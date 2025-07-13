@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cartograpy"
+version = "0.1.0"
+description = "Un package python pour creer des cartes."
+authors = [
+  { name="Anicet Cyrille KAMBOU", email="kanicetcyrille@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+dependencies = [
+    "geopandas==1.0.1",
+    "geojson==3.2.0",
+    "matplotlib==3.10.3",
+    "pandas==2.2.3",
+    "requests==2.32.4",
+    "requests-cache==1.2.1",
+    ""
+
+]
