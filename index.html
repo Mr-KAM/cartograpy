@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.11">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Documentation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="test_files/libs/clipboard/clipboard.min.js"></script>
+<script src="test_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="test_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="test_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="test_files/libs/quarto-html/popper.min.js"></script>
+<script src="test_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="test_files/libs/quarto-html/anchor.min.js"></script>
+<link href="test_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="test_files/libs/quarto-html/quarto-syntax-highlighting-09b140d2d032adf2aedb8b099be3ee13.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="test_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="test_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="test_files/libs/bootstrap/bootstrap-527a29cc8f375b86ac8beb45432ed94e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sommaire</h2>
+   
+  <ul>
+  <li><a href="#presentation" id="toc-presentation" class="nav-link active" data-scroll-target="#presentation"><span class="header-section-number">1</span> <strong>PRESENTATION</strong></a></li>
+  <li><a href="#fonctionnalite" id="toc-fonctionnalite" class="nav-link" data-scroll-target="#fonctionnalite"><span class="header-section-number">2</span> <strong>FONCTIONNALITE</strong></a></li>
+  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation"><span class="header-section-number">3</span> <strong>INSTALLATION</strong></a></li>
+  <li><a href="#utilisation" id="toc-utilisation" class="nav-link" data-scroll-target="#utilisation"><span class="header-section-number">4</span> <strong>UTILISATION</strong></a>
+  <ul class="collapse">
+  <li><a href="#obtension-de-données-géographiques" id="toc-obtension-de-données-géographiques" class="nav-link" data-scroll-target="#obtension-de-données-géographiques"><span class="header-section-number">4.1</span> <strong>Obtension de données géographiques</strong></a>
+  <ul class="collapse">
+  <li><a href="#récupérer-les-limites-administratives-dun-ou-plusieurs-pays" id="toc-récupérer-les-limites-administratives-dun-ou-plusieurs-pays" class="nav-link" data-scroll-target="#récupérer-les-limites-administratives-dun-ou-plusieurs-pays"><span class="header-section-number">4.1.1</span> <em>Récupérer les limites administratives d’un ou plusieurs pays</em></a></li>
+  <li><a href="#récupérer-les-métadonnées-dun-territoire" id="toc-récupérer-les-métadonnées-dun-territoire" class="nav-link" data-scroll-target="#récupérer-les-métadonnées-dun-territoire"><span class="header-section-number">4.1.2</span> Récupérer les métadonnées d’un territoire</a></li>
+  <li><a href="#géocoder-une-ou-plusieurs-adresses" id="toc-géocoder-une-ou-plusieurs-adresses" class="nav-link" data-scroll-target="#géocoder-une-ou-plusieurs-adresses"><span class="header-section-number">4.1.3</span> <em>Géocoder une ou plusieurs adresses</em></a></li>
+  </ul></li>
+  <li><a href="#processing-de-données" id="toc-processing-de-données" class="nav-link" data-scroll-target="#processing-de-données"><span class="header-section-number">4.2</span> <strong>Processing de données</strong></a>
+  <ul class="collapse">
+  <li><a href="#charger-des-données" id="toc-charger-des-données" class="nav-link" data-scroll-target="#charger-des-données"><span class="header-section-number">4.2.1</span> <em>Charger des données</em></a></li>
+  <li><a href="#obtenir-des-informations-sur-un-multipolygone" id="toc-obtenir-des-informations-sur-un-multipolygone" class="nav-link" data-scroll-target="#obtenir-des-informations-sur-un-multipolygone"><span class="header-section-number">4.2.2</span> <em>Obtenir des informations sur un multipolygone</em></a></li>
+  <li><a href="#séparer-un-multipolygon-en-polygone-simple" id="toc-séparer-un-multipolygon-en-polygone-simple" class="nav-link" data-scroll-target="#séparer-un-multipolygon-en-polygone-simple"><span class="header-section-number">4.2.3</span> <em>Séparer un multipolygon en polygone simple</em></a></li>
+  <li><a href="#fusionner-des-geodataframe" id="toc-fusionner-des-geodataframe" class="nav-link" data-scroll-target="#fusionner-des-geodataframe"><span class="header-section-number">4.2.4</span> <em>Fusionner des geodataframe</em></a></li>
+  <li><a href="#creer-une-nouvelle-colonne" id="toc-creer-une-nouvelle-colonne" class="nav-link" data-scroll-target="#creer-une-nouvelle-colonne"><span class="header-section-number">4.2.5</span> <em>Creer une nouvelle colonne</em></a></li>
+  <li><a href="#creer-un-geodataframe-de-centroïde" id="toc-creer-un-geodataframe-de-centroïde" class="nav-link" data-scroll-target="#creer-un-geodataframe-de-centroïde"><span class="header-section-number">4.2.6</span> <em>Creer un geodataframe de centroïde</em></a></li>
+  </ul></li>
+  <li><a href="#visualisation-de-données" id="toc-visualisation-de-données" class="nav-link" data-scroll-target="#visualisation-de-données"><span class="header-section-number">4.3</span> <strong>Visualisation de données</strong></a>
+  <ul class="collapse">
+  <li><a href="#voir-la-liste-des-palletes-de-couleurs-diponible" id="toc-voir-la-liste-des-palletes-de-couleurs-diponible" class="nav-link" data-scroll-target="#voir-la-liste-des-palletes-de-couleurs-diponible"><span class="header-section-number">4.3.1</span> <em>Voir la liste des palletes de couleurs diponible</em></a></li>
+  <li><a href="#voir-la-liste-des-polices-décritures-disponibles" id="toc-voir-la-liste-des-polices-décritures-disponibles" class="nav-link" data-scroll-target="#voir-la-liste-des-polices-décritures-disponibles"><span class="header-section-number">4.3.2</span> <em>Voir la liste des polices d’écritures disponibles</em></a></li>
+  <li><a href="#visualiser-des-données-vectorielles" id="toc-visualiser-des-données-vectorielles" class="nav-link" data-scroll-target="#visualiser-des-données-vectorielles"><span class="header-section-number">4.3.3</span> <em>Visualiser des données vectorielles</em></a></li>
+  <li><a href="#visualiser-des-données-rasters" id="toc-visualiser-des-données-rasters" class="nav-link" data-scroll-target="#visualiser-des-données-rasters"><span class="header-section-number">4.3.4</span> <em>Visualiser des données rasters</em></a></li>
+  <li><a href="#carte-cloropleth" id="toc-carte-cloropleth" class="nav-link" data-scroll-target="#carte-cloropleth"><span class="header-section-number">4.3.5</span> <em>Carte cloropleth</em></a></li>
+  <li><a href="#carte-de-ligne" id="toc-carte-de-ligne" class="nav-link" data-scroll-target="#carte-de-ligne"><span class="header-section-number">4.3.6</span> <em>Carte de ligne</em></a></li>
+  <li><a href="#ajouter-des-couches-de-tous-les-types" id="toc-ajouter-des-couches-de-tous-les-types" class="nav-link" data-scroll-target="#ajouter-des-couches-de-tous-les-types"><span class="header-section-number">4.3.7</span> <strong>Ajouter des couches de tous les types</strong></a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://github.com/mr-kam/cartograpy"><i class="bi bi-link-45deg"></i>Github Repo</a></li></ul></div></nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Documentation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div data-align="center">
+<img src="data/logo.png" alt="Logo" width="300">
+<p>
+Mapping in Python, the way it was always meant to be.
+</p>
+</div>
+<section id="presentation" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> <strong>PRESENTATION</strong></h1>
+<p>Cartograpy est un package python qui permet de manipuler des données geographiques et de creer des cartes simplement.</p>
+</section>
+<section id="fonctionnalite" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> <strong>FONCTIONNALITE</strong></h1>
+<ul>
+<li>Telecharger des données de découpage administratif de pays</li>
+<li>Importer des données de types vectorielles et matricielles</li>
+<li>Faire des traitement sur les données geospatiales importé</li>
+<li>Creer des cartes et les personnaliser simplement</li>
+</ul>
+</section>
+<section id="installation" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> <strong>INSTALLATION</strong></h1>
+<p>Pour installer le package cartograpy, vous pouvez utiliser pip. Ouvrez votre terminal ou invite de commande et exécutez la commande suivante :</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install cartograpy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="utilisation" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> <strong>UTILISATION</strong></h1>
+<section id="obtension-de-données-géographiques" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="obtension-de-données-géographiques"><span class="header-section-number">4.1</span> <strong>Obtension de données géographiques</strong></h2>
+<section id="récupérer-les-limites-administratives-dun-ou-plusieurs-pays" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="récupérer-les-limites-administratives-dun-ou-plusieurs-pays"><span class="header-section-number">4.1.1</span> <em>Récupérer les limites administratives d’un ou plusieurs pays</em></h3>
+<div id="9a711605" class="cell" data-execution_count="77">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importation</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> data</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> data.GeoBoundaries()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Les niveau de subbdivision administrative disponibles sont :</strong></p>
+<p>Il existe 5 subdivisions administratives disponibles :</p>
+<div id="38c7e251" class="cell" data-execution_count="78">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.adminLevels())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+| Niveau GeoBoundaries | Nom commun (FR)           | Nom commun (EN)       |
+| -------------------- | ------------------------- | --------------------- |
+| ADM0                 | Pays                      | Country               |
+| ADM1                 | Région / État / Province  | State / Region        |
+| ADM2                 | Département / District    | District / County     |
+| ADM3                 | Sous-préfecture / Commune | Subdistrict / Commune |
+| ADM4                 | Village / Localité        | Village / Locality    |
+| ADM5                 | Quartier / Secteur        | Neighborhood / Sector |
+        </code></pre>
+</div>
+</div>
+<p><strong>Remarques importantes :</strong></p>
+<ul>
+<li>Le nombre de niveaux dépend du pays. Certains pays s’arrêtent à ADM2, d’autres vont jusqu’à ADM4 ou ADM5.</li>
+<li>Le nom réel des subdivisions varie d’un pays à l’autre (ex : “State”, “Region”, “Province”, “Department”, etc.).</li>
+<li>GeoBoundaries propose toujours au moins le niveau ADM0 (frontière nationale).</li>
+</ul>
+<p>Pour savoir si un niveau administratif est disponible pour un pays, vous pouvez utiliser la méthode <code>is_valid_adm</code> de l’objet <code>GeoBoundaries</code>. Voici un exemple :</p>
+<div id="de737835" class="cell" data-execution_count="79">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.is_valid_adm(<span class="st">"CIV"</span>,<span class="st">"ADM1"</span>))  <span class="co"># Exemple pour vérifier si le niveau ADM1 est valide pour la Côte d'Ivoire</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Ou encore</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client._get_smallest_adm(<span class="st">"CIV"</span>))  <span class="co"># Exemple pour vérifier si le niveau admin minimum pour la Côte d'Ivoire</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>True
+Smallest ADM level found for CIV : ADM3
+ADM3</code></pre>
+</div>
+</div>
+<p><strong>Les codes des pays sont conformes à la norme ISO 3166-1 alpha-3 :</strong></p>
+<p>Pour obtenir la liste des pays valides, vous pouvez utiliser la méthode <code>countries()</code> de l’objet <code>GeoBoundaries</code>. Voici un exemple :</p>
+<div id="a1ac0d94" class="cell" data-execution_count="80">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>client.countries()[<span class="dv">0</span>:<span class="dv">10</span>]  <span class="co"># Affiche les 10 premiers pays</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="80">
+<pre><code>['أفغانستان',
+ 'афганистан',
+ 'afghánistán',
+ 'afghanistan',
+ 'αφγανιστάν',
+ 'afganio',
+ 'afganistán',
+ 'afganistan',
+ 'afganisztán',
+ 'աֆղանստան']</code></pre>
+</div>
+</div>
+<div id="182b84c3" class="cell" data-execution_count="81">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>client.get_iso3(<span class="st">"burk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="81">
+<pre><code>'BFA'</code></pre>
+</div>
+</div>
+<div id="3851d802" class="cell" data-execution_count="82">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>client.get_iso3(<span class="st">"con"</span>)  <span class="co"># Exemple pour obtenir le code ISO d'un pays</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="82">
+<pre><code>[('congo', 'cog'),
+ ('república del congo', 'cog'),
+ ('république du congo', 'cog'),
+ ('rep. del congo', 'cog'),
+ ('congo-brazzaville', 'cog'),
+ ('república do congo', 'cog'),
+ ('demokratiske republik congo', 'cod'),
+ ('congo, democratic republic of the', 'cod'),
+ ('república democrática del congo', 'cod'),
+ ('république démocratique du congo', 'cod'),
+ ('rd del congo', 'cod'),
+ ('congo-kinshasa', 'cod'),
+ ('república democrática do congo', 'cod'),
+ ('republica democrată congo', 'cod')]</code></pre>
+</div>
+</div>
+<div id="61b3db9e" class="cell" data-execution_count="83">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple 1: Récupérer les données administratives des régions de la cote d'ivoire</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>civ_data <span class="op">=</span> client.adm(<span class="st">"CIV"</span>, <span class="st">"ADM2"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>civ_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="83">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-4.68451 6.27179, -4.6868 6.26883, -...</td>
+<td>Agneby-Tiassa</td>
+<td></td>
+<td>98640826B52449815511854</td>
+<td>CIV</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-7.71925 9.07004, -7.72574 9.06397, ...</td>
+<td>Bafing</td>
+<td></td>
+<td>98640826B37750272367318</td>
+<td>CIV</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-6.19702 10.24246, -6.20038 10.24495...</td>
+<td>Bagoue</td>
+<td></td>
+<td>98640826B26044148659027</td>
+<td>CIV</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>MULTIPOLYGON (((-4.68451 6.27179, -4.68338 6.2...</td>
+<td>Belier</td>
+<td></td>
+<td>98640826B5123145245776</td>
+<td>CIV</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-6.70042 9.06196, -6.70118 9.05639, ...</td>
+<td>Bere</td>
+<td></td>
+<td>98640826B43857880322183</td>
+<td>CIV</td>
+<td>ADM2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="dacd540e" class="cell" data-execution_count="84">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>countries_data <span class="op">=</span> client.adm([<span class="st">"SEN"</span>, <span class="st">"mali"</span>], <span class="st">"ADM2"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>countries_data[<span class="st">"mali"</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="84">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-7.92938 12.68171, -7.93554 12.68821...</td>
+<td>Bamako</td>
+<td></td>
+<td>8926073B70420899930674</td>
+<td>MLI</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((1.32448 16.90639, 1.03227 16.61402, ...</td>
+<td>Ansongo</td>
+<td></td>
+<td>8926073B56917716124995</td>
+<td>MLI</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((1.17767 17.69958, 1.15458 17.70648, ...</td>
+<td>Bourem</td>
+<td></td>
+<td>8926073B86504284097699</td>
+<td>MLI</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POLYGON ((1.32448 16.90639, 1.65353 17.5735, 1...</td>
+<td>Gao</td>
+<td></td>
+<td>8926073B84061132695750</td>
+<td>MLI</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((1.31144 15.27381, 1.4716 15.28167, 1...</td>
+<td>Menaka</td>
+<td></td>
+<td>8926073B3742503303790</td>
+<td>MLI</td>
+<td>ADM2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="récupérer-les-métadonnées-dun-territoire" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="récupérer-les-métadonnées-dun-territoire"><span class="header-section-number">4.1.2</span> Récupérer les métadonnées d’un territoire</h3>
+<div id="c4201ce5" class="cell" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Récupérer les métadonnées d'un territoire</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>metadata_civ <span class="op">=</span> client.metadata(<span class="st">"CIV"</span>, <span class="st">"ADM0"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Métadonnées disponibles pour la Côte d'Ivoire: </span><span class="sc">{</span>metadata_civ<span class="sc">.</span>keys()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Métadonnées disponibles pour la Côte d'Ivoire: dict_keys(['boundaryID', 'boundaryName', 'boundaryISO', 'boundaryYearRepresented', 'boundaryType', 'boundaryCanonical', 'boundarySource', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySourceURL', 'sourceDataUpdateDate', 'buildDate', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'worldBankIncomeGroup', 'admUnitCount', 'meanVertices', 'minVertices', 'maxVertices', 'meanPerimeterLengthKM', 'minPerimeterLengthKM', 'maxPerimeterLengthKM', 'meanAreaSqKM', 'minAreaSqKM', 'maxAreaSqKM', 'staticDownloadLink', 'gjDownloadURL', 'tjDownloadURL', 'imagePreview', 'simplifiedGeometryGeoJSON'])</code></pre>
+</div>
+</div>
+<div id="4ea36520" class="cell" data-execution_count="86">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>metadata_civ[<span class="st">"Continent"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="86">
+<pre><code>'Africa'</code></pre>
+</div>
+</div>
+<div id="ce0c92f9" class="cell" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>metadata_civ[<span class="st">"UNSDG-subregion"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="87">
+<pre><code>'Western Africa'</code></pre>
+</div>
+</div>
+<div id="46528c5f" class="cell" data-execution_count="88">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>metadata_civ[<span class="st">"UNSDG-region"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="88">
+<pre><code>'Sub-Saharan Africa'</code></pre>
+</div>
+</div>
+<div id="cdd7906b" class="cell" data-execution_count="89">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>url_img<span class="op">=</span>metadata_civ[<span class="st">"imagePreview"</span>]</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>url_img</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="89">
+<pre><code>'https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CIV/ADM0/geoBoundaries-CIV-ADM0-PREVIEW.png'</code></pre>
+</div>
+</div>
+<div id="9ac4c5af" class="cell" data-execution_count="90">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Afficher l'image de prévisualisation dans le notebook</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> Image, display</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> :</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    display(Image(url<span class="op">=</span>url_img))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> :</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Impossible d'afficher l'image."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<img src="https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CIV/ADM0/geoBoundaries-CIV-ADM0-PREVIEW.png">
+</div>
+</div>
+</section>
+<section id="géocoder-une-ou-plusieurs-adresses" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="géocoder-une-ou-plusieurs-adresses"><span class="header-section-number">4.1.3</span> <em>Géocoder une ou plusieurs adresses</em></h3>
+<p>Le geocodage permet de convertir des adresses en coordonnées géographiques (latitude et longitude). Vous pouvez géocoder une ou plusieurs adresses en utilisant les méthode <code>geocode</code> et <code>geocode_batch</code> de l’objet <code>Geocoder</code>.</p>
+<div id="6364ea20" class="cell" data-execution_count="91">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> data</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>geocoder<span class="op">=</span> data.Geocoder()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Géocoder une adresse</strong></p>
+<div id="6a1c08b5" class="cell" data-execution_count="92">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>address <span class="op">=</span> <span class="st">"bouaké"</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> geocoder.geocode(address)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Adresse trouvée</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>result[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Début du géocodage de 1 localité(s)...
+Géocodage terminé.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="92">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">query</th>
+<th data-quarto-table-cell-role="th">address</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">altitude</th>
+<th data-quarto-table-cell-role="th">raw</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>bouaké</td>
+<td>Bouaké, Gbêkê, Vallée du Bandama, Côte d’Ivoire</td>
+<td>7.689021</td>
+<td>-5.028355</td>
+<td>0.0</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.02836 7.68902)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="ef92bc73" class="cell" data-execution_count="93">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adresse non trouvée</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>result[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="93">
+<pre><code>[]</code></pre>
+</div>
+</div>
+<p><strong>Geocoder une liste d’adresses</strong></p>
+<div id="a117e384" class="cell" data-execution_count="94">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>liste_adresses <span class="op">=</span> [<span class="st">"Abidjan"</span>, <span class="st">"Yamoussoukro"</span>, <span class="st">"Bouaké"</span>, <span class="st">"Korhogo"</span>,<span class="st">"Man CI"</span>, <span class="st">""</span>,<span class="st">"portbouet"</span>]</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>geocoder.geocode(liste_adresses)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Adresses trouvées</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>results[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Début du géocodage de 7 localité(s)...
+Géocodage terminé.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="94">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">query</th>
+<th data-quarto-table-cell-role="th">address</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">altitude</th>
+<th data-quarto-table-cell-role="th">raw</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Abidjan</td>
+<td>Abidjan, Le Plateau, Abidjan, Côte d’Ivoire</td>
+<td>5.320357</td>
+<td>-4.016107</td>
+<td>0.0</td>
+<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>POINT (-4.01611 5.32036)</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Yamoussoukro</td>
+<td>Yamoussoukro, Côte d’Ivoire</td>
+<td>6.820007</td>
+<td>-5.277603</td>
+<td>0.0</td>
+<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.2776 6.82001)</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Bouaké</td>
+<td>Bouaké, Gbêkê, Vallée du Bandama, Côte d’Ivoire</td>
+<td>7.689021</td>
+<td>-5.028355</td>
+<td>0.0</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.02836 7.68902)</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Korhogo</td>
+<td>Korhogo, Poro, Savanes, Côte d’Ivoire</td>
+<td>9.458070</td>
+<td>-5.631629</td>
+<td>0.0</td>
+<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.63163 9.45807)</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Man CI</td>
+<td>Man, Tonkpi, Montagnes, Côte d’Ivoire</td>
+<td>7.410258</td>
+<td>-7.550372</td>
+<td>0.0</td>
+<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>POINT (-7.55037 7.41026)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="9b1d94b1" class="cell" data-execution_count="95">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adresses non trouvée</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>results[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="95">
+<pre><code>['', 'portbouet']</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="processing-de-données" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="processing-de-données"><span class="header-section-number">4.2</span> <strong>Processing de données</strong></h2>
+<p><code>processing</code> vous permet d’executer des taches courantes effectuées sur des données vectorielles.</p>
+<div id="c1d42315" class="cell" data-execution_count="96">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importation</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing  <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="charger-des-données" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="charger-des-données"><span class="header-section-number">4.2.1</span> <em>Charger des données</em></h3>
+<div id="55ea9a80" class="cell" data-execution_count="97">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># hexagon_data.head()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="e9c0a370" class="cell" data-execution_count="98">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>path<span class="op">=</span><span class="st">"data</span><span class="er">\</span><span class="st">other</span><span class="er">\</span><span class="st">Département de Bouna.geojson"</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>donnee_bouna<span class="op">=</span>load(path)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>donnee_bouna.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>&lt;&gt;:1: SyntaxWarning: invalid escape sequence '\o'
+&lt;&gt;:1: SyntaxWarning: invalid escape sequence '\o'
+C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning: invalid escape sequence '\o'
+  path="data\other\Département de Bouna.geojson"</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="98">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">description</th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">begin</th>
+<th data-quarto-table-cell-role="th">end</th>
+<th data-quarto-table-cell-role="th">altitudeMode</th>
+<th data-quarto-table-cell-role="th">tessellate</th>
+<th data-quarto-table-cell-role="th">extrude</th>
+<th data-quarto-table-cell-role="th">visibility</th>
+<th data-quarto-table-cell-role="th">drawOrder</th>
+<th data-quarto-table-cell-role="th">icon</th>
+<th data-quarto-table-cell-role="th">snippet</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>ID_00022</td>
+<td>Bouna</td>
+<td>&lt;html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
+<td>None</td>
+<td>None</td>
+<td>None</td>
+<td>clampToGround</td>
+<td>-1</td>
+<td>0</td>
+<td>-1</td>
+<td>None</td>
+<td>None</td>
+<td></td>
+<td>MULTIPOLYGON Z (((-4.19952 9.61499 0, -4.209 9...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="obtenir-des-informations-sur-un-multipolygone" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="obtenir-des-informations-sur-un-multipolygone"><span class="header-section-number">4.2.2</span> <em>Obtenir des informations sur un multipolygone</em></h3>
+<div id="52bb0af7" class="cell" data-execution_count="99">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>multipolygon<span class="op">=</span>donnee_bouna[<span class="st">"geometry"</span>][<span class="dv">0</span>]</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>infos_multipolygon<span class="op">=</span>get_multipolygon_info(multipolygon)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>infos_multipolygon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="99">
+<pre><code>{'type': 'MultiPolygon',
+ 'num_polygons': 1,
+ 'total_area': 1.1852617495377915,
+ 'bounds': (-4.297637881999947,
+  8.508406537000042,
+  -2.596283662999952,
+  9.616030601000034),
+ 'areas': [1.1852617495377915],
+ 'largest_polygon_area': 1.1852617495377915,
+ 'smallest_polygon_area': 1.1852617495377915}</code></pre>
+</div>
+</div>
+</section>
+<section id="séparer-un-multipolygon-en-polygone-simple" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="séparer-un-multipolygon-en-polygone-simple"><span class="header-section-number">4.2.3</span> <em>Séparer un multipolygon en polygone simple</em></h3>
+<div id="a2fba636" class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>polygones_bouna<span class="op">=</span>split_multipolygon(donnee_bouna)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>polygones_bouna.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="100">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">description</th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">begin</th>
+<th data-quarto-table-cell-role="th">end</th>
+<th data-quarto-table-cell-role="th">altitudeMode</th>
+<th data-quarto-table-cell-role="th">tessellate</th>
+<th data-quarto-table-cell-role="th">extrude</th>
+<th data-quarto-table-cell-role="th">visibility</th>
+<th data-quarto-table-cell-role="th">drawOrder</th>
+<th data-quarto-table-cell-role="th">icon</th>
+<th data-quarto-table-cell-role="th">snippet</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">original_index</th>
+<th data-quarto-table-cell-role="th">polygon_part</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>ID_00022</td>
+<td>Bouna</td>
+<td>&lt;html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
+<td>None</td>
+<td>None</td>
+<td>None</td>
+<td>clampToGround</td>
+<td>-1</td>
+<td>0</td>
+<td>-1</td>
+<td>None</td>
+<td>None</td>
+<td></td>
+<td>POLYGON Z ((-4.19952 9.61499 0, -4.209 9.61568...</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="b4f88a0f" class="cell" data-execution_count="101">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>polygones_bouna.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-26-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="fusionner-des-geodataframe" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="fusionner-des-geodataframe"><span class="header-section-number">4.2.4</span> <em>Fusionner des geodataframe</em></h3>
+<div id="e5651e3f" class="cell" data-execution_count="102">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>countries_data <span class="op">=</span> client.adm([<span class="st">"SEN"</span>, <span class="st">"mali"</span>,<span class="st">"civ"</span>], <span class="st">"ADM2"</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>list_gdf<span class="op">=</span>[gdf <span class="cf">for</span> key, gdf <span class="kw">in</span> countries_data.items()] <span class="co"># Liste de dataframes</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>countries_merged_data<span class="op">=</span>fusion(list_gdf) <span class="co"># Fusion des dataframes</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>countries_merged_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="102">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-11.88782 13.38481, -11.88765 13.391...</td>
+<td>Bakel</td>
+<td></td>
+<td>50182788B16013842146029</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-16.38592 15.02258, -16.40452 15.023...</td>
+<td>Bambey</td>
+<td></td>
+<td>50182788B75300917140294</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97446 12.8904...</td>
+<td>Bignona</td>
+<td></td>
+<td>50182788B19391387689457</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POLYGON ((-15.59024 13.8291, -15.58246 13.8437...</td>
+<td>Birkelane</td>
+<td></td>
+<td>50182788B56779252201559</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97 12.89171, ...</td>
+<td>Bounkiling</td>
+<td></td>
+<td>50182788B68388966372963</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="creer-une-nouvelle-colonne" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="creer-une-nouvelle-colonne"><span class="header-section-number">4.2.5</span> <em>Creer une nouvelle colonne</em></h3>
+<div id="707b5175" class="cell" data-execution_count="103">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>new_countries_data<span class="op">=</span>add_column(df<span class="op">=</span>countries_merged_data,column_name<span class="op">=</span><span class="st">"random_data"</span>,expression<span class="op">=</span><span class="st">"random.randint(1,100)"</span>,globals_dict<span class="op">=</span>{<span class="st">"random"</span>:random})</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># global_dics correspond a la liste des packages necessaires pour evaluer l'expression</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>new_countries_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="103">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+<th data-quarto-table-cell-role="th">random_data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-11.88782 13.38481, -11.88765 13.391...</td>
+<td>Bakel</td>
+<td></td>
+<td>50182788B16013842146029</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-16.38592 15.02258, -16.40452 15.023...</td>
+<td>Bambey</td>
+<td></td>
+<td>50182788B75300917140294</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>45</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97446 12.8904...</td>
+<td>Bignona</td>
+<td></td>
+<td>50182788B19391387689457</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POLYGON ((-15.59024 13.8291, -15.58246 13.8437...</td>
+<td>Birkelane</td>
+<td></td>
+<td>50182788B56779252201559</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>19</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97 12.89171, ...</td>
+<td>Bounkiling</td>
+<td></td>
+<td>50182788B68388966372963</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>65</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="8f2daa23" class="cell" data-execution_count="104">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>new_countries_data<span class="op">=</span>add_column(new_countries_data,<span class="st">"dataType"</span>,<span class="st">"row['shapeGroup']+'-'+row['shapeType']"</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># row dans l'expression correspont a une ligne de la dataframe</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="co"># shapeGroup et shapeType sont des colonnes de la dataframe</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>new_countries_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="104">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+<th data-quarto-table-cell-role="th">random_data</th>
+<th data-quarto-table-cell-role="th">dataType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-11.88782 13.38481, -11.88765 13.391...</td>
+<td>Bakel</td>
+<td></td>
+<td>50182788B16013842146029</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>2</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-16.38592 15.02258, -16.40452 15.023...</td>
+<td>Bambey</td>
+<td></td>
+<td>50182788B75300917140294</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>45</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97446 12.8904...</td>
+<td>Bignona</td>
+<td></td>
+<td>50182788B19391387689457</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>8</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POLYGON ((-15.59024 13.8291, -15.58246 13.8437...</td>
+<td>Birkelane</td>
+<td></td>
+<td>50182788B56779252201559</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>19</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97 12.89171, ...</td>
+<td>Bounkiling</td>
+<td></td>
+<td>50182788B68388966372963</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>65</td>
+<td>SEN-ADM2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="1185b41a" class="cell" data-execution_count="105">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(new_countries_data.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="105">
+<pre><code>['geometry',
+ 'shapeName',
+ 'shapeISO',
+ 'shapeID',
+ 'shapeGroup',
+ 'shapeType',
+ 'random_data',
+ 'dataType']</code></pre>
+</div>
+</div>
+</section>
+<section id="creer-un-geodataframe-de-centroïde" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="creer-un-geodataframe-de-centroïde"><span class="header-section-number">4.2.6</span> <em>Creer un geodataframe de centroïde</em></h3>
+<div id="f3a1a196" class="cell" data-execution_count="106">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>coundtries_centroids <span class="op">=</span> centroids(new_countries_data)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Maintenant coundtries_centroids est un GeoDataFrame de points (centroïdes)</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># avec tous les attributs originaux de new_countries_data</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>coundtries_centroids.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="106">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+<th data-quarto-table-cell-role="th">random_data</th>
+<th data-quarto-table-cell-role="th">dataType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POINT (-12.25523 14.17004)</td>
+<td>Bakel</td>
+<td></td>
+<td>50182788B16013842146029</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>2</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POINT (-16.48386 14.80261)</td>
+<td>Bambey</td>
+<td></td>
+<td>50182788B75300917140294</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>45</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POINT (-16.36673 12.88758)</td>
+<td>Bignona</td>
+<td></td>
+<td>50182788B19391387689457</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>8</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POINT (-15.68446 14.05259)</td>
+<td>Birkelane</td>
+<td></td>
+<td>50182788B56779252201559</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>19</td>
+<td>SEN-ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POINT (-15.60351 13.13488)</td>
+<td>Bounkiling</td>
+<td></td>
+<td>50182788B68388966372963</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>65</td>
+<td>SEN-ADM2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="ea5dd945" class="cell" data-execution_count="107">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation simple avec matplotlib</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>coundtries_centroids.plot(markersize<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">'red'</span>,label<span class="op">=</span><span class="st">"Centroïde"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-32-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="visualisation-de-données" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="visualisation-de-données"><span class="header-section-number">4.3</span> <strong>Visualisation de données</strong></h2>
+<p>cartograpy permet de creer rapidement des cartes pour visualier les données géographiques.</p>
+<div id="0c1c79b7" class="cell" data-execution_count="108">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="5fca0bd7" class="cell" data-execution_count="109">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># J'ajoute des données aléatoires pour la visualisation</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>civ_data[<span class="st">'data'</span>] <span class="op">=</span> [random.randint(<span class="dv">0</span>,<span class="dv">10000</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(civ_data))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fed6fc78" class="cell" data-execution_count="110">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>civ_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="110">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+<th data-quarto-table-cell-role="th">data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-4.68451 6.27179, -4.6868 6.26883, -...</td>
+<td>Agneby-Tiassa</td>
+<td></td>
+<td>98640826B52449815511854</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>1075</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-7.71925 9.07004, -7.72574 9.06397, ...</td>
+<td>Bafing</td>
+<td></td>
+<td>98640826B37750272367318</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>6681</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-6.19702 10.24246, -6.20038 10.24495...</td>
+<td>Bagoue</td>
+<td></td>
+<td>98640826B26044148659027</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>9867</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>MULTIPOLYGON (((-4.68451 6.27179, -4.68338 6.2...</td>
+<td>Belier</td>
+<td></td>
+<td>98640826B5123145245776</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>9790</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-6.70042 9.06196, -6.70118 9.05639, ...</td>
+<td>Bere</td>
+<td></td>
+<td>98640826B43857880322183</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>6960</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="262a651f" class="cell" data-execution_count="111">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>geocode_localite<span class="op">=</span>results[<span class="dv">0</span>]</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>geocode_localite[<span class="st">"data"</span>]<span class="op">=</span> [random.randint(<span class="dv">0</span>,<span class="dv">10000</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(geocode_localite))]</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>geocode_localite.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="111">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">query</th>
+<th data-quarto-table-cell-role="th">address</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">altitude</th>
+<th data-quarto-table-cell-role="th">raw</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Abidjan</td>
+<td>Abidjan, Le Plateau, Abidjan, Côte d’Ivoire</td>
+<td>5.320357</td>
+<td>-4.016107</td>
+<td>0.0</td>
+<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>POINT (-4.01611 5.32036)</td>
+<td>5832</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Yamoussoukro</td>
+<td>Yamoussoukro, Côte d’Ivoire</td>
+<td>6.820007</td>
+<td>-5.277603</td>
+<td>0.0</td>
+<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.2776 6.82001)</td>
+<td>513</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Bouaké</td>
+<td>Bouaké, Gbêkê, Vallée du Bandama, Côte d’Ivoire</td>
+<td>7.689021</td>
+<td>-5.028355</td>
+<td>0.0</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.02836 7.68902)</td>
+<td>3729</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Korhogo</td>
+<td>Korhogo, Poro, Savanes, Côte d’Ivoire</td>
+<td>9.458070</td>
+<td>-5.631629</td>
+<td>0.0</td>
+<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.63163 9.45807)</td>
+<td>2584</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Man CI</td>
+<td>Man, Tonkpi, Montagnes, Côte d’Ivoire</td>
+<td>7.410258</td>
+<td>-7.550372</td>
+<td>0.0</td>
+<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>POINT (-7.55037 7.41026)</td>
+<td>1869</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<section id="voir-la-liste-des-palletes-de-couleurs-diponible" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="voir-la-liste-des-palletes-de-couleurs-diponible"><span class="header-section-number">4.3.1</span> <em>Voir la liste des palletes de couleurs diponible</em></h3>
+<div id="8fc35e3c" class="cell" data-execution_count="112">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les groupes de palettes diponibles</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>get_available_palettes().keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="112">
+<pre><code>dict_keys(['custom', 'seaborn_qualitative', 'seaborn_sequential', 'seaborn_diverging', 'matplotlib_sequential', 'matplotlib_diverging', 'matplotlib_cyclic', 'matplotlib_qualitative'])</code></pre>
+</div>
+</div>
+<div id="0ce89f57" class="cell" data-execution_count="113">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Voir les pallettes disponibles dans un groupe</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>get_available_palettes()[<span class="st">"seaborn_sequential"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="113">
+<pre><code>['Blues',
+ 'BuGn',
+ 'BuPu',
+ 'GnBu',
+ 'Greens',
+ 'Greys',
+ 'Oranges',
+ 'OrRd',
+ 'PuBu',
+ 'PuBuGn',
+ 'PuRd',
+ 'Purples',
+ 'RdPu',
+ 'Reds',
+ 'YlGn',
+ 'YlGnBu',
+ 'YlOrBr',
+ 'YlOrRd',
+ 'rocket',
+ 'mako',
+ 'flare',
+ 'crest']</code></pre>
+</div>
+</div>
+</section>
+<section id="voir-la-liste-des-polices-décritures-disponibles" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="voir-la-liste-des-polices-décritures-disponibles"><span class="header-section-number">4.3.2</span> <em>Voir la liste des polices d’écritures disponibles</em></h3>
+<div id="85fd57e8" class="cell" data-execution_count="114">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>get_fonts()[<span class="dv">0</span>:<span class="dv">10</span>] <span class="co"># Pour voir les 10 prémières polices </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="114">
+<pre><code>['Agency FB',
+ 'Algerian',
+ 'Arial',
+ 'Arial Rounded MT Bold',
+ 'Bahnschrift',
+ 'Baskerville Old Face',
+ 'Bauhaus 93',
+ 'Bell MT',
+ 'Berlin Sans FB',
+ 'Berlin Sans FB Demi']</code></pre>
+</div>
+</div>
+<div id="9556d619" class="cell" data-execution_count="115">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pour filtrer par un mot clé</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>get_fonts(<span class="st">"time"</span>)[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="115">
+<pre><code>'Times New Roman'</code></pre>
+</div>
+</div>
+</section>
+<section id="visualiser-des-données-vectorielles" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="visualiser-des-données-vectorielles"><span class="header-section-number">4.3.3</span> <em>Visualiser des données vectorielles</em></h3>
+<p><strong>Creer une carte cloropleth simple</strong></p>
+<div id="4b9cdcba" class="cell" data-execution_count="116">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>carte_ci<span class="op">=</span>Map(figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">12</span>), projection<span class="op">=</span>ccrs.PlateCarree())</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>carte_ci.add_polygons_cloropleth(gdf<span class="op">=</span>civ_data,</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>                              column_to_plot<span class="op">=</span><span class="st">'data'</span>,</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>                                title<span class="op">=</span><span class="st">'Légende'</span>,</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>                                cmap<span class="op">=</span><span class="st">'tab20c'</span>,</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>                                )</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>carte_ci.add_points_cloropleth(</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>    gdf<span class="op">=</span>geocode_localite,</span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    column_to_plot<span class="op">=</span><span class="st">"data"</span>,</span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>    label_column<span class="op">=</span><span class="st">"query"</span>,</span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>    point_size_column<span class="op">=</span><span class="st">"data"</span>,</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>    show_colorbar<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span><span class="st">"tab20c"</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>carte_ci.add_gridlines()</span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>font_name<span class="op">=</span>get_fonts(<span class="st">"time"</span>)[<span class="dv">0</span>]</span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>font_name</span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>carte_ci.set_font(font_name, size<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a>carte_ci.add_arrow(<span class="dv">3</span>, position<span class="op">=</span>(<span class="op">-</span><span class="fl">2.5</span>,<span class="fl">10.75</span>),zoom<span class="op">=</span><span class="fl">0.06</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a>carte_ci.figsize<span class="op">=</span>(<span class="dv">18</span>,<span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  cmap_obj = plt.cm.get_cmap(cmap)
+c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  cmap_obj = plt.cm.get_cmap(cmap)
+Can't handle color: param(outline)
+Can't handle color: param(outline)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📊 Centrage intelligent appliqué:
+   Format: Personnalisé (N/A)
+   Ratio figure: 1.33
+   Ratio données: 0.95
+   Étendue: [-10.39, -0.69, 3.91, 11.19]
+📊 Centrage intelligent appliqué:
+   Format: Personnalisé (N/A)
+   Ratio figure: 1.33
+   Ratio données: 0.95
+   Étendue: [-10.39, -0.69, 3.91, 11.19]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-41-output-4.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="visualiser-des-données-rasters" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="visualiser-des-données-rasters"><span class="header-section-number">4.3.4</span> <em>Visualiser des données rasters</em></h3>
+<div id="00f892a3" class="cell" data-execution_count="117">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création d'une carte raster</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>carte_dem <span class="op">=</span> Map(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>), projection<span class="op">=</span>ccrs.PlateCarree())</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajout d'une couche raster</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>carte_dem.add_raster(<span class="st">'data</span><span class="er">\</span><span class="st">other</span><span class="er">\</span><span class="st">Limite DEM Bouna.tif'</span>, cmap<span class="op">=</span><span class="st">'tab20c'</span>, title<span class="op">=</span><span class="st">'Élévation (m)'</span>)</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>font_name<span class="op">=</span>get_fonts(<span class="st">"couri"</span>)[<span class="dv">0</span>]</span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>carte_dem.set_font(font_name, size<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a>carte_dem.set_title(<span class="st">'Topographique de bouna'</span>, fontsize<span class="op">=</span><span class="dv">20</span>, color<span class="op">=</span><span class="st">'Black'</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>carte_dem.add_arrow(<span class="dv">3</span>, position<span class="op">=</span>(<span class="op">-</span><span class="fl">2.70</span>, <span class="fl">9.55</span>), zoom<span class="op">=</span><span class="fl">0.05</span>, color<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>carte_dem.add_gridlines()</span>
+<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a>carte_dem.add_scale_bar(length<span class="op">=</span><span class="dv">20</span>, units<span class="op">=</span><span class="st">"km"</span>,pad<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb66-14"><a href="#cb66-14" aria-hidden="true" tabindex="-1"></a>carte_dem.show()</span>
+<span id="cb66-15"><a href="#cb66-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-16"><a href="#cb66-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-17"><a href="#cb66-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Sauvegarde</span></span>
+<span id="cb66-18"><a href="#cb66-18" aria-hidden="true" tabindex="-1"></a><span class="co"># carte.save('carte_demo.png')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>&lt;&gt;:5: SyntaxWarning: invalid escape sequence '\o'
+&lt;&gt;:5: SyntaxWarning: invalid escape sequence '\o'
+C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\1404476908.py:5: SyntaxWarning: invalid escape sequence '\o'
+  carte_dem.add_raster('data\other\Limite DEM Bouna.tif', cmap='tab20c', title='Élévation (m)')
+Can't handle color: param(outline)
+Can't handle color: param(outline)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Location est : (0.1, 0.05). La bare d'échelle est placé à 10.0 % de la longeur et à 5.0 % de la hauteur)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-42-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="5c9831c9" class="cell" data-execution_count="118">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>civ_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="118">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+<th data-quarto-table-cell-role="th">data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-4.68451 6.27179, -4.6868 6.26883, -...</td>
+<td>Agneby-Tiassa</td>
+<td></td>
+<td>98640826B52449815511854</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>1075</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-7.71925 9.07004, -7.72574 9.06397, ...</td>
+<td>Bafing</td>
+<td></td>
+<td>98640826B37750272367318</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>6681</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-6.19702 10.24246, -6.20038 10.24495...</td>
+<td>Bagoue</td>
+<td></td>
+<td>98640826B26044148659027</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>9867</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>MULTIPOLYGON (((-4.68451 6.27179, -4.68338 6.2...</td>
+<td>Belier</td>
+<td></td>
+<td>98640826B5123145245776</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>9790</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-6.70042 9.06196, -6.70118 9.05639, ...</td>
+<td>Bere</td>
+<td></td>
+<td>98640826B43857880322183</td>
+<td>CIV</td>
+<td>ADM2</td>
+<td>6960</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="97463313" class="cell" data-execution_count="119">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(civ_data.shapeName.unique())[<span class="dv">0</span>:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="119">
+<pre><code>['Agneby-Tiassa',
+ 'Bafing',
+ 'Bagoue',
+ 'Belier',
+ 'Bere',
+ 'Bounkani',
+ 'Cavally',
+ "District Autonome D'Abidjan",
+ 'District Autonome De Yamoussoukro',
+ 'Folon']</code></pre>
+</div>
+</div>
+<div id="5358f968" class="cell" data-execution_count="120">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>civ_data[<span class="st">"shapeName"</span>].replace({</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"District Autonome D'Abidjan"</span>: <span class="st">"Abidjan"</span>,</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"District Autonome De Yamoussoukro"</span>: <span class="st">"Yamoussoukro"</span></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>}, inplace<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\1025282276.py:1: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  civ_data["shapeName"].replace({</code></pre>
+</div>
+</div>
+<div id="98f2f6f0" class="cell" data-execution_count="121">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>geocode_localite.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="121">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">query</th>
+<th data-quarto-table-cell-role="th">address</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">altitude</th>
+<th data-quarto-table-cell-role="th">raw</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Abidjan</td>
+<td>Abidjan, Le Plateau, Abidjan, Côte d’Ivoire</td>
+<td>5.320357</td>
+<td>-4.016107</td>
+<td>0.0</td>
+<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>POINT (-4.01611 5.32036)</td>
+<td>5832</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Yamoussoukro</td>
+<td>Yamoussoukro, Côte d’Ivoire</td>
+<td>6.820007</td>
+<td>-5.277603</td>
+<td>0.0</td>
+<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.2776 6.82001)</td>
+<td>513</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Bouaké</td>
+<td>Bouaké, Gbêkê, Vallée du Bandama, Côte d’Ivoire</td>
+<td>7.689021</td>
+<td>-5.028355</td>
+<td>0.0</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.02836 7.68902)</td>
+<td>3729</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Korhogo</td>
+<td>Korhogo, Poro, Savanes, Côte d’Ivoire</td>
+<td>9.458070</td>
+<td>-5.631629</td>
+<td>0.0</td>
+<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>POINT (-5.63163 9.45807)</td>
+<td>2584</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Man CI</td>
+<td>Man, Tonkpi, Montagnes, Côte d’Ivoire</td>
+<td>7.410258</td>
+<td>-7.550372</td>
+<td>0.0</td>
+<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>POINT (-7.55037 7.41026)</td>
+<td>1869</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="d79ea75d" class="cell" data-execution_count="122">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>font<span class="op">=</span>get_fonts(<span class="st">"time"</span>)[<span class="dv">0</span>]</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>font</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="122">
+<pre><code>'Times New Roman'</code></pre>
+</div>
+</div>
+<div id="afb45af1" class="cell" data-execution_count="123">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Creer un objet de carte basique avec OpenLayers et Python</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>carte1<span class="op">=</span>Map(figsize<span class="op">=</span><span class="st">"A4"</span>,title<span class="op">=</span><span class="st">"Carte de la Côte d'Ivoire"</span>)</span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter des couches de données</span></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>carte1.add_polygons(gdf<span class="op">=</span>civ_data,label<span class="op">=</span><span class="st">"Limite des régions"</span>)</span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>carte1.add_points(gdf<span class="op">=</span>geocode_localite,label<span class="op">=</span><span class="st">"Zone d'enquête"</span>)</span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter des etiquettes</span></span>
+<span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a>carte1.add_labels(</span>
+<span id="cb77-14"><a href="#cb77-14" aria-hidden="true" tabindex="-1"></a>    gdf<span class="op">=</span>civ_data,</span>
+<span id="cb77-15"><a href="#cb77-15" aria-hidden="true" tabindex="-1"></a>    label_column<span class="op">=</span><span class="st">'shapeName'</span>,</span>
+<span id="cb77-16"><a href="#cb77-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># custom_label="{row['data']}\n{row['shapeName']}", #Pour personnaliser l'affichage</span></span>
+<span id="cb77-17"><a href="#cb77-17" aria-hidden="true" tabindex="-1"></a>    fontsize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb77-18"><a href="#cb77-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># color="#e2f201",</span></span>
+<span id="cb77-19"><a href="#cb77-19" aria-hidden="true" tabindex="-1"></a>    outline_width<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb77-20"><a href="#cb77-20" aria-hidden="true" tabindex="-1"></a>    fontweight<span class="op">=</span><span class="st">"bold"</span></span>
+<span id="cb77-21"><a href="#cb77-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb77-22"><a href="#cb77-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-23"><a href="#cb77-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Mofifier la tailles du papier en A4</span></span>
+<span id="cb77-24"><a href="#cb77-24" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-25"><a href="#cb77-25" aria-hidden="true" tabindex="-1"></a>carte1.set_paper(<span class="st">"A4"</span>)</span>
+<span id="cb77-26"><a href="#cb77-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-27"><a href="#cb77-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter les grilles de coordonnées</span></span>
+<span id="cb77-28"><a href="#cb77-28" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-29"><a href="#cb77-29" aria-hidden="true" tabindex="-1"></a>carte1.add_gridlines(top_right<span class="op">=</span><span class="va">True</span>,fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb77-30"><a href="#cb77-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-31"><a href="#cb77-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter la légende</span></span>
+<span id="cb77-32"><a href="#cb77-32" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-33"><a href="#cb77-33" aria-hidden="true" tabindex="-1"></a>carte1.legend_presets(<span class="st">"simple"</span>, title<span class="op">=</span><span class="st">"Légende"</span>, title_fontsize<span class="op">=</span><span class="dv">12</span>, fontsize<span class="op">=</span><span class="dv">12</span>,loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb77-34"><a href="#cb77-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-35"><a href="#cb77-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter une barre d'echelle</span></span>
+<span id="cb77-36"><a href="#cb77-36" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-37"><a href="#cb77-37" aria-hidden="true" tabindex="-1"></a>carte1.add_scale_bar(length<span class="op">=</span><span class="dv">100</span>, units<span class="op">=</span><span class="st">"km"</span>, linewidth<span class="op">=</span><span class="dv">4</span>, location<span class="op">=</span>(<span class="fl">0.02</span>,<span class="fl">0.03</span>))</span>
+<span id="cb77-38"><a href="#cb77-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-39"><a href="#cb77-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajouter la fleche du nord geographique</span></span>
+<span id="cb77-40"><a href="#cb77-40" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-41"><a href="#cb77-41" aria-hidden="true" tabindex="-1"></a>carte1.add_arrow(arrow<span class="op">=</span><span class="dv">3</span>,position<span class="op">=</span>(<span class="op">-</span><span class="fl">0.5</span>,<span class="dv">11</span>),zoom<span class="op">=</span><span class="fl">0.05</span>)</span>
+<span id="cb77-42"><a href="#cb77-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-43"><a href="#cb77-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Changer le style de police</span></span>
+<span id="cb77-44"><a href="#cb77-44" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-45"><a href="#cb77-45" aria-hidden="true" tabindex="-1"></a>carte1.set_font(font)</span>
+<span id="cb77-46"><a href="#cb77-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-47"><a href="#cb77-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Afficher la carte </span></span>
+<span id="cb77-48"><a href="#cb77-48" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-49"><a href="#cb77-49" aria-hidden="true" tabindex="-1"></a>carte1.show(smart_centering<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb77-50"><a href="#cb77-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-51"><a href="#cb77-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Enregistrer la carte</span></span>
+<span id="cb77-52"><a href="#cb77-52" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
+<span id="cb77-53"><a href="#cb77-53" aria-hidden="true" tabindex="-1"></a><span class="co"># carte1.save("image.png")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Can't handle color: param(outline)
+Can't handle color: param(outline)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📄 Format de papier: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
+⚠️  Attention: Aucun CRS défini. Attribution du CRS par défaut: EPSG:4326
+📄 Format mis à jour: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
+{'fontsize': 12, 'title_fontsize': 12, 'frameon': True, 'fancybox': True, 'shadow': False, 'framealpha': 1.0, 'facecolor': 'white', 'edgecolor': '#888', 'borderpad': 1.0, 'columnspacing': 2.0, 'title': 'Légende', 'loc': 'lower right'}
+🛑Element de légende ajouté None
+✅ Légende personnalisée créée avec 2 éléments
+🎨 Préréglage 'simple' appliqué à la légende
+📊 Centrage intelligent appliqué:
+   Format: A4 (landscape)
+   Ratio figure: 1.41
+   Ratio données: 0.95
+   Étendue: [-10.96, -0.12, 3.72, 11.38]
+🛑Element de légende ajouté None
+✅ Légende personnalisée créée avec 2 éléments
+Location est : (0.02, 0.03). La bare d'échelle est placé à 2.0 % de la longeur et à 3.0 % de la hauteur)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-48-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="carte-cloropleth" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="carte-cloropleth"><span class="header-section-number">4.3.5</span> <em>Carte cloropleth</em></h3>
+<div id="edcbf8e2" class="cell" data-execution_count="124">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creer un simple cloropleth de point</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="co">#============================================</span></span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>carte2<span class="op">=</span>Map(figsize<span class="op">=</span><span class="st">"A4"</span>)</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>centroide<span class="op">=</span>centroids(geodf<span class="op">=</span>civ_data)</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a><span class="co"># civ_bound0=client.adm("civ","ADM0")</span></span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a><span class="co"># carte2.add_polygons(civ_bound0)</span></span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>carte2.add_points_cloropleth(gdf<span class="op">=</span>centroide,column_to_plot<span class="op">=</span><span class="st">"data"</span>,point_size_column<span class="op">=</span><span class="st">"data"</span>,cmap<span class="op">=</span><span class="st">"rainbow"</span>,alpha<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a>carte2.add_gridlines()</span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a>carte2.set_title(<span class="st">"Cloropleth de point avec points"</span>)</span>
+<span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>carte2.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📄 Format de papier: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
+Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
+📊 Centrage intelligent appliqué:
+   Format: A4 (landscape)
+   Ratio figure: 1.41
+   Ratio données: 0.91
+   Étendue: [-9.82, -1.18, 4.50, 10.61]
+📊 Centrage intelligent appliqué:
+   Format: A4 (landscape)
+   Ratio figure: 1.41
+   Ratio données: 0.91
+   Étendue: [-9.82, -1.18, 4.50, 10.61]</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  cmap_obj = plt.cm.get_cmap(cmap)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-49-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="76a5b1b8" class="cell" data-execution_count="125">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creer un cloropleth de polygone</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="co">#=================================================</span></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Creation de client geoboundaries</span></span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>bound<span class="op">=</span>data.GeoBoundaries()</span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Téléchargement des données de découpage administrativve du mali et du sénégale</span></span>
+<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a>dic<span class="op">=</span>bound.adm([<span class="st">"sen"</span>,<span class="st">"mali"</span>],adm<span class="op">=</span><span class="st">"ADM2"</span>)</span>
+<span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Fusion des données du découpages administratif</span></span>
+<span id="cb83-11"><a href="#cb83-11" aria-hidden="true" tabindex="-1"></a>data_sen_mali<span class="op">=</span>fusion(dataframes_list<span class="op">=</span>[dic[<span class="st">"sen"</span>],dic[<span class="st">"mali"</span>]])</span>
+<span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>data_sen_mali.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="125">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-11.88782 13.38481, -11.88765 13.391...</td>
+<td>Bakel</td>
+<td></td>
+<td>50182788B16013842146029</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-16.38592 15.02258, -16.40452 15.023...</td>
+<td>Bambey</td>
+<td></td>
+<td>50182788B75300917140294</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97446 12.8904...</td>
+<td>Bignona</td>
+<td></td>
+<td>50182788B19391387689457</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POLYGON ((-15.59024 13.8291, -15.58246 13.8437...</td>
+<td>Birkelane</td>
+<td></td>
+<td>50182788B56779252201559</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97 12.89171, ...</td>
+<td>Bounkiling</td>
+<td></td>
+<td>50182788B68388966372963</td>
+<td>SEN</td>
+<td>ADM2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Vous pouvez utiliser explorer et manipuler <strong>les palettes de couleurs</strong> avec <code>colors</code> de cartograpy</p>
+<div id="25965794" class="cell" data-execution_count="126">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chargement de la bibliothèque</span></span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> colors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="d58ee071" class="cell" data-execution_count="127">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création d'une colonne de données aléatoire</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>data_sen_mali<span class="op">=</span>add_column(df<span class="op">=</span>data_sen_mali,column_name<span class="op">=</span><span class="st">"data"</span>,expression<span class="op">=</span><span class="st">"random.randint(50,1000)"</span>,globals_dict<span class="op">=</span>{<span class="st">"random"</span>: random})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="942302a5" class="cell" data-execution_count="128">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>data_sen_mali.head()</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="128">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">shapeName</th>
+<th data-quarto-table-cell-role="th">shapeISO</th>
+<th data-quarto-table-cell-role="th">shapeID</th>
+<th data-quarto-table-cell-role="th">shapeGroup</th>
+<th data-quarto-table-cell-role="th">shapeType</th>
+<th data-quarto-table-cell-role="th">data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>POLYGON ((-11.88782 13.38481, -11.88765 13.391...</td>
+<td>Bakel</td>
+<td></td>
+<td>50182788B16013842146029</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>669</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>POLYGON ((-16.38592 15.02258, -16.40452 15.023...</td>
+<td>Bambey</td>
+<td></td>
+<td>50182788B75300917140294</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>351</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97446 12.8904...</td>
+<td>Bignona</td>
+<td></td>
+<td>50182788B19391387689457</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>151</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>POLYGON ((-15.59024 13.8291, -15.58246 13.8437...</td>
+<td>Birkelane</td>
+<td></td>
+<td>50182788B56779252201559</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>530</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>POLYGON ((-15.9775 12.88596, -15.97 12.89171, ...</td>
+<td>Bounkiling</td>
+<td></td>
+<td>50182788B68388966372963</td>
+<td>SEN</td>
+<td>ADM2</td>
+<td>698</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="af1acda4" class="cell" data-execution_count="129">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création de carte cloropleth</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>carte3 <span class="op">=</span> Map (figsize<span class="op">=</span><span class="st">"A4"</span>,title<span class="op">=</span><span class="st">"Chloropleth de polygone Sénégale et Mali"</span>)</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>carte3.add_polygons_cloropleth(gdf<span class="op">=</span>data_sen_mali,column_to_plot<span class="op">=</span><span class="st">"data"</span>,cmap<span class="op">=</span><span class="st">"Coconut"</span>)</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>carte3.add_labels(gdf<span class="op">=</span>data_sen_mali,label_column<span class="op">=</span><span class="st">"data"</span>,fontsize<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>carte3.add_gridlines()</span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>carte3.add_arrow(<span class="dv">1</span>,position<span class="op">=</span>(<span class="dv">5</span>,<span class="dv">25</span>),zoom<span class="op">=</span><span class="fl">0.03</span>)</span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>carte3.set_font(get_fonts(<span class="st">"time"</span>)[<span class="dv">0</span>])</span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>carte3.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📄 Format de papier: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
+Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  cmap_obj = plt.cm.get_cmap(cmap)
+Can't handle color: param(outline)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📊 Centrage intelligent appliqué:
+   Format: A4 (landscape)
+   Ratio figure: 1.41
+   Ratio données: 1.47
+   Étendue: [-19.27, 5.99, 8.64, 26.50]
+📊 Centrage intelligent appliqué:
+   Format: A4 (landscape)
+   Ratio figure: 1.41
+   Ratio données: 1.47
+   Étendue: [-19.27, 5.99, 8.64, 26.50]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-54-output-4.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="carte-de-ligne" class="level3" data-number="4.3.6">
+<h3 data-number="4.3.6" class="anchored" data-anchor-id="carte-de-ligne"><span class="header-section-number">4.3.6</span> <em>Carte de ligne</em></h3>
+<div id="b6d65bd1" class="cell" data-execution_count="130">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>path<span class="op">=</span><span class="st">"data</span><span class="ch">\\</span><span class="st">QGIS-Training-Data</span><span class="ch">\\</span><span class="st">exercise_data</span><span class="er">\</span><span class="st">shapefile</span><span class="ch">\\</span><span class="st">rivers.shp"</span></span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>data_riviere<span class="op">=</span>load(path)</span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>carte4<span class="op">=</span>Map(title<span class="op">=</span><span class="st">"Carte de rivière"</span>)</span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>carte4.set_paper(<span class="st">"A5"</span>)</span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>carte4.add_lines(data_riviere,color<span class="op">=</span><span class="st">"blue"</span>,alpha<span class="op">=</span><span class="fl">0.7</span>,linewidth<span class="op">=</span><span class="dv">1</span>,linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>carte4.add_gridlines()</span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>carte4.add_arrow(<span class="dv">5</span>,position<span class="op">=</span>(<span class="fl">20.56</span>,<span class="op">-</span><span class="fl">33.32</span>),zoom<span class="op">=</span><span class="fl">0.03</span>)</span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>carte4.add_scale_bar(<span class="dv">15</span>,units<span class="op">=</span><span class="st">"km"</span>, pad<span class="op">=</span><span class="fl">0.01</span>,color<span class="op">=</span><span class="st">"black"</span>,linewidth<span class="op">=</span><span class="dv">3</span>, location<span class="op">=</span>(<span class="fl">0.05</span>,<span class="fl">0.05</span>))</span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>carte4.add_scale_bar(<span class="dv">15</span>,units<span class="op">=</span><span class="st">"km"</span>, pad<span class="op">=</span><span class="fl">0.01</span>,color<span class="op">=</span><span class="st">"red"</span>,linewidth<span class="op">=</span><span class="dv">3</span>, location<span class="op">=</span>(<span class="fl">0.15</span>,<span class="fl">0.05</span>),label<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>carte4.add_legend_element(<span class="st">"line"</span>,color<span class="op">=</span><span class="st">"blue"</span>,label<span class="op">=</span><span class="st">"Rivière"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>carte4.legend_presets(<span class="st">"minimal"</span> ,loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>carte4.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>&lt;&gt;:1: SyntaxWarning: invalid escape sequence '\s'
+&lt;&gt;:1: SyntaxWarning: invalid escape sequence '\s'
+C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\2862275657.py:1: SyntaxWarning: invalid escape sequence '\s'
+  path="data\\QGIS-Training-Data\\exercise_data\shapefile\\rivers.shp"
+Can't handle color: param(outline)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📄 Format mis à jour: A5 (landscape) - Dimensions: 148 x 210 mm - Figure: 8.3" x 5.8"
+⚠️  Attention: Le GeoDataFrame contient des géométries nulles qui seront ignorées
+➕ Élément 'Rivière' ajouté à la légende
+{'fontsize': 9, 'frameon': False, 'fancybox': False, 'shadow': False, 'framealpha': 1.0, 'handlelength': 1.5, 'handletextpad': 0.5, 'loc': 'lower right'}
+🛑Element de légende ajouté None
+✅ Légende personnalisée créée avec 1 éléments
+🎨 Préréglage 'minimal' appliqué à la légende
+📊 Centrage intelligent appliqué:
+   Format: A5 (landscape)
+   Ratio figure: 1.42
+   Ratio données: 1.70
+   Étendue: [19.06, 20.66, -34.39, -33.26]
+🛑Element de légende ajouté None
+✅ Légende personnalisée créée avec 1 éléments
+Location est : (0.05, 0.05). La bare d'échelle est placé à 5.0 % de la longeur et à 5.0 % de la hauteur)
+Location est : (0.15, 0.05). La bare d'échelle est placé à 15.0 % de la longeur et à 5.0 % de la hauteur)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-55-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="ajouter-des-couches-de-tous-les-types" class="level3" data-number="4.3.7">
+<h3 data-number="4.3.7" class="anchored" data-anchor-id="ajouter-des-couches-de-tous-les-types"><span class="header-section-number">4.3.7</span> <strong>Ajouter des couches de tous les types</strong></h3>
+<div id="cd91ae8a" class="cell" data-execution_count="131">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>carte5<span class="op">=</span>Map(figsize<span class="op">=</span><span class="st">"A4"</span>,title<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>carte5.add_layer(data_sen_mali,label<span class="op">=</span><span class="st">"Admin 1"</span>)</span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>centroide_sen_mal<span class="op">=</span>centroids(data_sen_mali)</span>
+<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>carte5.add_layer(centroide_sen_mal,color<span class="op">=</span><span class="st">"orange"</span>, label<span class="op">=</span><span class="st">"Centroïde"</span>)</span>
+<span id="cb94-5"><a href="#cb94-5" aria-hidden="true" tabindex="-1"></a>carte5.legend_presets(loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb94-6"><a href="#cb94-6" aria-hidden="true" tabindex="-1"></a>carte5.set_paper(paper_format<span class="op">=</span><span class="st">"A4"</span>,orientation<span class="op">=</span><span class="st">"portrait"</span>)</span>
+<span id="cb94-7"><a href="#cb94-7" aria-hidden="true" tabindex="-1"></a>carte5.add_gridlines()</span>
+<span id="cb94-8"><a href="#cb94-8" aria-hidden="true" tabindex="-1"></a>carte5.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>📄 Format de papier: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
+⚠️  Attention: Aucun CRS défini. Attribution du CRS par défaut: EPSG:4326
+['Polygon' 'MultiPolygon']
+⚠️  Attention: Aucun CRS défini. Attribution du CRS par défaut: EPSG:4326
+['Point']
+{'fontsize': 10, 'frameon': True, 'fancybox': True, 'shadow': True, 'framealpha': 0.9, 'facecolor': 'white', 'edgecolor': 'black', 'loc': 'lower right'}
+🛑Element de légende ajouté None
+✅ Légende personnalisée créée avec 2 éléments
+🎨 Préréglage 'default' appliqué à la légende
+📄 Format mis à jour: A4 (portrait) - Dimensions: 210 x 297 mm - Figure: 8.3" x 11.7"
+📊 Centrage intelligent appliqué:
+   Format: A4 (portrait)
+   Ratio figure: 0.71
+   Ratio données: 1.47
+   Étendue: [-19.71, 6.42, -0.91, 36.05]
+🛑Element de légende ajouté None
+✅ Légende personnalisée créée avec 2 éléments</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="test_files/figure-html/cell-56-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -7,8 +7,9 @@ import geopandas as gpd
 from typing import List, Union
 import geojson
 import requests
-import cartograpy.countries_iso3 as countries_iso3
-import cartograpy.iso3_codes as iso3_codes
+# import cartograpy.countries_iso3 as countries_iso3
+# import cartograpy.iso3_codes as iso3_codes
+from cartograpy.iso_code import *
 from requests_cache import CachedSession
 
 from geopy.geocoders import Nominatim
@@ -117,7 +118,7 @@ class GeoBoundaries:
         Returns:
             bool: True si le code ISO3 est valide
         """
-        return str.lower(territory) in iso3_codes.iso_codes
+        return str.lower(territory) in iso_codes
     
     def _get_iso3_from_name_or_iso2(self, name: str) -> str:
         """
