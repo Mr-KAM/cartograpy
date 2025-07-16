@@ -1,10 +1,12 @@
 # Base de données cache
 http_cache.sqlite
 *.sqlite
+data/other/
+data/QGIS-Training-Data/
 
 
 # === Dossiers de données volumineuses à ignorer ===
-data/
+
 __pycache__/
 country-flag-icons/
 cartograpy/__pycache__/
