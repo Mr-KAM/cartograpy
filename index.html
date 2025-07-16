@@ -152,6 +152,12 @@ Mapping in Python, the way it was always meant to be.
 <section id="presentation" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> <strong>PRESENTATION</strong></h1>
 <p>Cartograpy est un package python qui permet de manipuler des données geographiques et de creer des cartes simplement.</p>
+<div data-align="center">
+<img src="data\create_python_maps.py (17).png" alt="Logo" width="800">
+<p>
+And you have all you need !
+</p>
+</div>
 </section>
 <section id="fonctionnalite" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> <strong>FONCTIONNALITE</strong></h1>
@@ -173,14 +179,14 @@ Mapping in Python, the way it was always meant to be.
 <h2 data-number="4.1" class="anchored" data-anchor-id="obtension-de-données-géographiques"><span class="header-section-number">4.1</span> <strong>Obtension de données géographiques</strong></h2>
 <section id="récupérer-les-limites-administratives-dun-ou-plusieurs-pays" class="level3" data-number="4.1.1">
 <h3 data-number="4.1.1" class="anchored" data-anchor-id="récupérer-les-limites-administratives-dun-ou-plusieurs-pays"><span class="header-section-number">4.1.1</span> <em>Récupérer les limites administratives d’un ou plusieurs pays</em></h3>
-<div id="9a711605" class="cell" data-execution_count="77">
+<div id="9a711605" class="cell" data-execution_count="132">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importation</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> data</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>client <span class="op">=</span> data.GeoBoundaries()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Les niveau de subbdivision administrative disponibles sont :</strong></p>
 <p>Il existe 5 subdivisions administratives disponibles :</p>
-<div id="38c7e251" class="cell" data-execution_count="78">
+<div id="38c7e251" class="cell" data-execution_count="133">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.adminLevels())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -202,7 +208,7 @@ Mapping in Python, the way it was always meant to be.
 <li>GeoBoundaries propose toujours au moins le niveau ADM0 (frontière nationale).</li>
 </ul>
 <p>Pour savoir si un niveau administratif est disponible pour un pays, vous pouvez utiliser la méthode <code>is_valid_adm</code> de l’objet <code>GeoBoundaries</code>. Voici un exemple :</p>
-<div id="de737835" class="cell" data-execution_count="79">
+<div id="de737835" class="cell" data-execution_count="134">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client.is_valid_adm(<span class="st">"CIV"</span>,<span class="st">"ADM1"</span>))  <span class="co"># Exemple pour vérifier si le niveau ADM1 est valide pour la Côte d'Ivoire</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Ou encore</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(client._get_smallest_adm(<span class="st">"CIV"</span>))  <span class="co"># Exemple pour vérifier si le niveau admin minimum pour la Côte d'Ivoire</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -214,9 +220,9 @@ ADM3</code></pre>
 </div>
 <p><strong>Les codes des pays sont conformes à la norme ISO 3166-1 alpha-3 :</strong></p>
 <p>Pour obtenir la liste des pays valides, vous pouvez utiliser la méthode <code>countries()</code> de l’objet <code>GeoBoundaries</code>. Voici un exemple :</p>
-<div id="a1ac0d94" class="cell" data-execution_count="80">
+<div id="a1ac0d94" class="cell" data-execution_count="135">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>client.countries()[<span class="dv">0</span>:<span class="dv">10</span>]  <span class="co"># Affiche les 10 premiers pays</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="80">
+<div class="cell-output cell-output-display" data-execution_count="135">
 <pre><code>['أفغانستان',
  'афганистан',
  'afghánistán',
@@ -229,15 +235,15 @@ ADM3</code></pre>
  'աֆղանստան']</code></pre>
 </div>
 </div>
-<div id="182b84c3" class="cell" data-execution_count="81">
+<div id="182b84c3" class="cell" data-execution_count="136">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>client.get_iso3(<span class="st">"burk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="81">
+<div class="cell-output cell-output-display" data-execution_count="136">
 <pre><code>'BFA'</code></pre>
 </div>
 </div>
-<div id="3851d802" class="cell" data-execution_count="82">
+<div id="3851d802" class="cell" data-execution_count="137">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>client.get_iso3(<span class="st">"con"</span>)  <span class="co"># Exemple pour obtenir le code ISO d'un pays</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="82">
+<div class="cell-output cell-output-display" data-execution_count="137">
 <pre><code>[('congo', 'cog'),
  ('república del congo', 'cog'),
  ('république du congo', 'cog'),
@@ -254,12 +260,12 @@ ADM3</code></pre>
  ('republica democrată congo', 'cod')]</code></pre>
 </div>
 </div>
-<div id="61b3db9e" class="cell" data-execution_count="83">
+<div id="61b3db9e" class="cell" data-execution_count="138">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple 1: Récupérer les données administratives des régions de la cote d'ivoire</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>civ_data <span class="op">=</span> client.adm(<span class="st">"CIV"</span>, <span class="st">"ADM2"</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>civ_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="83">
+<div class="cell-output cell-output-display" data-execution_count="138">
 <div>
 
 
@@ -327,11 +333,11 @@ ADM3</code></pre>
 </div>
 </div>
 </div>
-<div id="dacd540e" class="cell" data-execution_count="84">
+<div id="dacd540e" class="cell" data-execution_count="139">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>countries_data <span class="op">=</span> client.adm([<span class="st">"SEN"</span>, <span class="st">"mali"</span>], <span class="st">"ADM2"</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>countries_data[<span class="st">"mali"</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="84">
+<div class="cell-output cell-output-display" data-execution_count="139">
 <div>
 
 
@@ -402,7 +408,7 @@ ADM3</code></pre>
 </section>
 <section id="récupérer-les-métadonnées-dun-territoire" class="level3" data-number="4.1.2">
 <h3 data-number="4.1.2" class="anchored" data-anchor-id="récupérer-les-métadonnées-dun-territoire"><span class="header-section-number">4.1.2</span> Récupérer les métadonnées d’un territoire</h3>
-<div id="c4201ce5" class="cell" data-execution_count="85">
+<div id="c4201ce5" class="cell" data-execution_count="140">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Récupérer les métadonnées d'un territoire</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>metadata_civ <span class="op">=</span> client.metadata(<span class="st">"CIV"</span>, <span class="st">"ADM0"</span>)</span>
@@ -413,32 +419,32 @@ ADM3</code></pre>
 <pre><code>Métadonnées disponibles pour la Côte d'Ivoire: dict_keys(['boundaryID', 'boundaryName', 'boundaryISO', 'boundaryYearRepresented', 'boundaryType', 'boundaryCanonical', 'boundarySource', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySourceURL', 'sourceDataUpdateDate', 'buildDate', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'worldBankIncomeGroup', 'admUnitCount', 'meanVertices', 'minVertices', 'maxVertices', 'meanPerimeterLengthKM', 'minPerimeterLengthKM', 'maxPerimeterLengthKM', 'meanAreaSqKM', 'minAreaSqKM', 'maxAreaSqKM', 'staticDownloadLink', 'gjDownloadURL', 'tjDownloadURL', 'imagePreview', 'simplifiedGeometryGeoJSON'])</code></pre>
 </div>
 </div>
-<div id="4ea36520" class="cell" data-execution_count="86">
+<div id="4ea36520" class="cell" data-execution_count="141">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>metadata_civ[<span class="st">"Continent"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="86">
+<div class="cell-output cell-output-display" data-execution_count="141">
 <pre><code>'Africa'</code></pre>
 </div>
 </div>
-<div id="ce0c92f9" class="cell" data-execution_count="87">
+<div id="ce0c92f9" class="cell" data-execution_count="142">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>metadata_civ[<span class="st">"UNSDG-subregion"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="87">
+<div class="cell-output cell-output-display" data-execution_count="142">
 <pre><code>'Western Africa'</code></pre>
 </div>
 </div>
-<div id="46528c5f" class="cell" data-execution_count="88">
+<div id="46528c5f" class="cell" data-execution_count="143">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>metadata_civ[<span class="st">"UNSDG-region"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="88">
+<div class="cell-output cell-output-display" data-execution_count="143">
 <pre><code>'Sub-Saharan Africa'</code></pre>
 </div>
 </div>
-<div id="cdd7906b" class="cell" data-execution_count="89">
+<div id="cdd7906b" class="cell" data-execution_count="144">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>url_img<span class="op">=</span>metadata_civ[<span class="st">"imagePreview"</span>]</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>url_img</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="89">
+<div class="cell-output cell-output-display" data-execution_count="144">
 <pre><code>'https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CIV/ADM0/geoBoundaries-CIV-ADM0-PREVIEW.png'</code></pre>
 </div>
 </div>
-<div id="9ac4c5af" class="cell" data-execution_count="90">
+<div id="9ac4c5af" class="cell" data-execution_count="145">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Afficher l'image de prévisualisation dans le notebook</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> Image, display</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -454,12 +460,12 @@ ADM3</code></pre>
 <section id="géocoder-une-ou-plusieurs-adresses" class="level3" data-number="4.1.3">
 <h3 data-number="4.1.3" class="anchored" data-anchor-id="géocoder-une-ou-plusieurs-adresses"><span class="header-section-number">4.1.3</span> <em>Géocoder une ou plusieurs adresses</em></h3>
 <p>Le geocodage permet de convertir des adresses en coordonnées géographiques (latitude et longitude). Vous pouvez géocoder une ou plusieurs adresses en utilisant les méthode <code>geocode</code> et <code>geocode_batch</code> de l’objet <code>Geocoder</code>.</p>
-<div id="6364ea20" class="cell" data-execution_count="91">
+<div id="6364ea20" class="cell" data-execution_count="146">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> data</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>geocoder<span class="op">=</span> data.Geocoder()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Géocoder une adresse</strong></p>
-<div id="6a1c08b5" class="cell" data-execution_count="92">
+<div id="6a1c08b5" class="cell" data-execution_count="147">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>address <span class="op">=</span> <span class="st">"bouaké"</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> geocoder.geocode(address)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -469,7 +475,7 @@ ADM3</code></pre>
 <pre><code>Début du géocodage de 1 localité(s)...
 Géocodage terminé.</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="92">
+<div class="cell-output cell-output-display" data-execution_count="147">
 <div>
 
 
@@ -494,7 +500,7 @@ Géocodage terminé.</code></pre>
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
 </tr>
 </tbody>
@@ -503,15 +509,15 @@ Géocodage terminé.</code></pre>
 </div>
 </div>
 </div>
-<div id="ef92bc73" class="cell" data-execution_count="93">
+<div id="ef92bc73" class="cell" data-execution_count="148">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adresse non trouvée</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>result[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="93">
+<div class="cell-output cell-output-display" data-execution_count="148">
 <pre><code>[]</code></pre>
 </div>
 </div>
 <p><strong>Geocoder une liste d’adresses</strong></p>
-<div id="a117e384" class="cell" data-execution_count="94">
+<div id="a117e384" class="cell" data-execution_count="149">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>liste_adresses <span class="op">=</span> [<span class="st">"Abidjan"</span>, <span class="st">"Yamoussoukro"</span>, <span class="st">"Bouaké"</span>, <span class="st">"Korhogo"</span>,<span class="st">"Man CI"</span>, <span class="st">""</span>,<span class="st">"portbouet"</span>]</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>results<span class="op">=</span>geocoder.geocode(liste_adresses)</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -521,7 +527,7 @@ Géocodage terminé.</code></pre>
 <pre><code>Début du géocodage de 7 localité(s)...
 Géocodage terminé.</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="94">
+<div class="cell-output cell-output-display" data-execution_count="149">
 <div>
 
 
@@ -546,7 +552,7 @@ Géocodage terminé.</code></pre>
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277113208, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
 </tr>
 <tr class="even">
@@ -556,7 +562,7 @@ Géocodage terminé.</code></pre>
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405157296, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
 </tr>
 <tr class="odd">
@@ -566,7 +572,7 @@ Géocodage terminé.</code></pre>
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
 </tr>
 <tr class="even">
@@ -576,7 +582,7 @@ Géocodage terminé.</code></pre>
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277168989, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
 </tr>
 <tr class="odd">
@@ -586,7 +592,7 @@ Géocodage terminé.</code></pre>
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276691276, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
 </tr>
 </tbody>
@@ -595,10 +601,10 @@ Géocodage terminé.</code></pre>
 </div>
 </div>
 </div>
-<div id="9b1d94b1" class="cell" data-execution_count="95">
+<div id="9b1d94b1" class="cell" data-execution_count="150">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adresses non trouvée</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>results[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="95">
+<div class="cell-output cell-output-display" data-execution_count="150">
 <pre><code>['', 'portbouet']</code></pre>
 </div>
 </div>
@@ -607,17 +613,17 @@ Géocodage terminé.</code></pre>
 <section id="processing-de-données" class="level2" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="processing-de-données"><span class="header-section-number">4.2</span> <strong>Processing de données</strong></h2>
 <p><code>processing</code> vous permet d’executer des taches courantes effectuées sur des données vectorielles.</p>
-<div id="c1d42315" class="cell" data-execution_count="96">
+<div id="c1d42315" class="cell" data-execution_count="151">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importation</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing  <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="charger-des-données" class="level3" data-number="4.2.1">
 <h3 data-number="4.2.1" class="anchored" data-anchor-id="charger-des-données"><span class="header-section-number">4.2.1</span> <em>Charger des données</em></h3>
-<div id="55ea9a80" class="cell" data-execution_count="97">
+<div id="55ea9a80" class="cell" data-execution_count="152">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># hexagon_data.head()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="e9c0a370" class="cell" data-execution_count="98">
+<div id="e9c0a370" class="cell" data-execution_count="153">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>path<span class="op">=</span><span class="st">"data</span><span class="er">\</span><span class="st">other</span><span class="er">\</span><span class="st">Département de Bouna.geojson"</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>donnee_bouna<span class="op">=</span>load(path)</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>donnee_bouna.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -627,7 +633,7 @@ Géocodage terminé.</code></pre>
 C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning: invalid escape sequence '\o'
   path="data\other\Département de Bouna.geojson"</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="98">
+<div class="cell-output cell-output-display" data-execution_count="153">
 <div>
 
 
@@ -678,11 +684,11 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </section>
 <section id="obtenir-des-informations-sur-un-multipolygone" class="level3" data-number="4.2.2">
 <h3 data-number="4.2.2" class="anchored" data-anchor-id="obtenir-des-informations-sur-un-multipolygone"><span class="header-section-number">4.2.2</span> <em>Obtenir des informations sur un multipolygone</em></h3>
-<div id="52bb0af7" class="cell" data-execution_count="99">
+<div id="52bb0af7" class="cell" data-execution_count="154">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>multipolygon<span class="op">=</span>donnee_bouna[<span class="st">"geometry"</span>][<span class="dv">0</span>]</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>infos_multipolygon<span class="op">=</span>get_multipolygon_info(multipolygon)</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>infos_multipolygon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="99">
+<div class="cell-output cell-output-display" data-execution_count="154">
 <pre><code>{'type': 'MultiPolygon',
  'num_polygons': 1,
  'total_area': 1.1852617495377915,
@@ -698,10 +704,10 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </section>
 <section id="séparer-un-multipolygon-en-polygone-simple" class="level3" data-number="4.2.3">
 <h3 data-number="4.2.3" class="anchored" data-anchor-id="séparer-un-multipolygon-en-polygone-simple"><span class="header-section-number">4.2.3</span> <em>Séparer un multipolygon en polygone simple</em></h3>
-<div id="a2fba636" class="cell" data-execution_count="100">
+<div id="a2fba636" class="cell" data-execution_count="155">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>polygones_bouna<span class="op">=</span>split_multipolygon(donnee_bouna)</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>polygones_bouna.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="100">
+<div class="cell-output cell-output-display" data-execution_count="155">
 <div>
 
 
@@ -753,7 +759,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </div>
 </div>
 </div>
-<div id="b4f88a0f" class="cell" data-execution_count="101">
+<div id="b4f88a0f" class="cell" data-execution_count="156">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>polygones_bouna.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -766,13 +772,13 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </section>
 <section id="fusionner-des-geodataframe" class="level3" data-number="4.2.4">
 <h3 data-number="4.2.4" class="anchored" data-anchor-id="fusionner-des-geodataframe"><span class="header-section-number">4.2.4</span> <em>Fusionner des geodataframe</em></h3>
-<div id="e5651e3f" class="cell" data-execution_count="102">
+<div id="e5651e3f" class="cell" data-execution_count="157">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>countries_data <span class="op">=</span> client.adm([<span class="st">"SEN"</span>, <span class="st">"mali"</span>,<span class="st">"civ"</span>], <span class="st">"ADM2"</span>)</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>list_gdf<span class="op">=</span>[gdf <span class="cf">for</span> key, gdf <span class="kw">in</span> countries_data.items()] <span class="co"># Liste de dataframes</span></span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>countries_merged_data<span class="op">=</span>fusion(list_gdf) <span class="co"># Fusion des dataframes</span></span>
 <span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>countries_merged_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="102">
+<div class="cell-output cell-output-display" data-execution_count="157">
 <div>
 
 
@@ -843,11 +849,11 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </section>
 <section id="creer-une-nouvelle-colonne" class="level3" data-number="4.2.5">
 <h3 data-number="4.2.5" class="anchored" data-anchor-id="creer-une-nouvelle-colonne"><span class="header-section-number">4.2.5</span> <em>Creer une nouvelle colonne</em></h3>
-<div id="707b5175" class="cell" data-execution_count="103">
+<div id="707b5175" class="cell" data-execution_count="158">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>new_countries_data<span class="op">=</span>add_column(df<span class="op">=</span>countries_merged_data,column_name<span class="op">=</span><span class="st">"random_data"</span>,expression<span class="op">=</span><span class="st">"random.randint(1,100)"</span>,globals_dict<span class="op">=</span>{<span class="st">"random"</span>:random})</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># global_dics correspond a la liste des packages necessaires pour evaluer l'expression</span></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>new_countries_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="103">
+<div class="cell-output cell-output-display" data-execution_count="158">
 <div>
 
 
@@ -873,7 +879,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>2</td>
+<td>30</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
@@ -883,7 +889,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>45</td>
+<td>4</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
@@ -893,7 +899,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>8</td>
+<td>25</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
@@ -903,7 +909,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>19</td>
+<td>11</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
@@ -913,7 +919,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>65</td>
+<td>64</td>
 </tr>
 </tbody>
 </table>
@@ -921,12 +927,12 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </div>
 </div>
 </div>
-<div id="8f2daa23" class="cell" data-execution_count="104">
+<div id="8f2daa23" class="cell" data-execution_count="159">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>new_countries_data<span class="op">=</span>add_column(new_countries_data,<span class="st">"dataType"</span>,<span class="st">"row['shapeGroup']+'-'+row['shapeType']"</span>)</span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># row dans l'expression correspont a une ligne de la dataframe</span></span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="co"># shapeGroup et shapeType sont des colonnes de la dataframe</span></span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>new_countries_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="104">
+<div class="cell-output cell-output-display" data-execution_count="159">
 <div>
 
 
@@ -953,7 +959,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>2</td>
+<td>30</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="even">
@@ -964,7 +970,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>45</td>
+<td>4</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="odd">
@@ -975,7 +981,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>8</td>
+<td>25</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="even">
@@ -986,7 +992,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>19</td>
+<td>11</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="odd">
@@ -997,7 +1003,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>65</td>
+<td>64</td>
 <td>SEN-ADM2</td>
 </tr>
 </tbody>
@@ -1006,9 +1012,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </div>
 </div>
 </div>
-<div id="1185b41a" class="cell" data-execution_count="105">
+<div id="1185b41a" class="cell" data-execution_count="160">
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(new_countries_data.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="105">
+<div class="cell-output cell-output-display" data-execution_count="160">
 <pre><code>['geometry',
  'shapeName',
  'shapeISO',
@@ -1022,7 +1028,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </section>
 <section id="creer-un-geodataframe-de-centroïde" class="level3" data-number="4.2.6">
 <h3 data-number="4.2.6" class="anchored" data-anchor-id="creer-un-geodataframe-de-centroïde"><span class="header-section-number">4.2.6</span> <em>Creer un geodataframe de centroïde</em></h3>
-<div id="f3a1a196" class="cell" data-execution_count="106">
+<div id="f3a1a196" class="cell" data-execution_count="161">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>coundtries_centroids <span class="op">=</span> centroids(new_countries_data)</span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1030,7 +1036,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># avec tous les attributs originaux de new_countries_data</span></span>
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>coundtries_centroids.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="106">
+<div class="cell-output cell-output-display" data-execution_count="161">
 <div>
 
 
@@ -1057,7 +1063,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>2</td>
+<td>30</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="even">
@@ -1068,7 +1074,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>45</td>
+<td>4</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="odd">
@@ -1079,7 +1085,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>8</td>
+<td>25</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="even">
@@ -1090,7 +1096,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>19</td>
+<td>11</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr class="odd">
@@ -1101,7 +1107,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>65</td>
+<td>64</td>
 <td>SEN-ADM2</td>
 </tr>
 </tbody>
@@ -1110,7 +1116,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </div>
 </div>
 </div>
-<div id="ea5dd945" class="cell" data-execution_count="107">
+<div id="ea5dd945" class="cell" data-execution_count="162">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation simple avec matplotlib</span></span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1128,17 +1134,17 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <section id="visualisation-de-données" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="visualisation-de-données"><span class="header-section-number">4.3</span> <strong>Visualisation de données</strong></h2>
 <p>cartograpy permet de creer rapidement des cartes pour visualier les données géographiques.</p>
-<div id="0c1c79b7" class="cell" data-execution_count="108">
+<div id="0c1c79b7" class="cell" data-execution_count="163">
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="5fca0bd7" class="cell" data-execution_count="109">
+<div id="5fca0bd7" class="cell" data-execution_count="164">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># J'ajoute des données aléatoires pour la visualisation</span></span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>civ_data[<span class="st">'data'</span>] <span class="op">=</span> [random.randint(<span class="dv">0</span>,<span class="dv">10000</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(civ_data))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="fed6fc78" class="cell" data-execution_count="110">
+<div id="fed6fc78" class="cell" data-execution_count="165">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>civ_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="110">
+<div class="cell-output cell-output-display" data-execution_count="165">
 <div>
 
 
@@ -1164,7 +1170,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>98640826B52449815511854</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1075</td>
+<td>4759</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
@@ -1174,7 +1180,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>98640826B37750272367318</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6681</td>
+<td>8688</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
@@ -1184,7 +1190,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>98640826B26044148659027</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9867</td>
+<td>6097</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
@@ -1194,7 +1200,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>98640826B5123145245776</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9790</td>
+<td>6571</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
@@ -1204,7 +1210,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>98640826B43857880322183</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6960</td>
+<td>1428</td>
 </tr>
 </tbody>
 </table>
@@ -1212,11 +1218,11 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </div>
 </div>
 </div>
-<div id="262a651f" class="cell" data-execution_count="111">
+<div id="262a651f" class="cell" data-execution_count="166">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>geocode_localite<span class="op">=</span>results[<span class="dv">0</span>]</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>geocode_localite[<span class="st">"data"</span>]<span class="op">=</span> [random.randint(<span class="dv">0</span>,<span class="dv">10000</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(geocode_localite))]</span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>geocode_localite.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="111">
+<div class="cell-output cell-output-display" data-execution_count="166">
 <div>
 
 
@@ -1242,9 +1248,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277113208, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
-<td>5832</td>
+<td>9682</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
@@ -1253,9 +1259,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405157296, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
-<td>513</td>
+<td>4465</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
@@ -1264,9 +1270,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
-<td>3729</td>
+<td>4571</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
@@ -1275,9 +1281,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277168989, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
-<td>2584</td>
+<td>1753</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
@@ -1286,9 +1292,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276691276, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
-<td>1869</td>
+<td>3365</td>
 </tr>
 </tbody>
 </table>
@@ -1298,17 +1304,17 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </div>
 <section id="voir-la-liste-des-palletes-de-couleurs-diponible" class="level3" data-number="4.3.1">
 <h3 data-number="4.3.1" class="anchored" data-anchor-id="voir-la-liste-des-palletes-de-couleurs-diponible"><span class="header-section-number">4.3.1</span> <em>Voir la liste des palletes de couleurs diponible</em></h3>
-<div id="8fc35e3c" class="cell" data-execution_count="112">
+<div id="8fc35e3c" class="cell" data-execution_count="167">
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Les groupes de palettes diponibles</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>get_available_palettes().keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="112">
+<div class="cell-output cell-output-display" data-execution_count="167">
 <pre><code>dict_keys(['custom', 'seaborn_qualitative', 'seaborn_sequential', 'seaborn_diverging', 'matplotlib_sequential', 'matplotlib_diverging', 'matplotlib_cyclic', 'matplotlib_qualitative'])</code></pre>
 </div>
 </div>
-<div id="0ce89f57" class="cell" data-execution_count="113">
+<div id="0ce89f57" class="cell" data-execution_count="168">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Voir les pallettes disponibles dans un groupe</span></span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>get_available_palettes()[<span class="st">"seaborn_sequential"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="113">
+<div class="cell-output cell-output-display" data-execution_count="168">
 <pre><code>['Blues',
  'BuGn',
  'BuPu',
@@ -1336,9 +1342,9 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 </section>
 <section id="voir-la-liste-des-polices-décritures-disponibles" class="level3" data-number="4.3.2">
 <h3 data-number="4.3.2" class="anchored" data-anchor-id="voir-la-liste-des-polices-décritures-disponibles"><span class="header-section-number">4.3.2</span> <em>Voir la liste des polices d’écritures disponibles</em></h3>
-<div id="85fd57e8" class="cell" data-execution_count="114">
+<div id="85fd57e8" class="cell" data-execution_count="169">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>get_fonts()[<span class="dv">0</span>:<span class="dv">10</span>] <span class="co"># Pour voir les 10 prémières polices </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="114">
+<div class="cell-output cell-output-display" data-execution_count="169">
 <pre><code>['Agency FB',
  'Algerian',
  'Arial',
@@ -1351,10 +1357,10 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
  'Berlin Sans FB Demi']</code></pre>
 </div>
 </div>
-<div id="9556d619" class="cell" data-execution_count="115">
+<div id="9556d619" class="cell" data-execution_count="170">
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pour filtrer par un mot clé</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>get_fonts(<span class="st">"time"</span>)[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="115">
+<div class="cell-output cell-output-display" data-execution_count="170">
 <pre><code>'Times New Roman'</code></pre>
 </div>
 </div>
@@ -1362,7 +1368,7 @@ C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning:
 <section id="visualiser-des-données-vectorielles" class="level3" data-number="4.3.3">
 <h3 data-number="4.3.3" class="anchored" data-anchor-id="visualiser-des-données-vectorielles"><span class="header-section-number">4.3.3</span> <em>Visualiser des données vectorielles</em></h3>
 <p><strong>Creer une carte cloropleth simple</strong></p>
-<div id="4b9cdcba" class="cell" data-execution_count="116">
+<div id="4b9cdcba" class="cell" data-execution_count="171">
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>carte_ci<span class="op">=</span>Map(figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">12</span>), projection<span class="op">=</span>ccrs.PlateCarree())</span>
 <span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>carte_ci.add_polygons_cloropleth(gdf<span class="op">=</span>civ_data,</span>
 <span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>                              column_to_plot<span class="op">=</span><span class="st">'data'</span>,</span>
@@ -1418,7 +1424,7 @@ Can't handle color: param(outline)</code></pre>
 </section>
 <section id="visualiser-des-données-rasters" class="level3" data-number="4.3.4">
 <h3 data-number="4.3.4" class="anchored" data-anchor-id="visualiser-des-données-rasters"><span class="header-section-number">4.3.4</span> <em>Visualiser des données rasters</em></h3>
-<div id="00f892a3" class="cell" data-execution_count="117">
+<div id="00f892a3" class="cell" data-execution_count="172">
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création d'une carte raster</span></span>
 <span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>carte_dem <span class="op">=</span> Map(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>), projection<span class="op">=</span>ccrs.PlateCarree())</span>
 <span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1456,9 +1462,9 @@ Can't handle color: param(outline)</code></pre>
 </div>
 </div>
 </div>
-<div id="5c9831c9" class="cell" data-execution_count="118">
+<div id="5c9831c9" class="cell" data-execution_count="173">
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>civ_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="118">
+<div class="cell-output cell-output-display" data-execution_count="173">
 <div>
 
 
@@ -1484,7 +1490,7 @@ Can't handle color: param(outline)</code></pre>
 <td>98640826B52449815511854</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1075</td>
+<td>4759</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
@@ -1494,7 +1500,7 @@ Can't handle color: param(outline)</code></pre>
 <td>98640826B37750272367318</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6681</td>
+<td>8688</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
@@ -1504,7 +1510,7 @@ Can't handle color: param(outline)</code></pre>
 <td>98640826B26044148659027</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9867</td>
+<td>6097</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
@@ -1514,7 +1520,7 @@ Can't handle color: param(outline)</code></pre>
 <td>98640826B5123145245776</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9790</td>
+<td>6571</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
@@ -1524,7 +1530,7 @@ Can't handle color: param(outline)</code></pre>
 <td>98640826B43857880322183</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6960</td>
+<td>1428</td>
 </tr>
 </tbody>
 </table>
@@ -1532,9 +1538,9 @@ Can't handle color: param(outline)</code></pre>
 </div>
 </div>
 </div>
-<div id="97463313" class="cell" data-execution_count="119">
+<div id="97463313" class="cell" data-execution_count="174">
 <div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(civ_data.shapeName.unique())[<span class="dv">0</span>:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="119">
+<div class="cell-output cell-output-display" data-execution_count="174">
 <pre><code>['Agneby-Tiassa',
  'Bafing',
  'Bagoue',
@@ -1547,7 +1553,7 @@ Can't handle color: param(outline)</code></pre>
  'Folon']</code></pre>
 </div>
 </div>
-<div id="5358f968" class="cell" data-execution_count="120">
+<div id="5358f968" class="cell" data-execution_count="175">
 <div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>civ_data[<span class="st">"shapeName"</span>].replace({</span>
 <span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"District Autonome D'Abidjan"</span>: <span class="st">"Abidjan"</span>,</span>
 <span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"District Autonome De Yamoussoukro"</span>: <span class="st">"Yamoussoukro"</span></span>
@@ -1562,9 +1568,9 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
   civ_data["shapeName"].replace({</code></pre>
 </div>
 </div>
-<div id="98f2f6f0" class="cell" data-execution_count="121">
+<div id="98f2f6f0" class="cell" data-execution_count="176">
 <div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>geocode_localite.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="121">
+<div class="cell-output cell-output-display" data-execution_count="176">
 <div>
 
 
@@ -1590,9 +1596,9 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277113208, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
-<td>5832</td>
+<td>9682</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
@@ -1601,9 +1607,9 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405157296, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
-<td>513</td>
+<td>4465</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
@@ -1612,9 +1618,9 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
-<td>3729</td>
+<td>4571</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
@@ -1623,9 +1629,9 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277168989, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
-<td>2584</td>
+<td>1753</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
@@ -1634,9 +1640,9 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276691276, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
-<td>1869</td>
+<td>3365</td>
 </tr>
 </tbody>
 </table>
@@ -1644,14 +1650,14 @@ For example, when doing 'df[col].method(value, inplace=True)', try using 'df.met
 </div>
 </div>
 </div>
-<div id="d79ea75d" class="cell" data-execution_count="122">
+<div id="d79ea75d" class="cell" data-execution_count="177">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>font<span class="op">=</span>get_fonts(<span class="st">"time"</span>)[<span class="dv">0</span>]</span>
 <span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>font</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="122">
+<div class="cell-output cell-output-display" data-execution_count="177">
 <pre><code>'Times New Roman'</code></pre>
 </div>
 </div>
-<div id="afb45af1" class="cell" data-execution_count="123">
+<div id="afb45af1" class="cell" data-execution_count="178">
 <div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Creer un objet de carte basique avec OpenLayers et Python</span></span>
 <span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================================================</span></span>
@@ -1737,7 +1743,7 @@ Location est : (0.02, 0.03). La bare d'échelle est placé à 2.0 % de la longeu
 </section>
 <section id="carte-cloropleth" class="level3" data-number="4.3.5">
 <h3 data-number="4.3.5" class="anchored" data-anchor-id="carte-cloropleth"><span class="header-section-number">4.3.5</span> <em>Carte cloropleth</em></h3>
-<div id="edcbf8e2" class="cell" data-execution_count="124">
+<div id="edcbf8e2" class="cell" data-execution_count="179">
 <div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creer un simple cloropleth de point</span></span>
 <span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="co">#============================================</span></span>
 <span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>carte2<span class="op">=</span>Map(figsize<span class="op">=</span><span class="st">"A4"</span>)</span>
@@ -1774,7 +1780,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 </div>
 </div>
 </div>
-<div id="76a5b1b8" class="cell" data-execution_count="125">
+<div id="76a5b1b8" class="cell" data-execution_count="180">
 <div class="sourceCode cell-code" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creer un cloropleth de polygone</span></span>
 <span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="co">#=================================================</span></span>
 <span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1787,7 +1793,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 <span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Fusion des données du découpages administratif</span></span>
 <span id="cb83-11"><a href="#cb83-11" aria-hidden="true" tabindex="-1"></a>data_sen_mali<span class="op">=</span>fusion(dataframes_list<span class="op">=</span>[dic[<span class="st">"sen"</span>],dic[<span class="st">"mali"</span>]])</span>
 <span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>data_sen_mali.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="125">
+<div class="cell-output cell-output-display" data-execution_count="180">
 <div>
 
 
@@ -1856,19 +1862,19 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 </div>
 </div>
 <p>Vous pouvez utiliser explorer et manipuler <strong>les palettes de couleurs</strong> avec <code>colors</code> de cartograpy</p>
-<div id="25965794" class="cell" data-execution_count="126">
+<div id="25965794" class="cell" data-execution_count="181">
 <div class="sourceCode cell-code" id="cb84"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chargement de la bibliothèque</span></span>
 <span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> colors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="d58ee071" class="cell" data-execution_count="127">
+<div id="d58ee071" class="cell" data-execution_count="182">
 <div class="sourceCode cell-code" id="cb85"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création d'une colonne de données aléatoire</span></span>
 <span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>data_sen_mali<span class="op">=</span>add_column(df<span class="op">=</span>data_sen_mali,column_name<span class="op">=</span><span class="st">"data"</span>,expression<span class="op">=</span><span class="st">"random.randint(50,1000)"</span>,globals_dict<span class="op">=</span>{<span class="st">"random"</span>: random})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="942302a5" class="cell" data-execution_count="128">
+<div id="942302a5" class="cell" data-execution_count="183">
 <div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>data_sen_mali.head()</span>
 <span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="128">
+<div class="cell-output cell-output-display" data-execution_count="183">
 <div>
 
 
@@ -1894,7 +1900,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>669</td>
+<td>278</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
@@ -1904,7 +1910,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>351</td>
+<td>528</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
@@ -1914,7 +1920,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>151</td>
+<td>907</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
@@ -1924,7 +1930,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>530</td>
+<td>608</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
@@ -1934,7 +1940,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>698</td>
+<td>111</td>
 </tr>
 </tbody>
 </table>
@@ -1942,7 +1948,7 @@ Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 </div>
 </div>
 </div>
-<div id="af1acda4" class="cell" data-execution_count="129">
+<div id="af1acda4" class="cell" data-execution_count="184">
 <div class="sourceCode cell-code" id="cb87"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création de carte cloropleth</span></span>
 <span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>carte3 <span class="op">=</span> Map (figsize<span class="op">=</span><span class="st">"A4"</span>,title<span class="op">=</span><span class="st">"Chloropleth de polygone Sénégale et Mali"</span>)</span>
 <span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>carte3.add_polygons_cloropleth(gdf<span class="op">=</span>data_sen_mali,column_to_plot<span class="op">=</span><span class="st">"data"</span>,cmap<span class="op">=</span><span class="st">"Coconut"</span>)</span>
@@ -1983,7 +1989,7 @@ Can't handle color: param(outline)</code></pre>
 </section>
 <section id="carte-de-ligne" class="level3" data-number="4.3.6">
 <h3 data-number="4.3.6" class="anchored" data-anchor-id="carte-de-ligne"><span class="header-section-number">4.3.6</span> <em>Carte de ligne</em></h3>
-<div id="b6d65bd1" class="cell" data-execution_count="130">
+<div id="b6d65bd1" class="cell" data-execution_count="185">
 <div class="sourceCode cell-code" id="cb91"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>path<span class="op">=</span><span class="st">"data</span><span class="ch">\\</span><span class="st">QGIS-Training-Data</span><span class="ch">\\</span><span class="st">exercise_data</span><span class="er">\</span><span class="st">shapefile</span><span class="ch">\\</span><span class="st">rivers.shp"</span></span>
 <span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>data_riviere<span class="op">=</span>load(path)</span>
 <span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>carte4<span class="op">=</span>Map(title<span class="op">=</span><span class="st">"Carte de rivière"</span>)</span>
@@ -2032,7 +2038,7 @@ Location est : (0.15, 0.05). La bare d'échelle est placé à 15.0 % de la longe
 </section>
 <section id="ajouter-des-couches-de-tous-les-types" class="level3" data-number="4.3.7">
 <h3 data-number="4.3.7" class="anchored" data-anchor-id="ajouter-des-couches-de-tous-les-types"><span class="header-section-number">4.3.7</span> <strong>Ajouter des couches de tous les types</strong></h3>
-<div id="cd91ae8a" class="cell" data-execution_count="131">
+<div id="cd91ae8a" class="cell" data-execution_count="186">
 <div class="sourceCode cell-code" id="cb94"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>carte5<span class="op">=</span>Map(figsize<span class="op">=</span><span class="st">"A4"</span>,title<span class="op">=</span><span class="st">""</span>)</span>
 <span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>carte5.add_layer(data_sen_mali,label<span class="op">=</span><span class="st">"Admin 1"</span>)</span>
 <span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>centroide_sen_mal<span class="op">=</span>centroids(data_sen_mali)</span>

@@ -11,6 +11,11 @@ Mapping in Python, the way it was always meant to be.
 Cartograpy est un package python qui permet de manipuler des données
 geographiques et de creer des cartes simplement.
 
+<img src="data\create_python_maps.py (17).png" alt="Logo" width="800">
+<p>
+And you have all you need !
+</p>
+
 # **FONCTIONNALITE**
 
 -   Telecharger des données de découpage administratif de pays
@@ -406,7 +411,7 @@ result[0]
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
 </tr>
 </tbody>
@@ -470,7 +475,7 @@ results[0]
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277113208, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
 </tr>
 <tr>
@@ -480,7 +485,7 @@ results[0]
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405157296, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
 </tr>
 <tr>
@@ -490,7 +495,7 @@ results[0]
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
 </tr>
 <tr>
@@ -500,7 +505,7 @@ results[0]
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277168989, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
 </tr>
 <tr>
@@ -510,7 +515,7 @@ results[0]
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276691276, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
 </tr>
 </tbody>
@@ -838,7 +843,7 @@ new_countries_data.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>2</td>
+<td>30</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -848,7 +853,7 @@ new_countries_data.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>45</td>
+<td>4</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -858,7 +863,7 @@ new_countries_data.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>8</td>
+<td>25</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -868,7 +873,7 @@ new_countries_data.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>19</td>
+<td>11</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -878,7 +883,7 @@ new_countries_data.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>65</td>
+<td>64</td>
 </tr>
 </tbody>
 </table>
@@ -930,7 +935,7 @@ new_countries_data.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>2</td>
+<td>30</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -941,7 +946,7 @@ new_countries_data.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>45</td>
+<td>4</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -952,7 +957,7 @@ new_countries_data.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>8</td>
+<td>25</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -963,7 +968,7 @@ new_countries_data.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>19</td>
+<td>11</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -974,7 +979,7 @@ new_countries_data.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>65</td>
+<td>64</td>
 <td>SEN-ADM2</td>
 </tr>
 </tbody>
@@ -1045,7 +1050,7 @@ coundtries_centroids.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>2</td>
+<td>30</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1056,7 +1061,7 @@ coundtries_centroids.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>45</td>
+<td>4</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1067,7 +1072,7 @@ coundtries_centroids.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>8</td>
+<td>25</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1078,7 +1083,7 @@ coundtries_centroids.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>19</td>
+<td>11</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1089,7 +1094,7 @@ coundtries_centroids.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>65</td>
+<td>64</td>
 <td>SEN-ADM2</td>
 </tr>
 </tbody>
@@ -1162,7 +1167,7 @@ civ_data.head()
 <td>98640826B52449815511854</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1075</td>
+<td>4759</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1172,7 +1177,7 @@ civ_data.head()
 <td>98640826B37750272367318</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6681</td>
+<td>8688</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1182,7 +1187,7 @@ civ_data.head()
 <td>98640826B26044148659027</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9867</td>
+<td>6097</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1192,7 +1197,7 @@ civ_data.head()
 <td>98640826B5123145245776</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9790</td>
+<td>6571</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1202,7 +1207,7 @@ civ_data.head()
 <td>98640826B43857880322183</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6960</td>
+<td>1428</td>
 </tr>
 </tbody>
 </table>
@@ -1252,9 +1257,9 @@ geocode_localite.head()
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277113208, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
-<td>5832</td>
+<td>9682</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1263,9 +1268,9 @@ geocode_localite.head()
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405157296, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
-<td>513</td>
+<td>4465</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1274,9 +1279,9 @@ geocode_localite.head()
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
-<td>3729</td>
+<td>4571</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1285,9 +1290,9 @@ geocode_localite.head()
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277168989, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
-<td>2584</td>
+<td>1753</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1296,9 +1301,9 @@ geocode_localite.head()
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276691276, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
-<td>1869</td>
+<td>3365</td>
 </tr>
 </tbody>
 </table>
@@ -1491,7 +1496,7 @@ civ_data.head()
 <td>98640826B52449815511854</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1075</td>
+<td>4759</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1501,7 +1506,7 @@ civ_data.head()
 <td>98640826B37750272367318</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6681</td>
+<td>8688</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1511,7 +1516,7 @@ civ_data.head()
 <td>98640826B26044148659027</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9867</td>
+<td>6097</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1521,7 +1526,7 @@ civ_data.head()
 <td>98640826B5123145245776</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9790</td>
+<td>6571</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1531,7 +1536,7 @@ civ_data.head()
 <td>98640826B43857880322183</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>6960</td>
+<td>1428</td>
 </tr>
 </tbody>
 </table>
@@ -1609,9 +1614,9 @@ geocode_localite.head()
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277113208, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
-<td>5832</td>
+<td>9682</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1620,9 +1625,9 @@ geocode_localite.head()
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405157296, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
-<td>513</td>
+<td>4465</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1631,9 +1636,9 @@ geocode_localite.head()
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277285966, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
-<td>3729</td>
+<td>4571</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1642,9 +1647,9 @@ geocode_localite.head()
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277168989, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
-<td>2584</td>
+<td>1753</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1653,9 +1658,9 @@ geocode_localite.head()
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276691276, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
-<td>1869</td>
+<td>3365</td>
 </tr>
 </tbody>
 </table>
@@ -1928,7 +1933,7 @@ data_sen_mali.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>669</td>
+<td>278</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1938,7 +1943,7 @@ data_sen_mali.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>351</td>
+<td>528</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1948,7 +1953,7 @@ data_sen_mali.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>151</td>
+<td>907</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1958,7 +1963,7 @@ data_sen_mali.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>530</td>
+<td>608</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1968,7 +1973,7 @@ data_sen_mali.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>698</td>
+<td>111</td>
 </tr>
 </tbody>
 </table>
