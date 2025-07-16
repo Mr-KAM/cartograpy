@@ -1,24 +1,99 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "cartograpy"
-version = "0.1.0"
-description = "Un package python pour creer des cartes."
+version = "1.0.0"
+description = "Packages python pour créer des cartes"
+long_description = "Ce package fournit des outils pour créer des cartes en utilisant des données géographiques issus de geoboundaries. Il inclut des fonctionnalités pour télécharger des données géographiques, les traiter et les visualiser."
 authors = [
-  { name="Anicet Cyrille KAMBOU", email="kanicetcyrille@gmail.com" }
+    {name = "Anicet Cyrille KAMBOU", email = "kanicetcyrille@gmail.com"},
 ]
 readme = "README.md"
 requires-python = ">=3.7"
 license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
 dependencies = [
+    # Cartographie et géospatial
+    "cartopy>=0.24.0",
     "geopandas==1.0.1",
     "geojson==3.2.0",
+    "geopy>=2.4.0",
+    "shapely>=2.0.0",
+    "pyproj>=3.7.0",
+    "rasterio>=1.4.0",
+    
+    # Traitement de données GPX/KML
+    "gpxpy>=1.6.0",
+    "pykml>=0.2.0",
+    
+    # Visualisation
     "matplotlib==3.10.3",
+    "seaborn>=0.13.0",
+    "pypalettes>=0.1.0",
+    
+    # Données et analyse
     "pandas==2.2.3",
+    "numpy>=2.3.0",
+    "wbdata>=1.0.0",
+    
+    # Requêtes HTTP avec cache
     "requests==2.32.4",
     "requests-cache==1.2.1",
-    ""
-
+    
+    # Traitement d'images et SVG
+    "pillow>=11.0.0",
+    "svglib>=1.5.0",
+    "reportlab>=4.4.0",
+    
+    # Utilitaires
+    "typing-extensions>=4.14.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mr-kam/cartograpy"
+Repository = "https://github.com/mr-kam/cartograpy"
+Documentation = "https://github.com/mr-kam/cartograpy"
+"Bug Tracker" = "https://github.com/mr-kam/cartograpy/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cartograpy*"]
+exclude = ["tests*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?
+extend-ignore = ["E203", "W503"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

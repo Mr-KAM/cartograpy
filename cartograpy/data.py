@@ -16,6 +16,8 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from shapely.geometry import Point # Nécessaire pour créer des objets Point
 import time
 
+import wbdata
+
 
 class GeoBoundaries:
     """
@@ -490,6 +492,22 @@ class Geocoder:
 
         return geodataframe, not_found_coordinates
 
+class WorldBankData:
+    def __init__(self, api_key):
+        self.api_key = api_key
+    
+    def get_sources(self):
+        # Renvoie une liste de sources de données disponibles sur le site de la Banque mondiale.
+        return wbdata.get_sources()
+    
+    def get_indicators(self,source=1,query=None):
+        return wbdata.get_indicators(source=source)
+    
+    def get_countries(self,query):
+        return wbdata.get_countries(query= query)
+    
+    def get_data(indicators,country,date):
+        return wbdata.get_data(indicators=indicators,country=country,date=date)
 
 # Exemple d'utilisation
 if __name__ == "__main__":

@@ -1,0 +1,34 @@
+# Base de données cache
+http_cache.sqlite
+*.sqlite
+
+
+# === Dossiers de données volumineuses à ignorer ===
+data/
+__pycache__/
+country-flag-icons/
+cartograpy/__pycache__/
+
+# === Fichiers compilés Python ===
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# === Sauvegardes et fichiers temporaires ===
+*.swp
+*.swo
+*.bak
+*.tmp
+*~
+
+# === Fichiers de logs ===
+*.log
+
+# === Fichiers de configuration perso ===
+.env
+.DS_Store
+Thumbs.db
+
+# === Optionnel : ignorer les svg du dossier cartograpy/svg/ (sauf si tu veux les garder sur GitHub) ===
+# cartograpy/svg/
