@@ -1,3 +1,4 @@
+# Documentation
 
 
 <img src="data/logo.png" alt="Logo" width="300">
@@ -405,7 +406,7 @@ result[0]
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 277030935, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
 </tr>
 </tbody>
@@ -469,7 +470,7 @@ results[0]
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275432765, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
 </tr>
 <tr>
@@ -479,7 +480,7 @@ results[0]
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405167260, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
 </tr>
 <tr>
@@ -489,7 +490,7 @@ results[0]
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 277030935, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
 </tr>
 <tr>
@@ -499,7 +500,7 @@ results[0]
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 275218468, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
 </tr>
 <tr>
@@ -509,7 +510,7 @@ results[0]
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 275770928, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
 </tr>
 </tbody>
@@ -537,112 +538,9 @@ from cartograpy.processing  import *
 ### *Charger des données*
 
 ``` python
-hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")
-hexagon_data.head()
+# hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")
+# hexagon_data.head()
 ```
-
-    <>:1: SyntaxWarning: invalid escape sequence '\o'
-    <>:1: SyntaxWarning: invalid escape sequence '\o'
-    C:\Users\kanic\AppData\Local\Temp\ipykernel_65224\3617017383.py:1: SyntaxWarning: invalid escape sequence '\o'
-      hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")
-    c:\Users\kanic\.virtualenvs\carto\Lib\site-packages\pyogrio\raw.py:198: RuntimeWarning: Several features with id = 1 have been found. Altering it to be unique. This warning will not be emitted anymore for this layer
-      return ogr_read(
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-
-<table class="dataframe" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr style="text-align: right;">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">id</th>
-<th data-quarto-table-cell-role="th">left</th>
-<th data-quarto-table-cell-role="th">top</th>
-<th data-quarto-table-cell-role="th">right</th>
-<th data-quarto-table-cell-role="th">bottom</th>
-<th data-quarto-table-cell-role="th">row_index</th>
-<th data-quarto-table-cell-role="th">col_index</th>
-<th data-quarto-table-cell-role="th">DN</th>
-<th data-quarto-table-cell-role="th">geometry</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-quarto-table-cell-role="th">0</td>
-<td>1</td>
-<td>-4.297638</td>
-<td>9.616031</td>
-<td>-4.274544</td>
-<td>9.596031</td>
-<td>0</td>
-<td>0</td>
-<td>242.0</td>
-<td>POLYGON ((-4.29764 9.60603, -4.29186 9.61603, ...</td>
-</tr>
-<tr>
-<td data-quarto-table-cell-role="th">1</td>
-<td>1</td>
-<td>-4.297638</td>
-<td>9.616031</td>
-<td>-4.274544</td>
-<td>9.596031</td>
-<td>0</td>
-<td>0</td>
-<td>241.0</td>
-<td>POLYGON ((-4.29764 9.60603, -4.29186 9.61603, ...</td>
-</tr>
-<tr>
-<td data-quarto-table-cell-role="th">2</td>
-<td>1</td>
-<td>-4.297638</td>
-<td>9.616031</td>
-<td>-4.274544</td>
-<td>9.596031</td>
-<td>0</td>
-<td>0</td>
-<td>244.0</td>
-<td>POLYGON ((-4.29764 9.60603, -4.29186 9.61603, ...</td>
-</tr>
-<tr>
-<td data-quarto-table-cell-role="th">3</td>
-<td>1</td>
-<td>-4.297638</td>
-<td>9.616031</td>
-<td>-4.274544</td>
-<td>9.596031</td>
-<td>0</td>
-<td>0</td>
-<td>231.0</td>
-<td>POLYGON ((-4.29764 9.60603, -4.29186 9.61603, ...</td>
-</tr>
-<tr>
-<td data-quarto-table-cell-role="th">4</td>
-<td>1</td>
-<td>-4.297638</td>
-<td>9.616031</td>
-<td>-4.274544</td>
-<td>9.596031</td>
-<td>0</td>
-<td>0</td>
-<td>225.0</td>
-<td>POLYGON ((-4.29764 9.60603, -4.29186 9.61603, ...</td>
-</tr>
-</tbody>
-</table>
-
-</div>
 
 ``` python
 path="data\other\Département de Bouna.geojson"
@@ -652,7 +550,7 @@ donnee_bouna.head()
 
     <>:1: SyntaxWarning: invalid escape sequence '\o'
     <>:1: SyntaxWarning: invalid escape sequence '\o'
-    C:\Users\kanic\AppData\Local\Temp\ipykernel_65224\847831339.py:1: SyntaxWarning: invalid escape sequence '\o'
+    C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\847831339.py:1: SyntaxWarning: invalid escape sequence '\o'
       path="data\other\Département de Bouna.geojson"
 
 <div>
@@ -940,7 +838,7 @@ new_countries_data.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>40</td>
+<td>2</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -950,7 +848,7 @@ new_countries_data.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>82</td>
+<td>45</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -960,7 +858,7 @@ new_countries_data.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>1</td>
+<td>8</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -970,7 +868,7 @@ new_countries_data.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>6</td>
+<td>19</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -980,7 +878,7 @@ new_countries_data.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>91</td>
+<td>65</td>
 </tr>
 </tbody>
 </table>
@@ -1032,7 +930,7 @@ new_countries_data.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>40</td>
+<td>2</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1043,7 +941,7 @@ new_countries_data.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>82</td>
+<td>45</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1054,7 +952,7 @@ new_countries_data.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>1</td>
+<td>8</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1065,7 +963,7 @@ new_countries_data.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>6</td>
+<td>19</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1076,7 +974,7 @@ new_countries_data.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>91</td>
+<td>65</td>
 <td>SEN-ADM2</td>
 </tr>
 </tbody>
@@ -1147,7 +1045,7 @@ coundtries_centroids.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>40</td>
+<td>2</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1158,7 +1056,7 @@ coundtries_centroids.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>82</td>
+<td>45</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1169,7 +1067,7 @@ coundtries_centroids.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>1</td>
+<td>8</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1180,7 +1078,7 @@ coundtries_centroids.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>6</td>
+<td>19</td>
 <td>SEN-ADM2</td>
 </tr>
 <tr>
@@ -1191,7 +1089,7 @@ coundtries_centroids.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>91</td>
+<td>65</td>
 <td>SEN-ADM2</td>
 </tr>
 </tbody>
@@ -1264,7 +1162,7 @@ civ_data.head()
 <td>98640826B52449815511854</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1590</td>
+<td>1075</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1274,7 +1172,7 @@ civ_data.head()
 <td>98640826B37750272367318</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1314</td>
+<td>6681</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1284,7 +1182,7 @@ civ_data.head()
 <td>98640826B26044148659027</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9838</td>
+<td>9867</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1294,7 +1192,7 @@ civ_data.head()
 <td>98640826B5123145245776</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>4391</td>
+<td>9790</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1304,7 +1202,7 @@ civ_data.head()
 <td>98640826B43857880322183</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>2345</td>
+<td>6960</td>
 </tr>
 </tbody>
 </table>
@@ -1354,9 +1252,9 @@ geocode_localite.head()
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275432765, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
-<td>5326</td>
+<td>5832</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1365,9 +1263,9 @@ geocode_localite.head()
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405167260, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
-<td>4145</td>
+<td>513</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1376,9 +1274,9 @@ geocode_localite.head()
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 277030935, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
-<td>1957</td>
+<td>3729</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1387,9 +1285,9 @@ geocode_localite.head()
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 275218468, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
-<td>6132</td>
+<td>2584</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1398,9 +1296,9 @@ geocode_localite.head()
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 275770928, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
-<td>2216</td>
+<td>1869</td>
 </tr>
 </tbody>
 </table>
@@ -1498,9 +1396,9 @@ carte_ci.figsize=(18,16)
 
     Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 
-    c:\Users\kanic\OneDrive\Formations\Cartographie avec python\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
-    c:\Users\kanic\OneDrive\Formations\Cartographie avec python\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
     Can't handle color: param(outline)
     Can't handle color: param(outline)
@@ -1543,7 +1441,7 @@ carte_dem.show()
 
     <>:5: SyntaxWarning: invalid escape sequence '\o'
     <>:5: SyntaxWarning: invalid escape sequence '\o'
-    C:\Users\kanic\AppData\Local\Temp\ipykernel_65224\1404476908.py:5: SyntaxWarning: invalid escape sequence '\o'
+    C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\1404476908.py:5: SyntaxWarning: invalid escape sequence '\o'
       carte_dem.add_raster('data\other\Limite DEM Bouna.tif', cmap='tab20c', title='Élévation (m)')
     Can't handle color: param(outline)
     Can't handle color: param(outline)
@@ -1593,7 +1491,7 @@ civ_data.head()
 <td>98640826B52449815511854</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1590</td>
+<td>1075</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1603,7 +1501,7 @@ civ_data.head()
 <td>98640826B37750272367318</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>1314</td>
+<td>6681</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1613,7 +1511,7 @@ civ_data.head()
 <td>98640826B26044148659027</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>9838</td>
+<td>9867</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1623,7 +1521,7 @@ civ_data.head()
 <td>98640826B5123145245776</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>4391</td>
+<td>9790</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1633,7 +1531,7 @@ civ_data.head()
 <td>98640826B43857880322183</td>
 <td>CIV</td>
 <td>ADM2</td>
-<td>2345</td>
+<td>6960</td>
 </tr>
 </tbody>
 </table>
@@ -1662,7 +1560,7 @@ civ_data["shapeName"].replace({
 }, inplace=True)
 ```
 
-    C:\Users\kanic\AppData\Local\Temp\ipykernel_65224\1025282276.py:1: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+    C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\1025282276.py:1: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
     The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
 
     For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
@@ -1711,9 +1609,9 @@ geocode_localite.head()
 <td>5.320357</td>
 <td>-4.016107</td>
 <td>0.0</td>
-<td>{'place_id': 275432765, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275930228, 'licence': 'Data © Ope...</td>
 <td>POINT (-4.01611 5.32036)</td>
-<td>5326</td>
+<td>5832</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -1722,9 +1620,9 @@ geocode_localite.head()
 <td>6.820007</td>
 <td>-5.277603</td>
 <td>0.0</td>
-<td>{'place_id': 405167260, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 405334522, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.2776 6.82001)</td>
-<td>4145</td>
+<td>513</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -1733,9 +1631,9 @@ geocode_localite.head()
 <td>7.689021</td>
 <td>-5.028355</td>
 <td>0.0</td>
-<td>{'place_id': 277030935, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 275820936, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.02836 7.68902)</td>
-<td>1957</td>
+<td>3729</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -1744,9 +1642,9 @@ geocode_localite.head()
 <td>9.458070</td>
 <td>-5.631629</td>
 <td>0.0</td>
-<td>{'place_id': 275218468, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 276083703, 'licence': 'Data © Ope...</td>
 <td>POINT (-5.63163 9.45807)</td>
-<td>6132</td>
+<td>2584</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -1755,9 +1653,9 @@ geocode_localite.head()
 <td>7.410258</td>
 <td>-7.550372</td>
 <td>0.0</td>
-<td>{'place_id': 275770928, 'licence': 'Data © Ope...</td>
+<td>{'place_id': 277270784, 'licence': 'Data © Ope...</td>
 <td>POINT (-7.55037 7.41026)</td>
-<td>2216</td>
+<td>1869</td>
 </tr>
 </tbody>
 </table>
@@ -1876,7 +1774,7 @@ carte2.show()
        Ratio données: 0.91
        Étendue: [-9.82, -1.18, 4.50, 10.61]
 
-    c:\Users\kanic\OneDrive\Formations\Cartographie avec python\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
 
 ![](test_files/figure-markdown_strict/cell-49-output-3.png)
@@ -2030,7 +1928,7 @@ data_sen_mali.head()
 <td>50182788B16013842146029</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>241</td>
+<td>669</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">1</td>
@@ -2040,7 +1938,7 @@ data_sen_mali.head()
 <td>50182788B75300917140294</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>656</td>
+<td>351</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">2</td>
@@ -2050,7 +1948,7 @@ data_sen_mali.head()
 <td>50182788B19391387689457</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>292</td>
+<td>151</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">3</td>
@@ -2060,7 +1958,7 @@ data_sen_mali.head()
 <td>50182788B56779252201559</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>411</td>
+<td>530</td>
 </tr>
 <tr>
 <td data-quarto-table-cell-role="th">4</td>
@@ -2070,7 +1968,7 @@ data_sen_mali.head()
 <td>50182788B68388966372963</td>
 <td>SEN</td>
 <td>ADM2</td>
-<td>315</td>
+<td>698</td>
 </tr>
 </tbody>
 </table>
@@ -2091,7 +1989,7 @@ carte3.show()
     📄 Format de papier: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
     Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 
-    c:\Users\kanic\OneDrive\Formations\Cartographie avec python\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
     Can't handle color: param(outline)
 
@@ -2127,7 +2025,7 @@ carte4.show()
 
     <>:1: SyntaxWarning: invalid escape sequence '\s'
     <>:1: SyntaxWarning: invalid escape sequence '\s'
-    C:\Users\kanic\AppData\Local\Temp\ipykernel_65224\2862275657.py:1: SyntaxWarning: invalid escape sequence '\s'
+    C:\Users\kanic\AppData\Local\Temp\ipykernel_13180\2862275657.py:1: SyntaxWarning: invalid escape sequence '\s'
       path="data\\QGIS-Training-Data\\exercise_data\shapefile\\rivers.shp"
     Can't handle color: param(outline)
 
