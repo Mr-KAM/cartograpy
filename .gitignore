@@ -31,6 +31,6 @@ cartograpy/__pycache__/
 .env
 .DS_Store
 Thumbs.db
-
+.pypirc
 # === Optionnel : ignorer les svg du dossier cartograpy/svg/ (sauf si tu veux les garder sur GitHub) ===
 # cartograpy/svg/

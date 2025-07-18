@@ -330,7 +330,7 @@ def plot_choropleth(
     vmin = geodf[column_to_plot].min()
     vmax = geodf[column_to_plot].max()
     norm = plt.Normalize(vmin=vmin, vmax=vmax)
-    cmap = plt.cm.get_cmap(cmap)  # Correction ici
+    cmap = plt.get_cmap(cmap)  # Correction ici
 
     # Ajout des labels ou étiquettes (avec contour) au centre des polygones
     for idx, row in geodf.iterrows():
@@ -1541,7 +1541,7 @@ class Map:
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
-        cmap_obj = plt.cm.get_cmap(cmap)
+        cmap_obj = plt.get_cmap(cmap)
 
         # Tracé des polygones
         for idx, row in geodf.iterrows():
@@ -1713,7 +1713,7 @@ class Map:
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
-        cmap_obj = plt.cm.get_cmap(cmap)
+        cmap_obj = plt.get_cmap(cmap)
 
         # Normalisation des tailles
         if point_size_column:
@@ -2437,7 +2437,7 @@ class Map:
             except:
                 try:
                     # Try matplotlib colormap
-                    cmap = plt.cm.get_cmap(palette_name)
+                    cmap = plt.get_cmap(palette_name)
                     colors = [cmap(i / (n_colors - 1)) for i in range(n_colors)]
                 except:
                     print(f"Palette '{palette_name}' not found")
@@ -3118,7 +3118,7 @@ class Map:
         # Génération des couleurs
         if isinstance(color_scheme, str):
             # Utilisation d'une palette matplotlib
-            cmap = cm.get_cmap(color_scheme)
+            cmap = plt.get_cmap(color_scheme)
             colors = [cmap(i / len(unique_values)) for i in range(len(unique_values))]
         elif isinstance(color_scheme, list):
             # Liste de couleurs fournie

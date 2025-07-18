@@ -1,4 +1,4 @@
-from pypalettes import add_cmap
+from pypalettes import create_cmap
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
@@ -135,16 +135,16 @@ def palettes_avec_couleur(couleur_recherchee):
     return palettes_trouvees
 
 
-def to_cmap(colors,name):
+def to_cmap(colors,cmap_type="continuous"):
     """Convertit une liste de couleurs en cmap matplotlib"""
-    return add_cmap(colors,name)
+    return create_cmap(colors,cmap_type)
 
 
 def custom_palettes():
     """Retourne les palettes personnalisées"""
     colors={}
     for key,valur in color_palettes.items():
-        colors[key]=to_cmap(valur['couleurs'],key)
+        colors[key]=to_cmap(valur['couleurs'])
     
     return colors
 
@@ -382,7 +382,7 @@ def preview_palette(palette_name: str, n_colors: int = 8, custom_palettes: dict 
         except:
             try:
                 # Try matplotlib colormap
-                cmap = plt.cm.get_cmap(palette_name)
+                cmap = plt.get_cmap(palette_name)
                 colors = [cmap(i / (n_colors - 1)) for i in range(n_colors)]
             except:
                 print(f"Palette '{palette_name}' not found")
