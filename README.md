@@ -1,10 +1,9 @@
-
-<div style="display: flex; justify-content: center; align-items: center;">
+<center>
 <img src="https://mr-kam.github.io/cartograpy/data/logo.png" alt="Logo" width="300">
 <p>
 Mapping in Python, the way it was always meant to be.
 </p>
-</div>
+</center>
 
 # **PRESENTATION**
 
@@ -18,6 +17,7 @@ geographiques et de creer des cartes simplement.
 And you have all you need !
 </p>
 </div>
+
 # **FONCTIONNALITE**
 
 - Telecharger des données de découpage administratif de pays
