@@ -1,34 +1,36 @@
-# Documentation
 
-
-<img src="data/logo.png" alt="Logo" width="300">
+<div style="display: flex; justify-content: center; align-items: center;">
+<img src="https://mr-kam.github.io/cartograpy/data/logo.png" alt="Logo" width="300">
 <p>
 Mapping in Python, the way it was always meant to be.
 </p>
+</div>
 
 # **PRESENTATION**
 
 Cartograpy est un package python qui permet de manipuler des données
 geographiques et de creer des cartes simplement.
 
-<img src="data\create_python_maps.py (17).png" alt="Logo" width="800">
+<div style="display: flex; justify-content: center; align-items: center;">
+<img src="https://mr-kam.github.io/cartograpy/data/create_python_maps.py%20(17).png" alt="Logo" width="800">
+
 <p>
 And you have all you need !
 </p>
-
+</div>
 # **FONCTIONNALITE**
 
--   Telecharger des données de découpage administratif de pays
--   Importer des données de types vectorielles et matricielles
--   Faire des traitement sur les données geospatiales importé
--   Creer des cartes et les personnaliser simplement
+- Telecharger des données de découpage administratif de pays
+- Importer des données de types vectorielles et matricielles
+- Faire des traitement sur les données geospatiales importé
+- Creer des cartes et les personnaliser simplement
 
 # **INSTALLATION**
 
 Pour installer le package cartograpy, vous pouvez utiliser pip. Ouvrez
 votre terminal ou invite de commande et exécutez la commande suivante :
 
-``` bash
+```bash
 pip install cartograpy
 ```
 
@@ -38,7 +40,7 @@ pip install cartograpy
 
 ### *Récupérer les limites administratives d’un ou plusieurs pays*
 
-``` python
+```python
 # Importation
 from cartograpy import data
 client = data.GeoBoundaries()
@@ -48,35 +50,33 @@ client = data.GeoBoundaries()
 
 Il existe 5 subdivisions administratives disponibles :
 
-``` python
+```python
 print(client.adminLevels())
 ```
 
-
-    | Niveau GeoBoundaries | Nom commun (FR)           | Nom commun (EN)       |
-    | -------------------- | ------------------------- | --------------------- |
-    | ADM0                 | Pays                      | Country               |
-    | ADM1                 | Région / État / Province  | State / Region        |
-    | ADM2                 | Département / District    | District / County     |
-    | ADM3                 | Sous-préfecture / Commune | Subdistrict / Commune |
-    | ADM4                 | Village / Localité        | Village / Locality    |
-    | ADM5                 | Quartier / Secteur        | Neighborhood / Sector |
-            
+| Niveau GeoBoundaries | Nom commun (FR)            | Nom commun (EN)       |
+| -------------------- | -------------------------- | --------------------- |
+| ADM0                 | Pays                       | Country               |
+| ADM1                 | Région / État / Province | State / Region        |
+| ADM2                 | Département / District    | District / County     |
+| ADM3                 | Sous-préfecture / Commune | Subdistrict / Commune |
+| ADM4                 | Village / Localité        | Village / Locality    |
+| ADM5                 | Quartier / Secteur         | Neighborhood / Sector |
 
 **Remarques importantes :**
 
--   Le nombre de niveaux dépend du pays. Certains pays s’arrêtent à
-    ADM2, d’autres vont jusqu’à ADM4 ou ADM5.
--   Le nom réel des subdivisions varie d’un pays à l’autre (ex :
-    “State”, “Region”, “Province”, “Department”, etc.).
--   GeoBoundaries propose toujours au moins le niveau ADM0 (frontière
-    nationale).
+- Le nombre de niveaux dépend du pays. Certains pays s’arrêtent à
+  ADM2, d’autres vont jusqu’à ADM4 ou ADM5.
+- Le nom réel des subdivisions varie d’un pays à l’autre (ex :
+  “State”, “Region”, “Province”, “Department”, etc.).
+- GeoBoundaries propose toujours au moins le niveau ADM0 (frontière
+  nationale).
 
 Pour savoir si un niveau administratif est disponible pour un pays, vous
 pouvez utiliser la méthode `is_valid_adm` de l’objet `GeoBoundaries`.
 Voici un exemple :
 
-``` python
+```python
 print(client.is_valid_adm("CIV","ADM1"))  # Exemple pour vérifier si le niveau ADM1 est valide pour la Côte d'Ivoire
 # Ou encore
 print(client._get_smallest_adm("CIV"))  # Exemple pour vérifier si le niveau admin minimum pour la Côte d'Ivoire
@@ -91,7 +91,7 @@ print(client._get_smallest_adm("CIV"))  # Exemple pour vérifier si le niveau ad
 Pour obtenir la liste des pays valides, vous pouvez utiliser la méthode
 `countries()` de l’objet `GeoBoundaries`. Voici un exemple :
 
-``` python
+```python
 client.countries()[0:10]  # Affiche les 10 premiers pays
 ```
 
@@ -106,13 +106,13 @@ client.countries()[0:10]  # Affiche les 10 premiers pays
      'afganisztán',
      'աֆղանստան']
 
-``` python
+```python
 client.get_iso3("burk")
 ```
 
     'BFA'
 
-``` python
+```python
 client.get_iso3("con")  # Exemple pour obtenir le code ISO d'un pays
 ```
 
@@ -131,7 +131,7 @@ client.get_iso3("con")  # Exemple pour obtenir le code ISO d'un pays
      ('república democrática do congo', 'cod'),
      ('republica democrată congo', 'cod')]
 
-``` python
+```python
 
 # Exemple 1: Récupérer les données administratives des régions de la cote d'ivoire
 civ_data = client.adm("CIV", "ADM2")
@@ -150,8 +150,7 @@ civ_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -216,7 +215,7 @@ civ_data.head()
 
 </div>
 
-``` python
+```python
 # Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)
 countries_data = client.adm(["SEN", "mali"], "ADM2")
 countries_data["mali"].head()
@@ -234,8 +233,7 @@ countries_data["mali"].head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -302,7 +300,7 @@ countries_data["mali"].head()
 
 ### Récupérer les métadonnées d’un territoire
 
-``` python
+```python
 
 # Récupérer les métadonnées d'un territoire
 metadata_civ = client.metadata("CIV", "ADM0")
@@ -313,32 +311,32 @@ print(f"Métadonnées disponibles pour la Côte d'Ivoire: {metadata_civ.keys()}"
 
     Métadonnées disponibles pour la Côte d'Ivoire: dict_keys(['boundaryID', 'boundaryName', 'boundaryISO', 'boundaryYearRepresented', 'boundaryType', 'boundaryCanonical', 'boundarySource', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySourceURL', 'sourceDataUpdateDate', 'buildDate', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'worldBankIncomeGroup', 'admUnitCount', 'meanVertices', 'minVertices', 'maxVertices', 'meanPerimeterLengthKM', 'minPerimeterLengthKM', 'maxPerimeterLengthKM', 'meanAreaSqKM', 'minAreaSqKM', 'maxAreaSqKM', 'staticDownloadLink', 'gjDownloadURL', 'tjDownloadURL', 'imagePreview', 'simplifiedGeometryGeoJSON'])
 
-``` python
+```python
 metadata_civ["Continent"]
 ```
 
     'Africa'
 
-``` python
+```python
 metadata_civ["UNSDG-subregion"]
 ```
 
     'Western Africa'
 
-``` python
+```python
 metadata_civ["UNSDG-region"]
 ```
 
     'Sub-Saharan Africa'
 
-``` python
+```python
 url_img=metadata_civ["imagePreview"]
 url_img
 ```
 
     'https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CIV/ADM0/geoBoundaries-CIV-ADM0-PREVIEW.png'
 
-``` python
+```python
 # Afficher l'image de prévisualisation dans le notebook
 from IPython.display import Image, display
 
@@ -357,14 +355,14 @@ géographiques (latitude et longitude). Vous pouvez géocoder une ou
 plusieurs adresses en utilisant les méthode `geocode` et `geocode_batch`
 de l’objet `Geocoder`.
 
-``` python
+```python
 from cartograpy import data
 geocoder= data.Geocoder()
 ```
 
 **Géocoder une adresse**
 
-``` python
+```python
 address = "bouaké"
 result = geocoder.geocode(address)
 
@@ -387,8 +385,7 @@ result[0]
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -419,7 +416,7 @@ result[0]
 
 </div>
 
-``` python
+```python
 # Adresse non trouvée
 result[1]
 ```
@@ -428,7 +425,7 @@ result[1]
 
 **Geocoder une liste d’adresses**
 
-``` python
+```python
 liste_adresses = ["Abidjan", "Yamoussoukro", "Bouaké", "Korhogo","Man CI", "","portbouet"]
 results=geocoder.geocode(liste_adresses)
 
@@ -451,8 +448,7 @@ results[0]
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -523,7 +519,7 @@ results[0]
 
 </div>
 
-``` python
+```python
 # Adresses non trouvée
 results[1]
 ```
@@ -535,19 +531,19 @@ results[1]
 `processing` vous permet d’executer des taches courantes effectuées sur
 des données vectorielles.
 
-``` python
+```python
 # Importation
 from cartograpy.processing  import *
 ```
 
 ### *Charger des données*
 
-``` python
+```python
 # hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")
 # hexagon_data.head()
 ```
 
-``` python
+```python
 path="data\other\Département de Bouna.geojson"
 donnee_bouna=load(path)
 donnee_bouna.head()
@@ -570,8 +566,7 @@ donnee_bouna.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -598,7 +593,7 @@ donnee_bouna.head()
 <td data-quarto-table-cell-role="th">0</td>
 <td>ID_00022</td>
 <td>Bouna</td>
-<td>&lt;html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
+<td><html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
 <td>None</td>
 <td>None</td>
 <td>None</td>
@@ -618,7 +613,7 @@ donnee_bouna.head()
 
 ### *Obtenir des informations sur un multipolygone*
 
-``` python
+```python
 multipolygon=donnee_bouna["geometry"][0]
 infos_multipolygon=get_multipolygon_info(multipolygon)
 infos_multipolygon
@@ -637,7 +632,7 @@ infos_multipolygon
 
 ### *Séparer un multipolygon en polygone simple*
 
-``` python
+```python
 polygones_bouna=split_multipolygon(donnee_bouna)
 polygones_bouna.head()
 ```
@@ -654,8 +649,7 @@ polygones_bouna.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -684,7 +678,7 @@ polygones_bouna.head()
 <td data-quarto-table-cell-role="th">0</td>
 <td>ID_00022</td>
 <td>Bouna</td>
-<td>&lt;html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
+<td><html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
 <td>None</td>
 <td>None</td>
 <td>None</td>
@@ -704,7 +698,7 @@ polygones_bouna.head()
 
 </div>
 
-``` python
+```python
 polygones_bouna.plot()
 ```
 
@@ -712,7 +706,7 @@ polygones_bouna.plot()
 
 ### *Fusionner des geodataframe*
 
-``` python
+```python
 # Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)
 countries_data = client.adm(["SEN", "mali","civ"], "ADM2")
 list_gdf=[gdf for key, gdf in countries_data.items()] # Liste de dataframes
@@ -732,8 +726,7 @@ countries_merged_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -800,7 +793,7 @@ countries_merged_data.head()
 
 ### *Creer une nouvelle colonne*
 
-``` python
+```python
 new_countries_data=add_column(df=countries_merged_data,column_name="random_data",expression="random.randint(1,100)",globals_dict={"random":random})
 # global_dics correspond a la liste des packages necessaires pour evaluer l'expression
 new_countries_data.head()
@@ -818,8 +811,7 @@ new_countries_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -890,7 +882,7 @@ new_countries_data.head()
 
 </div>
 
-``` python
+```python
 new_countries_data=add_column(new_countries_data,"dataType","row['shapeGroup']+'-'+row['shapeType']")
 # row dans l'expression correspont a une ligne de la dataframe
 # shapeGroup et shapeType sont des colonnes de la dataframe
@@ -909,8 +901,7 @@ new_countries_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -987,7 +978,7 @@ new_countries_data.head()
 
 </div>
 
-``` python
+```python
 list(new_countries_data.columns)
 ```
 
@@ -1002,7 +993,7 @@ list(new_countries_data.columns)
 
 ### *Creer un geodataframe de centroïde*
 
-``` python
+```python
 
 coundtries_centroids = centroids(new_countries_data)
 
@@ -1024,8 +1015,7 @@ coundtries_centroids.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1102,7 +1092,7 @@ coundtries_centroids.head()
 
 </div>
 
-``` python
+```python
 
 # Visualisation simple avec matplotlib
 
@@ -1116,17 +1106,17 @@ coundtries_centroids.plot(markersize=50, color='red',label="Centroïde")
 cartograpy permet de creer rapidement des cartes pour visualier les
 données géographiques.
 
-``` python
+```python
 from cartograpy.mapper import *
 ```
 
-``` python
+```python
 # J'ajoute des données aléatoires pour la visualisation
 import random
 civ_data['data'] = [random.randint(0,10000) for i in range(len(civ_data))]
 ```
 
-``` python
+```python
 civ_data.head()
 ```
 
@@ -1142,8 +1132,7 @@ civ_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1214,7 +1203,7 @@ civ_data.head()
 
 </div>
 
-``` python
+```python
 geocode_localite=results[0]
 geocode_localite["data"]= [random.randint(0,10000) for i in range(len(geocode_localite))]
 geocode_localite.head()
@@ -1232,8 +1221,7 @@ geocode_localite.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1312,14 +1300,14 @@ geocode_localite.head()
 
 ### *Voir la liste des palletes de couleurs diponible*
 
-``` python
+```python
 # Les groupes de palettes diponibles
 get_available_palettes().keys()
 ```
 
     dict_keys(['custom', 'seaborn_qualitative', 'seaborn_sequential', 'seaborn_diverging', 'matplotlib_sequential', 'matplotlib_diverging', 'matplotlib_cyclic', 'matplotlib_qualitative'])
 
-``` python
+```python
 # Voir les pallettes disponibles dans un groupe
 get_available_palettes()["seaborn_sequential"]
 ```
@@ -1349,7 +1337,7 @@ get_available_palettes()["seaborn_sequential"]
 
 ### *Voir la liste des polices d’écritures disponibles*
 
-``` python
+```python
 get_fonts()[0:10] # Pour voir les 10 prémières polices 
 ```
 
@@ -1364,7 +1352,7 @@ get_fonts()[0:10] # Pour voir les 10 prémières polices
      'Berlin Sans FB',
      'Berlin Sans FB Demi']
 
-``` python
+```python
 # Pour filtrer par un mot clé
 get_fonts("time")[0]
 ```
@@ -1375,7 +1363,7 @@ get_fonts("time")[0]
 
 **Creer une carte cloropleth simple**
 
-``` python
+```python
 carte_ci=Map(figsize=(16, 12), projection=ccrs.PlateCarree())
 carte_ci.add_polygons_cloropleth(gdf=civ_data,
                               column_to_plot='data',
@@ -1389,7 +1377,7 @@ carte_ci.add_points_cloropleth(
     point_size_column="data",
     show_colorbar=False,
     cmap="tab20c"
-    
+  
 )
 carte_ci.add_gridlines()
 font_name=get_fonts("time")[0]
@@ -1401,7 +1389,7 @@ carte_ci.figsize=(18,16)
 
     Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 
-    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
     c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
@@ -1423,7 +1411,7 @@ carte_ci.figsize=(18,16)
 
 ### *Visualiser des données rasters*
 
-``` python
+```python
 # Création d'une carte raster
 carte_dem = Map(figsize=(12, 8), projection=ccrs.PlateCarree())
 
@@ -1455,7 +1443,7 @@ carte_dem.show()
 
 ![](test_files/figure-markdown_strict/cell-42-output-3.png)
 
-``` python
+```python
 civ_data.head()
 ```
 
@@ -1471,8 +1459,7 @@ civ_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1543,7 +1530,7 @@ civ_data.head()
 
 </div>
 
-``` python
+```python
 list(civ_data.shapeName.unique())[0:10]
 ```
 
@@ -1558,7 +1545,7 @@ list(civ_data.shapeName.unique())[0:10]
      'District Autonome De Yamoussoukro',
      'Folon']
 
-``` python
+```python
 civ_data["shapeName"].replace({
     "District Autonome D'Abidjan": "Abidjan",
     "District Autonome De Yamoussoukro": "Yamoussoukro"
@@ -1570,10 +1557,9 @@ civ_data["shapeName"].replace({
 
     For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
 
+    civ_data["shapeName"].replace({
 
-      civ_data["shapeName"].replace({
-
-``` python
+```python
 geocode_localite.head()
 ```
 
@@ -1589,8 +1575,7 @@ geocode_localite.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1667,14 +1652,14 @@ geocode_localite.head()
 
 </div>
 
-``` python
+```python
 font=get_fonts("time")[0]
 font
 ```
 
     'Times New Roman'
 
-``` python
+```python
 
 # Creer un objet de carte basique avec OpenLayers et Python
 # =========================================================
@@ -1753,7 +1738,7 @@ carte1.show(smart_centering=True)
 
 ### *Carte cloropleth*
 
-``` python
+```python
 # Creer un simple cloropleth de point
 #============================================
 carte2=Map(figsize="A4")
@@ -1779,12 +1764,12 @@ carte2.show()
        Ratio données: 0.91
        Étendue: [-9.82, -1.18, 4.50, 10.61]
 
-    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1716: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
 
 ![](test_files/figure-markdown_strict/cell-49-output-3.png)
 
-``` python
+```python
 # Creer un cloropleth de polygone
 #=================================================
 
@@ -1811,8 +1796,7 @@ data_sen_mali.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1880,18 +1864,18 @@ data_sen_mali.head()
 Vous pouvez utiliser explorer et manipuler **les palettes de couleurs**
 avec `colors` de cartograpy
 
-``` python
+```python
 # Chargement de la bibliothèque
 from cartograpy import colors
 ```
 
-``` python
+```python
 # Création d'une colonne de données aléatoire
 
 data_sen_mali=add_column(df=data_sen_mali,column_name="data",expression="random.randint(50,1000)",globals_dict={"random": random})
 ```
 
-``` python
+```python
 data_sen_mali.head()
 
 ```
@@ -1908,8 +1892,7 @@ data_sen_mali.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1980,7 +1963,7 @@ data_sen_mali.head()
 
 </div>
 
-``` python
+```python
 # Création de carte cloropleth
 carte3 = Map (figsize="A4",title="Chloropleth de polygone Sénégale et Mali")
 carte3.add_polygons_cloropleth(gdf=data_sen_mali,column_to_plot="data",cmap="Coconut")
@@ -1994,7 +1977,7 @@ carte3.show()
     📄 Format de papier: A4 (landscape) - Dimensions: 210 x 297 mm - Figure: 11.7" x 8.3"
     Warning: No CRS defined for geodf. Setting default CRS to EPSG:4326
 
-    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+    c:\Users\kanic\OneDrive\cartograpy\cartograpy\mapper.py:1544: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
       cmap_obj = plt.cm.get_cmap(cmap)
     Can't handle color: param(outline)
 
@@ -2013,7 +1996,7 @@ carte3.show()
 
 ### *Carte de ligne*
 
-``` python
+```python
 path="data\\QGIS-Training-Data\\exercise_data\shapefile\\rivers.shp"
 data_riviere=load(path)
 carte4=Map(title="Carte de rivière")
@@ -2055,7 +2038,7 @@ carte4.show()
 
 ### **Ajouter des couches de tous les types**
 
-``` python
+```python
 carte5=Map(figsize="A4",title="")
 carte5.add_layer(data_sen_mali,label="Admin 1")
 centroide_sen_mal=centroids(data_sen_mali)
