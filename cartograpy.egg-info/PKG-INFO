@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: cartograpy
-Version: 1.0.8
+Version: 1.0.9
 Summary: Packages python pour créer des cartes
 Home-page: https://github.com/mr-kam/cartograpy
 Author: Anicet Cyrille Kambou
@@ -73,24 +73,25 @@ Dynamic: author
 Dynamic: home-page
 Dynamic: license-file
 
-# Documentation
-
-`<img src="https://mr-kam.github.io/cartograpy/data/logo.png"  alt="Logo" width="300">`
-
+<center>
+<img src="https://mr-kam.github.io/cartograpy/data/logo.png" alt="Logo" width="300">
 <p>
 Mapping in Python, the way it was always meant to be.
 </p>
+</center>
 
 # **PRESENTATION**
 
 Cartograpy est un package python qui permet de manipuler des données
 geographiques et de creer des cartes simplement.
 
-`<img src="https://mr-kam.github.io/cartograpy/data/create_python_maps.py%20(17).png" alt="Logo" width="800">`
+<div style="display: flex; justify-content: center; align-items: center;">
+<img src="https://mr-kam.github.io/cartograpy/data/create_python_maps.py%20(17).png" alt="Logo" width="800">
 
 <p>
 And you have all you need !
 </p>
+</div>
 
 # **FONCTIONNALITE**
 
