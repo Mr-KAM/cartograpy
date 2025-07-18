@@ -3,7 +3,8 @@ http_cache.sqlite
 *.sqlite
 data/other/
 data/QGIS-Training-Data/
-
+dist/
+dist_old/
 
 # === Dossiers de données volumineuses à ignorer ===
 
