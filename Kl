@@ -1,0 +1,18 @@
+# Création d'une carte raster
+carte_dem = Map(figsize=(12, 8), projection=ccrs.PlateCarree())
+
+# Ajout d'une couche raster
+carte_dem.add_raster('data\other\Limite DEM Bouna.tif', cmap='tab20c', title='Élévation (m)')
+
+font_name=get_fonts("couri")[0]
+
+carte_dem.set_font(font_name, size=12)
+carte_dem.set_title('Topographique de bouna', fontsize=20, color='Black', pad=20)
+carte_dem.add_arrow(3, position=(-2.70, 9.55), zoom=0.05, color='black')
+carte_dem.add_gridlines()
+carte_dem.add_scale_bar(length=20, units="km",pad=0.01)
+carte_dem.show()
+
+
+# Sauvegarde
+# carte.save('carte_demo.png')
