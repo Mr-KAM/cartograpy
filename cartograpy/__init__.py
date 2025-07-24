@@ -6,6 +6,6 @@ from .iso_code import *
 from .data import *
 from .processing import *
 from .mapper import *
-from .colors import *
+from .styling import *
 from .geocoder import *
 from .converter import *

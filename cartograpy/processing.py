@@ -6,6 +6,7 @@ import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 from shapely import wkt
 from typing import List, Union, Optional
+import warnings
 
 def load(filepath):
     """
@@ -366,3 +367,135 @@ def get_geometry_types(df: gpd.GeoDataFrame) -> str:
         percentage = (count / len(gdf)) * 100
         output[geom_type] = {"count":count,"percentage":percentage}
         print(f"{geom_type}: {count} ({percentage:.1f}%)")
+
+
+def clip_gdf_by_mask(gdf_source, gdf_emprise, buffer_distance=0, crs="EPSG:4326"):
+    """
+    Découpe une GeoDataFrame selon l'emprise d'une seconde GeoDataFrame.
+    
+    Parameters:
+    -----------
+    gdf_source : geopandas.GeoDataFrame
+        La GeoDataFrame à découper
+    gdf_emprise : geopandas.GeoDataFrame
+        La GeoDataFrame servant de masque de découpage
+    buffer_distance : float, optional
+        Distance de buffer à appliquer à l'emprise (défaut: 0)
+    crs : str, optional
+        CRS par défaut à utiliser si les GeoDataFrames n'en ont pas (défaut: "EPSG:4326")
+        
+    Returns:
+    --------
+    geopandas.GeoDataFrame
+        La GeoDataFrame découpée selon l'emprise
+        
+    Raises:
+    -------
+    ValueError
+        Si les GeoDataFrames ont des CRS différents
+    """
+    
+    # Vérification des paramètres
+    if not isinstance(gdf_source, gpd.GeoDataFrame):
+        raise TypeError("gdf_source doit être une GeoDataFrame")
+    
+    if not isinstance(gdf_emprise, gpd.GeoDataFrame):
+        raise TypeError("gdf_emprise doit être une GeoDataFrame")
+    
+    if gdf_source.empty:
+        warnings.warn("La GeoDataFrame source est vide")
+        return gdf_source.copy()
+    
+    if gdf_emprise.empty:
+        warnings.warn("La GeoDataFrame d'emprise est vide")
+        return gpd.GeoDataFrame(columns=gdf_source.columns, crs=gdf_source.crs)
+    
+    # Vérification et harmonisation des CRS
+    # Attribution d'un CRS par défaut si manquant
+    if gdf_source.crs is None:
+        warnings.warn(f"gdf_source n'a pas de CRS défini. Attribution du CRS par défaut: {crs}")
+        gdf_source = gdf_source.set_crs(crs)
+    
+    if gdf_emprise.crs is None:
+        warnings.warn(f"gdf_emprise n'a pas de CRS défini. Attribution du CRS par défaut: {crs}")
+        gdf_emprise = gdf_emprise.set_crs(crs)
+    
+    # Reprojeter gdf_emprise dans le CRS de gdf_source si différent
+    if gdf_source.crs != gdf_emprise.crs:
+        gdf_emprise = gdf_emprise.to_crs(gdf_source.crs)
+    
+    # Création de l'emprise totale (union de toutes les géométries)
+    emprise_totale = gdf_emprise.geometry.unary_union
+    
+    # Application d'un buffer si spécifié
+    if buffer_distance != 0:
+        emprise_totale = emprise_totale.buffer(buffer_distance)
+    
+    # Sélection des géométries qui intersectent l'emprise
+    mask = gdf_source.geometry.intersects(emprise_totale)
+    gdf_intersect = gdf_source[mask].copy()
+    
+    if gdf_intersect.empty:
+        warnings.warn("Aucune géométrie ne intersecte avec l'emprise")
+        return gpd.GeoDataFrame(columns=gdf_source.columns, crs=gdf_source.crs)
+    
+    # Découpage des géométries
+    try:
+        gdf_intersect.loc[:, 'geometry'] = gdf_intersect.geometry.intersection(emprise_totale)
+        
+        # Suppression des géométries vides après découpage
+        gdf_result = gdf_intersect[~gdf_intersect.geometry.is_empty].copy()
+        
+        return gdf_result
+        
+    except Exception as e:
+        raise RuntimeError(f"Erreur lors du découpage : {str(e)}")
+
+
+def clip_gdf_by_bbox(gdf_source, gdf_emprise, crs="EPSG:4326"):
+    """
+    Version alternative qui utilise la bounding box de l'emprise.
+    Plus rapide mais moins précise que le découpage géométrique.
+    
+    Parameters:
+    -----------
+    gdf_source : geopandas.GeoDataFrame
+        La GeoDataFrame à découper
+    gdf_emprise : geopandas.GeoDataFrame
+        La GeoDataFrame servant de référence pour la bbox
+    crs : str, optional
+        CRS par défaut à utiliser si les GeoDataFrames n'en ont pas (défaut: "EPSG:4326")
+        
+    Returns:
+    --------
+    geopandas.GeoDataFrame
+        La GeoDataFrame découpée selon la bounding box
+    """
+    
+    # Harmonisation des CRS
+    # Attribution d'un CRS par défaut si manquant
+    if gdf_source.crs is None:
+        gdf_source = gdf_source.set_crs(crs)
+        
+    if gdf_emprise.crs is None:
+        gdf_emprise = gdf_emprise.set_crs(crs)
+    
+    # Reprojeter gdf_emprise dans le CRS de gdf_source si différent
+    if gdf_source.crs != gdf_emprise.crs:
+        gdf_emprise = gdf_emprise.to_crs(gdf_source.crs)
+    
+    # Récupération des bounds
+    bounds = gdf_emprise.total_bounds  # [minx, miny, maxx, maxy]
+    
+    # Création d'un polygon de la bbox
+    bbox_polygon = box(bounds[0], bounds[1], bounds[2], bounds[3])
+    
+    # Sélection et découpage
+    mask = gdf_source.geometry.intersects(bbox_polygon)
+    gdf_clipped = gdf_source[mask].copy()
+    
+    if not gdf_clipped.empty:
+        gdf_clipped.loc[:, 'geometry'] = gdf_clipped.geometry.intersection(bbox_polygon)
+        gdf_clipped = gdf_clipped[~gdf_clipped.geometry.is_empty].copy()
+    
+    return gdf_clipped

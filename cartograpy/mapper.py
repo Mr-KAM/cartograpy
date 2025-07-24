@@ -30,7 +30,7 @@ import matplotlib.transforms as mtransforms
 from pyproj import Geod
 import rasterio
 from rasterio.plot import show as rasterio_show
-from cartograpy.colors import *
+from cartograpy.styling import *
 # ----------------------------------------------------------------------
 # ================global methodes ======================================
 # ----------------------------------------------------------------------
@@ -330,7 +330,7 @@ def plot_choropleth(
     vmin = geodf[column_to_plot].min()
     vmax = geodf[column_to_plot].max()
     norm = plt.Normalize(vmin=vmin, vmax=vmax)
-    cmap = plt.get_cmap(cmap)  # Correction ici
+    cmap = load_cmap(cmap)  # Correction ici
 
     # Ajout des labels ou étiquettes (avec contour) au centre des polygones
     for idx, row in geodf.iterrows():
@@ -1541,7 +1541,7 @@ class Map:
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
-        cmap_obj = plt.get_cmap(cmap)
+        cmap_obj = load_cmap(cmap)
 
         # Tracé des polygones
         for idx, row in geodf.iterrows():
@@ -1713,7 +1713,7 @@ class Map:
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
-        cmap_obj = plt.get_cmap(cmap)
+        cmap_obj = load_cmap(cmap)
 
         # Normalisation des tailles
         if point_size_column:
@@ -1974,6 +1974,77 @@ class Map:
         self.gridlines = None
 
         return self
+    
+    def hide_grideline(self):
+        """
+        Masque toutes les bordures, ticks et labels de l'axe matplotlib donné.
+
+        Args:
+            ax: Un objet matplotlib.axes.Axes
+
+        Exemple :
+            fig, ax = plt.subplots()
+            # ... ton code de tracé ...
+            hide_grideline(ax)
+            plt.show()
+        """
+        ax=self.ax
+        # Cacher les spines (bordures)
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+        # Cacher les ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        # Cacher les labels de ticks
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+
+        # Cacher la grille si activée
+        ax.grid(False)
+
+    def add_annotation(
+        self,
+        text: str,
+        xy: tuple,
+        xytext: tuple = None,
+        arrow: bool = True,
+        arrow_kwargs: dict = None,
+        text_kwargs: dict = None
+    ):
+        """
+        Ajoute une annotation avec ou sans flèche sur un axe matplotlib.
+
+        Args:
+            ax: objet matplotlib.axes.Axes
+            text (str): Texte de l'annotation.
+            xy (tuple): Coordonnées du point à annoter (x, y).
+            xytext (tuple, optionnel): Position du texte. Si None, utilise xy.
+            arrow (bool): Si True, ajoute une flèche.
+            arrow_kwargs (dict, optionnel): Dictionnaire des options de la flèche.
+            text_kwargs (dict, optionnel): Dictionnaire des options du texte.
+
+        Exemple:
+            add_annotation(ax, "Ici", (3, 3), xytext=(2, 4))
+        """
+        ax=self.ax
+        if arrow_kwargs is None and arrow:
+            arrow_kwargs = dict(facecolor='black', arrowstyle="->")
+        elif not arrow:
+            arrow_kwargs = None
+
+        if text_kwargs is None:
+            text_kwargs = dict(fontsize=12, color='black')
+
+        ax.annotate(
+            text,
+            xy=xy,
+            xytext=xytext if xytext is not None else xy,
+            arrowprops=arrow_kwargs,
+            **text_kwargs
+        )
+
 
     # ----------------------------------------------------------------------
     # ================Custom labels=========================================
@@ -2437,7 +2508,7 @@ class Map:
             except:
                 try:
                     # Try matplotlib colormap
-                    cmap = plt.get_cmap(palette_name)
+                    cmap = load_cmap(palette_name)
                     colors = [cmap(i / (n_colors - 1)) for i in range(n_colors)]
                 except:
                     print(f"Palette '{palette_name}' not found")
@@ -3118,7 +3189,7 @@ class Map:
         # Génération des couleurs
         if isinstance(color_scheme, str):
             # Utilisation d'une palette matplotlib
-            cmap = plt.get_cmap(color_scheme)
+            cmap = load_cmap(color_scheme)
             colors = [cmap(i / len(unique_values)) for i in range(len(unique_values))]
         elif isinstance(color_scheme, list):
             # Liste de couleurs fournie

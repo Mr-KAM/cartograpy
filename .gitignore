@@ -5,6 +5,10 @@ data/other/
 data/QGIS-Training-Data/
 dist/
 dist_old/
+hydrorivers_data/
+temp_countries/
+cache/
+_extensions/
 
 # === Dossiers de données volumineuses à ignorer ===
 
