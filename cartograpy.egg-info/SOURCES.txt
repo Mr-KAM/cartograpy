@@ -5,7 +5,6 @@ pyproject.toml
 setup.py
 cartograpy/__init__.py
 cartograpy/boundaries.py
-cartograpy/colors.py
 cartograpy/converter.py
 cartograpy/countries_iso3.py
 cartograpy/data.py
@@ -14,6 +13,8 @@ cartograpy/iso3_codes.py
 cartograpy/iso_code.py
 cartograpy/mapper.py
 cartograpy/processing.py
+cartograpy/situation_map.py
+cartograpy/styling.py
 cartograpy.egg-info/PKG-INFO
 cartograpy.egg-info/SOURCES.txt
 cartograpy.egg-info/dependency_links.txt

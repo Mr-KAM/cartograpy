@@ -8,8 +8,8 @@ rasterio>=1.4.0
 gpxpy>=1.6.0
 pykml>=0.2.0
 matplotlib==3.10.3
-seaborn>=0.13.0
-pypalettes>=0.1.0
+seaborn==0.13.0
+pypalettes==0.1.6
 pandas==2.2.3
 numpy>=2.3.0
 wbdata>=1.0.0
@@ -20,6 +20,10 @@ svglib>=1.5.0
 reportlab[all]>=4.4.0
 typing-extensions>=4.14.0
 rlPyCairo==0.3.0
+geodatasets==2024.8.0
+mplcyberpunk==0.7.6
+SciencePlots==2.1.1
+osmnx==2.0.5
 
 [dev]
 pytest>=7.0.0
