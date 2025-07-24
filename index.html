@@ -177,15 +177,18 @@
 </head>
 
 <body class="quarto-light">
+
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-container">
-      <a href="#" class="nav-logo">cartograpy    </a>
+      <a href="#" class="nav-logo">cartograpy </a>
 
-      <div class="hamburger" id="hamburger">
-        <span></span>
-        <span></span>
-        <span></span>
+      <div class="nav-right">
+        <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
 
       <ul class="nav-menu" id="nav-menu">
@@ -202,17 +205,17 @@
           <ul class="dropdown">
             <li class="dropdown-item">
               <a href="#téléchargement-et-accès-rapide-aux-données-géographiques" class="dropdown-link">
-                <span class="section-number">2.1</span> Téléchargement et accès rapide aux données géographiques
+                <span class="section-number">2.1</span> Téléchargement de données
               </a>
             </li>
             <li class="dropdown-item">
               <a href="#pre-processing-et-processing-des-données" class="dropdown-link">
-                <span class="section-number">2.2</span> Pre-processing et processing des données
+                <span class="section-number">2.2</span> Pre-processing et processing
               </a>
             </li>
             <li class="dropdown-item">
               <a href="#cartographie-et-visualisation" class="dropdown-link">
-                <span class="section-number">2.3</span> Cartographie et visualisation
+                <span class="section-number">2.3</span> Cartographie
               </a>
             </li>
           </ul>
@@ -231,7 +234,7 @@
           <ul class="dropdown">
             <li class="dropdown-item">
               <a href="#obtension-de-données-géographiques" class="dropdown-link">
-                <span class="section-number">4.1</span> Obtention de données géographiques
+                <span class="section-number">4.1</span> Obtention de données
               </a>
             </li>
             <li class="dropdown-item">
@@ -268,15 +271,14 @@
               <li><a href="#téléchargement-et-accès-rapide-aux-données-géographiques"
                   id="toc-téléchargement-et-accès-rapide-aux-données-géographiques" class="nav-link"
                   data-scroll-target="#téléchargement-et-accès-rapide-aux-données-géographiques"><span
-                    class="header-section-number">2.1</span> <strong>Téléchargement et accès rapide aux données
-                    géographiques</strong></a></li>
+                    class="header-section-number">2.1</span> <strong>Téléchargement de données
+                  </strong></a></li>
               <li><a href="#pre-processing-et-processing-des-données" id="toc-pre-processing-et-processing-des-données"
                   class="nav-link" data-scroll-target="#pre-processing-et-processing-des-données"><span
-                    class="header-section-number">2.2</span> <strong>Pre-processing et processing des
-                    données</strong></a></li>
+                    class="header-section-number">2.2</span> <strong>Pre-processing et processing</strong></a></li>
               <li><a href="#cartographie-et-visualisation" id="toc-cartographie-et-visualisation" class="nav-link"
                   data-scroll-target="#cartographie-et-visualisation"><span class="header-section-number">2.3</span>
-                  <strong>Cartographie et visualisation</strong></a></li>
+                  <strong>Cartographie</strong></a></li>
             </ul>
           </li>
           <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation"><span
@@ -286,7 +288,7 @@
             <ul class="collapse">
               <li><a href="#obtension-de-données-géographiques" id="toc-obtension-de-données-géographiques"
                   class="nav-link" data-scroll-target="#obtension-de-données-géographiques"><span
-                    class="header-section-number">4.1</span> <strong>Obtension de données géographiques</strong></a>
+                    class="header-section-number">4.1</span> <strong>Obtension de données</strong></a>
                 <ul class="collapse">
                   <li><a href="#récupérer-les-limites-de-continents-ou-les-limites-administratives-de-pays"
                       id="toc-récupérer-les-limites-de-continents-ou-les-limites-administratives-de-pays"
@@ -385,7 +387,22 @@
 
     <!-- Main content -->
     <main class="content" id="quarto-document-content">
-
+      <!-- Translator -->
+      <!-- <div class="translate-container" style="position: fixed;bottom: 10px;right: 10px;z-index: 1000; ">
+        <button class="translate-btn" id="translateBtn" style="background-color: rgba(0, 0, 0, 0.783);">
+          <span class="translate-icon">🌐</span>
+          <span class="translate-text">Traduire</span>
+        </button>
+        <div id="google_translate_element"></div>
+      </div> -->
+    <div class="translate-container">
+        <button id="translateBtn" class="translate-btn" aria-label="Translate Page">
+            <span class="translate-icon">🌐</span>
+            <span class="translate-text">Traduction</span>
+        </button>
+        <div id="google_translate_element" class="google-translate-widget"></div>
+    </div>
+      <!-- Section Hero -->
       <div class="hero">
         <!-- <h1>Cartograpy</h1> -->
 
@@ -395,7 +412,7 @@
         </p>
         <!-- <p>Bibliothèque Python pour la cartographie et l'analyse géospatiale</p> -->
         <a href="https://github.com/mr-kam/cartograpy" class="github-link">
-          📊 GitHub Repo
+          📊 GitHub
         </a>
       </div>
 
@@ -5272,7 +5289,8 @@ WARNING:svglib.svglib:Can't handle color: param(outline)</code></pre>
       }
     });
   </script>
-
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+   <script src="translator.js"></script>
   <script src="test_files/libs/quarto-html/zenscroll-min.js"></script>
 </body>
 
