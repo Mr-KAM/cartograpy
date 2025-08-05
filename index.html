@@ -7,9 +7,9 @@
   <meta name="generator" content="quarto-1.8.11">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  
 
-
-  <title>test</title>
+  <title>cartograpy</title>
   <style>
     code {
       white-space: pre-wrap;
@@ -395,13 +395,6 @@
         </button>
         <div id="google_translate_element"></div>
       </div> -->
-    <div class="translate-container">
-        <button id="translateBtn" class="translate-btn" aria-label="Translate Page">
-            <span class="translate-icon">🌐</span>
-            <span class="translate-text">Traduction</span>
-        </button>
-        <div id="google_translate_element" class="google-translate-widget"></div>
-    </div>
       <!-- Section Hero -->
       <div class="hero">
         <!-- <h1>Cartograpy</h1> -->
@@ -5289,9 +5282,21 @@ WARNING:svglib.svglib:Can't handle color: param(outline)</code></pre>
       }
     });
   </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-   <script src="translator.js"></script>
+
+  <!-- <script src="translator.js"></script> -->
   <script src="test_files/libs/quarto-html/zenscroll-min.js"></script>
+    <script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <div id="google_translate_element"></div>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fr',    // Langue source de la page (ex: 'fr' pour français)
+        includedLanguages: 'en,fr,es,de,pt,it',  // Langues à afficher (exemple)
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
 </body>
 
 </html>

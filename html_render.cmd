@@ -1,1 +1,1 @@
-quarto render .\test.ipynb --to html --output index.html    
+quarto render .\docs.ipynb --to html --output index.html    

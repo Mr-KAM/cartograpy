@@ -1,1 +1,1 @@
-quarto render .\test.ipynb --to md --output README.md
+quarto render .\docs.ipynb --to md --output README.md

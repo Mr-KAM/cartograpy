@@ -1004,3 +1004,352 @@ class Hydro :
   """
         return description
 
+
+
+
+
+
+class DEM:
+    """
+    Classe pour télécharger des données numériques de terrain (DEM) pour une zone donnée.
+    
+    Sources de données supportées:
+    - SRTM (Shuttle Radar Topography Mission) - résolution 30m
+    - ASTER GDEM - résolution 30m
+    - OpenTopography API
+    """
+    
+    def __init__(self, output_dir: str = "./dem_data"):
+        """
+        Initialise le téléchargeur DEM.
+        
+        Args:
+            output_dir (str): Répertoire de sortie pour sauvegarder les fichiers DEM
+        """
+        self.output_dir = output_dir
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Python DEM Downloader 1.0'
+        })
+        
+        # Créer le répertoire de sortie s'il n'existe pas
+        os.makedirs(output_dir, exist_ok=True)
+    
+    def download_srtm_opentopography(self, 
+                                   bbox: Tuple[float, float, float, float],
+                                   output_format: str = 'GTiff',
+                                   resolution: float = 0.000277777778) -> str:
+        """
+        Télécharge des données SRTM via l'API OpenTopography.
+        
+        Args:
+            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
+            output_format (str): Format de sortie ('GTiff', 'AAIGrid', 'HFA')
+            resolution (float): Résolution en degrés (défaut: ~30m)
+        
+        Returns:
+            str: Chemin vers le fichier téléchargé
+        """
+        west, south, east, north = bbox
+        
+        # Validation de la bbox
+        if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
+            raise ValueError("Bounding box invalide. Vérifiez les coordonnées.")
+        
+        # URL de l'API OpenTopography SRTM
+        base_url = "https://cloud.sdsc.edu/v1/products"
+        
+        params = {
+            'demtype': 'SRTM_GL1',  # SRTM Global 1 arc-second (~30m)
+            'west': west,
+            'south': south,
+            'east': east,
+            'north': north,
+            'outputFormat': output_format,
+            'API_Key': 'demoapikeyot2022'  # Clé démo publique
+        }
+        
+        print(f"Téléchargement SRTM pour la zone: {bbox}")
+        
+        try:
+            response = self.session.get(base_url, params=params, timeout=300)
+            response.raise_for_status()
+            
+            # Nom du fichier de sortie
+            filename = f"srtm_{west}_{south}_{east}_{north}.tif"
+            filepath = os.path.join(self.output_dir, filename)
+            
+            # Sauvegarder le fichier
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            
+            print(f"DEM SRTM téléchargé: {filepath}")
+            return filepath
+            
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Erreur lors du téléchargement SRTM: {e}")
+    
+    def download_aster_gdem(self, 
+                           bbox: Tuple[float, float, float, float]) -> str:
+        """
+        Télécharge des données ASTER GDEM via OpenTopography.
+        
+        Args:
+            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
+        
+        Returns:
+            str: Chemin vers le fichier téléchargé
+        """
+        west, south, east, north = bbox
+        
+        base_url = "https://cloud.sdsc.edu/v1/products"
+        
+        params = {
+            'demtype': 'ASTER_GL1',  # ASTER Global 1 arc-second
+            'west': west,
+            'south': south,
+            'east': east,
+            'north': north,
+            'outputFormat': 'GTiff',
+            'API_Key': 'demoapikeyot2022'
+        }
+        
+        print(f"Téléchargement ASTER GDEM pour la zone: {bbox}")
+        
+        try:
+            response = self.session.get(base_url, params=params, timeout=300)
+            response.raise_for_status()
+            
+            filename = f"aster_{west}_{south}_{east}_{north}.tif"
+            filepath = os.path.join(self.output_dir, filename)
+            
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            
+            print(f"DEM ASTER téléchargé: {filepath}")
+            return filepath
+            
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Erreur lors du téléchargement ASTER: {e}")
+    
+    def get_elevation_point(self, lat: float, lon: float) -> Optional[float]:
+        """
+        Obtient l'élévation pour un point spécifique.
+        
+        Args:
+            lat (float): Latitude en degrés décimaux
+            lon (float): Longitude en degrés décimaux
+        
+        Returns:
+            float: Élévation en mètres, ou None si erreur
+        """
+        try:
+            # Utilise l'API OpenTopography pour un point
+            url = "https://cloud.sdsc.edu/v1/products"
+            params = {
+                'demtype': 'SRTM_GL1',
+                'west': lon - 0.001,
+                'south': lat - 0.001,
+                'east': lon + 0.001,
+                'north': lat + 0.001,
+                'outputFormat': 'GTiff',
+                'API_Key': 'demoapikeyot2022'
+            }
+            
+            response = self.session.get(url, params=params, timeout=60)
+            response.raise_for_status()
+            
+            # Sauvegarder temporairement et lire
+            with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
+                tmp.write(response.content)
+                tmp_path = tmp.name
+            
+            try:
+                with rasterio.open(tmp_path) as dataset:
+                    # Obtenir la valeur au centre
+                    row, col = dataset.index(lon, lat)
+                    elevation = dataset.read(1)[row, col]
+                    return float(elevation) if elevation != dataset.nodata else None
+            finally:
+                os.unlink(tmp_path)
+                
+        except Exception as e:
+            print(f"Erreur pour obtenir l'élévation au point ({lat}, {lon}): {e}")
+            return None
+    
+    def analyze_dem(self, dem_path: str) -> dict:
+        """
+        Analyse un fichier DEM et retourne des statistiques.
+        
+        Args:
+            dem_path (str): Chemin vers le fichier DEM
+        
+        Returns:
+            dict: Statistiques du DEM
+        """
+        try:
+            with rasterio.open(dem_path) as dataset:
+                data = dataset.read(1)
+                
+                # Masquer les valeurs NoData
+                if dataset.nodata is not None:
+                    data = np.ma.masked_equal(data, dataset.nodata)
+                
+                stats = {
+                    'chemin': dem_path,
+                    'crs': str(dataset.crs),
+                    'dimensions': (dataset.width, dataset.height),
+                    'resolution': dataset.transform[0],
+                    'bbox': dataset.bounds,
+                    'elevation_min': float(np.min(data)),
+                    'elevation_max': float(np.max(data)),
+                    'elevation_mean': float(np.mean(data)),
+                    'elevation_std': float(np.std(data)),
+                    'nodata_value': dataset.nodata
+                }
+                
+                return stats
+                
+        except Exception as e:
+            return {'erreur': str(e)}
+    
+    def reproject_dem(self, 
+                     input_path: str, 
+                     output_crs: str = 'EPSG:3857',
+                     resampling_method: Resampling = Resampling.bilinear) -> str:
+        """
+        Reprojette un DEM vers un autre système de coordonnées.
+        
+        Args:
+            input_path (str): Chemin vers le DEM d'entrée
+            output_crs (str): CRS de sortie (ex: 'EPSG:3857', 'EPSG:4326')
+            resampling_method: Méthode de rééchantillonnage
+        
+        Returns:
+            str: Chemin vers le fichier reprojeté
+        """
+        output_path = input_path.replace('.tif', f'_{output_crs.replace(":", "_")}.tif')
+        
+        with rasterio.open(input_path) as src:
+            dst_crs = CRS.from_string(output_crs)
+            
+            # Calculer la transformation
+            transform, width, height = calculate_default_transform(
+                src.crs, dst_crs, src.width, src.height, *src.bounds
+            )
+            
+            # Métadonnées pour le fichier de sortie
+            kwargs = src.meta.copy()
+            kwargs.update({
+                'crs': dst_crs,
+                'transform': transform,
+                'width': width,
+                'height': height
+            })
+            
+            with rasterio.open(output_path, 'w', **kwargs) as dst:
+                reproject(
+                    source=rasterio.band(src, 1),
+                    destination=rasterio.band(dst, 1),
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=resampling_method
+                )
+        
+        print(f"DEM reprojeté sauvegardé: {output_path}")
+        return output_path
+    
+    def create_hillshade(self, dem_path: str, azimuth: float = 315.0, altitude: float = 45.0) -> str:
+        """
+        Crée un ombrage (hillshade) à partir d'un DEM.
+        
+        Args:
+            dem_path (str): Chemin vers le DEM
+            azimuth (float): Azimut de la source lumineuse (0-360°)
+            altitude (float): Altitude de la source lumineuse (0-90°)
+        
+        Returns:
+            str: Chemin vers le fichier hillshade
+        """
+        try:
+            import numpy as np
+            from scipy import ndimage
+            
+            output_path = dem_path.replace('.tif', '_hillshade.tif')
+            
+            with rasterio.open(dem_path) as src:
+                elevation = src.read(1).astype(np.float64)
+                
+                # Calculer les gradients
+                x, y = np.gradient(elevation)
+                
+                # Convertir les angles en radians
+                azimuth_rad = np.radians(360.0 - azimuth + 90.0)
+                altitude_rad = np.radians(altitude)
+                
+                # Calculer la pente et l'aspect
+                slope = np.pi/2. - np.arctan(np.sqrt(x*x + y*y))
+                aspect = np.arctan2(-x, y)
+                
+                # Calculer l'ombrage
+                hillshade = np.sin(altitude_rad) * np.sin(slope) + \
+                           np.cos(altitude_rad) * np.cos(slope) * \
+                           np.cos(azimuth_rad - aspect)
+                
+                # Normaliser entre 0 et 255
+                hillshade = np.clip((hillshade * 255), 0, 255).astype(np.uint8)
+                
+                # Sauvegarder
+                profile = src.profile.copy()
+                profile.update(dtype=rasterio.uint8, count=1)
+                
+                with rasterio.open(output_path, 'w', **profile) as dst:
+                    dst.write(hillshade, 1)
+            
+            print(f"Hillshade créé: {output_path}")
+            return output_path
+            
+        except ImportError:
+            print("scipy est requis pour créer un hillshade")
+            return None
+        except Exception as e:
+            print(f"Erreur lors de la création du hillshade: {e}")
+            return None
+
+# Exemple d'utilisation
+if __name__ == "__main__":
+    # Créer une instance du téléchargeur
+    dem_downloader = DEMDownloader(output_dir="./mes_dem")
+    
+    # Définir une zone d'intérêt (exemple: région autour du Mont Blanc)
+    # Format: (ouest, sud, est, nord) en degrés décimaux
+    bbox_mont_blanc = (6.8, 45.8, 7.0, 46.0)
+    
+    try:
+        # Télécharger les données SRTM
+        print("=== Téléchargement SRTM ===")
+        srtm_path = dem_downloader.download_srtm_opentopography(bbox_mont_blanc)
+        
+        # Analyser le DEM
+        print("\n=== Analyse du DEM ===")
+        stats = dem_downloader.analyze_dem(srtm_path)
+        for key, value in stats.items():
+            print(f"{key}: {value}")
+        
+        # Obtenir l'élévation d'un point spécifique
+        print("\n=== Élévation ponctuelle ===")
+        lat, lon = 45.9, 6.9  # Approximativement le Mont Blanc
+        elevation = dem_downloader.get_elevation_point(lat, lon)
+        print(f"Élévation au point ({lat}, {lon}): {elevation} m")
+        
+        # Créer un hillshade
+        print("\n=== Création d'un hillshade ===")
+        hillshade_path = dem_downloader.create_hillshade(srtm_path)
+        if hillshade_path:
+            print(f"Hillshade créé avec succès")
+        
+    except Exception as e:
+        print(f"Erreur: {e}")
+        print("Vérifiez votre connexion internet et les paramètres de la bbox")
