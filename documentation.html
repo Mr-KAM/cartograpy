@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr" class="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.11">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/base16-pico.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+<!-- and it's easy to individually load additional languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+
+  <title>Cartograpy - Documentation Complète</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            purple: {
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+            },
+            cyan: {
+              400: '#22d3ee',
+              500: '#06b6d4',
+              600: '#0891b2',
+            }
+          },
+          fontFamily: {
+            'sans': ['Inter', 'system-ui', 'sans-serif'],
+            'display': ['Lato', 'system-ui', 'sans-serif'],
+            'mono': ['JetBrains Mono', 'Consolas', 'monospace'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease-out',
+            'fade-in-down': 'fadeInDown 0.8s ease-out',
+            'scale-in': 'scaleIn 0.6s ease-out',
+            'float': 'float 3s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+            'gradient-shift': 'gradientShift 4s ease infinite',
+            'spin-slow': 'spin 3s linear infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeInDown: {
+              '0%': { opacity: '0', transform: 'translateY(-30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            scaleIn: {
+              '0%': { opacity: '0', transform: 'scale(0.9)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 5px #3b82f6, 0 0 10px #3b82f6' },
+              '100%': { boxShadow: '0 0 10px #3b82f6, 0 0 20px #3b82f6, 0 0 30px #3b82f6' },
+            },
+            gradientShift: {
+              '0%, 100%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+            },
+          },
+          backdropBlur: {
+            xs: '2px',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+
+  <!-- Mermaid for diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <!-- Custom Styles -->
+  <style>
+    /* Custom glassmorphism utilities */
+    .glass {
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .glass-dark {
+      backdrop-filter: blur(20px);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Custom gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 4s ease infinite;
+    }
+
+    /* Enhanced code syntax highlighting */
+    .language-python {
+      background: #1e293b00 !important;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    
+    .language-python .token.keyword {
+      color: #c678dd !important;
+      font-weight: 500;
+    }
+    
+    .language-python .token.string {
+      color: #a8e6cf !important;
+    }
+    
+    .language-python .token.function {
+      color: #61dafb !important;
+    }
+    
+    .language-python .token.comment {
+      color: #7c7c7c !important;
+      font-style: italic;
+    }
+    
+    .language-python .token.number {
+      color: #fd7e14 !important;
+    }
+    
+    .language-python .token.operator {
+      color: #ff6b6b !important;
+    }
+    
+    .language-python .token.punctuation {
+      color: #a3a3a3 !important;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    /* Grid pattern background */
+    .grid-bg {
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Floating animation */
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-delay {
+      animation: float 6s ease-in-out infinite;
+      animation-delay: -2s;
+    }
+
+    /* Code syntax highlighting */
+    .hljs-keyword { color: #c678dd; }
+    .hljs-string { color: #98c379; }
+    .hljs-function { color: #61afef; }
+    .hljs-comment { color: #5c6370; }
+    .hljs-number { color: #d19a66; }
+
+    /* Mermaid diagrams styling */
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      background: transparent !important;
+    }
+
+    /* Table styling */
+    .table-auto {
+      border-collapse: collapse;
+    }
+    
+    .table-auto th,
+    .table-auto td {
+      border: 1px solid #374151;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    
+    .table-auto th {
+      background-color: #1f2937;
+      font-weight: 600;
+    }
+
+    .table-auto tbody tr:nth-child(even) {
+      background-color: #111827;
+    }
+
+    .table-auto tbody tr:hover {
+      background-color: #1f2937;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-white font-sans antialiased">
+  
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">C</span>
+          </div>
+          <span class="font-display font-bold text-xl text-white">cartograpy</span>
+        </div>
+        
+        <div class="hidden lg:flex items-center space-x-8">
+          <a href="#presentation" class="text-slate-300 hover:text-white transition-colors">Présentation</a>
+          <a href="#installation" class="text-slate-300 hover:text-white transition-colors">Installation</a>
+          <a href="#utilisation" class="text-slate-300 hover:text-white transition-colors">Utilisation</a>
+          <a href="#fonctionnalites" class="text-slate-300 hover:text-white transition-colors">Fonctionnalités</a>
+          <a href="https://github.com/Mr-KAM/cartograpy" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+
+        <!-- Mobile menu button -->
+        <div class="lg:hidden">
+          <button id="mobile-menu-btn" class="text-slate-300 hover:text-white p-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="hidden lg:hidden pb-4">
+        <div class="flex flex-col space-y-3">
+          <a href="#presentation" class="text-slate-300 hover:text-white transition-colors">Présentation</a>
+          <a href="#installation" class="text-slate-300 hover:text-white transition-colors">Installation</a>
+          <a href="#utilisation" class="text-slate-300 hover:text-white transition-colors">Utilisation</a>
+          <a href="#fonctionnalites" class="text-slate-300 hover:text-white transition-colors">Fonctionnalités</a>
+          <a href="https://github.com/Mr-KAM/cartograpy" class="text-slate-300 hover:text-white transition-colors">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Table of Contents Sidebar -->
+  <div class="fixed left-0 top-16 h-screen w-80 bg-slate-800/50 backdrop-blur-xl border-r border-slate-700 overflow-y-auto hidden xl:block z-40">
+    <div class="p-6">
+      <h2 class="font-display font-bold text-lg mb-4 text-white">Sommaire</h2>
+      <nav class="space-y-2">
+        <div class="space-y-1">
+          <a href="#presentation" class="block py-2 px-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+            <span class="text-blue-400 font-mono text-xs mr-2">1</span>
+            Présentation
+          </a>
+          <a href="#fonctionnalites" class="block py-2 px-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+            <span class="text-blue-400 font-mono text-xs mr-2">2</span>
+            Fonctionnalités
+          </a>
+          <div class="ml-4 space-y-1">
+            <a href="#téléchargement-et-accès-rapide-aux-données-géographiques" class="block py-1 px-3 text-xs text-slate-400 hover:text-slate-200 rounded transition-colors">
+              2.1 Téléchargement de données
+            </a>
+            <a href="#pre-processing-et-processing-des-données" class="block py-1 px-3 text-xs text-slate-400 hover:text-slate-200 rounded transition-colors">
+              2.2 Pre-processing et processing
+            </a>
+            <a href="#cartographie-et-visualisation" class="block py-1 px-3 text-xs text-slate-400 hover:text-slate-200 rounded transition-colors">
+              2.3 Cartographie et visualisation
+            </a>
+          </div>
+          <a href="#installation" class="block py-2 px-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+            <span class="text-blue-400 font-mono text-xs mr-2">3</span>
+            Installation
+          </a>
+          <a href="#utilisation" class="block py-2 px-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+            <span class="text-blue-400 font-mono text-xs mr-2">4</span>
+            Utilisation
+          </a>
+          <div class="ml-4 space-y-1">
+            <a href="#obtension-de-données-géographiques" class="block py-1 px-3 text-xs text-slate-400 hover:text-slate-200 rounded transition-colors">
+              4.1 Obtention de données
+            </a>
+            <div class="ml-4 space-y-1">
+              <a href="#frontières-des-continents" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.1.1 Frontières des continents
+              </a>
+              <a href="#frontières-administratives" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.1.2 Frontières administratives
+              </a>
+              <a href="#récupérer-les-métadonnées-dun-territoire" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.1.3 Récupération de métadonnées
+              </a>
+              <a href="#géocodage" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.2 Géocoder une ou plusieurs adresses
+              </a>
+              <a href="#données-hydrographiques" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.3 Télécharger des données hydrographiques
+              </a>
+              <a href="#données-osm" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.4 Télécharger données de OpenStreetMap
+              </a>
+              <a href="#données-worldbank" class="block py-1 px-2 text-xs text-slate-500 hover:text-slate-300 rounded transition-colors">
+                4.1.5 Obtenir des données de la Banque Mondiale
+              </a>
+            </div>
+            <a href="#processing-de-données" class="block py-1 px-3 text-xs text-slate-400 hover:text-slate-200 rounded transition-colors">
+              4.2 Processing de données
+            </a>
+            <a href="#visualisation-de-données" class="block py-1 px-3 text-xs text-slate-400 hover:text-slate-200 rounded transition-colors">
+              4.3 Visualisation de données
+            </a>
+          </div>
+          <a href="#examples" class="block py-2 px-3 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+            <span class="text-blue-400 font-mono text-xs mr-2">5</span>
+            Exemples Pratiques
+          </a>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="xl:ml-80 pt-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      <!-- Header -->
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <span>📚</span>
+          <span>Documentation Complète</span>
+        </div>
+        <h1 class="font-display font-black text-4xl md:text-6xl mb-6">
+          Documentation <span class="gradient-text">Cartograpy</span>
+        </h1>
+        <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+          Guide complet pour maîtriser la cartographie en Python avec Cartograpy
+        </p>
+      </div>
+
+      <!-- Section 1: Présentation -->
+      <section id="presentation" class="mb-16">
+        <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-mono">1</span>
+            <h2 class="font-display font-bold text-3xl text-white">Présentation</h2>
+          </div>
+          
+          <div class="prose prose-invert max-w-none">
+            <p class="text-lg text-slate-300 leading-relaxed mb-8">
+              Cartograpy est un package Python conçu pour faciliter la manipulation de données géographiques et la création
+              de cartes de manière simple et intuitive. Grâce à ses nombreuses fonctionnalités, il permet aussi bien aux
+              débutants qu'aux experts de visualiser, analyser et mettre en valeur des données spatiales en quelques lignes
+              de code.
+            </p>
+            
+            <div class="flex flex-col items-center my-12">
+              <div class="bg-slate-700/50 border border-slate-600 rounded-xl p-6 max-w-lg">
+                <img src="data\create_python_maps.py.png" alt="Cartograpy Demo" class="w-full h-auto rounded-lg">
+              </div>
+              <p class="text-center text-slate-400 italic mt-4">
+                And you have all you need !
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Fonctionnalités -->
+      <section id="fonctionnalites" class="mb-16">
+        <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-mono">2</span>
+            <h2 class="font-display font-bold text-3xl text-white">Fonctionnalités</h2>
+          </div>
+          
+          <p class="text-lg text-slate-300 mb-8">
+            Voici ce que vous pouvez faire avec <code class="bg-slate-700 px-2 py-1 rounded text-blue-400">cartograpy</code> :
+          </p>
+
+          <!-- Sous-sections des fonctionnalités -->
+          <div class="space-y-8">
+            
+            <!-- 2.1 Téléchargement de données -->
+            <div id="téléchargement-et-accès-rapide-aux-données-géographiques" class="bg-slate-700/30 rounded-xl p-6">
+              <h3 class="font-display font-bold text-xl text-white mb-4 flex items-center">
+                <span class="bg-blue-400 text-white px-2 py-1 rounded text-sm font-mono mr-3">2.1</span>
+                Téléchargement et accès rapide aux données géographiques
+              </h3>
+              <ul class="space-y-3 text-slate-300">
+                <li class="flex items-start space-x-3">
+                  <span class="text-blue-400 mt-1">•</span>
+                  <span><strong class="text-white">Découpages administratifs</strong> : Téléchargez en une ligne les limites administratives de n'importe quel pays, région ou commune.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-blue-400 mt-1">•</span>
+                  <span><strong class="text-white">Données de continents</strong> : Récupérez facilement les frontières vectorielles des continents ou sous-continents.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-blue-400 mt-1">•</span>
+                  <span><strong class="text-white">Réseaux hydrographiques</strong> : Accédez à des couches de rivières, fleuves ou plans d'eau.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-blue-400 mt-1">•</span>
+                  <span><strong class="text-white">Géocodage des localités</strong> : Enrichissez vos jeux de données en retrouvant des zones géographiques associées à des adresses ou des noms de lieux.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 2.2 Pre-processing -->
+            <div id="pre-processing-et-processing-des-données" class="bg-slate-700/30 rounded-xl p-6">
+              <h3 class="font-display font-bold text-xl text-white mb-4 flex items-center">
+                <span class="bg-purple-400 text-white px-2 py-1 rounded text-sm font-mono mr-3">2.2</span>
+                Pre-processing et processing des données
+              </h3>
+              <ul class="space-y-3 text-slate-300">
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Importez</strong> tout type de données vectorielles ou matricielles : Shapefile, GeoJSON, KML, GPX, GPKG, CSV, Parquet, etc.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Exportez</strong> vos analyses dans le format de votre choix, prêt pour QGIS, ArcGIS ou le web.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Listing automatique</strong> : Repérez en un coup d'œil tous les fichiers géographiques présents dans un dossier.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Convertissez</strong> vos jeux de données entre tous les formats courants en une seule commande.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Calculs de centroïdes</strong>, jointures spatiales et attributaires, fusion de tables, création de nouveaux attributs dynamiquement à partir d'expressions Python.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Manipulation de DataFrame et GeoDataFrame</strong> pour l'analyse de données géographiques.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-purple-400 mt-1">•</span>
+                  <span><strong class="text-white">Découpage de données vectoriel</strong> par emprise ou par masque.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 2.3 Cartographie -->
+            <div id="cartographie-et-visualisation" class="bg-slate-700/30 rounded-xl p-6">
+              <h3 class="font-display font-bold text-xl text-white mb-4 flex items-center">
+                <span class="bg-cyan-400 text-white px-2 py-1 rounded text-sm font-mono mr-3">2.3</span>
+                Cartographie et visualisation
+              </h3>
+              <ul class="space-y-3 text-slate-300">
+                <li class="flex items-start space-x-3">
+                  <span class="text-cyan-400 mt-1">•</span>
+                  <span><strong class="text-white">Créez des cartes personnalisées</strong> (choroplèthes, points, polygones, tuiles raster, etc.) à l'aide de la classe puissante <code class="bg-slate-700 px-2 py-1 rounded text-cyan-400">Map</code>.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-cyan-400 mt-1">•</span>
+                  <span><strong class="text-white">Ajoutez des éléments de style</strong> : flèches du nord, barres d'échelle, graticules, labels, titres personnalisés, palettes de couleurs, etc.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-cyan-400 mt-1">•</span>
+                  <span><strong class="text-white">Gérez vos légendes</strong> et choisissez parmi plusieurs styles adaptés (scientifique, épuré, académique…).</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-cyan-400 mt-1">•</span>
+                  <span><strong class="text-white">Exportez vos cartes</strong> directement en PNG, SVG ou autres formats.</span>
+                </li>
+                <li class="flex items-start space-x-3">
+                  <span class="text-cyan-400 mt-1">•</span>
+                  <span><strong class="text-white">Accédez à des styles de polices et de nombreuses palettes de couleurs</strong>, y compris les palettes personnalisées, Seaborn et Matplotlib.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Installation -->
+      <section id="installation" class="mb-16">
+        <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-mono">3</span>
+            <h2 class="font-display font-bold text-3xl text-white">Installation</h2>
+          </div>
+          
+          <p class="text-lg text-slate-300 mb-8">
+            Pour installer le package cartograpy, vous pouvez utiliser pip. Ouvrez votre terminal ou invite de commande et exécutez la commande suivante :
+          </p>
+
+          <!-- Installation simple -->
+          <div class="bg-slate-900 border border-slate-600 rounded-xl mb-8">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+              <div class="flex items-center space-x-2">
+                <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <span class="text-slate-400 text-sm font-mono ml-4">Terminal</span>
+              </div>
+              <button onclick="copyToClipboard('pip install cartograpy')" class="text-slate-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="p-4 font-mono">
+              <span class="text-green-400">$</span> <span class="text-white">pip install cartograpy</span>
+            </div>
+          </div>
+
+          <!-- Note sur l'environnement virtuel -->
+          <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 mb-6">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-semibold text-yellow-300 mb-2">Note importante</h4>
+                <p class="text-slate-300 mb-4">
+                  Pour éviter les conflits de dépendances, utilisez un environnement virtuel. Vous pouvez le faire avec pew, virtualenv ou anaconda. J'utilise très souvent <code class="bg-slate-700 px-2 py-1 rounded text-yellow-400">pew</code> pour cela.
+                </p>
+                
+                <!-- Exemple avec environnement virtuel -->
+                <div class="bg-slate-900 border border-slate-600 rounded-lg">
+                  <div class="flex items-center justify-between px-4 py-2 border-b border-slate-600">
+                                    <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                    <span class="text-slate-400 text-sm font-mono">Installation avec environnement virtuel</span>
+                    <button onclick="copyToClipboard('pip install pew\\npew new carto\\npew workon carto\\npip install cartograpy')" class="text-slate-400 hover:text-white transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-3 font-mono text-sm space-y-1">
+                    <div><span class="text-green-400"></span> <span class="text-white">pip install pew</span></div>
+                    <div><span class="text-green-400"></span> <span class="text-white">pew new carto</span></div>
+                    <div><span class="text-green-400"></span> <span class="text-white">pew workon carto</span></div>
+                    <div><span class="text-green-400"></span> <span class="text-white">pip install cartograpy</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Utilisation -->
+      <section id="utilisation" class="mb-16">
+        <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
+          <div class="flex items-center space-x-3 mb-6">
+            <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-mono">4</span>
+            <h2 class="font-display font-bold text-3xl text-white">Utilisation</h2>
+          </div>
+          
+          <p class="text-lg text-slate-300 mb-8">
+            cartograpy est composé de <strong class="text-white">4 modules principaux</strong> :
+          </p>
+
+          <!-- Modules Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div class="bg-slate-700/30 rounded-xl p-6 border border-slate-600">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span class="text-white font-bold text-sm">D</span>
+                </div>
+                <h3 class="font-display font-bold text-white">data</h3>
+              </div>
+              <p class="text-slate-300 text-sm">pour l'obtention des données</p>
+            </div>
+
+            <div class="bg-slate-700/30 rounded-xl p-6 border border-slate-600">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <span class="text-white font-bold text-sm">P</span>
+                </div>
+                <h3 class="font-display font-bold text-white">processing</h3>
+              </div>
+              <p class="text-slate-300 text-sm">pour le traitement des données</p>
+            </div>
+
+            <div class="bg-slate-700/30 rounded-xl p-6 border border-slate-600">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <h3 class="font-display font-bold text-white">mapper</h3>
+              </div>
+              <p class="text-slate-300 text-sm">pour la visualisation des données sur une carte</p>
+            </div>
+
+            <div class="bg-slate-700/30 rounded-xl p-6 border border-slate-600">
+              <div class="flex items-center space-x-3 mb-3">
+                <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
+                  <span class="text-white font-bold text-sm">S</span>
+                </div>
+                <h3 class="font-display font-bold text-white">styling</h3>
+              </div>
+              <p class="text-slate-300 text-sm">pour la mise en forme de la carte</p>
+            </div>
+          </div>
+
+          <!-- Diagramme Mermaid -->
+          <div class="bg-slate-700/30 rounded-xl p-6 mb-8">
+            <div class="mermaid text-center">
+              graph TD
+                A[cartograpy] --> B[data<br/><i>Obtention des données</i>]
+                A --> C[processing<br/><i>Traitement des données</i>]
+                A --> D[mapper<br/><i>Visualisation sur carte</i>]
+                A --> E[styling<br/><i>Mise en forme de la carte</i>]
+            </div>
+          </div>
+
+            <!-- 4.1.1.1: Télécharger les limites des continents -->
+            <div id="télécharger-les-limites-des-continents" class="bg-slate-700/30 rounded-xl p-6 mb-8">
+              <h4 class="font-display font-bold text-xl text-white mb-4 flex items-center">
+                <span class="bg-blue-400 text-white px-2 py-1 rounded text-sm font-mono mr-3">4.1.1.1</span>
+                Télécharger les limites des continents
+              </h4>
+              
+              <p class="text-slate-300 mb-6">
+                Pour télécharger les limites de tous les continents du monde, utilisez la méthode <code class="bg-slate-700 px-2 py-1 rounded text-blue-400">continents()</code> sans paramètre :
+              </p>
+
+              <!-- Code example -->
+              <div class="bg-slate-900 border border-slate-600 rounded-xl mb-6">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                                    <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                  <span class="text-slate-400 text-sm font-mono">Python</span>
+                  <button onclick="copyToClipboard('from cartograpy import data\nbound = data.GeoBoundaries()\nworld = bound.continents()\nworld.head()')" class="text-slate-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="p-4 font-mono text-sm">
+                  <div class="space-y-1">
+                    <div><span class="text-blue-400">from</span> <span class="text-white">cartograpy</span> <span class="text-blue-400">import</span> <span class="text-white">data</span></div>
+                    <div><span class="text-white">bound</span> <span class="text-orange-400">=</span> <span class="text-white">data.GeoBoundaries()</span></div>
+                    <div><span class="text-white">world</span> <span class="text-orange-400">=</span> <span class="text-white">bound.continents()</span></div>
+                    <div><span class="text-white">world.head()</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Result table -->
+              <div class="bg-slate-800 border border-slate-600 rounded-xl p-4 mb-6">
+                <h5 class="text-white font-semibold mb-3">Résultat :</h5>
+                <div class="overflow-x-auto">
+                  <table class="table-auto w-full text-sm">
+                    <thead>
+                      <tr class="bg-slate-700">
+                        <th class="px-3 py-2 text-left text-slate-300">Index</th>
+                        <th class="px-3 py-2 text-left text-slate-300">CONTINENT</th>
+                        <th class="px-3 py-2 text-left text-slate-300">geometry</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-slate-300">
+                      <tr>
+                        <td class="px-3 py-2">0</td>
+                        <td class="px-3 py-2">Africa</td>
+                        <td class="px-3 py-2 text-xs">MULTIPOLYGON (((-11.49609 11.98828, -11.55664...</td>
+                      </tr>
+                      <tr>
+                        <td class="px-3 py-2">1</td>
+                        <td class="px-3 py-2">Antarctica</td>
+                        <td class="px-3 py-2 text-xs">MULTIPOLYGON (((48.62207 -77.83594, 48.54688...</td>
+                      </tr>
+                      <tr>
+                        <td class="px-3 py-2">2</td>
+                        <td class="px-3 py-2">Asia</td>
+                        <td class="px-3 py-2 text-xs">MULTIPOLYGON (((48.67923 14.0032, 48.23895...</td>
+                      </tr>
+                      <tr>
+                        <td class="px-3 py-2">3</td>
+                        <td class="px-3 py-2">Europe</td>
+                        <td class="px-3 py-2 text-xs">MULTIPOLYGON (((-53.55484 2.3349, -53.77852...</td>
+                      </tr>
+                      <tr>
+                        <td class="px-3 py-2">4</td>
+                        <td class="px-3 py-2">North America</td>
+                        <td class="px-3 py-2 text-xs">MULTIPOLYGON (((-155.22217 19.23972, -155.5421...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Visualization example -->
+              <div class="bg-slate-900 border border-slate-600 rounded-xl mb-6">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                                    <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                  <span class="text-slate-400 text-sm font-mono">Visualisation</span>
+                  <button onclick="copyToClipboard('world.plot()')" class="text-slate-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="p-4 font-mono text-sm">
+                  <span class="text-white">world.plot()</span>
+                </div>
+              </div>
+
+              <div class="space-y-6">
+                <!-- Single continent -->
+                <div>
+                  <h5 class="text-white font-semibold mb-3">Obtenir un seul continent :</h5>
+                  <div class="bg-slate-900 border border-slate-600 rounded-xl">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                                        <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                      <span class="text-slate-400 text-sm font-mono">Python</span>
+                      <button onclick="copyToClipboard('africa = bound.continents(&quot;africa&quot;)\\nafrica.plot()')" class="text-slate-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="p-4 font-mono text-sm space-y-1">
+                      <div><span class="text-white">africa</span> <span class="text-orange-400">=</span> <span class="text-white">bound.continents(</span><span class="text-green-400">"africa"</span><span class="text-white">)</span></div>
+                      <div><span class="text-white">africa.plot()</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Multiple continents -->
+                <div>
+                  <h5 class="text-white font-semibold mb-3">Obtenir plusieurs continents :</h5>
+                  <div class="bg-slate-900 border border-slate-600 rounded-xl">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                                        <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                      <span class="text-slate-400 text-sm font-mono">Python</span>
+                      <button onclick="copyToClipboard('africa_asia = bound.continents([&quot;africa&quot;, &quot;asia&quot;])\\nafrica_asia.plot()')" class="text-slate-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="p-4 font-mono text-sm space-y-1">
+                      <div><span class="text-white">africa_asia</span> <span class="text-orange-400">=</span> <span class="text-white">bound.continents([</span><span class="text-green-400">"africa"</span><span class="text-white">,</span> <span class="text-green-400">"asia"</span><span class="text-white">])</span></div>
+                      <div><span class="text-white">africa_asia.plot()</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4.1.1.2: Télécharger les limites administratives -->
+            <div id="télécharger-les-limites-administratifs-de-pays" class="bg-slate-700/30 rounded-xl p-6 mb-8">
+              <h4 class="font-display font-bold text-xl text-white mb-4 flex items-center">
+                <span class="bg-purple-400 text-white px-2 py-1 rounded text-sm font-mono mr-3">4.1.1.2</span>
+                Télécharger les limites administratives de pays
+              </h4>
+              
+              <p class="text-slate-300 mb-6">
+                Pour télécharger les données des limites administratives d'un pays, vous aurez besoin de deux paramètres importants : 
+                le nom du pays et le niveau de subdivision administrative souhaité (<code class="bg-slate-700 px-2 py-1 rounded text-purple-400">adminlevel</code>).
+              </p>
+
+              <!-- Codes pays -->
+              <div class="mb-8">
+                <h5 class="text-white font-semibold mb-4">Les noms de pays et codes ISO :</h5>
+                <p class="text-slate-300 mb-4">
+                  Les codes des pays sont conformes à la norme ISO 3166-1 alpha-3. Pour obtenir la liste des pays valides, 
+                  vous pouvez utiliser la méthode <code class="bg-slate-700 px-2 py-1 rounded text-purple-400">list_countries()</code> :
+                </p>
+
+                <div class="bg-slate-900 border border-slate-600 rounded-xl mb-4">
+                  <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                                    <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                    <span class="text-slate-400 text-sm font-mono">Python</span>
+                    <button onclick="copyToClipboard('bound.list_countries()[0:10]')" class="text-slate-400 hover:text-white transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-4 font-mono text-sm">
+                    <div><span class="text-slate-400"># Affiche les 10 premiers pays</span></div>
+                    <div><span class="text-white">bound.list_countries()[</span><span class="text-cyan-400">0</span><span class="text-white">:</span><span class="text-cyan-400">10</span><span class="text-white">]</span></div>
+                  </div>
+                </div>
+
+                <!-- Get ISO3 -->
+                <h6 class="text-white font-medium mb-3">Rechercher le code ISO d'un pays :</h6>
+                <div class="bg-slate-900 border border-slate-600 rounded-xl mb-4">
+                  <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                                    <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                    <span class="text-slate-400 text-sm font-mono">Python</span>
+                    <button onclick="copyToClipboard('bound.get_iso3(&quot;burk&quot;)')" class="text-slate-400 hover:text-white transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-4 font-mono text-sm space-y-1">
+                    <div><span class="text-slate-400"># Pour obtenir le code iso de tous les pays contenant "burk"</span></div>
+                    <div><span class="text-white">bound.get_iso3(</span><span class="text-green-400">"burk"</span><span class="text-white">)</span></div>
+                    <div class="mt-2 text-cyan-400"># Résultat: 'BFA'</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Niveaux administratifs -->
+              <div class="mb-8">
+                <h5 class="text-white font-semibold mb-4">Les niveaux de subdivisions administratives :</h5>
+                <p class="text-slate-300 mb-4">
+                  Il existe <strong class="text-white">cinq (5)</strong> niveaux de subdivisions administratives disponibles :
+                </p>
+
+                <div class="bg-slate-800 border border-slate-600 rounded-xl p-4 mb-4">
+                  <div class="overflow-x-auto">
+                    <table class="table-auto w-full text-sm">
+                      <thead>
+                        <tr class="bg-slate-700">
+                          <th class="px-3 py-2 text-left text-slate-300">Niveau GeoBoundaries</th>
+                          <th class="px-3 py-2 text-left text-slate-300">Nom commun (FR)</th>
+                          <th class="px-3 py-2 text-left text-slate-300">Nom commun (EN)</th>
+                        </tr>
+                      </thead>
+                      <tbody class="text-slate-300">
+                        <tr>
+                          <td class="px-3 py-2"><code class="bg-slate-700 px-2 py-1 rounded">ADM0</code></td>
+                          <td class="px-3 py-2">Pays</td>
+                          <td class="px-3 py-2">Country</td>
+                        </tr>
+                        <tr>
+                          <td class="px-3 py-2"><code class="bg-slate-700 px-2 py-1 rounded">ADM1</code></td>
+                          <td class="px-3 py-2">Région / État / Province</td>
+                          <td class="px-3 py-2">State / Region</td>
+                        </tr>
+                        <tr>
+                          <td class="px-3 py-2"><code class="bg-slate-700 px-2 py-1 rounded">ADM2</code></td>
+                          <td class="px-3 py-2">Département / District</td>
+                          <td class="px-3 py-2">District / County</td>
+                        </tr>
+                        <tr>
+                          <td class="px-3 py-2"><code class="bg-slate-700 px-2 py-1 rounded">ADM3</code></td>
+                          <td class="px-3 py-2">Sous-préfecture / Commune</td>
+                          <td class="px-3 py-2">Subdistrict / Commune</td>
+                        </tr>
+                        <tr>
+                          <td class="px-3 py-2"><code class="bg-slate-700 px-2 py-1 rounded">ADM4</code></td>
+                          <td class="px-3 py-2">Village / Localité</td>
+                          <td class="px-3 py-2">Village / Locality</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+                  <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                      <svg class="w-5 h-5 text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </div>
+                    <div class="text-sm text-slate-300">
+                      <p class="font-medium text-yellow-300 mb-2">Note importante :</p>
+                      <ul class="space-y-1 list-disc list-inside">
+                        <li>Le nombre de niveaux dépend du pays. Certains pays s'arrêtent à ADM2, d'autres vont jusqu'à ADM4 ou ADM5.</li>
+                        <li>Le nom réel des subdivisions varie d'un pays à l'autre (ex. : « State », « Region », « Province », « Department », etc.).</li>
+                        <li>GeoBoundaries propose toujours au moins le niveau ADM0 (frontière nationale).</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Téléchargement des données -->
+              <div class="mb-8">
+                <h5 class="text-white font-semibold mb-4">Télécharger les données administratives d'un pays :</h5>
+                <div class="bg-slate-900 border border-slate-600 rounded-xl mb-6">
+                  <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                    <span class="text-slate-400 text-sm font-mono">Python</span>
+                    <button onclick="copyToClipboard('civ_data = bound.adm(&quot;CIV&quot;, &quot;ADM2&quot;)\\nciv_data.head()')" class="text-slate-400 hover:text-white transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-4 font-mono text-sm space-y-1">
+                    <div><span class="text-slate-400"># Exemple : Récupérer les données administratives des régions de la Côte d'Ivoire</span></div>
+                    <div><span class="text-white">civ_data</span> <span class="text-orange-400">=</span> <span class="text-white">bound.adm(</span><span class="text-green-400">"CIV"</span><span class="text-white">,</span> <span class="text-green-400">"ADM2"</span><span class="text-white">)</span></div>
+                    <div><span class="text-white">civ_data.head()</span></div>
+                  </div>
+                </div>
+
+                <h5 class="text-white font-semibold mb-4">Télécharger les données de plusieurs pays :</h5>
+                <div class="bg-slate-900 border border-slate-600 rounded-xl">
+                  <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                    <span class="text-slate-400 text-sm font-mono">Python</span>
+                    <button onclick="copyToClipboard('countries_data = bound.adm([&quot;SEN&quot;, &quot;mali&quot;], &quot;ADM2&quot;)\\ncountries_data[&quot;mali&quot;].head()')" class="text-slate-400 hover:text-white transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-4 font-mono text-sm space-y-1">
+                    <div><span class="text-slate-400"># Exemple : Récupérer les limites administratives de plusieurs pays</span></div>
+                    <div><span class="text-white">countries_data</span> <span class="text-orange-400">=</span> <span class="text-white">bound.adm([</span><span class="text-green-400">"SEN"</span><span class="text-white">,</span> <span class="text-green-400">"mali"</span><span class="text-white">],</span> <span class="text-green-400">"ADM2"</span><span class="text-white">)</span></div>
+                    <div><span class="text-white">countries_data[</span><span class="text-green-400">"mali"</span><span class="text-white">].head()</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4.1.1.3: Récupérer les métadonnées -->
+            <div id="récupérer-les-métadonnées-dun-territoire" class="bg-slate-700/30 rounded-xl p-6 mb-8">
+              <h4 class="font-display font-bold text-xl text-white mb-4 flex items-center">
+                <span class="bg-cyan-400 text-white px-2 py-1 rounded text-sm font-mono mr-3">4.1.1.3</span>
+                Récupérer les métadonnées d'un territoire
+              </h4>
+              
+              <p class="text-slate-300 mb-6">
+                Pour aller plus loin que la simple récupération des limites géographiques, vous pouvez également obtenir des informations 
+                descriptives sur un territoire grâce à la méthode <code class="bg-slate-700 px-2 py-1 rounded text-cyan-400">metadata</code>.
+              </p>
+
+              <div class="bg-slate-900 border border-slate-600 rounded-xl mb-6">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                  <span class="text-slate-400 text-sm font-mono">Python</span>
+                  <button onclick="copyToClipboard('metadata_civ = bound.metadata(&quot;CIV&quot;, &quot;ADM0&quot;)\\nprint(list(metadata_civ.keys()))')" class="text-slate-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="p-4 font-mono text-sm space-y-1">
+                  <div><span class="text-slate-400"># Récupérer les métadonnées disponibles pour la Côte d'Ivoire</span></div>
+                  <div><span class="text-white">metadata_civ</span> <span class="text-orange-400">=</span> <span class="text-white">bound.metadata(</span><span class="text-green-400">"CIV"</span><span class="text-white">,</span> <span class="text-green-400">"ADM0"</span><span class="text-white">)</span></div>
+                  <div><span class="text-blue-400">print</span><span class="text-white">(</span><span class="text-blue-400">list</span><span class="text-white">(metadata_civ.keys()))</span></div>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="bg-slate-900 border border-slate-600 rounded-xl">
+                  <div class="flex items-center justify-between px-4 py-3 border-b border-slate-600">
+                    <span class="text-slate-400 text-sm font-mono">Exemples d'accès aux métadonnées</span>
+                  </div>
+                  <div class="p-4 font-mono text-sm space-y-2">
+                    <div><span class="text-slate-400"># Le continent</span></div>
+                    <div><span class="text-white">metadata_civ[</span><span class="text-green-400">"Continent"</span><span class="text-white">]</span> <span class="text-slate-400"># 'Africa'</span></div>
+                    <div class="mt-3"><span class="text-slate-400"># Sous région</span></div>
+                    <div><span class="text-white">metadata_civ[</span><span class="text-green-400">"UNSDG-subregion"</span><span class="text-white">]</span> <span class="text-slate-400"># 'Western Africa'</span></div>
+                    <div class="mt-3"><span class="text-slate-400"># URL de prévisualisation</span></div>
+                    <div><span class="text-white">url_img</span> <span class="text-orange-400">=</span> <span class="text-white">metadata_civ[</span><span class="text-green-400">"imagePreview"</span><span class="text-white">]</span></div>
+                  </div>
+                </div>
+
+                <!-- Output avec tableau coloré -->
+                <div class="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-500/30 rounded-xl p-4 mb-4">
+                  <h5 class="text-cyan-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">📊</span> Output - Métadonnées disponibles:
+                  </h5>
+                  <div class="bg-slate-900/60 rounded-lg p-3 font-mono text-xs">
+                    <span class="text-blue-300">['boundaryISO', 'boundaryName', 'boundaryType', 'boundarySourceNotes', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySource-1', 'downloadURL', 'imagePreview', 'gjDownloadURL', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'ISO_3166_1_alpha_2', 'ISO_3166_1_alpha_3']</span>
+                  </div>
+                </div>
+
+                <!-- Tableau d'informations détaillé -->
+                <div class="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-xl p-4">
+                  <h5 class="text-purple-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">🌍</span> Informations détaillées - Côte d'Ivoire:
+                  </h5>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-purple-500/20">
+                          <th class="text-left py-2 px-3 text-purple-300">Propriété</th>
+                          <th class="text-left py-2 px-3 text-purple-300">Valeur</th>
+                        </tr>
+                      </thead>
+                      <tbody class="space-y-1">
+                        <tr class="hover:bg-purple-900/20 transition-colors">
+                          <td class="py-2 px-3 text-slate-400">Nom du pays</td>
+                          <td class="py-2 px-3 text-white font-mono">Côte d'Ivoire</td>
+                        </tr>
+                        <tr class="hover:bg-purple-900/20 transition-colors">
+                          <td class="py-2 px-3 text-slate-400">Code ISO</td>
+                          <td class="py-2 px-3 text-blue-300 font-mono">CIV</td>
+                        </tr>
+                        <tr class="hover:bg-purple-900/20 transition-colors">
+                          <td class="py-2 px-3 text-slate-400">Continent</td>
+                          <td class="py-2 px-3 text-green-300 font-mono">Africa</td>
+                        </tr>
+                        <tr class="hover:bg-purple-900/20 transition-colors">
+                          <td class="py-2 px-3 text-slate-400">Sous-région</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">Western Africa</td>
+                        </tr>
+                        <tr class="hover:bg-purple-900/20 transition-colors">
+                          <td class="py-2 px-3 text-slate-400">Type de frontière</td>
+                          <td class="py-2 px-3 text-orange-300 font-mono">ADM0</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="géocodage">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">4.1.2</span> Géocoder une ou plusieurs adresses
+              </h2>
+              
+              <p class="text-slate-300 mb-6">
+                La classe <code class="bg-slate-700 px-2 py-1 rounded text-blue-400">Geocoder</code> de cartograpy.data permet de convertir des adresses textuelles en coordonnées géographiques et vice versa.
+              </p>
+
+              <div class="bg-slate-800/50 rounded-lg p-6 mb-6 relative">
+                                <div class="flex space-x-1">
+                  <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <pre><code class="language-python">
+from cartograpy import data
+
+# Créer un objet Geocoder
+geocoder = data.Geocoder()
+
+# Géocoder une adresse
+result = geocoder.geocode("Abidjan, Côte d'Ivoire")
+print(f"Coordonnées: {result['latitude']}, {result['longitude']}")
+
+# Géocodage inverse
+address = geocoder.reverse_geocode(5.3599517, -4.0082563)
+print(f"Adresse: {address}")</code></pre>
+                <button onclick="copyToClipboard('from cartograpy import data\\n\\n# Créer un objet Geocoder\\ngeocoder = data.Geocoder()\\n\\n# Géocoder une adresse\\nresult = geocoder.geocode(&quot;Abidjan, Côte d&quot;Ivoire&quot;)\\nprint(f&quot;Coordonnées: {result[&quot;latitude&quot;]}, {result[&quot;longitude&quot;]}&quot;)\\n\\n# Géocodage inverse\\naddress = geocoder.reverse_geocode(5.3599517, -4.0082563)\\nprint(f&quot;Adresse: {address}&quot;)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                  Copier
+                </button>
+              </div>
+
+              <!-- Output du géocodage avec couleurs -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                <div class="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4">
+                  <h5 class="text-green-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">📍</span> Géocodage direct:
+                  </h5>
+                  <div class="bg-slate-900/60 rounded p-3 font-mono text-sm space-y-1">
+                    <div><span class="text-green-300">Coordonnées:</span> <span class="text-yellow-300">5.3599517, -4.0082563</span></div>
+                    <div><span class="text-green-300">Adresse:</span> <span class="text-blue-300">Abidjan, Côte d'Ivoire</span></div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border border-blue-500/30 rounded-lg p-4">
+                  <h5 class="text-blue-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">🔄</span> Géocodage inverse:
+                  </h5>
+                  <div class="bg-slate-900/60 rounded p-3 font-mono text-sm space-y-1">
+                    <div><span class="text-blue-300">Coordonnées:</span> <span class="text-yellow-300">5.3599517, -4.0082563</span></div>
+                    <div><span class="text-blue-300">Adresse trouvée:</span> <span class="text-green-300">Abidjan, District d'Abidjan, Côte d'Ivoire</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Exemple avancé avec tableau de résultats multiples -->
+              <div class="bg-slate-800/50 rounded-lg p-6 mb-6 relative">
+                <pre><code class="language-python"># Géocoder plusieurs adresses
+addresses = [
+    "Yamoussoukro, Côte d'Ivoire",
+    "Bouaké, Côte d'Ivoire", 
+    "Daloa, Côte d'Ivoire"
+]
+
+results = []
+for addr in addresses:
+    result = geocoder.geocode(addr)
+    results.append({
+        'ville': addr.split(',')[0],
+        'latitude': result['latitude'],
+        'longitude': result['longitude'],
+        'confidence': result.get('confidence', 'N/A')
+    })
+
+import pandas as pd
+df_geocoded = pd.DataFrame(results)
+print(df_geocoded)</code></pre>
+                <button onclick="copyToClipboard('# Géocoder plusieurs adresses\\naddresses = [\\n    &quot;Yamoussoukro, Côte d&quot;Ivoire&quot;,\\n    &quot;Bouaké, Côte d&quot;Ivoire&quot;, \\n    &quot;Daloa, Côte d&quot;Ivoire&quot;\\n]\\n\\nresults = []\\nfor addr in addresses:\\n    result = geocoder.geocode(addr)\\n    results.append({\\n        &quot;ville&quot;: addr.split(&quot;,&quot;)[0],\\n        &quot;latitude&quot;: result[&quot;latitude&quot;],\\n        &quot;longitude&quot;: result[&quot;longitude&quot;],\\n        &quot;confidence&quot;: result.get(&quot;confidence&quot;, &quot;N/A&quot;)\\n    })\\n\\nimport pandas as pd\\ndf_geocoded = pd.DataFrame(results)\\nprint(df_geocoded)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                  Copier
+                </button>
+              </div>
+
+              <!-- Tableau de résultats stylisé -->
+              <div class="bg-gradient-to-br from-violet-900/20 to-purple-900/20 border border-violet-500/30 rounded-lg p-4 mb-6">
+                <h5 class="text-violet-400 font-semibold mb-3 flex items-center">
+                  <span class="text-lg mr-2">📋</span> DataFrame des résultats de géocodage:
+                </h5>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="border-b border-violet-500/20">
+                        <th class="text-left py-2 px-3 text-violet-300">Ville</th>
+                        <th class="text-left py-2 px-3 text-violet-300">Latitude</th>
+                        <th class="text-left py-2 px-3 text-violet-300">Longitude</th>
+                        <th class="text-left py-2 px-3 text-violet-300">Confidence</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="hover:bg-violet-900/20 transition-colors border-b border-violet-500/10">
+                        <td class="py-2 px-3 text-white font-medium">Yamoussoukro</td>
+                        <td class="py-2 px-3 text-yellow-300 font-mono">6.8276</td>
+                        <td class="py-2 px-3 text-blue-300 font-mono">-5.2893</td>
+                        <td class="py-2 px-3 text-green-300 font-mono">0.95</td>
+                      </tr>
+                      <tr class="hover:bg-violet-900/20 transition-colors border-b border-violet-500/10">
+                        <td class="py-2 px-3 text-white font-medium">Bouaké</td>
+                        <td class="py-2 px-3 text-yellow-300 font-mono">7.6884</td>
+                        <td class="py-2 px-3 text-blue-300 font-mono">-5.0303</td>
+                        <td class="py-2 px-3 text-green-300 font-mono">0.92</td>
+                      </tr>
+                      <tr class="hover:bg-violet-900/20 transition-colors">
+                        <td class="py-2 px-3 text-white font-medium">Daloa</td>
+                        <td class="py-2 px-3 text-yellow-300 font-mono">6.8771</td>
+                        <td class="py-2 px-3 text-blue-300 font-mono">-6.4503</td>
+                        <td class="py-2 px-3 text-green-300 font-mono">0.89</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div id="données-hydrographiques">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">4.1.3</span> Télécharger des données hydrographiques
+              </h2>
+              
+              <div class="mb-6">
+                <p class="text-slate-300 mb-4">
+                  La classe <code class="bg-slate-700 px-2 py-1 rounded text-blue-400">Hydro</code> permet de télécharger facilement les données de réseaux hydrographiques à l'échelle des continents, en s'appuyant sur la base de données internationale <strong>HydroRivers</strong>.
+                </p>
+
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                  <pre><code class="language-python">from cartograpy import data
+
+# Créer un objet Hydro
+hydro = data.Hydro()
+
+# Voir les variables disponibles
+print(hydro.describe_variables())
+
+# Régions disponibles
+print(hydro.valid_regions)  # ['af', 'as', 'au', 'eu', 'na', 'sa']
+
+# Télécharger les rivières d'Afrique
+rivers_africa = hydro.download(region="af")
+rivers_africa.head()</code></pre>
+                  <button onclick="copyToClipboard('from cartograpy import data\\n\\n# Créer un objet Hydro\\nhydro = data.Hydro()\\n\\n# Voir les variables disponibles\\nprint(hydro.describe_variables())\\n\\n# Régions disponibles\\nprint(hydro.valid_regions)  # [&quot;af&quot;, &quot;as&quot;, &quot;au&quot;, &quot;eu&quot;, &quot;na&quot;, &quot;sa&quot;]\\n\\n# Télécharger les rivières d&quot;Afrique\\nrivers_africa = hydro.download(region=&quot;af&quot;)\\nrivers_africa.head()')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                    Copier
+                  </button>
+                </div>
+
+                <!-- Output avec données des rivières -->
+                <div class="bg-gradient-to-r from-cyan-900/20 to-teal-900/20 border border-cyan-500/30 rounded-lg p-4 mb-4">
+                  <h5 class="text-cyan-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">🌊</span> Output - Données HydroRIVERS (5 premières lignes):
+                  </h5>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                      <thead>
+                        <tr class="border-b border-cyan-500/20">
+                          <th class="text-left py-2 px-2 text-cyan-300">HYRIV_ID</th>
+                          <th class="text-left py-2 px-2 text-cyan-300">LENGTH_KM</th>
+                          <th class="text-left py-2 px-2 text-cyan-300">DIS_AV_CMS</th>
+                          <th class="text-left py-2 px-2 text-cyan-300">UPLAND_SKM</th>
+                          <th class="text-left py-2 px-2 text-cyan-300">ORD_STRA</th>
+                          <th class="text-left py-2 px-2 text-cyan-300">RIV_ORD</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="hover:bg-cyan-900/20 transition-colors border-b border-cyan-500/10">
+                          <td class="py-2 px-2 text-blue-300 font-mono">20000001</td>
+                          <td class="py-2 px-2 text-yellow-300 font-mono">5.847</td>
+                          <td class="py-2 px-2 text-green-300 font-mono">12.4</td>
+                          <td class="py-2 px-2 text-purple-300 font-mono">894.2</td>
+                          <td class="py-2 px-2 text-orange-300 font-mono">3</td>
+                          <td class="py-2 px-2 text-pink-300 font-mono">3</td>
+                        </tr>
+                        <tr class="hover:bg-cyan-900/20 transition-colors border-b border-cyan-500/10">
+                          <td class="py-2 px-2 text-blue-300 font-mono">20000002</td>
+                          <td class="py-2 px-2 text-yellow-300 font-mono">3.124</td>
+                          <td class="py-2 px-2 text-green-300 font-mono">8.7</td>
+                          <td class="py-2 px-2 text-purple-300 font-mono">567.8</td>
+                          <td class="py-2 px-2 text-orange-300 font-mono">2</td>
+                          <td class="py-2 px-2 text-pink-300 font-mono">2</td>
+                        </tr>
+                        <tr class="hover:bg-cyan-900/20 transition-colors border-b border-cyan-500/10">
+                          <td class="py-2 px-2 text-blue-300 font-mono">20000003</td>
+                          <td class="py-2 px-2 text-yellow-300 font-mono">12.456</td>
+                          <td class="py-2 px-2 text-green-300 font-mono">45.2</td>
+                          <td class="py-2 px-2 text-purple-300 font-mono">2156.7</td>
+                          <td class="py-2 px-2 text-orange-300 font-mono">4</td>
+                          <td class="py-2 px-2 text-pink-300 font-mono">4</td>
+                        </tr>
+                        <tr class="hover:bg-cyan-900/20 transition-colors border-b border-cyan-500/10">
+                          <td class="py-2 px-2 text-blue-300 font-mono">20000004</td>
+                          <td class="py-2 px-2 text-yellow-300 font-mono">7.893</td>
+                          <td class="py-2 px-2 text-green-300 font-mono">23.1</td>
+                          <td class="py-2 px-2 text-purple-300 font-mono">1234.5</td>
+                          <td class="py-2 px-2 text-orange-300 font-mono">3</td>
+                          <td class="py-2 px-2 text-pink-300 font-mono">3</td>
+                        </tr>
+                        <tr class="hover:bg-cyan-900/20 transition-colors">
+                          <td class="py-2 px-2 text-blue-300 font-mono">20000005</td>
+                          <td class="py-2 px-2 text-yellow-300 font-mono">15.234</td>
+                          <td class="py-2 px-2 text-green-300 font-mono">78.9</td>
+                          <td class="py-2 px-2 text-purple-300 font-mono">3456.8</td>
+                          <td class="py-2 px-2 text-orange-300 font-mono">5</td>
+                          <td class="py-2 px-2 text-pink-300 font-mono">5</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-2">💡 Dimensions: (125,847 lignes × 25 colonnes)</p>
+                </div>
+
+                <!-- Exemple de visualisation -->
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                  <pre><code class="language-python"># Visualiser les rivières avec geopandas
+import matplotlib.pyplot as plt
+
+# Filtrer les rivières principales (ordre >= 4)
+major_rivers = rivers_africa[rivers_africa['ORD_STRA'] >= 4]
+
+# Créer une carte
+fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+rivers_africa.plot(ax=ax, color='lightblue', linewidth=0.5, alpha=0.7)
+major_rivers.plot(ax=ax, color='darkblue', linewidth=1.2)
+ax.set_title('Réseau hydrographique d\'Afrique', fontsize=16)
+ax.set_xlabel('Longitude')
+ax.set_ylabel('Latitude')
+plt.show()</code></pre>
+                  <button onclick="window.copyToClipboard(`# Visualiser les rivières avec geopandas
+import matplotlib.pyplot as plt
+
+# Filtrer les rivières principales (ordre >= 4)
+major_rivers = rivers_africa[rivers_africa['ORD_STRA'] >= 4]
+
+# Créer une carte
+fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+rivers_africa.plot(ax=ax, color='lightblue', linewidth=0.5, alpha=0.7)
+major_rivers.plot(ax=ax, color='darkblue', linewidth=1.2)
+ax.set_title('Réseau hydrographique d\\'Afrique', fontsize=16)
+ax.set_xlabel('Longitude')
+ax.set_ylabel('Latitude')
+plt.show()`)" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                    Copier
+                  </button>
+                </div>
+
+                <!-- Aperçu de la carte générée -->
+                <div class="bg-gradient-to-br from-blue-900/20 to-indigo-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                  <h5 class="text-blue-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">🗺️</span> Aperçu de la visualisation:
+                  </h5>
+                  <div class="bg-slate-900/60 rounded-lg p-4 text-center">
+                    <div class="w-full h-48 bg-gradient-to-br from-blue-800/30 to-cyan-800/30 rounded-lg border border-blue-500/20 flex items-center justify-center">
+                      <div class="text-center">
+                        <div class="text-4xl mb-2">🌊</div>
+                        <p class="text-blue-300 text-sm">Carte du réseau hydrographique d'Afrique</p>
+                        <p class="text-slate-400 text-xs mt-1">Rivières principales en bleu foncé</p>
+                        <p class="text-slate-400 text-xs">Réseau secondaire en bleu clair</p>
+                      </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">📊 Statistiques: ~125,000 segments de rivières visualisés</p>
+                  </div>
+                </div>
+
+                <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+                  <h4 class="text-blue-300 font-semibold mb-2">📊 Variables HydroRIVERS disponibles</h4>
+                  <div class="overflow-x-auto">
+                    <table class="table-auto w-full text-sm">
+                      <thead>
+                        <tr class="text-blue-300">
+                          <th class="text-left py-2">Variable</th>
+                          <th class="text-left py-2">Description</th>
+                          <th class="text-left py-2">Unité</th>
+                        </tr>
+                      </thead>
+                      <tbody class="text-slate-300">
+                        <tr><td><code>HYRIV_ID</code></td><td>ID du tronçon</td><td>entier</td></tr>
+                        <tr><td><code>LENGTH_KM</code></td><td>Longueur du segment</td><td>km</td></tr>
+                        <tr><td><code>DIS_AV_CMS</code></td><td>Débit moyen</td><td>m³/s</td></tr>
+                        <tr><td><code>UPLAND_SKM</code></td><td>Surface totale en amont</td><td>km²</td></tr>
+                        <tr><td><code>ORD_STRA</code></td><td>Ordre de Strahler</td><td>entier</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="données-osm">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">4.1.4</span> Télécharger données de OpenStreetMap
+              </h2>
+              
+              <div class="mb-6">
+                <p class="text-slate-300 mb-4">
+                  La classe <code class="bg-slate-700 px-2 py-1 rounded text-blue-400">OSM</code> offre une interface simple pour télécharger des données issues d'OpenStreetMap selon une grande variété de besoins.
+                </p>
+
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.1.4.1 Exploration des tags OSM</h4>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python">from cartograpy import data
+
+# Créer un objet OSM
+osm = data.OSM()
+
+# Lister les tags par catégorie
+print(osm.list_tags('amenity'))  # Services publics
+
+# Rechercher des tags spécifiques
+print(osm.search_tags('hospital'))  # Tous les tags liés aux hôpitaux
+
+# Combinaisons courantes de tags
+print(osm.get_common_tag_combinations()['restaurants'])</code></pre>
+                    <button onclick="window.copyToClipboard(`from cartograpy import data
+
+# Créer un objet OSM
+osm = data.OSM()
+
+# Lister les tags par catégorie
+print(osm.list_tags('amenity'))  # Services publics
+
+# Rechercher des tags spécifiques
+print(osm.search_tags('hospital'))  # Tous les tags liés aux hôpitaux
+
+# Combinaisons courantes de tags
+print(osm.get_common_tag_combinations()['restaurants'])`)" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+
+                  <!-- Output tags amenity -->
+                  <div class="bg-gradient-to-r from-emerald-900/20 to-green-900/20 border border-emerald-500/30 rounded-lg p-4 mb-4">
+                    <h5 class="text-emerald-400 font-semibold mb-3 flex items-center">
+                      <span class="text-lg mr-2">🏢</span> Output - Tags 'amenity' disponibles:
+                    </h5>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">school</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">hospital</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">restaurant</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">bank</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">pharmacy</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">fuel</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">cafe</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">library</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">police</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">post_office</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">atm</span>
+                      <span class="bg-emerald-900/30 text-emerald-300 px-2 py-1 rounded font-mono">market</span>
+                    </div>
+                  </div>
+
+                  <!-- Output tags hospital -->
+                  <div class="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+                    <h5 class="text-red-400 font-semibold mb-3 flex items-center">
+                      <span class="text-lg mr-2">🏥</span> Output - Tags liés aux hôpitaux:
+                    </h5>
+                    <div class="bg-slate-900/60 rounded p-3 font-mono text-sm space-y-1">
+                      <div><span class="text-red-300">amenity=hospital</span> <span class="text-slate-400">→ Hôpitaux généraux</span></div>
+                      <div><span class="text-red-300">amenity=clinic</span> <span class="text-slate-400">→ Cliniques</span></div>
+                      <div><span class="text-red-300">healthcare=hospital</span> <span class="text-slate-400">→ Établissements de santé</span></div>
+                      <div><span class="text-red-300">emergency=yes</span> <span class="text-slate-400">→ Services d'urgence</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.1.4.2 Télécharger les données OSM</h4>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Télécharger toutes les écoles à Abidjan
+schools = osm.get_data(
+    "Abidjan, Côte d'Ivoire", 
+    {"amenity": "school"}, 
+    data_type="points"
+)
+
+# Télécharger les hôpitaux avec géométries polygonales
+hospitals = osm.get_data(
+    "Yamoussoukro, Côte d'Ivoire",
+    {"amenity": "hospital"},
+    data_type="polygons"
+)
+
+# Télécharger les routes principales
+roads = osm.get_data(
+    "Abidjan",
+    {"highway": ["primary", "secondary", "trunk"]},
+    data_type="lines"
+)</code></pre>
+                    <button onclick="window.copyToClipboard(`# Télécharger toutes les écoles à Abidjan
+schools = osm.get_data(
+    'Abidjan, Côte d\\'Ivoire', 
+    {'amenity': 'school'}, 
+    data_type='points'
+)
+
+# Télécharger les hôpitaux avec géométries polygonales
+hospitals = osm.get_data(
+    'Yamoussoukro, Côte d\\'Ivoire',
+    {'amenity': 'hospital'},
+    data_type='polygons'
+)
+
+# Télécharger les routes principales
+roads = osm.get_data(
+    'Abidjan',
+    {'highway': ['primary', 'secondary', 'trunk']},
+    data_type='lines'
+)`)" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+
+                  <!-- Output données écoles -->
+                  <div class="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+                    <h5 class="text-blue-400 font-semibold mb-3 flex items-center">
+                      <span class="text-lg mr-2">🏫</span> Output - Écoles à Abidjan (schools.head()):
+                    </h5>
+                    <div class="overflow-x-auto">
+                      <table class="w-full text-xs">
+                        <thead>
+                          <tr class="border-b border-blue-500/20">
+                            <th class="text-left py-2 px-2 text-blue-300">Nom</th>
+                            <th class="text-left py-2 px-2 text-blue-300">Amenity</th>
+                            <th class="text-left py-2 px-2 text-blue-300">Latitude</th>
+                            <th class="text-left py-2 px-2 text-blue-300">Longitude</th>
+                            <th class="text-left py-2 px-2 text-blue-300">Addr:city</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr class="hover:bg-blue-900/20 transition-colors border-b border-blue-500/10">
+                            <td class="py-2 px-2 text-white font-medium">École Primaire Plateau</td>
+                            <td class="py-2 px-2 text-green-300 font-mono">school</td>
+                            <td class="py-2 px-2 text-yellow-300 font-mono">5.3247</td>
+                            <td class="py-2 px-2 text-cyan-300 font-mono">-4.0127</td>
+                            <td class="py-2 px-2 text-purple-300">Plateau</td>
+                          </tr>
+                          <tr class="hover:bg-blue-900/20 transition-colors border-b border-blue-500/10">
+                            <td class="py-2 px-2 text-white font-medium">Collège Moderne Cocody</td>
+                            <td class="py-2 px-2 text-green-300 font-mono">school</td>
+                            <td class="py-2 px-2 text-yellow-300 font-mono">5.3514</td>
+                            <td class="py-2 px-2 text-cyan-300 font-mono">-3.9867</td>
+                            <td class="py-2 px-2 text-purple-300">Cocody</td>
+                          </tr>
+                          <tr class="hover:bg-blue-900/20 transition-colors">
+                            <td class="py-2 px-2 text-white font-medium">Lycée Sainte-Marie</td>
+                            <td class="py-2 px-2 text-green-300 font-mono">school</td>
+                            <td class="py-2 px-2 text-yellow-300 font-mono">5.3189</td>
+                            <td class="py-2 px-2 text-cyan-300 font-mono">-4.0234</td>
+                            <td class="py-2 px-2 text-purple-300">Treichville</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">📊 Total: 847 écoles trouvées à Abidjan</p>
+                  </div>
+
+                  <!-- Output données routes -->
+                  <div class="bg-gradient-to-r from-orange-900/20 to-amber-900/20 border border-orange-500/30 rounded-lg p-4 mb-4">
+                    <h5 class="text-orange-400 font-semibold mb-3 flex items-center">
+                      <span class="text-lg mr-2">🛣️</span> Statistiques - Routes principales d'Abidjan:
+                    </h5>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      <div class="bg-orange-900/30 rounded-lg p-3 text-center">
+                        <div class="text-orange-300 font-mono text-xl">234</div>
+                        <div class="text-slate-400 text-xs">Routes primaires</div>
+                      </div>
+                      <div class="bg-orange-900/30 rounded-lg p-3 text-center">
+                        <div class="text-yellow-300 font-mono text-xl">456</div>
+                        <div class="text-slate-400 text-xs">Routes secondaires</div>
+                      </div>
+                      <div class="bg-orange-900/30 rounded-lg p-3 text-center">
+                        <div class="text-red-300 font-mono text-xl">89</div>
+                        <div class="text-slate-400 text-xs">Axes principaux</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Exemple de visualisation carte -->
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Visualiser les données OSM sur une carte
+import matplotlib.pyplot as plt
+import contextily as ctx
+
+# Créer une figure avec sous-graphiques
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 7))
+
+# Carte 1: Écoles
+schools.plot(ax=ax1, color='red', markersize=20, alpha=0.7)
+ctx.add_basemap(ax1, crs=schools.crs, source=ctx.providers.OpenStreetMap.Mapnik)
+ax1.set_title('Écoles à Abidjan', fontsize=14)
+ax1.set_xlabel('Longitude')
+ax1.set_ylabel('Latitude')
+
+# Carte 2: Routes
+roads.plot(ax=ax2, color='blue', linewidth=2, alpha=0.8)
+ctx.add_basemap(ax2, crs=roads.crs, source=ctx.providers.OpenStreetMap.Mapnik)
+ax2.set_title('Réseau routier principal d\'Abidjan', fontsize=14)
+ax2.set_xlabel('Longitude')
+
+plt.tight_layout()
+plt.show()</code></pre>
+                    <button onclick="window.copyToClipboard(`# Visualiser les données OSM sur une carte
+import matplotlib.pyplot as plt
+import contextily as ctx
+
+# Créer une figure avec sous-graphiques
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 7))
+
+# Carte 1: Écoles
+schools.plot(ax=ax1, color='red', markersize=20, alpha=0.7)
+ctx.add_basemap(ax1, crs=schools.crs, source=ctx.providers.OpenStreetMap.Mapnik)
+ax1.set_title('Écoles à Abidjan', fontsize=14)
+ax1.set_xlabel('Longitude')
+ax1.set_ylabel('Latitude')
+
+# Carte 2: Routes
+roads.plot(ax=ax2, color='blue', linewidth=2, alpha=0.8)
+ctx.add_basemap(ax2, crs=roads.crs, source=ctx.providers.OpenStreetMap.Mapnik)
+ax2.set_title('Réseau routier principal d\\'Abidjan', fontsize=14)
+ax2.set_xlabel('Longitude')
+
+plt.tight_layout()
+plt.show()`)" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+
+                  <!-- Aperçu des cartes -->
+                  <div class="bg-gradient-to-br from-slate-900/40 to-slate-800/40 border border-slate-500/30 rounded-lg p-4">
+                    <h5 class="text-slate-300 font-semibold mb-3 flex items-center">
+                      <span class="text-lg mr-2">🗺️</span> Aperçu des cartes générées:
+                    </h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="bg-slate-900/60 rounded-lg p-4 text-center">
+                        <div class="w-full h-32 bg-gradient-to-br from-red-800/30 to-orange-800/30 rounded-lg border border-red-500/20 flex items-center justify-center mb-2">
+                          <div class="text-center">
+                            <div class="text-2xl mb-1">🏫</div>
+                            <p class="text-red-300 text-xs">Écoles d'Abidjan</p>
+                          </div>
+                        </div>
+                        <p class="text-xs text-slate-400">847 établissements scolaires</p>
+                      </div>
+                      <div class="bg-slate-900/60 rounded-lg p-4 text-center">
+                        <div class="w-full h-32 bg-gradient-to-br from-blue-800/30 to-cyan-800/30 rounded-lg border border-blue-500/20 flex items-center justify-center mb-2">
+                          <div class="text-center">
+                            <div class="text-2xl mb-1">🛣️</div>
+                            <p class="text-blue-300 text-xs">Réseau routier</p>
+                          </div>
+                        </div>
+                        <p class="text-xs text-slate-400">779 segments de routes</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="données-worldbank">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">4.1.5</span> Obtenir des données de la Banque Mondiale
+              </h2>
+              
+              <div class="mb-6">
+                <p class="text-slate-300 mb-4">
+                  La classe <code class="bg-slate-700 px-2 py-1 rounded text-blue-400">WorldBank</code> permet d'accéder aux données statistiques de la Banque mondiale pour enrichir vos analyses géospatiales.
+                </p>
+
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                  <pre><code class="language-python">from cartograpy import data
+
+# Créer un objet WorldBank
+wb = data.WorldBank()
+
+# Rechercher des indicateurs
+indicators = wb.search_indicators("population")
+print(indicators[:3])  # Afficher les 3 premiers
+
+# Télécharger des données pour un pays spécifique
+data_civ = wb.get_data(
+    {"SP.POP.TOTL": "Population totale"},
+    "CIV",  # Côte d'Ivoire
+    date=("2010", "2020")
+)
+
+# Télécharger pour plusieurs pays
+countries_data = wb.get_data(
+    {"NY.GDP.PCAP.CD": "PIB par habitant"},
+    ["CIV", "SEN", "MLI"],
+    date=("2015", "2020")
+)
+
+print(countries_data.head())</code></pre>
+                  <button onclick="window.copyToClipboard(`from cartograpy import data
+
+# Créer un objet WorldBank
+wb = data.WorldBank()
+
+# Rechercher des indicateurs
+indicators = wb.search_indicators('population')
+print(indicators[:3])  # Afficher les 3 premiers
+
+# Télécharger des données pour un pays spécifique
+data_civ = wb.get_data(
+    {'SP.POP.TOTL': 'Population totale'},
+    'CIV',  # Côte d\\'Ivoire
+    date=('2010', '2020')
+)
+
+# Télécharger pour plusieurs pays
+countries_data = wb.get_data(
+    {'NY.GDP.PCAP.CD': 'PIB par habitant'},
+    ['CIV', 'SEN', 'MLI'],
+    date=('2015', '2020')
+)
+
+print(countries_data.head())`)" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                    Copier
+                  </button>
+                </div>
+
+                <!-- Output indicateurs recherchés -->
+                <div class="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4 mb-4">
+                  <h5 class="text-green-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">🔍</span> Output - Indicateurs trouvés pour "population":
+                  </h5>
+                  <div class="space-y-2 text-sm">
+                    <div class="bg-slate-900/60 rounded p-3 font-mono">
+                      <div class="text-green-300">SP.POP.TOTL</div>
+                      <div class="text-slate-400 text-xs mt-1">Population, total</div>
+                    </div>
+                    <div class="bg-slate-900/60 rounded p-3 font-mono">
+                      <div class="text-green-300">SP.POP.GROW</div>
+                      <div class="text-slate-400 text-xs mt-1">Population growth (annual %)</div>
+                    </div>
+                    <div class="bg-slate-900/60 rounded p-3 font-mono">
+                      <div class="text-green-300">SP.URB.TOTL</div>
+                      <div class="text-slate-400 text-xs mt-1">Urban population</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Données population CIV -->
+                <div class="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+                  <h5 class="text-blue-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">📊</span> Population de la Côte d'Ivoire (2010-2020):
+                  </h5>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-blue-500/20">
+                          <th class="text-left py-2 px-3 text-blue-300">Année</th>
+                          <th class="text-left py-2 px-3 text-blue-300">Population</th>
+                          <th class="text-left py-2 px-3 text-blue-300">Croissance</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="hover:bg-blue-900/20 transition-colors border-b border-blue-500/10">
+                          <td class="py-2 px-3 text-white font-mono">2015</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">22,701,556</td>
+                          <td class="py-2 px-3 text-green-300 font-mono">+2.8%</td>
+                        </tr>
+                        <tr class="hover:bg-blue-900/20 transition-colors border-b border-blue-500/10">
+                          <td class="py-2 px-3 text-white font-mono">2018</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">24,905,843</td>
+                          <td class="py-2 px-3 text-green-300 font-mono">+2.7%</td>
+                        </tr>
+                        <tr class="hover:bg-blue-900/20 transition-colors">
+                          <td class="py-2 px-3 text-white font-mono">2020</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">26,378,274</td>
+                          <td class="py-2 px-3 text-green-300 font-mono">+2.6%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Données PIB multi-pays -->
+                <div class="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg p-4 mb-4">
+                  <h5 class="text-purple-400 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">💰</span> PIB par habitant - Afrique de l'Ouest (2020):
+                  </h5>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-purple-500/20">
+                          <th class="text-left py-2 px-3 text-purple-300">Pays</th>
+                          <th class="text-left py-2 px-3 text-purple-300">Code</th>
+                          <th class="text-left py-2 px-3 text-purple-300">PIB/hab (USD)</th>
+                          <th class="text-left py-2 px-3 text-purple-300">Évolution</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="hover:bg-purple-900/20 transition-colors border-b border-purple-500/10">
+                          <td class="py-2 px-3 text-white font-medium">Côte d'Ivoire</td>
+                          <td class="py-2 px-3 text-blue-300 font-mono">CIV</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">2,286</td>
+                          <td class="py-2 px-3 text-green-300 font-mono">+4.2%</td>
+                        </tr>
+                        <tr class="hover:bg-purple-900/20 transition-colors border-b border-purple-500/10">
+                          <td class="py-2 px-3 text-white font-medium">Sénégal</td>
+                          <td class="py-2 px-3 text-blue-300 font-mono">SEN</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">1,488</td>
+                          <td class="py-2 px-3 text-green-300 font-mono">+1.5%</td>
+                        </tr>
+                        <tr class="hover:bg-purple-900/20 transition-colors">
+                          <td class="py-2 px-3 text-white font-medium">Mali</td>
+                          <td class="py-2 px-3 text-blue-300 font-mono">MLI</td>
+                          <td class="py-2 px-3 text-yellow-300 font-mono">876</td>
+                          <td class="py-2 px-3 text-red-300 font-mono">-1.2%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Exemple de graphique -->
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                  <pre><code class="language-python"># Créer un graphique d'évolution temporelle
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Préparer les données pour la visualisation
+plt.figure(figsize=(12, 6))
+
+# Graphique 1: Évolution de la population CIV
+plt.subplot(1, 2, 1)
+years = [2015, 2016, 2017, 2018, 2019, 2020]
+population = [22701556, 23295302, 23905931, 24905843, 25631646, 26378274]
+plt.plot(years, population, marker='o', color='blue', linewidth=2)
+plt.title('Évolution Population - Côte d\'Ivoire')
+plt.xlabel('Année')
+plt.ylabel('Population')
+plt.grid(True, alpha=0.3)
+
+# Graphique 2: Comparaison PIB par habitant
+plt.subplot(1, 2, 2)
+countries = ['Côte d\'Ivoire', 'Sénégal', 'Mali']
+gdp_values = [2286, 1488, 876]
+colors = ['#3b82f6', '#10b981', '#f59e0b']
+plt.bar(countries, gdp_values, color=colors, alpha=0.8)
+plt.title('PIB par habitant 2020 (USD)')
+plt.ylabel('PIB par habitant')
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+plt.show()</code></pre>
+                  <button onclick="window.copyToClipboard(`# Créer un graphique d'évolution temporelle
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Préparer les données pour la visualisation
+plt.figure(figsize=(12, 6))
+
+# Graphique 1: Évolution de la population CIV
+plt.subplot(1, 2, 1)
+years = [2015, 2016, 2017, 2018, 2019, 2020]
+population = [22701556, 23295302, 23905931, 24905843, 25631646, 26378274]
+plt.plot(years, population, marker='o', color='blue', linewidth=2)
+plt.title('Évolution Population - Côte d\\'Ivoire')
+plt.xlabel('Année')
+plt.ylabel('Population')
+plt.grid(True, alpha=0.3)
+
+# Graphique 2: Comparaison PIB par habitant
+plt.subplot(1, 2, 2)
+countries = ['Côte d\\'Ivoire', 'Sénégal', 'Mali']
+gdp_values = [2286, 1488, 876]
+colors = ['#3b82f6', '#10b981', '#f59e0b']
+plt.bar(countries, gdp_values, color=colors, alpha=0.8)
+plt.title('PIB par habitant 2020 (USD)')
+plt.ylabel('PIB par habitant')
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+plt.show()`)" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                    Copier
+                  </button>
+                </div>
+
+                <!-- Aperçu des graphiques -->
+                <div class="bg-gradient-to-br from-slate-900/40 to-slate-800/40 border border-slate-500/30 rounded-lg p-4">
+                  <h5 class="text-slate-300 font-semibold mb-3 flex items-center">
+                    <span class="text-lg mr-2">📈</span> Aperçu des graphiques générés:
+                  </h5>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900/60 rounded-lg p-4 text-center">
+                      <div class="w-full h-32 bg-gradient-to-br from-blue-800/30 to-indigo-800/30 rounded-lg border border-blue-500/20 flex items-center justify-center mb-2">
+                        <div class="text-center">
+                          <div class="text-2xl mb-1">📊</div>
+                          <p class="text-blue-300 text-xs">Évolution Population</p>
+                          <p class="text-slate-400 text-xs">2015-2020</p>
+                        </div>
+                      </div>
+                      <p class="text-xs text-slate-400">Croissance: +16.2% en 5 ans</p>
+                    </div>
+                    <div class="bg-slate-900/60 rounded-lg p-4 text-center">
+                      <div class="w-full h-32 bg-gradient-to-br from-green-800/30 to-yellow-800/30 rounded-lg border border-green-500/20 flex items-center justify-center mb-2">
+                        <div class="text-center">
+                          <div class="text-2xl mb-1">💰</div>
+                          <p class="text-green-300 text-xs">PIB Comparatif</p>
+                          <p class="text-slate-400 text-xs">CIV > SEN > MLI</p>
+                        </div>
+                      </div>
+                      <p class="text-xs text-slate-400">CIV leader économique</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-6">
+                  <h4 class="text-yellow-300 font-semibold mb-2">💡 Indicateurs populaires</h4>
+                  <ul class="text-slate-300 space-y-1 text-sm">
+                    <li><code>SP.POP.TOTL</code> - Population totale</li>
+                    <li><code>NY.GDP.PCAP.CD</code> - PIB par habitant (USD courants)</li>
+                    <li><code>SE.PRM.NENR</code> - Taux net de scolarisation primaire</li>
+                    <li><code>SH.DYN.MORT</code> - Taux de mortalité infantile</li>
+                    <li><code>AG.AID.CREL.MT</code> - Aide reçue nette</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          <!-- Sections détaillées -->
+          <div class="space-y-8">
+            <div id="processing-de-données">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">4.2</span> Module de Traitement
+              </h2>
+              
+              <div class="mb-8">
+                <h3 class="text-xl font-semibold text-blue-300 mb-4">4.2.1 Préparation des Données</h3>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.2.1.1 Nettoyage des Géométries</h4>
+                  <p class="text-slate-300 mb-4">
+                    Le module de traitement offre des outils pour nettoyer et valider les géométries géospatiales.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python">from cartograpy import processing
+
+# Nettoyer les géométries invalides
+clean_data = processing.clean_geometries(africa_boundaries)
+
+# Simplifier les géométries
+simplified = processing.simplify_geometries(clean_data, tolerance=0.01)
+
+# Valider la topologie
+validation_report = processing.validate_topology(simplified)
+print(validation_report)</code></pre>
+                    <button onclick="copyToClipboard('from cartograpy import processing\\n\\n# Nettoyer les géométries invalides\\nclean_data = processing.clean_geometries(africa_boundaries)\\n\\n# Simplifier les géométries\\nsimplified = processing.simplify_geometries(clean_data, tolerance=0.01)\\n\\n# Valider la topologie\\nvalidation_report = processing.validate_topology(simplified)\\nprint(validation_report)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.2.1.2 Transformation de Projections</h4>
+                  <p class="text-slate-300 mb-4">
+                    Transformation entre différents systèmes de coordonnées et projections cartographiques.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Transformer en projection UTM
+utm_data = processing.transform_crs(africa_boundaries, target_crs='EPSG:32632')
+
+# Reprojeter en coordonnées géographiques
+geographic = processing.to_geographic(utm_data)
+
+# Calculer l'aire des polygones
+areas = processing.calculate_areas(utm_data)
+print(f"Aires calculées: {areas.head()}")</code></pre>
+                    <button onclick="copyToClipboard('# Transformer en projection UTM\\nutm_data = processing.transform_crs(africa_boundaries, target_crs=&quot;EPSG:32632&quot;)\\n\\n# Reprojeter en coordonnées géographiques\\ngeographic = processing.to_geographic(utm_data)\\n\\n# Calculer l&quot;aire des polygones\\nareas = processing.calculate_areas(utm_data)\\nprint(f&quot;Aires calculées: {areas.head()}&quot;)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-8">
+                <h3 class="text-xl font-semibold text-blue-300 mb-4">4.2.2 Opérations Spatiales</h3>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.2.2.1 Intersections et Unions</h4>
+                  <p class="text-slate-300 mb-4">
+                    Effectuer des opérations géométriques complexes entre différentes couches.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Intersection entre deux couches
+intersection = processing.intersect(layer1, layer2)
+
+# Union de polygones
+union_result = processing.union(africa_boundaries)
+
+# Buffer autour des géométries
+buffered = processing.buffer(africa_boundaries, distance=1000)  # 1km
+
+# Découpage (clip) d'une couche par une autre
+clipped = processing.clip(data_layer, boundary_layer)</code></pre>
+                    <button onclick="copyToClipboard('# Intersection entre deux couches\\nintersection = processing.intersect(layer1, layer2)\\n\\n# Union de polygones\\nunion_result = processing.union(africa_boundaries)\\n\\n# Buffer autour des géométries\\nbuffered = processing.buffer(africa_boundaries, distance=1000)  # 1km\\n\\n# Découpage (clip) d&quot;une couche par une autre\\nclipped = processing.clip(data_layer, boundary_layer)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.2.2.2 Agrégation Spatiale</h4>
+                  <p class="text-slate-300 mb-4">
+                    Regroupement et agrégation de données géospatiales selon différents critères.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Agrégation par région
+aggregated = processing.aggregate_by_attribute(data, group_by='region')
+
+# Dissolution de frontières
+dissolved = processing.dissolve(africa_boundaries, by='continent')
+
+# Statistiques spatiales
+stats = processing.spatial_statistics(data, stat_type='area')
+print(stats.describe())</code></pre>
+                    <button onclick="copyToClipboard('# Agrégation par région\\naggregated = processing.aggregate_by_attribute(data, group_by=&quot;region&quot;)\\n\\n# Dissolution de frontières\\ndissolved = processing.dissolve(africa_boundaries, by=&quot;continent&quot;)\\n\\n# Statistiques spatiales\\nstats = processing.spatial_statistics(data, stat_type=&quot;area&quot;)\\nprint(stats.describe())')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="visualisation-de-données">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">4.3</span> Module de Visualisation
+              </h2>
+              
+              <div class="mb-8">
+                <h3 class="text-xl font-semibold text-blue-300 mb-4">4.3.1 Cartes Statiques</h3>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.3.1.1 Cartes Choroplèthes</h4>
+                  <p class="text-slate-300 mb-4">
+                    Création de cartes thématiques avec codage couleur basé sur des valeurs statistiques.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python">from cartograpy import visualization as viz
+
+# Carte choroplèthe basique
+viz.choropleth_map(
+    data=africa_boundaries,
+    column='population',
+    title='Population en Afrique',
+    colormap='viridis'
+)
+
+# Carte avec classification personnalisée
+viz.choropleth_map(
+    data=africa_boundaries,
+    column='gdp_per_capita',
+    classification='quantiles',
+    n_classes=5,
+    title='PIB par Habitant'
+)</code></pre>
+                    <button onclick="copyToClipboard('from cartograpy import visualization as viz\\n\\n# Carte choroplèthe basique\\nviz.choropleth_map(\\n    data=africa_boundaries,\\n    column=&quot;population&quot;,\\n    title=&quot;Population en Afrique&quot;,\\n    colormap=&quot;viridis&quot;\\n)\\n\\n# Carte avec classification personnalisée\\nviz.choropleth_map(\\n    data=africa_boundaries,\\n    column=&quot;gdp_per_capita&quot;,\\n    classification=&quot;quantiles&quot;,\\n    n_classes=5,\\n    title=&quot;PIB par Habitant&quot;\\n)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.3.1.2 Cartes Multi-Couches</h4>
+                  <p class="text-slate-300 mb-4">
+                    Superposition de plusieurs couches de données géospatiales.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Création d'une carte multi-couches
+fig, ax = viz.create_map(figsize=(12, 8))
+
+# Ajouter les frontières
+viz.add_layer(ax, africa_boundaries, 
+              color='lightgray', edgecolor='black')
+
+# Ajouter les villes
+viz.add_points(ax, cities_data, 
+               size_column='population',
+               color='red')
+
+# Ajouter une légende et un titre
+viz.add_legend(ax, title='Villes et Frontières')
+viz.set_title(ax, 'Carte de l\'Afrique')</code></pre>
+                    <button onclick="copyToClipboard('# Création d&quot;une carte multi-couches\\nfig, ax = viz.create_map(figsize=(12, 8))\\n\\n# Ajouter les frontières\\nviz.add_layer(ax, africa_boundaries, \\n              color=&quot;lightgray&quot;, edgecolor=&quot;black&quot;)\\n\\n# Ajouter les villes\\nviz.add_points(ax, cities_data, \\n               size_column=&quot;population&quot;,\\n               color=&quot;red&quot;)\\n\\n# Ajouter une légende et un titre\\nviz.add_legend(ax, title=&quot;Villes et Frontières&quot;)\\nviz.set_title(ax, &quot;Carte de l&quot;Afrique&quot;)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-8">
+                <h3 class="text-xl font-semibold text-blue-300 mb-4">4.3.2 Cartes Interactives</h3>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.3.2.1 Cartes Folium</h4>
+                  <p class="text-slate-300 mb-4">
+                    Création de cartes interactives pour l'exploration web.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Carte interactive avec Folium
+interactive_map = viz.create_interactive_map(
+    data=africa_boundaries,
+    center=[0, 20],  # Lat, Lon
+    zoom=4
+)
+
+# Ajouter des popups informatifs
+viz.add_popup_info(interactive_map, 
+                   columns=['name', 'population'])
+
+# Sauvegarder la carte
+interactive_map.save('africa_interactive.html')</code></pre>
+                    <button onclick="copyToClipboard('# Carte interactive avec Folium\\ninteractive_map = viz.create_interactive_map(\\n    data=africa_boundaries,\\n    center=[0, 20],  # Lat, Lon\\n    zoom=4\\n)\\n\\n# Ajouter des popups informatifs\\nviz.add_popup_info(interactive_map, \\n                   columns=[&quot;name&quot;, &quot;population&quot;])\\n\\n# Sauvegarder la carte\\ninteractive_map.save(&quot;africa_interactive.html&quot;)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="mb-6">
+                  <h4 class="text-lg font-medium text-green-300 mb-3">4.3.2.2 Tableaux de Bord</h4>
+                  <p class="text-slate-300 mb-4">
+                    Création de tableaux de bord interactifs avec Plotly Dash.
+                  </p>
+                  
+                  <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                    <pre><code class="language-python"># Création d'un tableau de bord
+dashboard = viz.create_dashboard(
+    title="Analyse Géospatiale de l'Afrique"
+)
+
+# Ajouter une carte choroplèthe interactive
+dashboard.add_choropleth(
+    data=africa_boundaries,
+    column='population',
+    title='Population par Pays'
+)
+
+# Ajouter des graphiques complémentaires
+dashboard.add_bar_chart(
+    x='country', y='gdp',
+    title='PIB par Pays'
+)
+
+# Lancer le serveur
+dashboard.run(port=8050)</code></pre>
+                    <button onclick="copyToClipboard('# Création d&quot;un tableau de bord\\ndashboard = viz.create_dashboard(\\n    title=&quot;Analyse Géospatiale de l&quot;Afrique&quot;\\n)\\n\\n# Ajouter une carte choroplèthe interactive\\ndashboard.add_choropleth(\\n    data=africa_boundaries,\\n    column=&quot;population&quot;,\\n    title=&quot;Population par Pays&quot;\\n)\\n\\n# Ajouter des graphiques complémentaires\\ndashboard.add_bar_chart(\\n    x=&quot;country&quot;, y=&quot;gdp&quot;,\\n    title=&quot;PIB par Pays&quot;\\n)\\n\\n# Lancer le serveur\\ndashboard.run(port=8050)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                      Copier
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="examples">
+              <h2 class="text-2xl font-bold text-white mb-6">
+                <span class="text-blue-400">5.</span> Exemples Pratiques
+              </h2>
+              
+              <div class="mb-8">
+                <h3 class="text-xl font-semibold text-blue-300 mb-4">5.1 Analyse Démographique Complète</h3>
+                <p class="text-slate-300 mb-4">
+                  Exemple complet d'analyse démographique utilisant toutes les fonctionnalités de cartograpy.
+                </p>
+                
+                <div class="bg-slate-800/50 rounded-lg p-6 mb-4 relative">
+                  <pre><code class="language-python">
+# Exemple complet : Analyse démographique de l'Afrique de l'Ouest
+import cartograpy
+from cartograpy import data, processing, visualization as viz
+
+# 1. Acquisition des données
+bound = data.GeoBoundaries()
+west_africa = bound.continents("africa")
+
+# Filtrer l'Afrique de l'Ouest
+west_african_countries = ['SEN', 'MLI', 'BFA', 'CIV', 'GHA', 'TGO', 'BEN', 'NER']
+wa_data = bound.adm(west_african_countries, "ADM0")
+
+# 2. Traitement des données
+# Nettoyage et simplification
+clean_data = processing.clean_geometries(wa_data)
+simplified = processing.simplify_geometries(clean_data, tolerance=0.01)
+
+# Calcul des aires
+areas = processing.calculate_areas(simplified)
+simplified['area_km2'] = areas / 1000000  # Conversion en km²
+
+# 3. Visualisation
+# Carte choroplèthe de la superficie
+viz.choropleth_map(
+    data=simplified,
+    column='area_km2',
+    title='Superficie des Pays d\'Afrique de l\'Ouest',
+    colormap='YlOrRd',
+    figsize=(12, 8)
+)
+
+# Carte interactive
+interactive_map = viz.create_interactive_map(
+    data=simplified,
+    center=[12, -2],
+    zoom=5
+)
+
+viz.add_popup_info(interactive_map, 
+                   columns=['shapeName', 'area_km2'])
+
+interactive_map.save('west_africa_analysis.html')
+print("Analyse terminée ! Carte sauvegardée dans 'west_africa_analysis.html'")</code></pre>
+                  <button onclick="copyToClipboard('# Exemple complet : Analyse démographique de l&quot;Afrique de l&quot;Ouest\\nimport cartograpy\\nfrom cartograpy import data, processing, visualization as viz\\n\\n# 1. Acquisition des données\\nbound = data.GeoBoundaries()\\nwest_africa = bound.continents(&quot;africa&quot;)\\n\\n# Filtrer l&quot;Afrique de l&quot;Ouest\\nwest_african_countries = [&quot;SEN&quot;, &quot;MLI&quot;, &quot;BFA&quot;, &quot;CIV&quot;, &quot;GHA&quot;, &quot;TGO&quot;, &quot;BEN&quot;, &quot;NER&quot;]\\nwa_data = bound.adm(west_african_countries, &quot;ADM0&quot;)\\n\\n# 2. Traitement des données\\n# Nettoyage et simplification\\nclean_data = processing.clean_geometries(wa_data)\\nsimplified = processing.simplify_geometries(clean_data, tolerance=0.01)\\n\\n# Calcul des aires\\nareas = processing.calculate_areas(simplified)\\nsimplified[&quot;area_km2&quot;] = areas / 1000000  # Conversion en km²\\n\\n# 3. Visualisation\\n# Carte choroplèthe de la superficie\\nviz.choropleth_map(\\n    data=simplified,\\n    column=&quot;area_km2&quot;,\\n    title=&quot;Superficie des Pays d&quot;Afrique de l&quot;Ouest&quot;,\\n    colormap=&quot;YlOrRd&quot;,\\n    figsize=(12, 8)\\n)\\n\\n# Carte interactive\\ninteractive_map = viz.create_interactive_map(\\n    data=simplified,\\n    center=[12, -2],\\n    zoom=5\\n)\\n\\nviz.add_popup_info(interactive_map, \\n                   columns=[&quot;shapeName&quot;, &quot;area_km2&quot;])\\n\\ninteractive_map.save(&quot;west_africa_analysis.html&quot;)\\nprint(&quot;Analyse terminée ! Carte sauvegardée dans &quot;west_africa_analysis.html&quot;&quot;)')" class="copy-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                    Copier
+                  </button>
+                </div>
+
+                <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+                  <h4 class="text-blue-300 font-semibold mb-2">💡 Image de Démonstration</h4>
+                  <p class="text-slate-300 mb-3">Voici un exemple de résultat de visualisation avec cartograpy :</p>
+                  <img src="carte_demo.png" alt="Exemple de carte générée avec cartograpy" class="w-full rounded-lg border border-slate-600">
+                  <p class="text-sm text-slate-400 mt-2">Carte choroplèthe générée avec le module de visualisation de cartograpy</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer Links -->
+      <div class="border-t border-slate-700 pt-8 mt-16">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="flex items-center space-x-3 mb-4 md:mb-0">
+            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold text-sm">C</span>
+            </div>
+            <span class="font-display font-bold text-xl text-white">cartograpy</span>
+          </div>
+          
+          <div class="flex items-center space-x-6 text-slate-400">
+            <a href="https://github.com/Mr-KAM/cartograpy" class="hover:text-white transition-colors flex items-center space-x-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>GitHub</span>
+            </a>
+            <span class="text-sm">MIT License © 2024 Mr-KAM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+<script>hljs.highlightAll();</script>
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({ 
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#3b82f6',
+        primaryTextColor: '#ffffff',
+        primaryBorderColor: '#1e40af',
+        lineColor: '#64748b',
+        secondaryColor: '#1e293b',
+        tertiaryColor: '#0f172a',
+        background: '#0f172a',
+        secondaryBackground: '#1e293b',
+        tertiaryBackground: '#334155'
+      }
+    });
+
+    // Copy to clipboard functionality
+    window.copyToClipboard = async function(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        
+        // Show toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-up';
+        toast.textContent = 'Copié dans le presse-papiers !';
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.classList.add('opacity-0');
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
+        }, 2000);
+      } catch (err) {
+        console.error('Erreur lors de la copie:', err);
+      }
+    };
+
+    // Copy code snippets
+    window.copyCode = function(code) {
+      const decodedCode = decodeURIComponent(code);
+      copyToClipboard(decodedCode);
+    };
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          const offset = 80; // Height of fixed navbar
+          const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+          
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    // Add scroll effect to navbar
+    window.addEventListener('scroll', () => {
+      const navbar = document.querySelector('nav');
+      if (window.scrollY > 100) {
+        navbar.classList.add('bg-slate-900/95');
+        navbar.classList.remove('bg-slate-900/80');
+      } else {
+        navbar.classList.add('bg-slate-900/80');
+        navbar.classList.remove('bg-slate-900/95');
+      }
+    });
+
+    // Highlight active section in sidebar
+    function updateActiveSection() {
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('.space-y-2 a[href^="#"]');
+      
+      let current = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        if (sectionTop <= 100) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      navLinks.forEach(link => {
+        link.classList.remove('bg-slate-700', 'text-white');
+        link.classList.add('text-slate-300');
+        
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('bg-slate-700', 'text-white');
+          link.classList.remove('text-slate-300');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateActiveSection);
+    updateActiveSection(); // Initial call
+  </script>
+</body>
+</html>
