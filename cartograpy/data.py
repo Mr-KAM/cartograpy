@@ -1,6 +1,3 @@
-"""
-Runfola, Daniel, Community Contributors, and [v4.0: Lindsey Rogers, Joshua Habib, Sidonie Horn, Sean Murphy, Dorian Miller, Hadley Day, Lydia Troup, Dominic Fornatora, Natalie Spage, Kristina Pupkiewicz, Michael Roth, Carolina Rivera, Charlie Altman, Isabel Schruer, Tara McLaughlin, Russ Biddle, Renee Ritchey, Emily Topness, James Turner, Sam Updike, Helena Buckman, Neel Simpson, Jason Lin], [v2.0: Austin Anderson, Heather Baier, Matt Crittenden, Elizabeth Dowker, Sydney Fuhrig, Seth Goodman, Grace Grimsley, Rachel Layko, Graham Melville, Maddy Mulder, Rachel Oberman, Joshua Panganiban, Andrew Peck, Leigh Seitz, Sylvia Shea, Hannah Slevin, Rebecca Yougerman, Lauren Hobbs]. "geoBoundaries: A global database of political administrative boundaries." Plos one 15, no. 4 (2020): e0231866.
-"""
 # Packages pour les données vectorelles
 import pandas as pd
 import geopandas as gpd
@@ -20,12 +17,186 @@ import requests
 import zipfile
 import io
 import os
+from pathlib import Path
 
 # Packages pour les données de la worldbank
 import wbdata
 
 # Package pour les données de OSM 
 import osmnx as ox
+
+# Packages pour la lecture des données Rasters
+import numpy as np
+import rasterio
+from rasterio.warp import calculate_default_transform, reproject, Resampling
+from rasterio.crs import CRS
+import tempfile
+from urllib.parse import urlencode
+import warnings
+import datetime
+
+
+def load(filepath):
+    """
+    Charge un fichier vectoriel ou raster selon son extension.
+
+    Paramètres :
+        filepath : str
+            Chemin complet vers le fichier à charger. L'extension détermine le type de données.
+
+    Retourne :
+        - geopandas.GeoDataFrame : Pour les fichiers vectoriels (.shp, .geojson, .gpkg, .kml, .gpx)
+        - pandas.DataFrame : Pour les fichiers tabulaires (.csv, .parquet)
+        - rasterio.io.DatasetReader : Pour les fichiers raster (.tif, .tiff)
+
+    Formats supportés :
+        Vectoriels : shp, geojson, gpkg, kml, gpx, csv, parquet
+        Rasters : tif, tiff
+
+    Exemples :
+        >>> # Charger un fichier shapefile
+        >>> gdf = load("data/ma_carte.shp")
+        
+        >>> # Charger un fichier GeoJSON
+        >>> gdf = load("data/ma_carte.geojson")
+        
+        >>> # Charger un fichier raster
+        >>> raster = load("data/elevation.tif")
+
+    Raises :
+        ValueError : Si le format de fichier n'est pas supporté
+        RuntimeError : Si une erreur survient lors de la lecture du fichier
+    """
+    ext = filepath.split('.')[-1].lower()
+
+    # Vector formats
+    vector_exts = ['shp', 'geojson', 'gpkg', 'kml', 'gpx', 'csv', 'parquet']
+    raster_exts = ['tif', 'tiff']
+
+    if ext in vector_exts:
+        if ext in ['shp', 'geojson', 'gpkg']:
+            return gpd.read_file(filepath)
+        elif ext == 'kml':
+            try:
+                return gpd.read_file(filepath, driver="LIBKML")
+            except Exception as e:
+                raise RuntimeError(f"Erreur lors de la lecture KML : {e}")
+        elif ext == 'gpx':
+            try:
+                return gpd.read_file(filepath, layer="tracks")
+            except Exception as e:
+                raise RuntimeError(f"Erreur lors de la lecture GPX : {e}")
+        elif ext == 'csv':
+            return pd.read_csv(filepath)
+        elif ext == 'parquet':
+            return pd.read_parquet(filepath)
+    elif ext in raster_exts:
+        try:
+            return rasterio.open(filepath)
+        except Exception as e:
+            raise RuntimeError(f"Erreur lors de la lecture raster : {e}")
+    else:
+        raise ValueError(f"Format '{ext}' non supporté pour le chargement.")
+
+
+def save(data, file_extension, filename="output", timestamp=False, raster_meta=None):
+    """
+    Sauvegarde un fichier raster ou vectoriel selon le type.
+
+    Paramètres :
+        data : Données à sauvegarder.
+            - Pour les données vectorielles : GeoDataFrame ou DataFrame pandas.
+            - Pour les données raster : DatasetReader rasterio ou tableau numpy.
+        file_extension : str
+            Extension du fichier de sortie (ex: 'geojson', 'shp', 'tif').
+        filename : str, optionnel
+            Nom de base du fichier (sans extension). Par défaut "output".
+        timestamp : bool, optionnel
+            Si True, ajoute un horodatage au nom du fichier. Par défaut False.
+        raster_meta : dict, optionnel
+            Métadonnées raster nécessaires si `data` est un tableau numpy.
+            Doit contenir au minimum : crs, transform, width, height, dtype, count.
+
+    Retour :
+        str : Chemin complet vers le fichier sauvegardé.
+
+    Exemples :
+        >>> # Sauvegarder un GeoDataFrame en GeoJSON
+        >>> gdf = gpd.GeoDataFrame(...)
+        >>> save(gdf, 'geojson', 'ma_carte')
+
+        >>> # Sauvegarder un tableau numpy en TIFF avec métadonnées
+        >>> import rasterio
+        >>> meta = {'crs': 'EPSG:4326', 'transform': affine_transform, ...}
+        >>> save(array, 'tif', 'mon_raster', raster_meta=meta)
+    """
+    file_extension = file_extension.lower()
+    if timestamp:
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{filename}_{now}"
+    output_path = f"{filename}.{file_extension}"
+
+    # VECTOR
+    if isinstance(data, (gpd.GeoDataFrame, pd.DataFrame)):
+        if file_extension == 'geojson':
+            data.to_file(output_path, driver='GeoJSON')
+        elif file_extension == 'shp':
+            data.to_file(output_path, driver='ESRI Shapefile')
+        elif file_extension == 'gpkg':
+            data.to_file(output_path, driver='GPKG')
+        elif file_extension == 'kml':
+            try:
+                data.to_file(output_path, driver='KML')
+            except Exception as e:
+                print(f"❌ Impossible d'écrire un fichier KML ici : {e}")
+        elif file_extension == 'csv':
+            if isinstance(data, gpd.GeoDataFrame):
+                data = data.drop(columns='geometry', errors='ignore')
+            data.to_csv(output_path, index=False)
+        elif file_extension == 'parquet':
+            if isinstance(data, gpd.GeoDataFrame):
+                data = data.drop(columns='geometry', errors='ignore')
+            data.to_parquet(output_path, index=False)
+        elif file_extension == 'xlsx':
+            if isinstance(data, gpd.GeoDataFrame):
+                data = data.drop(columns='geometry', errors='ignore')
+            data.to_excel(output_path, index=False)
+        elif file_extension == 'feather':
+            if isinstance(data, gpd.GeoDataFrame):
+                data = data.drop(columns='geometry', errors='ignore')
+            data.to_feather(output_path)
+
+    # RASTER
+    elif isinstance(data, rasterio.io.DatasetReader):
+        with rasterio.open(output_path, 'w', **data.meta) as dst:
+            dst.write(data.read())
+    elif isinstance(data, np.ndarray):
+        if raster_meta is None:
+            raise ValueError("raster_meta est requis pour enregistrer un tableau numpy raster.")
+        with rasterio.open(output_path, 'w', **raster_meta) as dst:
+            dst.write(data)
+
+    else:
+        raise TypeError("Type de données non pris en charge pour la sauvegarde.")
+
+    print(f"✅ Fichier sauvegardé : {os.path.abspath(output_path)}")
+    return output_path
+
+
+def list_geofiles(folder_path):
+    """
+    Liste tous les fichiers géospatiaux (vecteurs et rasters) dans un dossier.
+    """
+    geospatial_extensions = ['.shp', '.geojson', '.gpkg', '.kml', '.csv', '.parquet', '.gpx', '.tif', '.tiff']
+
+    files = []
+    for root, _, filenames in os.walk(folder_path):
+        for filename in filenames:
+            if any(filename.lower().endswith(ext) for ext in geospatial_extensions):
+                files.append(os.path.join(root, filename))
+    return files
+
+
 
 class GeoBoundaries:
     """
@@ -928,9 +1099,9 @@ class OSM :
 
 
 class Hydro :
-    def __init__(self):
+    def __init__(self,output_dir="data/hydro"):
         
-        self.output_dir="hydrorivers_data"
+        self.output_dir=output_dir
         self.valid_regions=['af', 'as', 'au', 'eu', 'na', 'sa']
 
 
@@ -1008,15 +1179,16 @@ class Hydro :
 
 
 
-
 class DEM:
     """
-    Classe pour télécharger des données numériques de terrain (DEM) pour une zone donnée.
+    Classe pour télécharger des données numériques de terrain (DEM) en utilisant
+    des packages Python existants spécialisés.
     
     Sources de données supportées:
-    - SRTM (Shuttle Radar Topography Mission) - résolution 30m
-    - ASTER GDEM - résolution 30m
-    - OpenTopography API
+    - SRTM via le package 'elevation'
+    - USGS 3DEP via le package 'py3dep' 
+    - ALOS World 3D via 'elevation'
+    - ASTER GDEM via 'elevation'
     """
     
     def __init__(self, output_dir: str = "./dem_data"):
@@ -1026,73 +1198,72 @@ class DEM:
         Args:
             output_dir (str): Répertoire de sortie pour sauvegarder les fichiers DEM
         """
-        self.output_dir = output_dir
-        self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Python DEM Downloader 1.0'
-        })
+        self.output_dir = Path(output_dir)
+        self.downloaded_list = []  # Liste des DEMs téléchargés
         
         # Créer le répertoire de sortie s'il n'existe pas
-        os.makedirs(output_dir, exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        
+        print("Packages requis: pip install elevation py3dep geopandas rasterio")
     
-    def download_srtm_opentopography(self, 
-                                   bbox: Tuple[float, float, float, float],
-                                   output_format: str = 'GTiff',
-                                   resolution: float = 0.000277777778) -> str:
+    def download_srtm_elevation(self, 
+                               bbox: Tuple[float, float, float, float],
+                               resolution: int = 1) -> str:
         """
-        Télécharge des données SRTM via l'API OpenTopography.
+        Télécharge des données SRTM via le package 'elevation'.
         
         Args:
             bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
-            output_format (str): Format de sortie ('GTiff', 'AAIGrid', 'HFA')
-            resolution (float): Résolution en degrés (défaut: ~30m)
+            resolution (int): Résolution en arc-seconds (1 ou 3)
         
         Returns:
             str: Chemin vers le fichier téléchargé
         """
+        try:
+            import elevation
+        except ImportError:
+            raise ImportError("Le package 'elevation' est requis: pip install elevation")
+        
         west, south, east, north = bbox
         
         # Validation de la bbox
         if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
             raise ValueError("Bounding box invalide. Vérifiez les coordonnées.")
         
-        # URL de l'API OpenTopography SRTM
-        base_url = "https://cloud.sdsc.edu/v1/products"
+        print(f"Téléchargement SRTM (resolution: {resolution}s) pour la zone: {bbox}")
         
-        params = {
-            'demtype': 'SRTM_GL1',  # SRTM Global 1 arc-second (~30m)
-            'west': west,
-            'south': south,
-            'east': east,
-            'north': north,
-            'outputFormat': output_format,
-            'API_Key': 'demoapikeyot2022'  # Clé démo publique
-        }
-        
-        print(f"Téléchargement SRTM pour la zone: {bbox}")
+        # Nom du fichier de sortie
+        filename = f"srtm_{resolution}s_{west}_{south}_{east}_{north}.tif"
+        filepath = self.output_dir / filename
         
         try:
-            response = self.session.get(base_url, params=params, timeout=300)
-            response.raise_for_status()
+            # Télécharger avec le package elevation
+            elevation.clip(
+                bounds=(west, south, east, north),
+                output=str(filepath),
+                product=f'SRTM{resolution}'  # SRTM1 (30m) ou SRTM3 (90m)
+            )
             
-            # Nom du fichier de sortie
-            filename = f"srtm_{west}_{south}_{east}_{north}.tif"
-            filepath = os.path.join(self.output_dir, filename)
-            
-            # Sauvegarder le fichier
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
+            # Ajouter à la liste des téléchargements
+            dem_info = {
+                'path': str(filepath),
+                'bbox': bbox,
+                'source': f'SRTM{resolution}',
+                'resolution': f'{resolution} arc-second',
+                'package': 'elevation'
+            }
+            self.downloaded_list.append(dem_info)
             
             print(f"DEM SRTM téléchargé: {filepath}")
-            return filepath
+            return str(filepath)
             
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             raise Exception(f"Erreur lors du téléchargement SRTM: {e}")
     
-    def download_aster_gdem(self, 
-                           bbox: Tuple[float, float, float, float]) -> str:
+    def download_alos_elevation(self, 
+                               bbox: Tuple[float, float, float, float]) -> str:
         """
-        Télécharge des données ASTER GDEM via OpenTopography.
+        Télécharge des données ALOS World 3D-30m via le package 'elevation'.
         
         Args:
             bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
@@ -1100,79 +1271,199 @@ class DEM:
         Returns:
             str: Chemin vers le fichier téléchargé
         """
+        try:
+            import elevation
+        except ImportError:
+            raise ImportError("Le package 'elevation' est requis: pip install elevation")
+        
         west, south, east, north = bbox
         
-        base_url = "https://cloud.sdsc.edu/v1/products"
+        print(f"Téléchargement ALOS World 3D-30m pour la zone: {bbox}")
         
-        params = {
-            'demtype': 'ASTER_GL1',  # ASTER Global 1 arc-second
-            'west': west,
-            'south': south,
-            'east': east,
-            'north': north,
-            'outputFormat': 'GTiff',
-            'API_Key': 'demoapikeyot2022'
-        }
-        
-        print(f"Téléchargement ASTER GDEM pour la zone: {bbox}")
+        # Nom du fichier de sortie
+        filename = f"alos_30m_{west}_{south}_{east}_{north}.tif"
+        filepath = self.output_dir / filename
         
         try:
-            response = self.session.get(base_url, params=params, timeout=300)
-            response.raise_for_status()
+            # Télécharger ALOS World 3D-30m
+            elevation.clip(
+                bounds=(west, south, east, north),
+                output=str(filepath),
+                product='ALOS30'  # ALOS World 3D 30m
+            )
             
-            filename = f"aster_{west}_{south}_{east}_{north}.tif"
-            filepath = os.path.join(self.output_dir, filename)
+            # Ajouter à la liste des téléchargements
+            dem_info = {
+                'path': str(filepath),
+                'bbox': bbox,
+                'source': 'ALOS World 3D-30m',
+                'resolution': '30 meters',
+                'package': 'elevation'
+            }
+            self.downloaded_list.append(dem_info)
             
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
+            print(f"DEM ALOS téléchargé: {filepath}")
+            return str(filepath)
             
-            print(f"DEM ASTER téléchargé: {filepath}")
-            return filepath
-            
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Erreur lors du téléchargement ASTER: {e}")
+        except Exception as e:
+            raise Exception(f"Erreur lors du téléchargement ALOS: {e}")
     
-    def get_elevation_point(self, lat: float, lon: float) -> Optional[float]:
+    def download_usgs_3dep(self, 
+                          bbox: Tuple[float, float, float, float],
+                          resolution: int = 30,
+                          crs: str = "EPSG:4326") -> str:
+        """
+        Télécharge des données USGS 3DEP via le package 'py3dep'.
+        
+        Args:
+            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
+            resolution (int): Résolution en mètres (10, 30, 60)
+            crs (str): Système de coordonnées de référence
+        
+        Returns:
+            str: Chemin vers le fichier téléchargé
+        """
+        try:
+            import py3dep
+        except ImportError:
+            raise ImportError("Le package 'py3dep' est requis: pip install py3dep")
+        
+        west, south, east, north = bbox
+        
+        print(f"Téléchargement USGS 3DEP (résolution: {resolution}m) pour la zone: {bbox}")
+        
+        try:
+            # Créer un GeoDataFrame avec la bbox
+            geometry = [box(west, south, east, north)]
+            gdf = gpd.GeoDataFrame(geometry=geometry, crs="EPSG:4326")
+            
+            # Si CRS différent, reprojeter
+            if crs != "EPSG:4326":
+                gdf = gdf.to_crs(crs)
+            
+            # Télécharger les données 3DEP
+            dem = py3dep.get_map(
+                gdf.bounds.iloc[0].values,  # [minx, miny, maxx, maxy]
+                resolution=resolution,
+                geo_crs=crs,
+                crs=crs
+            )
+            
+            # Nom du fichier de sortie
+            filename = f"usgs_3dep_{resolution}m_{west}_{south}_{east}_{north}.tif"
+            filepath = self.output_dir / filename
+            
+            # Sauvegarder le DEM
+            dem.rio.to_raster(str(filepath))
+            
+            # Ajouter à la liste des téléchargements
+            dem_info = {
+                'path': str(filepath),
+                'bbox': bbox,
+                'source': 'USGS 3DEP',
+                'resolution': f'{resolution} meters',
+                'crs': crs,
+                'package': 'py3dep'
+            }
+            self.downloaded_list.append(dem_info)
+            
+            print(f"DEM USGS 3DEP téléchargé: {filepath}")
+            return str(filepath)
+            
+        except Exception as e:
+            # Fallback pour les zones hors USA
+            if "outside" in str(e).lower() or "usa" in str(e).lower():
+                print("Zone hors USA, USGS 3DEP non disponible pour cette région")
+                return None
+            raise Exception(f"Erreur lors du téléchargement USGS 3DEP: {e}")
+    
+    def download_nasadem(self, 
+                        bbox: Tuple[float, float, float, float]) -> str:
+        """
+        Télécharge des données NASADEM via le package 'elevation'.
+        
+        Args:
+            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
+        
+        Returns:
+            str: Chemin vers le fichier téléchargé
+        """
+        try:
+            import elevation
+        except ImportError:
+            raise ImportError("Le package 'elevation' est requis: pip install elevation")
+        
+        west, south, east, north = bbox
+        
+        print(f"Téléchargement NASADEM pour la zone: {bbox}")
+        
+        # Nom du fichier de sortie
+        filename = f"nasadem_{west}_{south}_{east}_{north}.tif"
+        filepath = self.output_dir / filename
+        
+        try:
+            # Télécharger NASADEM
+            elevation.clip(
+                bounds=(west, south, east, north),
+                output=str(filepath),
+                product='NASADEM'  # NASADEM ~30m
+            )
+            
+            # Ajouter à la liste des téléchargements
+            dem_info = {
+                'path': str(filepath),
+                'bbox': bbox,
+                'source': 'NASADEM',
+                'resolution': '~30 meters',
+                'package': 'elevation'
+            }
+            self.downloaded_list.append(dem_info)
+            
+            print(f"DEM NASADEM téléchargé: {filepath}")
+            return str(filepath)
+            
+        except Exception as e:
+            raise Exception(f"Erreur lors du téléchargement NASADEM: {e}")
+    
+    def get_elevation_point(self, lat: float, lon: float, source: str = "srtm") -> Optional[float]:
         """
         Obtient l'élévation pour un point spécifique.
         
         Args:
             lat (float): Latitude en degrés décimaux
             lon (float): Longitude en degrés décimaux
+            source (str): Source de données ("srtm", "alos", "nasadem")
         
         Returns:
             float: Élévation en mètres, ou None si erreur
         """
         try:
-            # Utilise l'API OpenTopography pour un point
-            url = "https://cloud.sdsc.edu/v1/products"
-            params = {
-                'demtype': 'SRTM_GL1',
-                'west': lon - 0.001,
-                'south': lat - 0.001,
-                'east': lon + 0.001,
-                'north': lat + 0.001,
-                'outputFormat': 'GTiff',
-                'API_Key': 'demoapikeyot2022'
-            }
+            # Créer une petite bbox autour du point
+            buffer = 0.01  # ~1km
+            bbox = (lon - buffer, lat - buffer, lon + buffer, lat + buffer)
             
-            response = self.session.get(url, params=params, timeout=60)
-            response.raise_for_status()
+            # Télécharger temporairement
+            if source.lower() == "srtm":
+                temp_dem = self.download_srtm_elevation(bbox, resolution=1)
+            elif source.lower() == "alos":
+                temp_dem = self.download_alos_elevation(bbox)
+            elif source.lower() == "nasadem":
+                temp_dem = self.download_nasadem(bbox)
+            else:
+                temp_dem = self.download_srtm_elevation(bbox, resolution=1)
             
-            # Sauvegarder temporairement et lire
-            with tempfile.NamedTemporaryFile(suffix='.tif', delete=False) as tmp:
-                tmp.write(response.content)
-                tmp_path = tmp.name
+            if not temp_dem:
+                return None
             
-            try:
-                with rasterio.open(tmp_path) as dataset:
-                    # Obtenir la valeur au centre
-                    row, col = dataset.index(lon, lat)
+            # Lire la valeur au point
+            with rasterio.open(temp_dem) as dataset:
+                row, col = dataset.index(lon, lat)
+                if 0 <= row < dataset.height and 0 <= col < dataset.width:
                     elevation = dataset.read(1)[row, col]
                     return float(elevation) if elevation != dataset.nodata else None
-            finally:
-                os.unlink(tmp_path)
-                
+                else:
+                    return None
+                    
         except Exception as e:
             print(f"Erreur pour obtenir l'élévation au point ({lat}, {lon}): {e}")
             return None
@@ -1199,19 +1490,105 @@ class DEM:
                     'chemin': dem_path,
                     'crs': str(dataset.crs),
                     'dimensions': (dataset.width, dataset.height),
-                    'resolution': dataset.transform[0],
+                    'resolution_x': abs(dataset.transform[0]),
+                    'resolution_y': abs(dataset.transform[4]),
                     'bbox': dataset.bounds,
                     'elevation_min': float(np.min(data)),
                     'elevation_max': float(np.max(data)),
                     'elevation_mean': float(np.mean(data)),
                     'elevation_std': float(np.std(data)),
-                    'nodata_value': dataset.nodata
+                    'nodata_value': dataset.nodata,
+                    'size_mb': os.path.getsize(dem_path) / (1024*1024)
                 }
                 
                 return stats
                 
         except Exception as e:
             return {'erreur': str(e)}
+    
+    def create_hillshade(self, 
+                        dem_path: str, 
+                        azimuth: float = 315.0, 
+                        altitude: float = 45.0) -> str:
+        """
+        Crée un ombrage (hillshade) à partir d'un DEM.
+        
+        Args:
+            dem_path (str): Chemin vers le DEM
+            azimuth (float): Azimut de la source lumineuse (0-360°)
+            altitude (float): Altitude de la source lumineuse (0-90°)
+        
+        Returns:
+            str: Chemin vers le fichier hillshade
+        """
+        try:
+            import richdem as rd
+            
+            # Charger le DEM
+            dem = rd.LoadGDAL(dem_path)
+            
+            # Calculer le hillshade
+            hillshade = rd.TerrainAttribute(dem, attrib='hillshade', azimuth=azimuth, angle=altitude)
+            
+            # Nom du fichier de sortie
+            output_path = dem_path.replace('.tif', '_hillshade.tif')
+            
+            # Sauvegarder
+            rd.SaveGDAL(output_path, hillshade)
+            
+            print(f"Hillshade créé: {output_path}")
+            return output_path
+            
+        except ImportError:
+            print("Le package 'richdem' est recommandé pour le hillshade: pip install richdem")
+            # Fallback avec numpy/scipy
+            return self._create_hillshade_numpy(dem_path, azimuth, altitude)
+        except Exception as e:
+            print(f"Erreur lors de la création du hillshade: {e}")
+            return None
+    
+    def _create_hillshade_numpy(self, dem_path: str, azimuth: float, altitude: float) -> str:
+        """
+        Version fallback du hillshade avec numpy.
+        """
+        try:
+            output_path = dem_path.replace('.tif', '_hillshade.tif')
+            
+            with rasterio.open(dem_path) as src:
+                elevation = src.read(1).astype(np.float64)
+                
+                # Calculer les gradients
+                x, y = np.gradient(elevation)
+                
+                # Convertir les angles en radians
+                azimuth_rad = np.radians(360.0 - azimuth + 90.0)
+                altitude_rad = np.radians(altitude)
+                
+                # Calculer la pente et l'aspect
+                slope = np.pi/2. - np.arctan(np.sqrt(x*x + y*y))
+                aspect = np.arctan2(-x, y)
+                
+                # Calculer l'ombrage
+                hillshade = np.sin(altitude_rad) * np.sin(slope) + \
+                           np.cos(altitude_rad) * np.cos(slope) * \
+                           np.cos(azimuth_rad - aspect)
+                
+                # Normaliser entre 0 et 255
+                hillshade = np.clip((hillshade * 255), 0, 255).astype(np.uint8)
+                
+                # Sauvegarder
+                profile = src.profile.copy()
+                profile.update(dtype=rasterio.uint8, count=1)
+                
+                with rasterio.open(output_path, 'w', **profile) as dst:
+                    dst.write(hillshade, 1)
+            
+            print(f"Hillshade créé: {output_path}")
+            return output_path
+            
+        except Exception as e:
+            print(f"Erreur lors de la création du hillshade: {e}")
+            return None
     
     def reproject_dem(self, 
                      input_path: str, 
@@ -1261,95 +1638,311 @@ class DEM:
         print(f"DEM reprojeté sauvegardé: {output_path}")
         return output_path
     
-    def create_hillshade(self, dem_path: str, azimuth: float = 315.0, altitude: float = 45.0) -> str:
+    def get_downloaded_list(self) -> List[dict]:
         """
-        Crée un ombrage (hillshade) à partir d'un DEM.
-        
-        Args:
-            dem_path (str): Chemin vers le DEM
-            azimuth (float): Azimut de la source lumineuse (0-360°)
-            altitude (float): Altitude de la source lumineuse (0-90°)
+        Retourne la liste des DEMs téléchargés.
         
         Returns:
-            str: Chemin vers le fichier hillshade
+            List[dict]: Liste des informations sur les DEMs téléchargés
         """
-        try:
-            import numpy as np
-            from scipy import ndimage
-            
-            output_path = dem_path.replace('.tif', '_hillshade.tif')
-            
-            with rasterio.open(dem_path) as src:
-                elevation = src.read(1).astype(np.float64)
-                
-                # Calculer les gradients
-                x, y = np.gradient(elevation)
-                
-                # Convertir les angles en radians
-                azimuth_rad = np.radians(360.0 - azimuth + 90.0)
-                altitude_rad = np.radians(altitude)
-                
-                # Calculer la pente et l'aspect
-                slope = np.pi/2. - np.arctan(np.sqrt(x*x + y*y))
-                aspect = np.arctan2(-x, y)
-                
-                # Calculer l'ombrage
-                hillshade = np.sin(altitude_rad) * np.sin(slope) + \
-                           np.cos(altitude_rad) * np.cos(slope) * \
-                           np.cos(azimuth_rad - aspect)
-                
-                # Normaliser entre 0 et 255
-                hillshade = np.clip((hillshade * 255), 0, 255).astype(np.uint8)
-                
-                # Sauvegarder
-                profile = src.profile.copy()
-                profile.update(dtype=rasterio.uint8, count=1)
-                
-                with rasterio.open(output_path, 'w', **profile) as dst:
-                    dst.write(hillshade, 1)
-            
-            print(f"Hillshade créé: {output_path}")
-            return output_path
-            
-        except ImportError:
-            print("scipy est requis pour créer un hillshade")
-            return None
-        except Exception as e:
-            print(f"Erreur lors de la création du hillshade: {e}")
-            return None
+        return self.downloaded_list
+    
+    def clear_downloaded_list(self):
+        """
+        Vide la liste des DEMs téléchargés.
+        """
+        self.downloaded_list.clear()
+        print("Liste des téléchargements vidée.")
+    
+    def print_downloaded_summary(self):
+        """
+        Affiche un résumé des DEMs téléchargés.
+        """
+        if not self.downloaded_list:
+            print("Aucun DEM téléchargé.")
+            return
+        
+        print(f"\n=== Résumé des {len(self.downloaded_list)} DEM(s) téléchargé(s) ===")
+        for i, dem in enumerate(self.downloaded_list, 1):
+            print(f"\n{i}. Source: {dem['source']} (via {dem['package']})")
+            print(f"   Fichier: {Path(dem['path']).name}")
+            print(f"   Zone: {dem['bbox']}")
+            print(f"   Résolution: {dem['resolution']}")
+            if 'crs' in dem:
+                print(f"   CRS: {dem['crs']}")
+    
+    def auto_download(self, 
+                     bbox: Tuple[float, float, float, float],
+                     prefer_high_res: bool = True) -> str:
+        """
+        Télécharge automatiquement le meilleur DEM disponible pour la zone.
+        
+        Args:
+            bbox (tuple): Bounding box (west, south, east, north)
+            prefer_high_res (bool): Préférer la haute résolution
+        
+        Returns:
+            str: Chemin vers le DEM téléchargé
+        """
+        west, south, east, north = bbox
+        
+        print(f"Téléchargement automatique pour la zone: {bbox}")
+        
+        # Détecter si c'est aux USA pour 3DEP
+        is_usa = (-180 <= west <= -65 and 15 <= south <= 72 and 
+                  -180 <= east <= -65 and 15 <= north <= 72)
+        
+        # Ordre de priorité selon les préférences
+        if prefer_high_res:
+            methods = [
+                ('USGS 3DEP 10m', lambda: self.download_usgs_3dep(bbox, resolution=10) if is_usa else None),
+                ('USGS 3DEP 30m', lambda: self.download_usgs_3dep(bbox, resolution=30) if is_usa else None),
+                ('ALOS World 3D', lambda: self.download_alos_elevation(bbox)),
+                ('SRTM 1s', lambda: self.download_srtm_elevation(bbox, resolution=1)),
+                ('NASADEM', lambda: self.download_nasadem(bbox))
+            ]
+        else:
+            methods = [
+                ('SRTM 1s', lambda: self.download_srtm_elevation(bbox, resolution=1)),
+                ('ALOS World 3D', lambda: self.download_alos_elevation(bbox)),
+                ('NASADEM', lambda: self.download_nasadem(bbox)),
+                ('USGS 3DEP 30m', lambda: self.download_usgs_3dep(bbox, resolution=30) if is_usa else None)
+            ]
+        
+        # Essayer chaque méthode
+        for method_name, method_func in methods:
+            try:
+                print(f"Tentative avec {method_name}...")
+                result = method_func()
+                if result:
+                    print(f"Succès avec {method_name}")
+                    return result
+            except Exception as e:
+                print(f"Échec avec {method_name}: {e}")
+                continue
+        
+        raise Exception("Impossible de télécharger des données DEM pour cette zone")
 
-# Exemple d'utilisation
-if __name__ == "__main__":
-    # Créer une instance du téléchargeur
-    dem_downloader = DEMDownloader(output_dir="./mes_dem")
-    
-    # Définir une zone d'intérêt (exemple: région autour du Mont Blanc)
-    # Format: (ouest, sud, est, nord) en degrés décimaux
-    bbox_mont_blanc = (6.8, 45.8, 7.0, 46.0)
-    
-    try:
-        # Télécharger les données SRTM
-        print("=== Téléchargement SRTM ===")
-        srtm_path = dem_downloader.download_srtm_opentopography(bbox_mont_blanc)
+    def download(self, 
+                bbox: Tuple[float, float, float, float],
+                source: Optional[str] = None,
+                resolution: Optional[Union[str, float]] = None) -> str:
+        """
+        Télécharge un DEM depuis une source priorisée (API → fallback local).
         
-        # Analyser le DEM
-        print("\n=== Analyse du DEM ===")
-        stats = dem_downloader.analyze_dem(srtm_path)
-        for key, value in stats.items():
-            print(f"{key}: {value}")
+        Args:
+            bbox (tuple): (west, south, east, north)
+            source (str, optional): 'srtm', 'etopo', 'openelevation', 'fallback'
+            resolution (str|float, optional): résolution selon source
         
-        # Obtenir l'élévation d'un point spécifique
-        print("\n=== Élévation ponctuelle ===")
-        lat, lon = 45.9, 6.9  # Approximativement le Mont Blanc
-        elevation = dem_downloader.get_elevation_point(lat, lon)
-        print(f"Élévation au point ({lat}, {lon}): {elevation} m")
+        Returns:
+            str: chemin vers le fichier DEM
+        """
+        try_sources = [source] if source else ['srtm', 'etopo', 'openelevation']
         
-        # Créer un hillshade
-        print("\n=== Création d'un hillshade ===")
-        hillshade_path = dem_downloader.create_hillshade(srtm_path)
-        if hillshade_path:
-            print(f"Hillshade créé avec succès")
+        for src in try_sources:
+            try:
+                print(f"👉 Tentative avec la source '{src}'...")
+                if src == 'srtm':
+                    res = resolution if resolution else 0.000277777778
+                    return self.download_srtm_opentopography(bbox, resolution=res)
+                elif src == 'etopo':
+                    res = resolution if resolution else '1m'
+                    return self.download_etopo_noaa(bbox, resolution=res)
+                elif src in ['open-elevation', 'openelevation']:
+                    res = resolution if resolution else 1000
+                    return self.download_elevation_api(bbox, samples=int(res))
+            except Exception as e:
+                print(f"⚠️ Échec avec la source '{src}': {e}")
+                continue
+
+        # 🛟 Fallback avec `elevation` (basé sur SRTM)
+        try:
+            print("🚨 Aucune source API n'a fonctionné. Fallback avec le package Python 'elevation'...")
+            import elevation
+            from rasterio import transform as rtransform
+
+            bounds = {'left': bbox[0], 'bottom': bbox[1], 'right': bbox[2], 'top': bbox[3]}
+            filename = f"fallback_srtm_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]}.tif"
+            filepath = os.path.join(self.output_dir, filename)
+
+            elevation.clip(bounds=bounds, output=filepath, product='SRTM1')
+            elevation.clean()
+
+            print(f"✅ Fichier DEM téléchargé avec fallback (elevation): {filepath}")
+            return filepath
         
-    except Exception as e:
-        print(f"Erreur: {e}")
-        print("Vérifiez votre connexion internet et les paramètres de la bbox")
+        except Exception as e:
+            print(f"⚠️ Échec du fallback avec 'elevation': {e}")
+
+
+    def download_elevation_api(self, 
+                             bbox: Tuple[float, float, float, float],
+                             samples: int = 1500) -> str:
+        """
+        Télécharge des données d'élévation via Open-Elevation API (gratuit, sans clé).
+        
+        Args:
+            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
+            samples (int): Nombre d'échantillons par dimension (max 100x100 recommandé)
+        
+        Returns:
+            str: Chemin vers le fichier téléchargé
+        """
+        west, south, east, north = bbox
+        
+        # Validation
+        if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
+            raise ValueError("Bounding box invalide. Vérifiez les coordonnées.")
+        
+        if samples > 100:
+            print("Attention: samples > 100 peut causer des timeouts")
+            samples = 100
+        
+        print(f"Téléchargement via Open-Elevation API pour la zone: {bbox}")
+        print(f"Résolution: {samples}x{samples} points")
+        
+        # Créer une grille de points
+        lats = np.linspace(south, north, samples)
+        lons = np.linspace(west, east, samples)
+        
+        # Initialiser la matrice d'élévation
+        elevation_data = np.zeros((samples, samples))
+        
+        # API Open-Elevation (limite: 100 points par requête)
+        base_url = "https://api.open-elevation.com/api/v1/lookup"
+        
+        batch_size = 100
+        total_points = samples * samples
+        processed = 0
+        
+        for i, lat in enumerate(lats):
+            for j in range(0, len(lons), batch_size):
+                batch_lons = lons[j:j+batch_size]
+                
+                # Préparer les locations pour cette batch
+                locations = []
+                for lon in batch_lons:
+                    locations.append({"latitude": lat, "longitude": lon})
+                
+                try:
+                    response = self.session.post(
+                        base_url,
+                        json={"locations": locations},
+                        timeout=30
+                    )
+                    response.raise_for_status()
+                    
+                    results = response.json()['results']
+                    
+                    # Remplir la matrice d'élévation
+                    for k, result in enumerate(results):
+                        col_idx = j + k
+                        if col_idx < len(lons):
+                            elevation_data[i, col_idx] = result['elevation']
+                    
+                    processed += len(results)
+                    if processed % 500 == 0:
+                        print(f"Progression: {processed}/{total_points} points")
+                
+                except requests.exceptions.RequestException as e:
+                    print(f"Erreur pour la batch lat={lat:.4f}: {e}")
+                    # Remplir avec des valeurs par défaut en cas d'erreur
+                    try :
+                        response = self.session.post(
+                            base_url,
+                            json={"locations": locations},
+                            timeout=30
+                        )
+                        response.raise_for_status()
+                        
+                        results = response.json()['results']
+                        
+                        # Remplir la matrice d'élévation
+                        for k, result in enumerate(results):
+                            col_idx = j + k
+                            if col_idx < len(lons):
+                                elevation_data[i, col_idx] = result['elevation']
+                        
+                        processed += len(results)
+                        if processed % 500 == 0:
+                            print(f"Progression: {processed}/{total_points} points")
+                    except :
+                        try :
+                            response = self.session.post(
+                                base_url,
+                                json={"locations": locations},
+                                timeout=30
+                            )
+                            response.raise_for_status()
+                            
+                            results = response.json()['results']
+                            
+                            # Remplir la matrice d'élévation
+                            for k, result in enumerate(results):
+                                col_idx = j + k
+                                if col_idx < len(lons):
+                                    elevation_data[i, col_idx] = result['elevation']
+                            
+                            processed += len(results)
+                            if processed % 500 == 0:
+                                print(f"Progression: {processed}/{total_points} points")
+                        except :
+
+                            response = self.session.post(
+                                base_url,
+                                json={"locations": locations},
+                                timeout=30
+                            )
+                            response.raise_for_status()
+                            
+                            results = response.json()['results']
+                            
+                            # Remplir la matrice d'élévation
+                            for k, result in enumerate(results):
+                                col_idx = j + k
+                                if col_idx < len(lons):
+                                    elevation_data[i, col_idx] = result['elevation']
+                            
+                            processed += len(results)
+                            if processed % 500 == 0:
+                                print(f"Progression: {processed}/{total_points} points")
+                            # except :
+                            #     # Remplir avec des valeurs par défaut en cas d'erreur
+                            #     for k in range(len(batch_lons)):
+                            #         col_idx = j + k
+                            #         if col_idx < len(lons):
+                            #             elevation_data[i, col_idx] = -9999
+        
+        # Créer le GeoTIFF
+        filename = f"open_elevation_{west}_{south}_{east}_{north}_{samples}x{samples}.tif"
+        filepath = os.path.join(self.output_dir, filename)
+        
+        # Transformation géospatiale
+        transform = rasterio.transform.from_bounds(west, south, east, north, samples, samples)
+        
+        # Sauvegarder
+        with rasterio.open(
+            filepath, 'w',
+            driver='GTiff',
+            height=samples,
+            width=samples,
+            count=1,
+            dtype=np.float32,
+            crs='EPSG:4326',
+            transform=transform,
+            nodata=-9999
+        ) as dst:
+            dst.write(elevation_data.astype(np.float32), 1)
+        
+        # Ajouter à la liste des téléchargements
+        dem_info = {
+            'path': filepath,
+            'bbox': bbox,
+            'source': 'Open-Elevation API',
+            'resolution': f"{samples}x{samples}"
+        }
+        self.downloaded_list.append(dem_info)
+        
+        print(f"DEM Open-Elevation téléchargé: {filepath}")
+        return filepath
