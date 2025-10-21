@@ -56,7 +56,8 @@ dependencies = [
     "meteostat==1.7.4",
     "pyfonts==1.0.0",
     "plotjs==0.0.3",
-    "RiverREM==0.0.1"
+    "RiverREM==0.0.1",
+    "morethemes==0.5.1"
 
 ]
 

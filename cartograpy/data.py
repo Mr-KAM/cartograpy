@@ -1204,7 +1204,7 @@ class DEM:
         # Créer le répertoire de sortie s'il n'existe pas
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
-        print("Packages requis: pip install elevation py3dep geopandas rasterio")
+        # print("Packages requis: pip install elevation py3dep geopandas rasterio")
     
     def download_srtm_elevation(self, 
                                bbox: Tuple[float, float, float, float],
