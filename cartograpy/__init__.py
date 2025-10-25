@@ -9,3 +9,4 @@ from .mapper import *
 from .styling import *
 from .geocoder import *
 from .converter import *
+from .srtm_core import*
