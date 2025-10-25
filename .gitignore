@@ -9,7 +9,7 @@ hydrorivers_data/
 temp_countries/
 cache/
 _extensions/
-
+*.tif
 # === Dossiers de données volumineuses à ignorer ===
 
 __pycache__/
