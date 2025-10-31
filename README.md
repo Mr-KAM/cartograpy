@@ -180,18 +180,7 @@ world.head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -384,18 +373,6 @@ civ_data.head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -478,19 +455,6 @@ countries_data["mali"].head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
-`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -572,9 +536,9 @@ code ISO, la source des données, etc.
 metadata_civ = bound.metadata("CIV", "ADM0")
 
 print(list(metadata_civ.keys()))
-```
+```bash
 
-    ['boundaryID', 'boundaryName', 'boundaryISO', 'boundaryYearRepresented', 'boundaryType', 'boundaryCanonical', 'boundarySource', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySourceURL', 'sourceDataUpdateDate', 'buildDate', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'worldBankIncomeGroup', 'admUnitCount', 'meanVertices', 'minVertices', 'maxVertices', 'meanPerimeterLengthKM', 'minPerimeterLengthKM', 'maxPerimeterLengthKM', 'meanAreaSqKM', 'minAreaSqKM', 'maxAreaSqKM', 'staticDownloadLink', 'gjDownloadURL', 'tjDownloadURL', 'imagePreview', 'simplifiedGeometryGeoJSON']
+['boundaryID', 'boundaryName', 'boundaryISO', 'boundaryYearRepresented', 'boundaryType', 'boundaryCanonical', 'boundarySource', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySourceURL', 'sourceDataUpdateDate', 'buildDate', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'worldBankIncomeGroup', 'admUnitCount', 'meanVertices', 'minVertices', 'maxVertices', 'meanPerimeterLengthKM', 'minPerimeterLengthKM', 'maxPerimeterLengthKM', 'meanAreaSqKM', 'minAreaSqKM', 'maxAreaSqKM', 'staticDownloadLink', 'gjDownloadURL', 'tjDownloadURL', 'imagePreview', 'simplifiedGeometryGeoJSON']
 
 ```python
 # Le continent
@@ -657,19 +621,6 @@ resultat_geocode[0]
     Géocodage terminé.
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -721,18 +672,6 @@ resultat_geocode[0]
     Géocodage terminé.
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -841,18 +780,6 @@ resultats_reverse[0]
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -994,18 +921,6 @@ rivers_africa.head()
     Les données pour la région AF sont déjà présentes.
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1201,18 +1116,7 @@ schools.head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1412,18 +1316,7 @@ highway.head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1623,18 +1516,7 @@ buildings.head()
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1891,18 +1773,7 @@ wb.get_data({"AG.AID.CREL.MT": "Aide nette"},"CIV",date=("2010","2012"))
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1976,18 +1847,7 @@ hexagon_data.head()
       return ogr_read(
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2083,18 +1943,7 @@ donnee_bouna.head()
       path="data\other\Département de Bouna.geojson"
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
