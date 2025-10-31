@@ -1,9 +1,10 @@
-
-
+<center> 
 <img src="data/logo.png" alt="Logo" style="width: 30vw;min-width:200px">
+
 <p>
 Mapping in Python, the way it was always meant to be.
-</p>
+</p> 
+</center>
 
 # **PRESENTATION**
 
@@ -24,54 +25,54 @@ Voici ce que vous pouvez faire avec `cartograpy`:
 
 ## **Téléchargement et accès rapide aux données géographiques**
 
--   **Découpages administratifs** : Téléchargez en une ligne les limites
-    administratives de n’importe quel pays, région ou commune.
--   **Données de continents** : Récupérez facilement les frontières
-    vectorielles des continents ou sous-continents.
--   **Réseaux hydrographiques** : Accédez à des couches de rivières,
-    fleuves ou plans d’eau.
--   **Géocodage des localités** : Enrichissez vos jeux de données en
-    rétrouvant des zones géographiques associées à des adresses ou des
-    noms de lieux.
+- **Découpages administratifs** : Téléchargez en une ligne les limites
+  administratives de n’importe quel pays, région ou commune.
+- **Données de continents** : Récupérez facilement les frontières
+  vectorielles des continents ou sous-continents.
+- **Réseaux hydrographiques** : Accédez à des couches de rivières,
+  fleuves ou plans d’eau.
+- **Géocodage des localités** : Enrichissez vos jeux de données en
+  rétrouvant des zones géographiques associées à des adresses ou des
+  noms de lieux.
 
 ## **Pre-processing et processing des données**
 
--   **Importez** tout type de données vectorielles ou matricielles :
-    Shapefile, GeoJSON, KML, GPX, GPKG, CSV, Parquet, etc.
--   **Exportez** vos analyses dans le format de votre choix, prêt pour
-    QGIS, ArcGIS ou le web.
--   **Listing automatique** : Repérez en un coup d’œil tous les fichiers
-    géographiques présents dans un dossier.
--   **Convertissez** vos jeux de données entre tous les formats courants
-    en une seule commande.
--   **Calculs de centroïdes**, jointures spatiales et attributaires,
-    fusion de tables, création de nouveaux attributs dynamiquement à
-    partir d’expressions Python.
--   **Manipulation de DataFrame et GeoDataFrame** pour l’analyse de
-    données géographiques.
--   **Découpage de données vectoriel** par emprise ou par masque.
+- **Importez** tout type de données vectorielles ou matricielles :
+  Shapefile, GeoJSON, KML, GPX, GPKG, CSV, Parquet, etc.
+- **Exportez** vos analyses dans le format de votre choix, prêt pour
+  QGIS, ArcGIS ou le web.
+- **Listing automatique** : Repérez en un coup d’œil tous les fichiers
+  géographiques présents dans un dossier.
+- **Convertissez** vos jeux de données entre tous les formats courants
+  en une seule commande.
+- **Calculs de centroïdes**, jointures spatiales et attributaires,
+  fusion de tables, création de nouveaux attributs dynamiquement à
+  partir d’expressions Python.
+- **Manipulation de DataFrame et GeoDataFrame** pour l’analyse de
+  données géographiques.
+- **Découpage de données vectoriel** par emprise ou par masque.
 
 ## **Cartographie et visualisation**
 
--   **Créez des cartes personnalisées** (choroplèthes, points,
-    polygones, tuiles raster, etc.) à l’aide de la classe puissante
-    `Map`.
--   **Ajoutez des éléments de style** : flèches du nord, barres
-    d’échelle, graticules, labels, titres personnalisés, palettes de
-    couleurs, etc.
--   **Gérez vos légendes** et choisissez parmi plusieurs styles adaptés
-    (scientifique, épuré, académique…).
--   **Exportez vos cartes** directement en PNG, SVG ou autres formats.
--   **Accédez à des styles de polices et de nombreuses palettes de
-    couleurs**, y compris les palettes personnalisées, Seaborn et
-    Matplotlib .
+- **Créez des cartes personnalisées** (choroplèthes, points,
+  polygones, tuiles raster, etc.) à l’aide de la classe puissante
+  `Map`.
+- **Ajoutez des éléments de style** : flèches du nord, barres
+  d’échelle, graticules, labels, titres personnalisés, palettes de
+  couleurs, etc.
+- **Gérez vos légendes** et choisissez parmi plusieurs styles adaptés
+  (scientifique, épuré, académique…).
+- **Exportez vos cartes** directement en PNG, SVG ou autres formats.
+- **Accédez à des styles de polices et de nombreuses palettes de
+  couleurs**, y compris les palettes personnalisées, Seaborn et
+  Matplotlib .
 
 # **INSTALLATION**
 
 Pour installer le package cartograpy, vous pouvez utiliser pip. Ouvrez
 votre terminal ou invite de commande et exécutez la commande suivante :
 
-``` bash
+```bash
 pip install cartograpy
 ```
 
@@ -81,7 +82,7 @@ pip install cartograpy
 > virtuel. Vous pouvez le faire avec pew ou virtual env ou anaconda.
 > J’utilise très souvant `pew` pour cela.
 >
-> ``` bash
+> ```bash
 > pip install pew
 > pip new myenv
 > pew workon myenv
@@ -97,8 +98,8 @@ données - **mapper** : pour la visualisation des données sur une carte -
 
 <figure class=''>
 
-<img src="test_files\figure-markdown_strict\mermaid-figure-1.png"
-style="width:11.36in;height:2.06in" />
+`<img src="test_files\figure-markdown_strict\mermaid-figure-1.png"
+style="width:11.36in;height:2.06in" />`
 
 </figure>
 
@@ -119,8 +120,8 @@ création de vos cartes.
 
 <figure class=''>
 
-<img src="test_files\figure-markdown_strict\mermaid-figure-4.png"
-style="width:15in;height:3.06in" />
+`<img src="test_files\figure-markdown_strict\mermaid-figure-4.png"
+style="width:15in;height:3.06in" />`
 
 </figure>
 
@@ -130,7 +131,7 @@ Toutes les données sont formatées pour être retournées sous forme de
 Vous devez commencer par importer `data` de `cartograpy` de la manière
 suivante :
 
-``` python
+```python
 from cartograpy import data
 ```
 
@@ -145,7 +146,7 @@ from cartograpy import data
 Commencez par créer un objet de la classe `GeoBoundaries`, disponible
 dans le module `data`.
 
-``` python
+```python
 bound = data.GeoBoundaries()
 ```
 
@@ -154,7 +155,7 @@ bound = data.GeoBoundaries()
 Vous pouvez commencer par consulter la liste des noms de continents
 disponibles avec la méthode `list_continents_names`.
 
-``` python
+```python
 bound.list_continents_names()
 ```
 
@@ -175,7 +176,7 @@ bound.list_continents_names()
 Pour obtenir une geodataframe des continents, vous pouvez utiliser la
 méthode `continents`
 
-``` python
+```python
 world = bound.continents() # World ici est une geodataframe des continents
 world.head()
 ```
@@ -192,8 +193,7 @@ world.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -234,7 +234,7 @@ world.head()
 
 </div>
 
-``` python
+```python
 # Vous pouvez la visualiser facilement en utilsant 'plot()' de geopandas
 world.plot()
 ```
@@ -245,7 +245,7 @@ Si vous souhaitez obtenir la limite d’un seul continent, il vous suffit
 de passer son nom en paramètre. Dans l’exemple ci-dessous, on récupère
 la limite de l’Afrique.
 
-``` python
+```python
 africa=bound.continents("africa")
 africa.plot()
 ```
@@ -256,7 +256,7 @@ Si vous souhaitez obtenir la limite de plusieurs continents, il vous
 suffit de passer leur liste en paramètre. Dans l’exemple ci-dessous, on
 récupère la limite de l’Afrique et de l’Asie.
 
-``` python
+```python
 africa_asia=bound.continents(["africa","asia"])
 africa_asia.plot()
 ```
@@ -276,7 +276,7 @@ obtenir la liste des pays valides, vous pouvez utiliser la méthode
 `list_countries()` de l’objet `GeoBoundaries`. L’exemple si dessous
 renvoi la liste des 10 premiers noms pays.
 
-``` python
+```python
 # Affiche les 10 premiers pays
 bound.list_countries()[0:10]
 ```
@@ -297,7 +297,7 @@ méthode `get_iso3`. Dans l’exemple suivant, on essaye d’obtenir le code
 ISO de tous les pays contenant le mot-clé « burk ». La méthode renvoie
 le code ISO3 du Burkina Faso, car c’est le seul pays trouvé.
 
-``` python
+```python
 # Pour obtenir le code iso de tous les pays du monde contenant le mot clé "burk"
 bound.get_iso3("burk")
 ```
@@ -307,7 +307,7 @@ bound.get_iso3("burk")
 Si plusieurs pays correspondent, elle retourne une liste de tuples (nom
 du pays, code ISO3).
 
-``` python
+```python
 bound.get_iso3("con")  # Exemple pour obtenir le code ISO d'un pays
 ```
 
@@ -332,42 +332,40 @@ Il existe *cinq (5)* niveaux de subdivisions administratives
 disponibles. Pour les afficher, utilisez la méthode `admLevels` comme
 suit :
 
-``` python
+```python
 print(bound.adminLevels())
 ```
 
-
-    | Niveau GeoBoundaries | Nom commun (FR)           | Nom commun (EN)       |
-    | -------------------- | ------------------------- | --------------------- |
-    | ADM0                 | Pays                      | Country               |
-    | ADM1                 | Région / État / Province  | State / Region        |
-    | ADM2                 | Département / District    | District / County     |
-    | ADM3                 | Sous-préfecture / Commune | Subdistrict / Commune |
-    | ADM4                 | Village / Localité        | Village / Locality    |
-    | ADM5                 | Quartier / Secteur        | Neighborhood / Sector |
-            
+| Niveau GeoBoundaries | Nom commun (FR)            | Nom commun (EN)       |
+| -------------------- | -------------------------- | --------------------- |
+| ADM0                 | Pays                       | Country               |
+| ADM1                 | Région / État / Province | State / Region        |
+| ADM2                 | Département / District    | District / County     |
+| ADM3                 | Sous-préfecture / Commune | Subdistrict / Commune |
+| ADM4                 | Village / Localité        | Village / Locality    |
+| ADM5                 | Quartier / Secteur         | Neighborhood / Sector |
 
 > \[!NOTE\]
 >
-> -   Le nombre de niveaux dépend du pays. Certains pays s’arrêtent à
->     ADM2, d’autres vont jusqu’à ADM4 ou ADM5.
-> -   Le nom réel des subdivisions varie d’un pays à l’autre (ex. :
->     « State », « Region », « Province », « Department », etc.).
-> -   GeoBoundaries propose toujours au moins le niveau ADM0 (frontière
->     nationale).
+> - Le nombre de niveaux dépend du pays. Certains pays s’arrêtent à
+>   ADM2, d’autres vont jusqu’à ADM4 ou ADM5.
+> - Le nom réel des subdivisions varie d’un pays à l’autre (ex. :
+>   « State », « Region », « Province », « Department », etc.).
+> - GeoBoundaries propose toujours au moins le niveau ADM0 (frontière
+>   nationale).
 
 Pour savoir si un niveau administratif est disponible pour un pays, vous
 pouvez utiliser la méthode `is_valid_adm` de l’objet `GeoBoundaries`.
 Voici un exemple :
 
-``` python
+```python
 # Exemple pour vérifier si le niveau ADM1 est valide pour la Côte d'Ivoire
 print(bound.is_valid_adm("CIV","ADM1"))
 ```
 
     True
 
-``` python
+```python
 # Exemple pour vérifier le niveau admin minimum pour la Côte d'Ivoire
 print(bound._get_smallest_adm("CIV")) 
 ```
@@ -380,7 +378,7 @@ subdivision administrative, vous pouvez alors télécharger les données.
 
 **Télécharger les données administratives d’un pays:**
 
-``` python
+```python
 
 # Exemple : Récupérer les données administratives des régions de la cote d'ivoire
 civ_data = bound.adm("CIV", "ADM2")
@@ -399,8 +397,7 @@ civ_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -465,7 +462,7 @@ civ_data.head()
 
 </div>
 
-``` python
+```python
 civ_data.plot()
 ```
 
@@ -476,7 +473,7 @@ civ_data.plot()
 Assurez-vous que le niveau administratif (`adminLevel`) est bien
 disponible pour tous les pays présents dans la liste à télécharger.
 
-``` python
+```python
 # Exemple : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)
 countries_data = bound.adm(["SEN", "mali"], "ADM2")
 countries_data["mali"].head()
@@ -494,8 +491,7 @@ countries_data["mali"].head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -571,7 +567,7 @@ son code ISO (`CIV`). Vous pouvez ensuite explorer les différentes
 informations disponibles, comme le nom du territoire, sa superficie, son
 code ISO, la source des données, etc.
 
-``` python
+```python
 
 # Récupérer les métadonnées disponibles pour la Côte d'Ivoire
 metadata_civ = bound.metadata("CIV", "ADM0")
@@ -581,28 +577,28 @@ print(list(metadata_civ.keys()))
 
     ['boundaryID', 'boundaryName', 'boundaryISO', 'boundaryYearRepresented', 'boundaryType', 'boundaryCanonical', 'boundarySource', 'boundaryLicense', 'licenseDetail', 'licenseSource', 'boundarySourceURL', 'sourceDataUpdateDate', 'buildDate', 'Continent', 'UNSDG-region', 'UNSDG-subregion', 'worldBankIncomeGroup', 'admUnitCount', 'meanVertices', 'minVertices', 'maxVertices', 'meanPerimeterLengthKM', 'minPerimeterLengthKM', 'maxPerimeterLengthKM', 'meanAreaSqKM', 'minAreaSqKM', 'maxAreaSqKM', 'staticDownloadLink', 'gjDownloadURL', 'tjDownloadURL', 'imagePreview', 'simplifiedGeometryGeoJSON']
 
-``` python
+```python
 # Le continent
 metadata_civ["Continent"]
 ```
 
     'Africa'
 
-``` python
+```python
 # Sous région
 metadata_civ["UNSDG-subregion"]
 ```
 
     'Western Africa'
 
-``` python
+```python
 # Région 
 metadata_civ["UNSDG-region"]
 ```
 
     'Sub-Saharan Africa'
 
-``` python
+```python
 # Url de la prévisualisation de la carte du pays
 url_img=metadata_civ["imagePreview"]
 url_img
@@ -610,7 +606,7 @@ url_img
 
     'https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CIV/ADM0/geoBoundaries-CIV-ADM0-PREVIEW.png'
 
-``` python
+```python
 # Afficher l'image de prévisualisation dans le notebook
 from IPython.display import Image, display
 
@@ -631,7 +627,7 @@ plusieurs adresses en utilisant les méthodes `geocode` et
 
 Commencez par creer un objet Geocoder :
 
-``` python
+```python
 from cartograpy import data
 geocoder= data.Geocoder()
 ```
@@ -650,7 +646,7 @@ fois, en passant une liste d’adresses en paramètre.
 
 **Géocoder une adresse**
 
-``` python
+```python
 addresse = "bouaké"
 resultat_geocode = geocoder.geocode(addresse)
 
@@ -673,8 +669,7 @@ resultat_geocode[0]
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -705,7 +700,7 @@ resultat_geocode[0]
 
 </div>
 
-``` python
+```python
 # Adresse non trouvée
 resultat_geocode[1]
 ```
@@ -714,7 +709,7 @@ resultat_geocode[1]
 
 **Geocoder une liste d’adresses**
 
-``` python
+```python
 liste_adresses = ["Abidjan", "Yamoussoukro", "Bouaké", "Korhogo","Man CI", "","portbouet"]
 resultat_geocode=geocoder.geocode(liste_adresses)
 
@@ -737,8 +732,7 @@ resultat_geocode[0]
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -809,7 +803,7 @@ resultat_geocode[0]
 
 </div>
 
-``` python
+```python
 # Adresses non trouvée
 resultat_geocode[1]
 ```
@@ -833,14 +827,14 @@ cartograpy propose une méthode dédiée pour effectuer facilement ce type
 de requête à partir d’une ou plusieurs coordonnées. Il s’agit de la
 méthode `reverse_geocode` et retourne la même chose que `geocode`.
 
-``` python
+```python
 resultats_reverse=geocoder.reverse_geocode((48.8566, 2.3522))
 ```
 
     Début du géocodage inverse (coordonnées -> adresse) de 1 point(s)...
     Géocodage inverse (coordonnées -> adresse) terminé.
 
-``` python
+```python
 # trouvé
 resultats_reverse[0]
 # On a ici les résulats de l'hotel de ville de Paris
@@ -858,8 +852,7 @@ resultats_reverse[0]
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -890,7 +883,7 @@ resultats_reverse[0]
 
 </div>
 
-``` python
+```python
 # Pas trouvé 
 resultats_reverse[1]
 ```
@@ -909,7 +902,7 @@ l’étude des ressources en eau à large échelle.
 
 Vous pouvez commencer par créer un objet `Hydro`.
 
-``` python
+```python
 from cartograpy import data
 hydro=data.Hydro()
 ```
@@ -920,29 +913,28 @@ Pour obtenir des informations sur les différentes variables de la
 GeoDataFrame d’hydrorivers retournée, vous pouvez utiliser la méthode
 `describe_variables()` de `Hydro`.
 
-``` python
+```python
 print(hydro.describe_variables())
 ```
 
+    📘 Description des variables HydroRIVERS :
 
-        📘 Description des variables HydroRIVERS :
-    | Nom          | Signification                    | Unité / Type         |
-    | ------------ | -------------------------------- | -------------------- |
-    | `HYRIV_ID`   | ID du tronçon                    | entier               |
-    | `NEXT_DOWN`  | ID du tronçon aval               | entier               |
-    | `MAIN_RIV`   | ID du fleuve principal           | entier               |
-    | `LENGTH_KM`  | Longueur du segment              | km (float)           |
-    | `DIST_DN_KM` | Distance jusqu'à l'embouchure    | km (float)           |
-    | `DIST_UP_KM` | Distance depuis la source        | km (float)           |
-    | `CATCH_SKM`  | Surface locale du bassin versant | km² (float)          |
-    | `UPLAND_SKM` | Surface totale en amont          | km² (float)          |
-    | `ENDORHEIC`  | 1 = bassin fermé, 0 = ouvert     | booléen (int)        |
-    | `DIS_AV_CMS` | Débit moyen                      | m³/s (float)         |
-    | `ORD_STRA`   | Ordre de Strahler                | entier               |
-    | `ORD_CLAS`   | Classe hiérarchique simplifiée   | entier               |
-    | `ORD_FLOW`   | Ordre de flux                    | entier               |
-    | `HYBAS_L12`  | Code du bassin de niveau 12      | entier (catégorique) |
-      
+| Nom            | Signification                    | Unité / Type         |
+| -------------- | -------------------------------- | --------------------- |
+| `HYRIV_ID`   | ID du tronçon                   | entier                |
+| `NEXT_DOWN`  | ID du tronçon aval              | entier                |
+| `MAIN_RIV`   | ID du fleuve principal           | entier                |
+| `LENGTH_KM`  | Longueur du segment              | km (float)            |
+| `DIST_DN_KM` | Distance jusqu'à l'embouchure   | km (float)            |
+| `DIST_UP_KM` | Distance depuis la source        | km (float)            |
+| `CATCH_SKM`  | Surface locale du bassin versant | km² (float)          |
+| `UPLAND_SKM` | Surface totale en amont          | km² (float)          |
+| `ENDORHEIC`  | 1 = bassin fermé, 0 = ouvert    | booléen (int)        |
+| `DIS_AV_CMS` | Débit moyen                     | m³/s (float)         |
+| `ORD_STRA`   | Ordre de Strahler                | entier                |
+| `ORD_CLAS`   | Classe hiérarchique simplifiée | entier                |
+| `ORD_FLOW`   | Ordre de flux                    | entier                |
+| `HYBAS_L12`  | Code du bassin de niveau 12      | entier (catégorique) |
 
 #### **Télécharger les données de réseau hydrographique**
 
@@ -951,7 +943,7 @@ lui passer le code de la région (continent) en paramètre.
 
 **Liste des régions:**
 
-``` python
+```python
 hydro.valid_regions
 ```
 
@@ -994,7 +986,7 @@ hydro.valid_regions
 
 **Téléchargement des données**
 
-``` python
+```python
 rivers_africa = hydro.download(region="af")  # Afrique
 rivers_africa.head()
 ```
@@ -1013,8 +1005,7 @@ rivers_africa.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1133,7 +1124,7 @@ rivers_africa.head()
 
 </div>
 
-``` python
+```python
 rivers_africa.plot()
 ```
 
@@ -1151,7 +1142,7 @@ simple et puissante pour télécharger des données issues d’OpenStreetMap
 
 Pour commencer, creez un objet `OSM`.
 
-``` python
+```python
 from cartograpy import data
 osm = data.OSM()
 ```
@@ -1164,28 +1155,28 @@ géographiques à télécharger (bâtiments, routes, écoles, hôpitaux, etc.).
 Ces outils facilitent la préparation des filtres à appliquer pour
 récupérer les données OSM qui correspondent à votre projet.
 
--   **`list_tags`** permet d’obtenir la liste des tags par grande
-    famille (bâtiment, voirie, loisirs, etc.) :
+- **`list_tags`** permet d’obtenir la liste des tags par grande
+  famille (bâtiment, voirie, loisirs, etc.) :
 
-``` python
+```python
 print(osm.list_tags('amenity'))  # Affiche les tags liés aux services publics
 ```
 
     ['amenity']
 
--   **`search_tags`** permet de rechercher un mot-clé dans tous les tags
-    pour trouver rapidement ce qui vous intéresse :
+- **`search_tags`** permet de rechercher un mot-clé dans tous les tags
+  pour trouver rapidement ce qui vous intéresse :
 
-``` python
+```python
 print(osm.search_tags('hospital'))  # Recherche tous les tags relatifs aux hôpitaux
 ```
 
     {'building': {'description': 'Bâtiments et structures', 'matching_tags': {'building': ['hospital']}, 'example': {'building': 'house', 'building:levels': '2'}}, 'amenity': {'description': 'Services publics et commodités', 'matching_tags': {'amenity': ['hospital']}, 'example': {'amenity': 'restaurant', 'cuisine': 'french'}}}
 
--   **`get_common_tag_combinations`** retourne des exemples de requêtes
-    toutes prêtes pour les objets OSM les plus fréquents :
+- **`get_common_tag_combinations`** retourne des exemples de requêtes
+  toutes prêtes pour les objets OSM les plus fréquents :
 
-``` python
+```python
 print(osm.get_common_tag_combinations()['restaurants'])
 ```
 
@@ -1201,9 +1192,9 @@ Il suffit de spécifier les tags OSM correspondant au type d’objet
 recherché (bâtiments, routes, écoles, hôpitaux, etc.) ainsi que le type
 de géométrie souhaité (points, polygons, lines ou all).
 
--   Vous pouvez utiliser un **nom de lieu** :
+- Vous pouvez utiliser un **nom de lieu** :
 
-``` python
+```python
  # Exemple : télécharger toutes les écoles à Abidjan
 schools = osm.get_data("Abidjan, Côte d'Ivoire", {"amenity": "school"}, data_type="points")
 schools.head()
@@ -1221,8 +1212,7 @@ schools.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1406,9 +1396,9 @@ data-valign="top">node</td>
 <p>5 rows × 64 columns</p>
 </div>
 
--   Ou une **bounding box** :
+- Ou une **bounding box** :
 
-``` python
+```python
   # Télécharger tous les routets dans une zone définie par une bbox
 import osmnx as ox
 # Coordonnées approximatives du centre de Yamoussoukro
@@ -1433,8 +1423,7 @@ highway.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1618,15 +1607,15 @@ data-valign="top">way</td>
 <p>5 rows × 47 columns</p>
 </div>
 
-``` python
+```python
 highway.plot()
 ```
 
 ![](test_files/figure-markdown_strict/cell-43-output-1.png)
 
--   Ou un **GeoDataFrame polygonal** :
+- Ou un **GeoDataFrame polygonal** :
 
-``` python
+```python
 # batiment de la région du béré
 gdf = civ_data[civ_data["shapeName"]=="Belier"] # région du béré 
 buildings = osm.get_data(gdf, {"building": "yes"}, data_type="polygons")
@@ -1645,8 +1634,7 @@ buildings.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1822,7 +1810,7 @@ data-valign="top">relation</td>
 
 </div>
 
-``` python
+```python
 buildings.plot(facecolor="red")
 ```
 
@@ -1832,20 +1820,20 @@ buildings.plot(facecolor="red")
 
 Vous pouvez utiliser la class `WorldBank` de data pour cela.
 
-``` python
+```python
 from cartograpy import data
 wb=data.WorldBank()
 ```
 
 #### **Obtenir les sources de données**
 
-``` python
+```python
 wb.get_sources()
 ```
 
 #### **Obtenir les indicateurs disponibles dans une source de données**
 
-``` python
+```python
 # 11 Correcpond a la source Africa Development Indicators
 
 wb.get_indicators(11)
@@ -1853,7 +1841,7 @@ wb.get_indicators(11)
 
 #### **Obtenir la liste des pays selon une requette**
 
-``` python
+```python
 wb.get_countries(query="cote")
 ```
 
@@ -1877,30 +1865,27 @@ mondiale** pour un ou plusieurs indicateurs, et pour un ou plusieurs
 pays, sur une période définie. Elle s’appuie sur le package `wbdata`
 pour accéder directement aux bases de données du World Bank Group.
 
--   **Paramètres :**
+- **Paramètres :**
 
-    -   `indicators` : un **dictionnaire** (ou une liste) des codes
-        d’indicateurs Banque mondiale à récupérer, par exemple :
-        `{"AG.AID.CREL.MT": "Aide reçue nette"}` ou bien
-        `["AG.AID.CREL.MT"]`.
+  - `indicators` : un **dictionnaire** (ou une liste) des codes
+    d’indicateurs Banque mondiale à récupérer, par exemple :
+    `{"AG.AID.CREL.MT": "Aide reçue nette"}` ou bien
+    `["AG.AID.CREL.MT"]`.
+  - `country` : code du pays (ISO alpha-3, ex. : `"CIV"` pour la
+    Côte d’Ivoire) ou `"all"` pour tous les pays.
+  - `**kwrargs` : autres arguments optionnels à passer à la
+    fonction, par exemple :
 
-    -   `country` : code du pays (ISO alpha-3, ex. : `"CIV"` pour la
-        Côte d’Ivoire) ou `"all"` pour tous les pays.
+    - `date` : période à récupérer, sous forme de tuple ou de
+      string (`("2017","2020")`)
+    - `freq` : fréquence des données (`"Y"` pour annuel)
+    - etc.
+- **Retour :**
 
-    -   `**kwrargs` : autres arguments optionnels à passer à la
-        fonction, par exemple :
+  - Un **DataFrame pandas** contenant les valeurs des indicateurs
+    demandés pour le(s) pays et la période indiqués.
 
-        -   `date` : période à récupérer, sous forme de tuple ou de
-            string (`("2017","2020")`)
-        -   `freq` : fréquence des données (`"Y"` pour annuel)
-        -   etc.
-
--   **Retour :**
-
-    -   Un **DataFrame pandas** contenant les valeurs des indicateurs
-        demandés pour le(s) pays et la période indiqués.
-
-``` python
+```python
 # Données de 2010 à 2012 pour la Côte d'Ivoire
 wb.get_data({"AG.AID.CREL.MT": "Aide nette"},"CIV",date=("2010","2012"))
 ```
@@ -1917,8 +1902,7 @@ wb.get_data({"AG.AID.CREL.MT": "Aide nette"},"CIV",date=("2010","2012"))
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -1957,12 +1941,12 @@ le chargement, le traitement et la sauvegarde de données vectorielles.
 
 <figure class=''>
 
-<img src="test_files\figure-markdown_strict\mermaid-figure-3.png"
-style="width:12.95in;height:2.81in" />
+`<img src="test_files\figure-markdown_strict\mermaid-figure-3.png"
+style="width:12.95in;height:2.81in" />`
 
 </figure>
 
-``` python
+```python
 # Importation
 from cartograpy.processing import *
 ```
@@ -1975,12 +1959,11 @@ Cette fonction permet de **charger un fichier de données vectorielles**
 (shapefile, GeoJSON, GPKG, KML, GPX, CSV, parquet, etc.), quel que soit
 son format. Elle détecte l’extension du fichier et utilise la méthode
 adaptée pour lire le fichier sous forme de `GeoDataFrame` (pour les
-formats géospatiaux) ou de `DataFrame` classique (pour CSV/parquet).  
-**Paramètre** :
+formats géospatiaux) ou de `DataFrame` classique (pour CSV/parquet).**Paramètre** :
 
--   `filepath` (str) : chemin du fichier à charger.
+- `filepath` (str) : chemin du fichier à charger.
 
-``` python
+```python
 # Chargement de données volumineuses
 hexagon_data=load("data\other\hexagon 0.2_Jointure data raster.geojson")
 hexagon_data.head()
@@ -2005,8 +1988,7 @@ hexagon_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2089,7 +2071,7 @@ hexagon_data.head()
 
 </div>
 
-``` python
+```python
 # Chargement de mutipolygone
 path="data\other\Département de Bouna.geojson"
 donnee_bouna=load(path)
@@ -2113,8 +2095,7 @@ donnee_bouna.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2141,7 +2122,7 @@ donnee_bouna.head()
 <td data-quarto-table-cell-role="th">0</td>
 <td>ID_00022</td>
 <td>Bouna</td>
-<td>&lt;html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
+<td><html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
 <td>None</td>
 <td>None</td>
 <td>None</td>
@@ -2165,12 +2146,11 @@ donnee_bouna.head()
 
 Retourne **un dictionnaire d’informations** sur un MultiPolygon (ou
 Polygon) : nombre de polygones, aires, bornes, aire totale, plus
-grand/petit polygone, etc.  
-**Paramètre** :
+grand/petit polygone, etc.**Paramètre** :
 
--   `multipolygon` (MultiPolygon ou str) : objet à analyser
+- `multipolygon` (MultiPolygon ou str) : objet à analyser
 
-``` python
+```python
 multipolygon=donnee_bouna["geometry"][0]
 infos_multipolygon=get_multipolygon_info(multipolygon)
 infos_multipolygon
@@ -2193,14 +2173,12 @@ infos_multipolygon
 
 Sépare un **objet MultiPolygon** (ou sa représentation WKT, ou une
 GeoDataFrame) en polygones individuels, et retourne soit une liste de
-polygones, soit un GeoDataFrame.  
-**Paramètres** :
+polygones, soit un GeoDataFrame.**Paramètres** :
 
--   `multipolygon` (MultiPolygon, str ou GeoDataFrame) : objet à séparer
+- `multipolygon` (MultiPolygon, str ou GeoDataFrame) : objet à séparer
+- `return_type` (str) : format du résultat (‘list’ ou ‘geodataframe’)
 
--   `return_type` (str) : format du résultat (‘list’ ou ‘geodataframe’)
-
-``` python
+```python
 polygones_bouna=split_multipolygon(donnee_bouna)
 polygones_bouna.head()
 ```
@@ -2217,8 +2195,7 @@ polygones_bouna.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2247,7 +2224,7 @@ polygones_bouna.head()
 <td data-quarto-table-cell-role="th">0</td>
 <td>ID_00022</td>
 <td>Bouna</td>
-<td>&lt;html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
+<td><html xmlns:fo="http://www.w3.org/1999/XSL/For...</td>
 <td>None</td>
 <td>None</td>
 <td>None</td>
@@ -2267,7 +2244,7 @@ polygones_bouna.head()
 
 </div>
 
-``` python
+```python
 polygones_bouna.plot()
 ```
 
@@ -2280,18 +2257,14 @@ polygones_bouna.plot()
 Cette fonction **sauvegarde un DataFrame ou GeoDataFrame** dans
 différents formats (shp, geojson, gpkg, csv, parquet, xlsx, feather,
 kml), avec possibilité d’ajouter un timestamp dans le nom du fichier
-pour éviter l’écrasement.  
-**Paramètres** :
+pour éviter l’écrasement.**Paramètres** :
 
--   `geodf` : le DataFrame ou GeoDataFrame à sauvegarder
+- `geodf` : le DataFrame ou GeoDataFrame à sauvegarder
+- `file_extension` (str) : format de sortie
+- `filename` (str, optionnel) : nom de base du fichier
+- `timestamp` (bool, optionnel) : ajoute la date/heure au nom
 
--   `file_extension` (str) : format de sortie
-
--   `filename` (str, optionnel) : nom de base du fichier
-
--   `timestamp` (bool, optionnel) : ajoute la date/heure au nom
-
-``` python
+```python
 # Sauvegarde en shapefile
 save(polygones_bouna,"shp","data/other/polygone de Bouna")
 ```
@@ -2302,16 +2275,13 @@ save(polygones_bouna,"shp","data/other/polygone de Bouna")
 
 Fusionne (concatène verticalement) **une liste de DataFrames ou
 GeoDataFrames**, avec options pour réinitialiser l’index ou ignorer les
-conflits de système de coordonnées (CRS).  
-**Paramètres** :
+conflits de système de coordonnées (CRS).**Paramètres** :
 
--   `dataframes_list` (list) : DataFrames/GeoDataFrames à empiler
+- `dataframes_list` (list) : DataFrames/GeoDataFrames à empiler
+- `reset_index` (bool, optionnel) : réinitialise l’index
+- `ignore_crs` (bool, optionnel) : ignore les conflits de CRS
 
--   `reset_index` (bool, optionnel) : réinitialise l’index
-
--   `ignore_crs` (bool, optionnel) : ignore les conflits de CRS
-
-``` python
+```python
 # Exemple 2 : Récupérer les limites administratives de plusieurs pays (senegal et mali ici)
 countries_data = bound.adm(["SEN", "mali","civ"], "ADM2")
 list_gdf=[gdf for key, gdf in countries_data.items()] # Liste de dataframes
@@ -2331,8 +2301,7 @@ countries_merged_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2403,19 +2372,15 @@ countries_merged_data.head()
 
 Ajoute **une nouvelle colonne** à un DataFrame/GeoDataFrame, dont les
 valeurs sont calculées dynamiquement à partir d’une expression (chaîne
-de caractères évaluée ligne par ligne).  
-**Paramètres** :
+de caractères évaluée ligne par ligne).**Paramètres** :
 
--   `df` : DataFrame/GeoDataFrame d’origine
+- `df` : DataFrame/GeoDataFrame d’origine
+- `column_name` (str) : nom de la colonne à créer
+- `expression` (str) : expression à évaluer
+- `globals_dict` (dict, optionnel) : variables globales accessibles
+  dans l’expression
 
--   `column_name` (str) : nom de la colonne à créer
-
--   `expression` (str) : expression à évaluer
-
--   `globals_dict` (dict, optionnel) : variables globales accessibles
-    dans l’expression
-
-``` python
+```python
 new_countries_data=add_column(df=countries_merged_data,column_name="random_data",expression="random.randint(1,100)",globals_dict={"random":random})
 # global_dics correspond a la liste des packages necessaires pour evaluer l'expression
 new_countries_data.head()
@@ -2433,8 +2398,7 @@ new_countries_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2505,7 +2469,7 @@ new_countries_data.head()
 
 </div>
 
-``` python
+```python
 
 new_countries_data=add_column(new_countries_data,"dataType","row['shapeGroup']+'-'+row['shapeType']")
 # 'row' dans l'expression correspont a une ligne de la dataframe. Elle doit être toujours nommée 'row'
@@ -2525,8 +2489,7 @@ new_countries_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2603,7 +2566,7 @@ new_countries_data.head()
 
 </div>
 
-``` python
+```python
 list(new_countries_data.columns)
 ```
 
@@ -2621,12 +2584,11 @@ list(new_countries_data.columns)
 `centroids(geodf)`
 
 Crée un **nouveau GeoDataFrame contenant les centroïdes** de chaque
-géométrie de l’objet d’entrée.  
-**Paramètre** :
+géométrie de l’objet d’entrée.**Paramètre** :
 
--   `geodf` (GeoDataFrame) : table géospatiale d’origine
+- `geodf` (GeoDataFrame) : table géospatiale d’origine
 
-``` python
+```python
 
 coundtries_centroids = centroids(new_countries_data)
 
@@ -2648,8 +2610,7 @@ coundtries_centroids.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2726,7 +2687,7 @@ coundtries_centroids.head()
 
 </div>
 
-``` python
+```python
 
 # Visualisation rapide
 coundtries_centroids.plot(markersize=50, color='red',label="Centroïde")
@@ -2740,18 +2701,14 @@ coundtries_centroids.plot(markersize=50, color='red',label="Centroïde")
 
 Découpe (clip) une GeoDataFrame **selon la géométrie d’emprise** d’une
 autre GeoDataFrame, avec possibilité d’appliquer un buffer et de gérer
-le système de coordonnées.  
-**Paramètres** :
+le système de coordonnées.**Paramètres** :
 
--   `gdf_source` (GeoDataFrame) : table à découper
+- `gdf_source` (GeoDataFrame) : table à découper
+- `gdf_emprise` (GeoDataFrame) : masque de découpe
+- `buffer_distance` (float, optionnel) : distance de buffer
+- `crs` (str, optionnel) : CRS à utiliser si absent
 
--   `gdf_emprise` (GeoDataFrame) : masque de découpe
-
--   `buffer_distance` (float, optionnel) : distance de buffer
-
--   `crs` (str, optionnel) : CRS à utiliser si absent
-
-``` python
+```python
 rivers_civ=clip_gdf_by_mask(rivers_africa,civ_data)
 rivers_civ.head()
 ```
@@ -2773,8 +2730,7 @@ rivers_civ.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -2902,37 +2858,37 @@ Le principe de création de cartes simples et intuitives avec cartograpy
 repose sur l’utilisation de la classe `Map`, qui permet de générer des
 rendus statiques de cartes. Les étapes sont les suivantes :
 
--   Créer un objet `Map`
--   Personnaliser le format de papier avec des dimensions
-    internationales (A4, A3, B2, etc.)
--   Ajouter vos couches de données
--   Ajuster le style à votre convenance (ajout de flèche du nord, de
-    légende, d’échelle, etc.)
--   Afficher la carte
+- Créer un objet `Map`
+- Personnaliser le format de papier avec des dimensions
+  internationales (A4, A3, B2, etc.)
+- Ajouter vos couches de données
+- Ajuster le style à votre convenance (ajout de flèche du nord, de
+  légende, d’échelle, etc.)
+- Afficher la carte
 
 C’est aussi simple que ça !
 
 <figure class=''>
 
-<img src="test_files\figure-markdown_strict\mermaid-figure-2.png"
-style="width:14.3in;height:0.98in" />
+`<img src="test_files\figure-markdown_strict\mermaid-figure-2.png"
+style="width:14.3in;height:0.98in" />`
 
 </figure>
 
-``` python
+```python
 from cartograpy.mapper import *
 ```
 
 Nous allons ajouter des données aléatoire a nos données vectorielle pour
 avec `random` pour la demonstration
 
-``` python
+```python
 # J'ajoute des données aléatoires a civ_data
 import random
 civ_data['data'] = [random.randint(0,10000) for i in range(len(civ_data))]
 ```
 
-``` python
+```python
 civ_data.head()
 ```
 
@@ -2948,8 +2904,7 @@ civ_data.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -3020,7 +2975,7 @@ civ_data.head()
 
 </div>
 
-``` python
+```python
 # Ajout de données aléatoire a geocode_localite
 geocode_localite=resultat_geocode[0]
 geocode_localite["data"]= [random.randint(0,10000) for i in range(len(geocode_localite))]
@@ -3039,8 +2994,7 @@ geocode_localite.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -3119,7 +3073,7 @@ geocode_localite.head()
 
 ### **Visualiser des données rasters**
 
-``` python
+```python
 # Création d'une carte raster
 carte_dem = Map(figsize=(12, 8), projection=ccrs.PlateCarree())
 
@@ -3155,7 +3109,7 @@ carte_dem.show()
 
 #### **Carte de cloropleth de points et polygones simplement**
 
-``` python
+```python
 carte_ci=Map(figsize=(16, 12), projection=ccrs.PlateCarree(),title="Carte cloropleth de données aléatoires")
 carte_ci.add_polygons_cloropleth(gdf=civ_data,
                               column_to_plot='data',
@@ -3169,7 +3123,7 @@ carte_ci.add_points_cloropleth(
     point_size_column="data",
     show_colorbar=False,
     cmap="tab20c"
-    
+  
 )
 carte_ci.add_gridlines()
 font_name=get_fonts("time")[0]
@@ -3198,7 +3152,7 @@ carte_ci.figsize=(18,16)
 
 #### **Carte cloropleth de points**
 
-``` python
+```python
 # Creer un simple cloropleth de point
 #============================================
 carte2=Map(figsize="A4")
@@ -3231,7 +3185,7 @@ carte2.show()
 Nous allons modifier légèrement les noms `shapeName` de Yamoussoukro et
 Abidjan pour faciliter la lecture.
 
-``` python
+```python
 # list(civ_data.shapeName.unique()) # liste des valeurs uniques de la colonne 'shapeName'
 civ_data["shapeName"].replace({
     "District Autonome D'Abidjan": "Abidjan",
@@ -3244,10 +3198,9 @@ civ_data["shapeName"].replace({
 
     For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
 
+    civ_data["shapeName"].replace({
 
-      civ_data["shapeName"].replace({
-
-``` python
+```python
 
 # Creer un objet de carte basique avec OpenLayers et Python
 # =========================================================
@@ -3326,7 +3279,7 @@ carte1.show(smart_centering=True)
 
 #### **Carte de lignes**
 
-``` python
+```python
 path="data\\QGIS-Training-Data\\exercise_data\shapefile\\rivers.shp"
 data_riviere=load(path)
 carte4=Map(title="Carte de rivière")
@@ -3371,7 +3324,7 @@ carte4.show()
 Vous pouvez utiliser explorer et manipuler **les palettes de couleurs**
 avec `styling` de cartograpy
 
-``` python
+```python
 # Chargement de la bibliothèque
 from cartograpy.styling import *
 ```
@@ -3384,14 +3337,14 @@ Les palettes de couleurs et styles disponibles sont ceux de
 Pour voir la liste des palettes valides, utilisez la commande
 `get_valid_palettes()`.
 
-``` python
+```python
 # Les groupes de palettes diponibles
 get_available_palettes().keys()
 ```
 
     dict_keys(['custom', 'seaborn_qualitative', 'seaborn_sequential', 'seaborn_diverging', 'matplotlib_sequential', 'matplotlib_diverging', 'matplotlib_cyclic', 'matplotlib_qualitative'])
 
-``` python
+```python
 # Voir les pallettes disponibles dans un groupe
 get_available_palettes()["seaborn_sequential"]
 ```
@@ -3419,7 +3372,7 @@ get_available_palettes()["seaborn_sequential"]
      'flare',
      'crest']
 
-``` python
+```python
 # Ou pour voir toutes celles de matplotlib
 print (plt.colormaps())
 ```
@@ -3428,7 +3381,7 @@ print (plt.colormaps())
 
 Vous pouvez visualiser une palette de couleurs avec `show_palette()`
 
-``` python
+```python
 # Pour visualiser une palette de couleurs
 show_palette("Coconut")
 ```
@@ -3437,7 +3390,7 @@ show_palette("Coconut")
 
 ![](test_files/figure-markdown_strict/cell-79-output-2.png)
 
-``` python
+```python
 show_palette("rainbow")
 ```
 
@@ -3446,7 +3399,7 @@ show_palette("rainbow")
 Si vous voulez creer votre propre palette de couleurs, vous pouvez
 utiliser `to_cmap()`
 
-``` python
+```python
 colors =["#8B0000", "#A0522D", "#F5F5DC", "#1E3A8A", "#4682B4"]
 new_cmap=to_cmap(colors=colors,cmap_type="continuous") # cmap_type est soit 'continuous' soit 'discrete'
 show_palette(new_cmap)
@@ -3456,7 +3409,7 @@ show_palette(new_cmap)
 
 #### **Les polices d’écritures disponibles**
 
-``` python
+```python
 get_fonts()[0:10] # Pour voir les 10 prémières polices 
 ```
 
@@ -3471,7 +3424,7 @@ get_fonts()[0:10] # Pour voir les 10 prémières polices
      'Berlin Sans FB',
      'Berlin Sans FB Demi']
 
-``` python
+```python
 # Pour rechercher des polices
 get_fonts("time")[0] # Renvoie la première police de la liste des polices contenant times 
 ```
@@ -3483,7 +3436,7 @@ get_fonts("time")[0] # Renvoie la première police de la liste des polices conte
 Pour voir la liste des styles diponibles, il faut utilser la fonction
 `list_all_styles()` de styling.
 
-``` python
+```python
 print(list_all_styles ())
 ```
 
@@ -3491,7 +3444,7 @@ print(list_all_styles ())
 
 Pour utiliser un style prédefini, utilisez `set_style`
 
-``` python
+```python
 set_style("default")
 ```
 
@@ -3499,7 +3452,7 @@ set_style("default")
 
 Commençons par personnaliser nos données afin de créer notre carte.
 
-``` python
+```python
 # Creer un cloropleth de polygone
 #=================================================
 
@@ -3526,8 +3479,7 @@ data_sen_mali.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -3592,13 +3544,13 @@ data_sen_mali.head()
 
 </div>
 
-``` python
+```python
 # Création d'une colonne de données aléatoire
 
 data_sen_mali=add_column(df=data_sen_mali,column_name="data",expression="random.randint(50,1000)",globals_dict={"random": random})
 ```
 
-``` python
+```python
 data_sen_mali.head()
 
 ```
@@ -3615,8 +3567,7 @@ data_sen_mali.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -3687,7 +3638,7 @@ data_sen_mali.head()
 
 </div>
 
-``` python
+```python
 # Création de carte cloropleth
 carte3 = Map (figsize="A4",title="Chloropleth de polygone Sénégale et Mali")
 carte3.add_polygons_cloropleth(gdf=data_sen_mali,column_to_plot="data",cmap="Coconut")
@@ -3718,7 +3669,7 @@ carte3.show()
 
 Changeons le style en dark_background
 
-``` python
+```python
 set_style("dark_background")
 carte3 = Map (figsize="A4",title="Chloropleth de polygone Sénégale et Mali")
 carte3.add_polygons_cloropleth(gdf=data_sen_mali,column_to_plot="data",cmap="Coconut")
@@ -3748,7 +3699,7 @@ carte3.show()
 
 ![](test_files/figure-markdown_strict/cell-90-output-4.png)
 
-``` python
+```python
 get_fonts("script")
 ```
 
@@ -3763,7 +3714,7 @@ get_fonts("script")
      'Segoe Script',
      'Vladimir Script']
 
-``` python
+```python
 carteRivers=Map("A4",title="Réseau hydrographique de l'Afrique")
 carteRivers.set_font("Freestyle Script", size=120)
 carteRivers.add_lines(gdf=rivers_africa,linewidth=0.1,color="white",column="ORD_FLOW",cmap="managua")
@@ -3780,7 +3731,7 @@ carteRivers.show()
 
 ![](test_files/figure-markdown_strict/cell-92-output-2.png)
 
-``` python
+```python
 rivers_civ=clip_gdf_by_mask(rivers_africa,civ_data)
 rivers_civ.head()
 ```
@@ -3802,8 +3753,7 @@ rivers_civ.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -3922,13 +3872,13 @@ rivers_civ.head()
 
 </div>
 
-``` python
+```python
 set_style("cyberpunk")
 ```
 
     ✅ Style Matplotlib appliqué : cyberpunk
 
-``` python
+```python
 carteRiversCiv=Map("A4",title="Carte hydrographique de la Côte d'Ivoire")
 carteRiversCiv.add_lines(gdf=rivers_civ,linewidth=0.5,cmap="Blues",column="ORD_FLOW")
 carteRiversCiv.add_gridlines()
@@ -3974,20 +3924,20 @@ carteRiversCiv.save(dpi=600,filename="carte reseau hydrographique ci")
 
 #### **Ajouter des couches de tous les types**
 
-``` python
+```python
 font=get_fonts("da")[0]
 font
 ```
 
     'Candara'
 
-``` python
+```python
 print(list_all_styles())
 ```
 
     {'matplotlib': ['Solarize_Light2', '_classic_test_patch', '_mpl-gallery', '_mpl-gallery-nogrid', 'bmh', 'bright', 'cjk-jp-font', 'cjk-kr-font', 'cjk-sc-font', 'cjk-tc-font', 'classic', 'cyberpunk', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'grid', 'high-contrast', 'high-vis', 'ieee', 'latex-sans', 'light', 'muted', 'nature', 'no-latex', 'notebook', 'petroff10', 'pgf', 'retro', 'russian-font', 'sans', 'scatter', 'science', 'seaborn-v0_8', 'seaborn-v0_8-bright', 'seaborn-v0_8-colorblind', 'seaborn-v0_8-dark', 'seaborn-v0_8-dark-palette', 'seaborn-v0_8-darkgrid', 'seaborn-v0_8-deep', 'seaborn-v0_8-muted', 'seaborn-v0_8-notebook', 'seaborn-v0_8-paper', 'seaborn-v0_8-pastel', 'seaborn-v0_8-poster', 'seaborn-v0_8-talk', 'seaborn-v0_8-ticks', 'seaborn-v0_8-white', 'seaborn-v0_8-whitegrid', 'std-colors', 'tableau-colorblind10', 'turkish-font', 'vibrant'], 'seaborn': ['darkgrid', 'whitegrid', 'dark', 'white', 'ticks'], 'mplcyberpunk': ['cyberpunk'], 'SciencePlots': ['science', 'nature', 'ieee', 'vibrant', 'bright', 'muted', 'retro', 'notebook', 'scatter', 'grid', 'seaborn-v0_8']}
 
-``` python
+```python
 data_sen_mali.head()
 ```
 
@@ -4003,8 +3953,7 @@ data_sen_mali.head()
 
     .dataframe thead th {
         text-align: right;
-    }
-</style>
+    }`</style>`
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
@@ -4075,7 +4024,7 @@ data_sen_mali.head()
 
 </div>
 
-``` python
+```python
 cmap=load_cmap("Juarez")
 plt.style.use("default")
 carte5=Map(figsize="A4",title="")

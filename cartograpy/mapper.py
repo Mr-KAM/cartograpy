@@ -2163,6 +2163,74 @@ class Map:
         """
         self.ax.set_title(title, fontsize=fontsize, pad=pad)
 
+    def add_text(
+        self,
+        text: str,
+        xy: tuple,
+        fontsize: int = 12,
+        color: str = "black",
+        outline_width: float = 0,
+        outline_color: str = "white",
+        **kwargs
+    ):
+        """
+        Ajoute du texte personnalisé à la carte.
+
+        Parameters:
+        -----------
+        text : str
+            Le texte à afficher
+        xy : tuple
+            Position du texte (x, y) en coordonnées géographiques
+        fontsize : int
+            Taille de la police (défaut: 12)
+        color : str
+            Couleur du texte (défaut: "black")
+        outline_width : float
+            Largeur du contour du texte (défaut: 0 = pas de contour)
+        outline_color : str
+            Couleur du contour du texte (défaut: "white")
+        **kwargs : dict
+            Autres paramètres pour matplotlib.text()
+            (ha, va, rotation, alpha, weight, style, etc.)
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> map_obj.add_text("Paris", (2.3522, 48.8566), 
+        ...                   fontsize=14, color="red", 
+        ...                   ha="center", va="center")
+        """
+        # Paramètres par défaut pour le texte
+        text_params = {
+            'fontsize': fontsize,
+            'color': color,
+            'ha': 'left',  # alignement horizontal par défaut
+            'va': 'bottom',  # alignement vertical par défaut
+            'transform': ccrs.PlateCarree(),  # utilise les coordonnées géographiques
+        }
+        
+        # Mise à jour avec les paramètres personnalisés
+        text_params.update(kwargs)
+        
+        # Ajout du contour si spécifié
+        if outline_width > 0:
+            from matplotlib import patheffects
+            text_params['path_effects'] = [
+                patheffects.withStroke(
+                    linewidth=outline_width, 
+                    foreground=outline_color
+                )
+            ]
+        
+        # Ajout du texte à la carte
+        self.ax.text(xy[0], xy[1], text, **text_params)
+        
+        return self
+
     def set_title(
         self,
         title: str,
