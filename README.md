@@ -492,7 +492,7 @@ countries_data["mali"].head()
     .dataframe thead th {
         text-align: right;
     }`</style>`
-
+</style>
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr style="text-align: right;">
@@ -669,7 +669,8 @@ resultat_geocode[0]
 
     .dataframe thead th {
         text-align: right;
-    }`</style>`
+    }
+</style>
 
 <table class="dataframe" data-quarto-postprocess="true" data-border="1">
 <thead>
