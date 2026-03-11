@@ -3,13 +3,13 @@ import pandas as pd
 import os
 import random
 import numpy as np
-from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import MultiPolygon, Polygon, LineString, MultiLineString, box
 from shapely import wkt
 from typing import List, Union, Optional
 import warnings
 import datetime
-import numpy as np
 import rasterio
+from rasterio.features import shapes as rio_shapes
 
 def load(filepath):
     """
@@ -110,6 +110,10 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
         now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{filename}_{now}"
     output_path = f"{filename}.{file_extension}"
+
+    _SUPPORTED_EXTS = {'geojson', 'shp', 'gpkg', 'kml', 'csv', 'parquet', 'xlsx', 'feather', 'tif', 'tiff'}
+    if file_extension not in _SUPPORTED_EXTS:
+        raise ValueError(f"Format '{file_extension}' non supporté. Formats acceptés : {', '.join(sorted(_SUPPORTED_EXTS))}")
 
     # VECTOR
     if isinstance(data, (gpd.GeoDataFrame, pd.DataFrame)):
@@ -251,9 +255,19 @@ def fusion(dataframes_list, reset_index=True, ignore_crs=True):
     return result
 
 
-def add_column(df, column_name, expression,globals_dict=None):
+def add_column(df, column_name, expression, globals_dict=None):
     """
     Ajoute une nouvelle colonne à un DataFrame/GeoDataFrame selon une expression.
+
+    L'expression est évaluée via ``eval()`` pour chaque ligne. Elle a accès
+    à la variable ``row`` (la ligne courante), ainsi qu'à ``random`` et ``np``
+    (numpy) par défaut. Des modules supplémentaires peuvent être injectés via
+    ``globals_dict``.
+
+    .. warning::
+        Cette fonction utilise ``eval()`` en interne. Ne jamais l'utiliser
+        avec des expressions provenant d'entrées utilisateur non contrôlées,
+        car cela pourrait entraîner une exécution de code arbitraire.
 
     Paramètres
     ----------
@@ -262,12 +276,23 @@ def add_column(df, column_name, expression,globals_dict=None):
     column_name : str
         Nom de la nouvelle colonne à créer.
     expression : str
-        Expression à évaluer, utilisant 'row' (ex: "row['col1'] + row['col2']").
-    global_dic : Liste de package à importer
-    
+        Expression Python à évaluer pour chaque ligne, utilisant ``row``
+        pour accéder aux colonnes (ex: ``"row['col1'] + row['col2']"``).
+    globals_dict : dict, optionnel
+        Dictionnaire de variables/modules supplémentaires accessibles dans
+        l'expression (ex: ``{"math": math}``).
+
     Retourne
-    -------
-    Le DataFrame/GeoDataFrame modifié (avec la nouvelle colonne).
+    --------
+    DataFrame ou GeoDataFrame
+        Le DataFrame/GeoDataFrame modifié (avec la nouvelle colonne).
+
+    Exemples
+    --------
+    >>> add_column(df, "total", "row['price'] * row['quantity']")
+    >>> add_column(df, "log_pop", "np.log(row['population'])")
+    >>> import math
+    >>> add_column(df, "sqrt_area", "math.sqrt(row['area'])", globals_dict={"math": math})
     """
 
     _globals = {"random": random, "np":np}
@@ -329,7 +354,7 @@ def split_multipolygon(multipolygon: Union[MultiPolygon, str,gpd.GeoDataFrame],
             return gdf
         else:
             raise ValueError("return_type doit être 'list' ou 'geodataframe'")
-    except:
+    except (TypeError, ValueError):
         return split_multipolygon_from_gdf(multipolygon)
 
 
@@ -434,13 +459,14 @@ def get_multipolygon_info(multipolygon: Union[MultiPolygon, str]) -> dict:
         'smallest_polygon_area': min(areas)
     }
 
-def get_geometry_types(df: gpd.GeoDataFrame) -> str:
-    types = gdf.geometry.geom_type.value_counts()
+def get_geometry_types(df: gpd.GeoDataFrame) -> dict:
+    types = df.geometry.geom_type.value_counts()
     output={}
     for geom_type, count in types.items():
-        percentage = (count / len(gdf)) * 100
+        percentage = (count / len(df)) * 100
         output[geom_type] = {"count":count,"percentage":percentage}
         print(f"{geom_type}: {count} ({percentage:.1f}%)")
+    return output
 
 
 def clip_gdf_by_mask(gdf_source, gdf_emprise, buffer_distance=0, crs="EPSG:4326"):
@@ -573,3 +599,510 @@ def clip_gdf_by_bbox(gdf_source, gdf_emprise, crs="EPSG:4326"):
         gdf_clipped = gdf_clipped[~gdf_clipped.geometry.is_empty].copy()
     
     return gdf_clipped
+
+
+
+def vectorize(raster, band: int = 1, nodata=None, column_name: str = "value",
+              output_path: str = None) -> gpd.GeoDataFrame:
+    """
+    Transforme un raster en GeoDataFrame (vectorisation).
+
+    Paramètres
+    ----------
+    raster : str ou rasterio.io.DatasetReader
+        Chemin vers un fichier raster (.tif, .tiff) ou un DatasetReader déjà ouvert.
+    band : int, optionnel
+        Numéro de la bande à vectoriser (défaut : 1).
+    nodata : float ou int, optionnel
+        Valeur nodata à exclure. Si None, utilise la valeur nodata du raster.
+    column_name : str, optionnel
+        Nom de la colonne contenant les valeurs du raster (défaut : "value").
+    output_path : str, optionnel
+        Chemin de sortie GeoJSON. Si fourni, le GeoDataFrame est enregistré.
+
+    Retourne
+    --------
+    geopandas.GeoDataFrame
+        GeoDataFrame contenant les polygones vectorisés et leurs valeurs.
+
+    Exemples
+    --------
+    >>> gdf = vectorize("elevation.tif")
+    >>> gdf = vectorize("elevation.tif", output_path="elevation.geojson")
+    """
+    from shapely.geometry import shape
+
+    opened_here = False
+    if isinstance(raster, (str, os.PathLike)):
+        raster = rasterio.open(str(raster))
+        opened_here = True
+
+    try:
+        data = raster.read(band)
+        transform = raster.transform
+        crs = raster.crs
+
+        mask = None
+        nd = nodata if nodata is not None else raster.nodata
+        if nd is not None:
+            mask = data != nd
+
+        records = []
+        for geom, value in rio_shapes(data, mask=mask, transform=transform):
+            records.append({"geometry": shape(geom), column_name: value})
+
+        gdf = gpd.GeoDataFrame(records, crs=crs)
+    finally:
+        if opened_here:
+            raster.close()
+
+    if output_path is not None:
+        output_path = str(output_path)
+        parent = os.path.dirname(output_path)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
+        gdf.to_file(output_path, driver="GeoJSON")
+        print(f"✅ Fichier sauvegardé : {os.path.abspath(output_path)}")
+
+    return gdf
+
+
+def line_to_polygon(gdf: gpd.GeoDataFrame, keep_invalid: bool = False) -> gpd.GeoDataFrame:
+    """
+    Transforme un GeoDataFrame de lignes (LineString / MultiLineString) en polygones.
+
+    Chaque ligne dont les coordonnées forment un anneau fermé (ou quasi-fermé)
+    est convertie en Polygon. Les MultiLineString sont d'abord fusionnées
+    (merge) puis converties.
+
+    Paramètres
+    ----------
+    gdf : geopandas.GeoDataFrame
+        GeoDataFrame dont la colonne geometry contient des LineString ou MultiLineString.
+    keep_invalid : bool, optionnel
+        Si True, conserve les lignes qui n'ont pas pu être converties (geometry = None).
+        Si False (défaut), elles sont supprimées du résultat.
+
+    Retourne
+    --------
+    geopandas.GeoDataFrame
+        Nouveau GeoDataFrame avec des géométries Polygon / MultiPolygon.
+
+    Exemples
+    --------
+    >>> gdf_poly = line_to_polygon(gdf_lines)
+    """
+    from shapely.ops import linemerge, polygonize
+
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("Le paramètre gdf doit être un GeoDataFrame.")
+
+    result = gdf.copy()
+    new_geoms = []
+
+    for geom in result.geometry:
+        if geom is None or geom.is_empty:
+            new_geoms.append(None)
+            continue
+
+        # Rassembler toutes les lignes en une liste
+        if isinstance(geom, MultiLineString):
+            merged = linemerge(geom)
+            lines = [merged] if isinstance(merged, LineString) else list(merged.geoms)
+        elif isinstance(geom, LineString):
+            lines = [geom]
+        else:
+            new_geoms.append(None)
+            continue
+
+        # Tenter la polygonisation
+        polys = list(polygonize(lines))
+
+        if len(polys) == 1:
+            new_geoms.append(polys[0])
+        elif len(polys) > 1:
+            new_geoms.append(MultiPolygon(polys))
+        else:
+            # Dernière tentative : fermer la ligne manuellement
+            closed = []
+            for ln in lines:
+                coords = list(ln.coords)
+                if len(coords) >= 3:
+                    if coords[0] != coords[-1]:
+                        coords.append(coords[0])
+                    closed.append(Polygon(coords))
+            if len(closed) == 1:
+                new_geoms.append(closed[0])
+            elif len(closed) > 1:
+                new_geoms.append(MultiPolygon(closed))
+            else:
+                new_geoms.append(None)
+
+    result = result.set_geometry([g for g in new_geoms], crs=gdf.crs)
+
+    if not keep_invalid:
+        result = result[result.geometry.notnull() & ~result.geometry.is_empty].copy()
+
+    return result
+
+
+def select_by_attribute(gdf: gpd.GeoDataFrame, expression: str) -> gpd.GeoDataFrame:
+    """
+    Sélectionne des entités d'un GeoDataFrame selon une expression attributaire.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source.
+    expression : str
+        Expression de filtrage pandas (ex: ``"population > 10000"``),
+        évaluée via ``DataFrame.query()``.
+
+    Retourne
+    --------
+    GeoDataFrame
+        Sous-ensemble filtré.
+
+    Exemples
+    --------
+    >>> select_by_attribute(gdf, "population > 10000")
+    >>> select_by_attribute(gdf, "nom == 'Paris'")
+    >>> select_by_attribute(gdf, "type in ['ville', 'commune']")
+    """
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+    return gdf.query(expression).copy()
+
+
+def select_by_location(gdf: gpd.GeoDataFrame, mask: gpd.GeoDataFrame,
+                       predicate: str = "intersects") -> gpd.GeoDataFrame:
+    """
+    Sélectionne des entités d'un GeoDataFrame selon leur relation spatiale
+    avec un autre GeoDataFrame.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame dont on veut extraire les entités.
+    mask : GeoDataFrame
+        GeoDataFrame servant de filtre spatial.
+    predicate : str, optionnel
+        Prédicat spatial parmi : ``'intersects'``, ``'contains'``,
+        ``'within'``, ``'touches'``, ``'crosses'``, ``'overlaps'``.
+        Par défaut ``'intersects'``.
+
+    Retourne
+    --------
+    GeoDataFrame
+        Entités de ``gdf`` satisfaisant la relation spatiale avec ``mask``.
+
+    Exemples
+    --------
+    >>> select_by_location(points, zones, predicate="within")
+    >>> select_by_location(parcelles, riviere, predicate="intersects")
+    """
+    valid_predicates = {"intersects", "contains", "within", "touches", "crosses", "overlaps"}
+    if predicate not in valid_predicates:
+        raise ValueError(f"Prédicat '{predicate}' invalide. Valeurs acceptées : {valid_predicates}")
+
+    if gdf.crs != mask.crs:
+        mask = mask.to_crs(gdf.crs)
+
+    mask_union = mask.geometry.unary_union
+    spatial_index = gdf.sindex
+    possible_matches_idx = list(spatial_index.intersection(mask_union.bounds))
+    possible_matches = gdf.iloc[possible_matches_idx]
+
+    method = getattr(possible_matches.geometry, predicate)
+    result = possible_matches[method(mask_union)].copy()
+    return result
+
+
+def buffer(gdf: gpd.GeoDataFrame, distance: float, cap_style: int = 1,
+           join_style: int = 1, resolution: int = 16) -> gpd.GeoDataFrame:
+    """
+    Crée une zone tampon autour des géométries d'un GeoDataFrame.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source.
+    distance : float
+        Distance du buffer (dans l'unité du CRS).
+    cap_style : int, optionnel
+        Style des extrémités (1=rond, 2=plat, 3=carré). Défaut : 1.
+    join_style : int, optionnel
+        Style des jointures (1=rond, 2=onglet, 3=biseau). Défaut : 1.
+    resolution : int, optionnel
+        Nombre de segments pour approximer les courbes. Défaut : 16.
+
+    Retourne
+    --------
+    GeoDataFrame
+        GeoDataFrame avec les géométries remplacées par les buffers.
+
+    Exemples
+    --------
+    >>> gdf_buf = buffer(gdf, distance=500)
+    >>> gdf_buf = buffer(gdf, distance=0.01)  # ~1 km en EPSG:4326
+    """
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+    result = gdf.copy()
+    result["geometry"] = result.geometry.buffer(
+        distance, cap_style=cap_style, join_style=join_style, resolution=resolution
+    )
+    return result
+
+
+def dissolve(gdf: gpd.GeoDataFrame, by: str = None,
+             aggfunc: str = "first") -> gpd.GeoDataFrame:
+    """
+    Fusionne les géométries d'un GeoDataFrame, éventuellement par groupe.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source.
+    by : str, optionnel
+        Nom de la colonne servant de clé de regroupement.
+        Si None, toutes les géométries sont fusionnées en une seule.
+    aggfunc : str, optionnel
+        Fonction d'agrégation pour les attributs (``'first'``, ``'sum'``,
+        ``'mean'``, ``'min'``, ``'max'``, ``'count'``). Défaut : ``'first'``.
+
+    Retourne
+    --------
+    GeoDataFrame
+        GeoDataFrame dissous.
+
+    Exemples
+    --------
+    >>> dissolve(gdf, by="region")
+    >>> dissolve(gdf, by="type", aggfunc="sum")
+    >>> dissolve(gdf)  # fusionne tout en une seule géométrie
+    """
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+    if by is not None and by not in gdf.columns:
+        raise ValueError(f"La colonne '{by}' n'existe pas dans le GeoDataFrame.")
+    return gdf.dissolve(by=by, aggfunc=aggfunc).reset_index()
+
+
+def intersection(gdf1: gpd.GeoDataFrame,
+                 gdf2: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Calcule l'intersection géométrique entre deux GeoDataFrames.
+
+    Retourne un nouveau GeoDataFrame ne contenant que les parties communes
+    aux deux couches, avec les attributs des deux sources.
+
+    Paramètres
+    ----------
+    gdf1 : GeoDataFrame
+        Première couche.
+    gdf2 : GeoDataFrame
+        Seconde couche.
+
+    Retourne
+    --------
+    GeoDataFrame
+        Intersection des deux couches.
+
+    Exemples
+    --------
+    >>> result = intersection(parcelles, zone_inondable)
+    """
+    if gdf1.crs != gdf2.crs:
+        gdf2 = gdf2.to_crs(gdf1.crs)
+    result = gpd.overlay(gdf1, gdf2, how="intersection")
+    return result
+
+
+def reproject(gdf: gpd.GeoDataFrame, target_crs: str) -> gpd.GeoDataFrame:
+    """
+    Reprojette un GeoDataFrame vers un autre système de coordonnées.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source.
+    target_crs : str
+        CRS cible (ex: ``"EPSG:4326"``, ``"EPSG:32632"``).
+
+    Retourne
+    --------
+    GeoDataFrame
+        GeoDataFrame reprojeté.
+
+    Exemples
+    --------
+    >>> gdf_utm = reproject(gdf, "EPSG:32632")
+    >>> gdf_wgs84 = reproject(gdf, "EPSG:4326")
+    """
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+    if gdf.crs is None:
+        raise ValueError("Le GeoDataFrame n'a pas de CRS défini. Utilisez set_crs() d'abord.")
+    return gdf.to_crs(target_crs)
+
+
+def fix_geometry(gdf: gpd.GeoDataFrame, drop_invalid: bool = False) -> gpd.GeoDataFrame:
+    """
+    Corrige les géométries invalides d'un GeoDataFrame.
+
+    Utilise ``buffer(0)`` puis ``make_valid()`` pour tenter de réparer
+    les géométries cassées (auto-intersections, anneaux croisés, etc.).
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source.
+    drop_invalid : bool, optionnel
+        Si True, supprime les géométries qui restent invalides après correction.
+        Si False (défaut), les conserve telles quelles.
+
+    Retourne
+    --------
+    GeoDataFrame
+        GeoDataFrame avec les géométries corrigées.
+
+    Exemples
+    --------
+    >>> gdf_clean = fix_geometry(gdf)
+    >>> gdf_clean = fix_geometry(gdf, drop_invalid=True)
+    """
+    from shapely.validation import make_valid
+
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+
+    result = gdf.copy()
+
+    invalid_mask = ~result.geometry.is_valid
+    n_invalid = invalid_mask.sum()
+
+    if n_invalid > 0:
+        result.loc[invalid_mask, "geometry"] = result.loc[invalid_mask, "geometry"].buffer(0)
+
+        still_invalid = ~result.geometry.is_valid
+        if still_invalid.sum() > 0:
+            result.loc[still_invalid, "geometry"] = result.loc[still_invalid, "geometry"].apply(make_valid)
+
+        final_invalid = ~result.geometry.is_valid
+        n_fixed = n_invalid - final_invalid.sum()
+        print(f"✅ {n_fixed}/{n_invalid} géométrie(s) corrigée(s).")
+
+        if drop_invalid and final_invalid.sum() > 0:
+            result = result[result.geometry.is_valid].copy()
+            print(f"🗑️ {final_invalid.sum()} géométrie(s) invalide(s) supprimée(s).")
+    else:
+        print("✅ Toutes les géométries sont déjà valides.")
+
+    return result
+
+
+def calculate_area(gdf: gpd.GeoDataFrame, column_name: str = "area",
+                   unit: str = "m2", projected_crs: str = None) -> gpd.GeoDataFrame:
+    """
+    Calcule la surface de chaque géométrie et l'ajoute comme colonne.
+
+    Si le CRS est géographique (degrés), une reprojection temporaire est
+    effectuée pour obtenir des surfaces en mètres carrés.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source contenant des polygones.
+    column_name : str, optionnel
+        Nom de la colonne de surface à créer. Défaut : ``"area"``.
+    unit : str, optionnel
+        Unité de surface : ``"m2"``, ``"km2"``, ``"ha"``. Défaut : ``"m2"``.
+    projected_crs : str, optionnel
+        CRS projeté à utiliser pour le calcul (ex: ``"EPSG:32632"``).
+        Si None et que le CRS est géographique, utilise une projection
+        Equal Area automatique.
+
+    Retourne
+    --------
+    GeoDataFrame
+        GeoDataFrame avec la nouvelle colonne de surface.
+
+    Exemples
+    --------
+    >>> gdf = calculate_area(gdf, unit="km2")
+    >>> gdf = calculate_area(gdf, column_name="superficie", unit="ha")
+    """
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+
+    result = gdf.copy()
+
+    if result.crs is not None and result.crs.is_geographic:
+        if projected_crs:
+            work = result.to_crs(projected_crs)
+        else:
+            work = result.to_crs(result.estimate_utm_crs())
+        areas = work.geometry.area
+    else:
+        areas = result.geometry.area
+
+    divisors = {"m2": 1, "km2": 1_000_000, "ha": 10_000}
+    if unit not in divisors:
+        raise ValueError(f"Unité '{unit}' invalide. Valeurs acceptées : {list(divisors.keys())}")
+
+    result[column_name] = areas / divisors[unit]
+    return result
+
+
+def calculate_length(gdf: gpd.GeoDataFrame, column_name: str = "length",
+                     unit: str = "m", projected_crs: str = None) -> gpd.GeoDataFrame:
+    """
+    Calcule la longueur de chaque géométrie linéaire et l'ajoute comme colonne.
+
+    Si le CRS est géographique (degrés), une reprojection temporaire est
+    effectuée pour obtenir des longueurs en mètres.
+
+    Paramètres
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame source contenant des lignes.
+    column_name : str, optionnel
+        Nom de la colonne de longueur à créer. Défaut : ``"length"``.
+    unit : str, optionnel
+        Unité de longueur : ``"m"``, ``"km"``. Défaut : ``"m"``.
+    projected_crs : str, optionnel
+        CRS projeté à utiliser pour le calcul (ex: ``"EPSG:32632"``).
+        Si None et que le CRS est géographique, utilise une projection
+        UTM automatique.
+
+    Retourne
+    --------
+    GeoDataFrame
+        GeoDataFrame avec la nouvelle colonne de longueur.
+
+    Exemples
+    --------
+    >>> gdf = calculate_length(gdf, unit="km")
+    >>> gdf = calculate_length(gdf, column_name="longueur", unit="m")
+    """
+    if not isinstance(gdf, gpd.GeoDataFrame):
+        raise TypeError("gdf doit être un GeoDataFrame.")
+
+    result = gdf.copy()
+
+    if result.crs is not None and result.crs.is_geographic:
+        if projected_crs:
+            work = result.to_crs(projected_crs)
+        else:
+            work = result.to_crs(result.estimate_utm_crs())
+        lengths = work.geometry.length
+    else:
+        lengths = result.geometry.length
+
+    divisors = {"m": 1, "km": 1000}
+    if unit not in divisors:
+        raise ValueError(f"Unité '{unit}' invalide. Valeurs acceptées : {list(divisors.keys())}")
+
+    result[column_name] = lengths / divisors[unit]
+    return result

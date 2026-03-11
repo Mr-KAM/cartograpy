@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 # Packages pour les données vectorelles
 import pandas as pd
 import geopandas as gpd
 import geojson
 from typing import *
+import math
+import numpy as np
 
 # Packages pour les boundaries
 from cartograpy.iso_code import *
@@ -26,24 +30,30 @@ import wbdata
 import osmnx as ox
 
 # Packages pour la lecture des données Rasters
-import numpy as np
+
 import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.crs import CRS
+try:
+    from rasterio.transform import Affine
+    from rasterio.merge import merge as rio_merge
+    from rasterio.windows import from_bounds
+except ImportError as e:
+    raise ImportError(
+        """Cette classe nécessite rasterio. 
+        Installez-le avec: pip install rasterio"""
+    ) from e
 import tempfile
 from urllib.parse import urlencode
 import warnings
 import datetime
-
-
-
-# import os
-# import time
-# import requests
-import math
-from typing import Optional, Tuple
-from pathlib import Path
 from tqdm import tqdm
+import gzip
+from contextlib import ExitStack
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import struct
+
+
 
 def load(filepath):
     """
@@ -76,7 +86,9 @@ def load(filepath):
         ValueError : Si le format de fichier n'est pas supporté
         RuntimeError : Si une erreur survient lors de la lecture du fichier
     """
-    ext = filepath.split('.')[-1].lower()
+    # Convertir filepath en string s'il s'agit d'un objet Path
+    filepath_str = str(filepath)
+    ext = filepath_str.split('.')[-1].lower()
 
     # Vector formats
     vector_exts = ['shp', 'geojson', 'gpkg', 'kml', 'gpx', 'csv', 'parquet']
@@ -99,13 +111,24 @@ def load(filepath):
             return pd.read_csv(filepath)
         elif ext == 'parquet':
             return pd.read_parquet(filepath)
+    # Chargement de données raster
     elif ext in raster_exts:
         try:
-            return rasterio.open(filepath)
+            with rasterio.open(filepath) as src:
+                arr = src.read(1)           # bande 1
+                nodata = src.nodata
+            # Masquer les NoData pour un rendu propre
+            if nodata is not None:
+                import numpy as np
+                arr = np.ma.masked_equal(arr, nodata)
+            return arr
         except Exception as e:
             raise RuntimeError(f"Erreur lors de la lecture raster : {e}")
     else:
         raise ValueError(f"Format '{ext}' non supporté pour le chargement.")
+
+
+
 
 
 def save(data, file_extension, filename="output", timestamp=False, raster_meta=None):
@@ -127,69 +150,121 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
             Doit contenir au minimum : crs, transform, width, height, dtype, count.
 
     Retour :
-        str : Chemin complet vers le fichier sauvegardé.
+        str : Chemin absolu vers le fichier sauvegardé.
+
+    Raises :
+        ValueError : Si le format n'est pas supporté ou si raster_meta est manquant/incomplet.
+        TypeError  : Si le type de données n'est pas pris en charge.
 
     Exemples :
-        >>> # Sauvegarder un GeoDataFrame en GeoJSON
-        >>> gdf = gpd.GeoDataFrame(...)
         >>> save(gdf, 'geojson', 'ma_carte')
-
-        >>> # Sauvegarder un tableau numpy en TIFF avec métadonnées
-        >>> import rasterio
-        >>> meta = {'crs': 'EPSG:4326', 'transform': affine_transform, ...}
         >>> save(array, 'tif', 'mon_raster', raster_meta=meta)
     """
-    file_extension = file_extension.lower()
+    # -- Mapping des formats supportés ----------------------------------------
+    _VECTOR_DRIVERS = {
+        'geojson': 'GeoJSON',
+        'shp': 'ESRI Shapefile',
+        'gpkg': 'GPKG',
+        'kml': 'KML',
+    }
+    _TABULAR_EXTS = {'csv', 'parquet', 'geoparquet', 'xlsx', 'feather'}
+    _RASTER_EXTS = {'tif', 'tiff'}
+    _ALL_SUPPORTED = set(_VECTOR_DRIVERS) | _TABULAR_EXTS | _RASTER_EXTS
+
+    # -- Normalisation / validation -------------------------------------------
+    file_extension = file_extension.lower().lstrip('.')
+    if file_extension not in _ALL_SUPPORTED:
+        raise ValueError(
+            f"Format '{file_extension}' non supporté. "
+            f"Formats acceptés : {sorted(_ALL_SUPPORTED)}"
+        )
+
+    # S1 : empêcher le path traversal (on ne garde que le basename)
+    filename = os.path.basename(str(filename))
+
     if timestamp:
         now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{filename}_{now}"
     output_path = f"{filename}.{file_extension}"
 
-    # VECTOR
-    if isinstance(data, (gpd.GeoDataFrame, pd.DataFrame)):
-        if file_extension == 'geojson':
-            data.to_file(output_path, driver='GeoJSON')
-        elif file_extension == 'shp':
-            data.to_file(output_path, driver='ESRI Shapefile')
-        elif file_extension == 'gpkg':
-            data.to_file(output_path, driver='GPKG')
-        elif file_extension == 'kml':
-            try:
-                data.to_file(output_path, driver='KML')
-            except Exception as e:
-                print(f"❌ Impossible d'écrire un fichier KML ici : {e}")
-        elif file_extension == 'csv':
-            if isinstance(data, gpd.GeoDataFrame):
-                data = data.drop(columns='geometry', errors='ignore')
-            data.to_csv(output_path, index=False)
-        elif file_extension == 'parquet':
-            if isinstance(data, gpd.GeoDataFrame):
-                data = data.drop(columns='geometry', errors='ignore')
-            data.to_parquet(output_path, index=False)
-        elif file_extension == 'xlsx':
-            if isinstance(data, gpd.GeoDataFrame):
-                data = data.drop(columns='geometry', errors='ignore')
-            data.to_excel(output_path, index=False)
-        elif file_extension == 'feather':
-            if isinstance(data, gpd.GeoDataFrame):
-                data = data.drop(columns='geometry', errors='ignore')
-            data.to_feather(output_path)
+    # R1 : créer le répertoire parent si nécessaire
+    parent = os.path.dirname(output_path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
 
-    # RASTER
+    # ── VECTOR / TABULAR ────────────────────────────────────────────────────
+    if isinstance(data, (gpd.GeoDataFrame, pd.DataFrame)):
+        # Formats vectoriels natifs (via fiona/GDAL)
+        if file_extension in _VECTOR_DRIVERS:
+            data.to_file(output_path, driver=_VECTOR_DRIVERS[file_extension])
+
+        # Formats tabulaires (géométrie retirée sauf geoparquet)
+        elif file_extension in _TABULAR_EXTS:
+            # GeoParquet conserve la géométrie
+            if file_extension == 'geoparquet':
+                if isinstance(data, gpd.GeoDataFrame):
+                    data.to_parquet(output_path, index=False)
+                else:
+                    raise TypeError(
+                        "geoparquet nécessite un GeoDataFrame (pas un DataFrame)."
+                    )
+            else:
+                # Retirer la géométrie une seule fois
+                if isinstance(data, gpd.GeoDataFrame):
+                    data = data.drop(columns='geometry', errors='ignore')
+                if file_extension == 'csv':
+                    data.to_csv(output_path, index=False)
+                elif file_extension == 'parquet':
+                    data.to_parquet(output_path, index=False)
+                elif file_extension == 'xlsx':
+                    data.to_excel(output_path, index=False)
+                elif file_extension == 'feather':
+                    data.to_feather(output_path)
+        else:
+            raise ValueError(
+                f"Le format '{file_extension}' n'est pas un format vectoriel/tabulaire. "
+                f"Type de données reçu : {type(data).__name__}"
+            )
+
+    # ── RASTER ──────────────────────────────────────────────────────────────
     elif isinstance(data, rasterio.io.DatasetReader):
+        if file_extension not in _RASTER_EXTS:
+            raise ValueError(
+                f"Un DatasetReader ne peut être sauvegardé qu'en TIFF, "
+                f"pas en '{file_extension}'."
+            )
         with rasterio.open(output_path, 'w', **data.meta) as dst:
             dst.write(data.read())
+
     elif isinstance(data, np.ndarray):
+        if file_extension not in _RASTER_EXTS:
+            raise ValueError(
+                f"Un ndarray raster ne peut être sauvegardé qu'en TIFF, "
+                f"pas en '{file_extension}'."
+            )
         if raster_meta is None:
-            raise ValueError("raster_meta est requis pour enregistrer un tableau numpy raster.")
+            raise ValueError("raster_meta est requis pour enregistrer un ndarray.")
+        _required_keys = {'crs', 'transform', 'width', 'height', 'dtype', 'count'}
+        missing = _required_keys - set(raster_meta)
+        if missing:
+            raise ValueError(
+                f"Clés manquantes dans raster_meta : {sorted(missing)}"
+            )
+        # B4 : ndarray 2D → 3D automatiquement
+        if data.ndim == 2:
+            data = data[np.newaxis, :, :]
         with rasterio.open(output_path, 'w', **raster_meta) as dst:
             dst.write(data)
 
     else:
-        raise TypeError("Type de données non pris en charge pour la sauvegarde.")
+        raise TypeError(
+            f"Type de données non pris en charge : {type(data).__name__}. "
+            f"Attendu : GeoDataFrame, DataFrame, DatasetReader ou ndarray."
+        )
 
-    print(f"✅ Fichier sauvegardé : {os.path.abspath(output_path)}")
-    return output_path
+    abs_path = os.path.abspath(output_path)
+    print(f"✅ Fichier sauvegardé : {abs_path}")
+    return abs_path
 
 
 def list_geofiles(folder_path):
@@ -606,6 +681,528 @@ class GeoBoundaries:
             }
 
 
+
+class Bound:
+    """
+    Client pour interagir avec l'API GeoBoundaries.
+    Permet de récupérer les limites administratives des territoires.
+    """
+    
+    def __init__(self, cache_expire_seconds: int = 604800):
+        """
+        Initialise le client GeoBoundaries.
+        
+        Args:
+            cache_expire_seconds: Durée d'expiration du cache en secondes (défaut: 1 semaine)
+        """
+        self._session = CachedSession(expire_after=cache_expire_seconds)
+        self._base_url = "https://www.geoboundaries.org/api/current/gbOpen"
+    
+    def clear_cache(self):
+        """Vide le cache des requêtes."""
+        self._session.cache.clear()
+    
+    def set_cache_expire_time(self, seconds: int):
+        """
+        Met à jour le temps d'expiration du cache sans vider le cache existant.
+        
+        Args:
+            seconds: Nouvelle durée d'expiration en secondes
+        """
+        self._session = CachedSession(expire_after=seconds)
+    
+    def disable_cache(self):
+        """Désactive le cache des requêtes."""
+        self._session = requests
+    
+    def is_valid_adm(self, iso3: str, adm: str) -> bool:
+        """
+        Vérifie si un niveau ADM est valide pour un pays donné.
+        
+        Args:
+            iso3: Code ISO3 du pays
+            adm: Niveau administratif (ex: 'ADM0', 'ADM1', etc.)
+            
+        Returns:
+            bool: True si le niveau ADM est valide
+        """
+        url = f"{self._base_url}/{iso3}/"
+        html = self._session.get(url, verify=True).text
+        return adm in html
+    
+    def _validate_adm(self, adm: Union[str, int]) -> str:
+        """
+        Valide et normalise un niveau ADM.
+        
+        Args:
+            adm: Niveau administratif (int ou str)
+            
+        Returns:
+            str: Niveau ADM validé et normalisé
+            
+        Raises:
+            KeyError: Si le niveau ADM n'est pas valide
+        """
+        if isinstance(adm, int) or len(str(adm)) == 1:
+            adm = f'ADM{adm}'
+        
+        valid_adms = [f'ADM{i}' for i in range(6)] + ['ALL']
+        if str.upper(adm) in valid_adms:
+            return str.upper(adm)
+        
+        raise KeyError(f"Niveau ADM invalide: {adm}")
+    
+    def _get_smallest_adm(self, iso3: str) -> str:
+        """
+        Trouve le plus petit niveau ADM disponible pour un pays.
+        
+        Args:
+            iso3: Code ISO3 du pays
+            
+        Returns:
+            str: Plus petit niveau ADM disponible
+        """
+        for current_adm in range(5, -1, -1):
+            adm_level = f'ADM{current_adm}'
+            if self.is_valid_adm(iso3, adm_level):
+                print(f'Smallest ADM level found for {iso3} : {adm_level}')
+                return adm_level
+        
+        return 'ADM0'  # Fallback
+    
+    def _is_valid_iso3_code(self, territory: str) -> bool:
+        """
+        Vérifie si un code ISO3 est valide.
+        
+        Args:
+            territory: Code ou nom du territoire
+            
+        Returns:
+            bool: True si le code ISO3 est valide
+        """
+        return str.lower(territory) in iso_codes
+    
+    def _get_iso3_from_name_or_iso2(self, name: str) -> str:
+        """
+        Convertit un nom de pays ou code ISO2 en code ISO3.
+        
+        Args:
+            name: Nom du pays ou code ISO2
+            
+        Returns:
+            str: Code ISO3 correspondant
+            
+        Raises:
+            KeyError: Si le pays n'est pas trouvé
+        """
+        try:
+            list_iso3 = self.get_iso3(name)
+            if isinstance(list_iso3, str):
+                return list_iso3.upper()
+            # Si plusieurs pays correspondent, on retourne la liste
+            elif isinstance(list_iso3, list) and len(list_iso3) >= 1:
+                # Si un seul pays correspond, on retourne son code ISO3
+                return list_iso3[0][1].upper()
+            else:
+                raise KeyError(f"{name} non trouvé")
+        
+        except KeyError as e:
+            print(f"KeyError : Couldn't find country named {e}")
+            raise KeyError(f"Pays non trouvé: {name}")
+        
+    def get_iso3(self, territory: str):
+        """
+        Récupère le code ISO3 d'un territoire.
+        
+        Args:
+            territory: Nom du territoire ou code ISO2/ISO3
+            
+        Returns:
+            str: Code ISO3 du territoire
+            
+        Raises:
+            KeyError: Si le territoire n'est pas trouvé
+        """
+        if self._is_valid_iso3_code(territory):
+            return str.upper(territory)
+        else:
+            list_iso3 = [(countrie_name,iso) for countrie_name, iso in countries_iso3.items() if str.lower(territory) in str.lower(countrie_name)]
+            # Si aucun pays ne correspond, on retourne None
+            if list_iso3 == []:
+                return None
+            # Si un seul pays correspond, on retourne son code ISO3
+            elif len(list_iso3) == 1:
+                return list_iso3[0][1].upper()
+            else : # Si plusieurs pays correspondent, avec le même ISO3, on retourne le code ISO3 correspondant
+                if len(set([iso for _, iso in list_iso3])) == 1:
+                    return list_iso3[0][1].upper()
+                else :# Sinon, on retourne la liste des pays correspondants
+                    return list_iso3
+    
+    
+    def list_countries(self) -> List[str]:
+        """
+        Récupère la liste des pays valides.
+        
+        Returns:
+            List[str]: Liste des codes ISO3 des pays
+        """
+        return list(countries_iso3.keys())
+
+
+    
+    def _generate_url(self, territory: str, adm: Union[str, int]) -> str:
+        """
+        Génère l'URL de l'API pour un territoire et niveau ADM donnés.
+        
+        Args:
+            territory: Nom du territoire ou code ISO
+            adm: Niveau administratif
+            
+        Returns:
+            str: URL de l'API
+            
+        Raises:
+            KeyError: Si le territoire ou niveau ADM n'est pas valide
+        """
+        iso3 = (str.upper(territory) if self._is_valid_iso3_code(territory) 
+                else self._get_iso3_from_name_or_iso2(territory))
+        
+        if adm != -1:
+            adm = self._validate_adm(adm)
+        else:
+            adm = self._get_smallest_adm(iso3)
+        
+        if not self.is_valid_adm(iso3, adm):
+            error_msg = f"ADM level '{adm}' doesn't exist for country '{territory}' ({iso3})"
+            print(f"KeyError : {error_msg}")
+            raise KeyError(error_msg)
+        
+        return f"{self._base_url}/{iso3}/{adm}/"
+    
+    def adminLevels(self):
+        return """
+| Niveau GeoBoundaries | Nom commun (FR)           | Nom commun (EN)       |
+| -------------------- | ------------------------- | --------------------- |
+| ADM0                 | Pays                      | Country               |
+| ADM1                 | Région / État / Province  | State / Region        |
+| ADM2                 | Département / District    | District / County     |
+| ADM3                 | Sous-préfecture / Commune | Subdistrict / Commune |
+| ADM4                 | Village / Localité        | Village / Locality    |
+| ADM5                 | Quartier / Secteur        | Neighborhood / Sector |
+        """
+
+
+    def metadata(self, territory: str, adm: Union[str, int]) -> dict:
+        """
+        Récupère les métadonnées d'un territoire.
+        
+        Args:
+            territory: Nom du territoire ou code ISO
+            adm: Niveau administratif (utiliser 'ALL' pour tous les niveaux)
+            
+        Returns:
+            dict: Métadonnées du territoire
+        """
+        url = self._generate_url(territory, adm)
+        return self._session.get(url, verify=True).json()
+    
+    def _get_data(self, territory: str, adm: str, simplified: bool) -> str:
+        """
+        Récupère les données géographiques d'un territoire.
+        
+        Args:
+            territory: Nom du territoire ou code ISO
+            adm: Niveau administratif
+            simplified: Si True, utilise la géométrie simplifiée
+            
+        Returns:
+            str: Données GeoJSON sous forme de chaîne
+        """
+        geom_complexity = 'simplifiedGeometryGeoJSON' if simplified else 'gjDownloadURL'
+        
+        try:
+            json_uri = self.metadata(territory, adm)[geom_complexity]
+        except Exception as e:
+            error_msg = f"Error while requesting geoboudaries API\n URL : {self._generate_url(territory, adm)}\n"
+            print(error_msg)
+            raise e
+        
+        return self._session.get(json_uri).text
+    
+    def adm(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> dict:
+        """
+        Récupère les limites administratives des territoires spécifiés.
+        
+        Args:
+            territories: Territoire(s) à récupérer. Peut être :
+                - Un string unique : "Senegal", "SEN", "เซเนกัล"
+                - Une liste de strings : ["SEN", "Mali"], ["セネガル", "մալի"]
+            adm: Niveau administratif :
+                - 'ADM0' à 'ADM5' (si existant pour le pays)
+                - int de 0 à 5
+                - int -1 (retourne le plus petit niveau ADM disponible)
+            simplified: Si True, utilise la géométrie simplifiée (défaut: True)
+            
+        Returns:
+            dict: Données GeoJSON des territoires
+            
+        Note:
+            Valeurs autorisées pour territories :
+            - ISO 3166-1 (alpha2) : AFG, QAT, YEM, etc.
+            - ISO 3166-1 (alpha3) : AF, QA, YE, etc.
+            - Nom du pays en plusieurs langues supportées
+        """
+        if isinstance(territories, str):
+            geo_df=gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territories, adm, simplified)))
+            return geo_df
+        
+        # Traitement pour une liste de territoires
+        geojsons_dic = {}
+        for territory in territories:
+            data = gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territory, adm, simplified)))
+            geojsons_dic[territory]=data
+
+        return geojsons_dic
+
+    def get_admin(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> dict:
+        """
+        Récupère les limites administratives des territoires spécifiés.
+        
+        Args:
+            territories: Territoire(s) à récupérer. Peut être :
+                - Un string unique : "Senegal", "SEN", "เซเนกัล"
+                - Une liste de strings : ["SEN", "Mali"], ["セネガル", "մալի"]
+            adm: Niveau administratif :
+                - 'ADM0' à 'ADM5' (si existant pour le pays)
+                - int de 0 à 5
+                - int -1 (retourne le plus petit niveau ADM disponible)
+            simplified: Si True, utilise la géométrie simplifiée (défaut: True)
+            
+        Returns:
+            dict: Données GeoJSON des territoires
+            
+        Note:
+            Valeurs autorisées pour territories :
+            - ISO 3166-1 (alpha2) : AFG, QAT, YEM, etc.
+            - ISO 3166-1 (alpha3) : AF, QA, YE, etc.
+            - Nom du pays en plusieurs langues supportées
+        """
+        if isinstance(territories, str):
+            geo_df=gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territories, adm, simplified)))
+            return geo_df
+        
+        # Traitement pour une liste de territoires
+        geojsons_dic = {}
+        for territory in territories:
+            data = gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territory, adm, simplified)))
+            geojsons_dic[territory]=data
+
+        return pd.concat(geojsons_dic,axis=0,ignore_index=True)
+
+
+    def continents(self,continents: Optional[Union[str, List[str]]] = None) -> gpd.GeoDataFrame:
+        """
+        Retourne un GeoDataFrame des continents du monde.
+        
+        Parameters:
+        -----------
+        continents : str, list of str, or None, optional
+            - Si str : retourne le GeoDataFrame du continent spécifié
+            - Si list : retourne le GeoDataFrame des continents dans la liste
+            - Si None : retourne tous les continents
+        
+        Returns:
+        --------
+        gpd.GeoDataFrame
+            GeoDataFrame contenant les géométries des continents demandés
+        
+        Raises:
+        -------
+        ValueError
+            Si un continent spécifié n'existe pas dans les données
+        """
+        
+        try:
+            # Charger les données des pays du monde depuis naturalearth (URL directe)
+            naturalearth_url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
+            world = gpd.read_file(naturalearth_url)
+            
+            # Mapping des continents pour normaliser les noms
+            continent_mapping = {
+                'africa': 'Africa',
+                'afrique': 'Africa',
+                'asia': 'Asia',
+                'asie': 'Asia',
+                'europe': 'Europe',
+                'north america': 'North America',
+                'amérique du nord': 'North America',
+                'south america': 'South America',
+                'amérique du sud': 'South America',
+                'oceania': 'Oceania',
+                'océanie': 'Oceania',
+                'antarctica': 'Antarctica',
+                'antarctique': 'Antarctica'
+            }
+            
+            # Créer un GeoDataFrame des continents en dissolvant les géométries par continent
+            # Le nom de la colonne peut varier selon la version des données
+            continent_col = 'CONTINENT' if 'CONTINENT' in world.columns else 'continent'
+            
+            continents_gdf = world.dissolve(by=continent_col, as_index=False)
+            continents_gdf = continents_gdf[[continent_col, 'geometry']]
+            continents_gdf = continents_gdf.rename(columns={continent_col: 'continent'})
+            
+            # Si aucun continent spécifié, retourner tous les continents
+            if continents is None:
+                return continents_gdf
+            
+            # Si un seul continent (string)
+            if isinstance(continents, str):
+                continent_name = continent_mapping.get(continents.lower(), continents)
+                filtered_gdf = continents_gdf[continents_gdf['continent'].str.contains(continent_name, case=False, na=False)]
+                
+                if filtered_gdf.empty:
+                    available_continents = ', '.join(continents_gdf['continent'].unique())
+                    raise ValueError(f"Continent '{continents}' non trouvé. Continents disponibles: {available_continents}")
+                
+                return filtered_gdf
+            
+            # Si une liste de continents
+            elif isinstance(continents, list):
+                # Normaliser les noms des continents
+                normalized_continents = []
+                for cont in continents:
+                    normalized_name = continent_mapping.get(cont.lower(), cont)
+                    normalized_continents.append(normalized_name)
+                
+                # Filtrer le GeoDataFrame
+                mask = continents_gdf['continent'].str.lower().isin([c.lower() for c in normalized_continents])
+                filtered_gdf = continents_gdf[mask]
+                
+                if filtered_gdf.empty:
+                    available_continents = ', '.join(continents_gdf['continent'].unique())
+                    raise ValueError(f"Aucun continent trouvé dans la liste. Continents disponibles: {available_continents}")
+                
+                # Vérifier si tous les continents demandés ont été trouvés
+                found_continents = filtered_gdf['continent'].str.lower().tolist()
+                missing = [c for c in continents if continent_mapping.get(c.lower(), c).lower() not in found_continents]
+                
+                if missing:
+                    print(f"Attention: Continents non trouvés: {', '.join(missing)}")
+                
+                return filtered_gdf
+            
+            else:
+                raise TypeError("Le paramètre 'continents' doit être une chaîne, une liste ou None")
+        
+        except Exception as e:
+            print(f"Erreur lors du chargement des données: {e}")
+            raise
+
+    def list_continents_names(self):
+        return {
+                'africa': 'Africa',
+                'afrique': 'Africa',
+                'asia': 'Asia',
+                'asie': 'Asia',
+                'europe': 'Europe',
+                'north america': 'North America',
+                'amérique du nord': 'North America',
+                'south america': 'South America',
+                'amérique du sud': 'South America',
+                'oceania': 'Oceania',
+                'océanie': 'Oceania',
+                'antarctica': 'Antarctica',
+                'antarctique': 'Antarctica'
+            }
+
+    def get_country(self, name: Union[str, List[str]]) -> gpd.GeoDataFrame:
+        """
+        Récupère les frontières (ADM0) d'un ou plusieurs pays.
+
+        Args:
+            name: Nom du pays, code ISO2/ISO3, ou une liste de noms/codes.
+                  Exemples : "France", "FRA", ["France", "SEN", "Mali"]
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame contenant la/les géométrie(s) du/des pays (niveau ADM0).
+                Si un seul pays est fourni, retourne un GeoDataFrame.
+                Si une liste est fournie, retourne un GeoDataFrame concaténé de tous les pays.
+
+        Raises:
+            KeyError: Si un pays n'est pas trouvé.
+
+        Exemples:
+            >>> b = bound()
+            >>> france = b.get_country("France")
+            >>> pays = b.get_country(["France", "SEN", "Mali"])
+        """
+        if isinstance(name, str):
+            return self.get_admin(name, adm=0, simplified=True)
+        
+        gdfs = []
+        for country in name:
+            gdf = self.get_admin(country, adm=0, simplified=True)
+            gdfs.append(gdf)
+        return pd.concat(gdfs, ignore_index=True)
+
+
+    def get_continent(self, name: Union[str, List[str]]) -> gpd.GeoDataFrame:
+        """
+        Récupère la géométrie d'un ou plusieurs continents à partir de leur nom.
+
+        Args:
+            name: Nom du continent ou liste de noms (français ou anglais).
+                  Exemples : "Africa", "Afrique", ["Europe", "Afrique"], ["Asia", "Amérique du Sud"]
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame contenant la/les géométrie(s) du/des continent(s).
+
+        Raises:
+            ValueError: Si un continent n'est pas trouvé.
+
+        Exemples:
+            >>> b = bound()
+            >>> afrique = b.get_continent("Afrique")
+            >>> europe = b.get_continent("Europe")
+            >>> plusieurs = b.get_continent(["Afrique", "Europe", "Asia"])
+        """
+        return self.continents(name)
+
+    def get_world(self, level: str = "continent") -> gpd.GeoDataFrame:
+        """
+        Retourne un GeoDataFrame du monde entier, agrégé par continent ou par pays.
+
+        Args:
+            level: Niveau d'agrégation. Valeurs possibles :
+                - "continent" : retourne les géométries de tous les continents (par défaut)
+                - "country" : retourne les géométries de tous les pays
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame contenant les géométries du monde.
+
+        Raises:
+            ValueError: Si le niveau spécifié n'est pas "continent" ou "country".
+
+        Exemples:
+            >>> b = bound()
+            >>> continents = b.get_world("continent")
+            >>> pays = b.get_world("country")
+        """
+        level = level.strip().lower()
+        if level == "continent":
+            return self.continents()
+        elif level == "country":
+            naturalearth_url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
+            return gpd.read_file(naturalearth_url)
+        else:
+            raise ValueError(
+                f"Niveau '{level}' non supporté. Utilisez 'continent' ou 'country'."
+            )
+
+
+
 class Geocoder:
     """
     Un objet Python pour géocoder une ou plusieurs localités en utilisant geopy
@@ -632,7 +1229,7 @@ class Geocoder:
         self.delay = delay
 
     def _geocode_single(self, location_str):
-        """
+        """ 
         Méthode interne pour géocoder une seule localité.
 
         Args:
@@ -794,6 +1391,14 @@ class Geocoder:
 
         return geodataframe, not_found_coordinates
 
+    def bbox(self,localitie):
+        import osmnx as ox
+        gdf = ox.geocode_to_gdf(localitie)
+        west, south, east, north = gdf.total_bounds
+        return (west, south, east, north)
+
+
+
 class WorldBank:
     def __init__(self):
         self.api_key = "_si_necessite_se_presente"
@@ -814,9 +1419,9 @@ class WorldBank:
 
 class OSM :
     def __init__(self):
-        self.api_key = "api_key_si_necessaire"
+        self.api_key = ""
     
-    def get_data(self,place, tags, data_type="points"):
+    def get_data(self,place, tags, data_type="all"):
         """
         Récupère des données OpenStreetMap pour un lieu donné (str, bbox ou GeoDataFrame)
         et des tags OSM personnalisés.
@@ -1075,7 +1680,7 @@ class OSM :
         return results
 
 
-    def get_common_tag_combinations(self):
+    def get_common_tag(self):
         """
         Retourne des combinaisons de tags couramment utilisées ensemble.
         
@@ -1186,988 +1791,803 @@ class Hydro :
 
 
 
+BBox = Tuple[float, float, float, float]  # (west, south, east, north)
+
+class DEMDownloadError(RuntimeError):
+    """Erreur de téléchargement/traitement DEM."""
+    pass
 
 
 class DEM:
     """
-    Classe pour télécharger des données numériques de terrain (DEM) en utilisant
-    des packages Python existants spécialisés.
-    
-    Sources de données supportées:
-    - SRTM via le package 'elevation'
-    - USGS 3DEP via le package 'py3dep' 
-    - ALOS World 3D via 'elevation'
-    - ASTER GDEM via 'elevation'
+    Télécharge un MNT (Modèle Numérique de Terrain) SRTM (~30 m) sans clé API
+    via les tuiles Skadi hébergées sur AWS, puis mosaïque et découpe selon
+    une emprise (EPSG:4326).
+
+    Paramètres
+    ----------
+    work_dir : répertoire de travail pour les fichiers intermédiaires.
+    timeout : délai maximal (en secondes) par requête HTTP.
+    keep_intermediate : si True, conserve les tuiles .hgt.gz et .tif.
+    output_dir : alias déprécié de work_dir (rétrocompatibilité).
+
+    Exemple
+    -------
+    >>> dem = DEM(work_dir="_dem_tiles", timeout=180)
+    >>> chemin = dem.download(bbox=(-8, 4, -2, 11), out_tif="srtm_ci.tif")
     """
-    
-    def __init__(self, output_dir: str = "./dem_data"):
-        """
-        Initialise le téléchargeur DEM.
-        
-        Args:
-            output_dir (str): Répertoire de sortie pour sauvegarder les fichiers DEM
-        """
-        self.output_dir = Path(output_dir)
-        self.downloaded_list = []  # Liste des DEMs téléchargés
-        
-        # Créer le répertoire de sortie s'il n'existe pas
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # print("Packages requis: pip install elevation py3dep geopandas rasterio")
-    
-    def download_srtm_elevation(self, 
-                               bbox: Tuple[float, float, float, float],
-                               resolution: int = 1) -> str:
-        """
-        Télécharge des données SRTM via le package 'elevation'.
-        
-        Args:
-            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
-            resolution (int): Résolution en arc-seconds (1 ou 3)
-        
-        Returns:
-            str: Chemin vers le fichier téléchargé
-        """
-        try:
-            import elevation
-        except ImportError:
-            raise ImportError("Le package 'elevation' est requis: pip install elevation")
-        
-        west, south, east, north = bbox
-        
-        # Validation de la bbox
-        if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
-            raise ValueError("Bounding box invalide. Vérifiez les coordonnées.")
-        
-        print(f"Téléchargement SRTM (resolution: {resolution}s) pour la zone: {bbox}")
-        
-        # Nom du fichier de sortie
-        filename = f"srtm_{resolution}s_{west}_{south}_{east}_{north}.tif"
-        filepath = self.output_dir / filename
-        
-        try:
-            # Télécharger avec le package elevation
-            elevation.clip(
-                bounds=(west, south, east, north),
-                output=str(filepath),
-                product=f'SRTM{resolution}'  # SRTM1 (30m) ou SRTM3 (90m)
-            )
-            
-            # Ajouter à la liste des téléchargements
-            dem_info = {
-                'path': str(filepath),
-                'bbox': bbox,
-                'source': f'SRTM{resolution}',
-                'resolution': f'{resolution} arc-second',
-                'package': 'elevation'
-            }
-            self.downloaded_list.append(dem_info)
-            
-            print(f"DEM SRTM téléchargé: {filepath}")
-            return str(filepath)
-            
-        except Exception as e:
-            raise Exception(f"Erreur lors du téléchargement SRTM: {e}")
-    
-    def download_alos_elevation(self, 
-                               bbox: Tuple[float, float, float, float]) -> str:
-        """
-        Télécharge des données ALOS World 3D-30m via le package 'elevation'.
-        
-        Args:
-            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
-        
-        Returns:
-            str: Chemin vers le fichier téléchargé
-        """
-        try:
-            import elevation
-        except ImportError:
-            raise ImportError("Le package 'elevation' est requis: pip install elevation")
-        
-        west, south, east, north = bbox
-        
-        print(f"Téléchargement ALOS World 3D-30m pour la zone: {bbox}")
-        
-        # Nom du fichier de sortie
-        filename = f"alos_30m_{west}_{south}_{east}_{north}.tif"
-        filepath = self.output_dir / filename
-        
-        try:
-            # Télécharger ALOS World 3D-30m
-            elevation.clip(
-                bounds=(west, south, east, north),
-                output=str(filepath),
-                product='ALOS30'  # ALOS World 3D 30m
-            )
-            
-            # Ajouter à la liste des téléchargements
-            dem_info = {
-                'path': str(filepath),
-                'bbox': bbox,
-                'source': 'ALOS World 3D-30m',
-                'resolution': '30 meters',
-                'package': 'elevation'
-            }
-            self.downloaded_list.append(dem_info)
-            
-            print(f"DEM ALOS téléchargé: {filepath}")
-            return str(filepath)
-            
-        except Exception as e:
-            raise Exception(f"Erreur lors du téléchargement ALOS: {e}")
-    
-    def download_usgs_3dep(self, 
-                          bbox: Tuple[float, float, float, float],
-                          resolution: int = 30,
-                          crs: str = "EPSG:4326") -> str:
-        """
-        Télécharge des données USGS 3DEP via le package 'py3dep'.
-        
-        Args:
-            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
-            resolution (int): Résolution en mètres (10, 30, 60)
-            crs (str): Système de coordonnées de référence
-        
-        Returns:
-            str: Chemin vers le fichier téléchargé
-        """
-        try:
-            import py3dep
-        except ImportError:
-            raise ImportError("Le package 'py3dep' est requis: pip install py3dep")
-        
-        west, south, east, north = bbox
-        
-        print(f"Téléchargement USGS 3DEP (résolution: {resolution}m) pour la zone: {bbox}")
-        
-        try:
-            # Créer un GeoDataFrame avec la bbox
-            geometry = [box(west, south, east, north)]
-            gdf = gpd.GeoDataFrame(geometry=geometry, crs="EPSG:4326")
-            
-            # Si CRS différent, reprojeter
-            if crs != "EPSG:4326":
-                gdf = gdf.to_crs(crs)
-            
-            # Télécharger les données 3DEP
-            dem = py3dep.get_map(
-                gdf.bounds.iloc[0].values,  # [minx, miny, maxx, maxy]
-                resolution=resolution,
-                geo_crs=crs,
-                crs=crs
-            )
-            
-            # Nom du fichier de sortie
-            filename = f"usgs_3dep_{resolution}m_{west}_{south}_{east}_{north}.tif"
-            filepath = self.output_dir / filename
-            
-            # Sauvegarder le DEM
-            dem.rio.to_raster(str(filepath))
-            
-            # Ajouter à la liste des téléchargements
-            dem_info = {
-                'path': str(filepath),
-                'bbox': bbox,
-                'source': 'USGS 3DEP',
-                'resolution': f'{resolution} meters',
-                'crs': crs,
-                'package': 'py3dep'
-            }
-            self.downloaded_list.append(dem_info)
-            
-            print(f"DEM USGS 3DEP téléchargé: {filepath}")
-            return str(filepath)
-            
-        except Exception as e:
-            # Fallback pour les zones hors USA
-            if "outside" in str(e).lower() or "usa" in str(e).lower():
-                print("Zone hors USA, USGS 3DEP non disponible pour cette région")
-                return None
-            raise Exception(f"Erreur lors du téléchargement USGS 3DEP: {e}")
-    
-    def download_nasadem(self, 
-                        bbox: Tuple[float, float, float, float]) -> str:
-        """
-        Télécharge des données NASADEM via le package 'elevation'.
-        
-        Args:
-            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
-        
-        Returns:
-            str: Chemin vers le fichier téléchargé
-        """
-        try:
-            import elevation
-        except ImportError:
-            raise ImportError("Le package 'elevation' est requis: pip install elevation")
-        
-        west, south, east, north = bbox
-        
-        print(f"Téléchargement NASADEM pour la zone: {bbox}")
-        
-        # Nom du fichier de sortie
-        filename = f"nasadem_{west}_{south}_{east}_{north}.tif"
-        filepath = self.output_dir / filename
-        
-        try:
-            # Télécharger NASADEM
-            elevation.clip(
-                bounds=(west, south, east, north),
-                output=str(filepath),
-                product='NASADEM'  # NASADEM ~30m
-            )
-            
-            # Ajouter à la liste des téléchargements
-            dem_info = {
-                'path': str(filepath),
-                'bbox': bbox,
-                'source': 'NASADEM',
-                'resolution': '~30 meters',
-                'package': 'elevation'
-            }
-            self.downloaded_list.append(dem_info)
-            
-            print(f"DEM NASADEM téléchargé: {filepath}")
-            return str(filepath)
-            
-        except Exception as e:
-            raise Exception(f"Erreur lors du téléchargement NASADEM: {e}")
-    
-    def get_elevation_point(self, lat: float, lon: float, source: str = "srtm") -> Optional[float]:
-        """
-        Obtient l'élévation pour un point spécifique.
-        
-        Args:
-            lat (float): Latitude en degrés décimaux
-            lon (float): Longitude en degrés décimaux
-            source (str): Source de données ("srtm", "alos", "nasadem")
-        
-        Returns:
-            float: Élévation en mètres, ou None si erreur
-        """
-        try:
-            # Créer une petite bbox autour du point
-            buffer = 0.01  # ~1km
-            bbox = (lon - buffer, lat - buffer, lon + buffer, lat + buffer)
-            
-            # Télécharger temporairement
-            if source.lower() == "srtm":
-                temp_dem = self.download_srtm_elevation(bbox, resolution=1)
-            elif source.lower() == "alos":
-                temp_dem = self.download_alos_elevation(bbox)
-            elif source.lower() == "nasadem":
-                temp_dem = self.download_nasadem(bbox)
-            else:
-                temp_dem = self.download_srtm_elevation(bbox, resolution=1)
-            
-            if not temp_dem:
-                return None
-            
-            # Lire la valeur au point
-            with rasterio.open(temp_dem) as dataset:
-                row, col = dataset.index(lon, lat)
-                if 0 <= row < dataset.height and 0 <= col < dataset.width:
-                    elevation = dataset.read(1)[row, col]
-                    return float(elevation) if elevation != dataset.nodata else None
-                else:
-                    return None
-                    
-        except Exception as e:
-            print(f"Erreur pour obtenir l'élévation au point ({lat}, {lon}): {e}")
-            return None
-    
-    def analyze_dem(self, dem_path: str) -> dict:
-        """
-        Analyse un fichier DEM et retourne des statistiques.
-        
-        Args:
-            dem_path (str): Chemin vers le fichier DEM
-        
-        Returns:
-            dict: Statistiques du DEM
-        """
-        try:
-            with rasterio.open(dem_path) as dataset:
-                data = dataset.read(1)
-                
-                # Masquer les valeurs NoData
-                if dataset.nodata is not None:
-                    data = np.ma.masked_equal(data, dataset.nodata)
-                
-                stats = {
-                    'chemin': dem_path,
-                    'crs': str(dataset.crs),
-                    'dimensions': (dataset.width, dataset.height),
-                    'resolution_x': abs(dataset.transform[0]),
-                    'resolution_y': abs(dataset.transform[4]),
-                    'bbox': dataset.bounds,
-                    'elevation_min': float(np.min(data)),
-                    'elevation_max': float(np.max(data)),
-                    'elevation_mean': float(np.mean(data)),
-                    'elevation_std': float(np.std(data)),
-                    'nodata_value': dataset.nodata,
-                    'size_mb': os.path.getsize(dem_path) / (1024*1024)
-                }
-                
-                return stats
-                
-        except Exception as e:
-            return {'erreur': str(e)}
-    
-    def create_hillshade(self, 
-                        dem_path: str, 
-                        azimuth: float = 315.0, 
-                        altitude: float = 45.0) -> str:
-        """
-        Crée un ombrage (hillshade) à partir d'un DEM.
-        
-        Args:
-            dem_path (str): Chemin vers le DEM
-            azimuth (float): Azimut de la source lumineuse (0-360°)
-            altitude (float): Altitude de la source lumineuse (0-90°)
-        
-        Returns:
-            str: Chemin vers le fichier hillshade
-        """
-        try:
-            import richdem as rd
-            
-            # Charger le DEM
-            dem = rd.LoadGDAL(dem_path)
-            
-            # Calculer le hillshade
-            hillshade = rd.TerrainAttribute(dem, attrib='hillshade', azimuth=azimuth, angle=altitude)
-            
-            # Nom du fichier de sortie
-            output_path = dem_path.replace('.tif', '_hillshade.tif')
-            
-            # Sauvegarder
-            rd.SaveGDAL(output_path, hillshade)
-            
-            print(f"Hillshade créé: {output_path}")
-            return output_path
-            
-        except ImportError:
-            print("Le package 'richdem' est recommandé pour le hillshade: pip install richdem")
-            # Fallback avec numpy/scipy
-            return self._create_hillshade_numpy(dem_path, azimuth, altitude)
-        except Exception as e:
-            print(f"Erreur lors de la création du hillshade: {e}")
-            return None
-    
-    def _create_hillshade_numpy(self, dem_path: str, azimuth: float, altitude: float) -> str:
-        """
-        Version fallback du hillshade avec numpy.
-        """
-        try:
-            output_path = dem_path.replace('.tif', '_hillshade.tif')
-            
-            with rasterio.open(dem_path) as src:
-                elevation = src.read(1).astype(np.float64)
-                
-                # Calculer les gradients
-                x, y = np.gradient(elevation)
-                
-                # Convertir les angles en radians
-                azimuth_rad = np.radians(360.0 - azimuth + 90.0)
-                altitude_rad = np.radians(altitude)
-                
-                # Calculer la pente et l'aspect
-                slope = np.pi/2. - np.arctan(np.sqrt(x*x + y*y))
-                aspect = np.arctan2(-x, y)
-                
-                # Calculer l'ombrage
-                hillshade = np.sin(altitude_rad) * np.sin(slope) + \
-                           np.cos(altitude_rad) * np.cos(slope) * \
-                           np.cos(azimuth_rad - aspect)
-                
-                # Normaliser entre 0 et 255
-                hillshade = np.clip((hillshade * 255), 0, 255).astype(np.uint8)
-                
-                # Sauvegarder
-                profile = src.profile.copy()
-                profile.update(dtype=rasterio.uint8, count=1)
-                
-                with rasterio.open(output_path, 'w', **profile) as dst:
-                    dst.write(hillshade, 1)
-            
-            print(f"Hillshade créé: {output_path}")
-            return output_path
-            
-        except Exception as e:
-            print(f"Erreur lors de la création du hillshade: {e}")
-            return None
-    
-    def reproject_dem(self, 
-                     input_path: str, 
-                     output_crs: str = 'EPSG:3857',
-                     resampling_method: Resampling = Resampling.bilinear) -> str:
-        """
-        Reprojette un DEM vers un autre système de coordonnées.
-        
-        Args:
-            input_path (str): Chemin vers le DEM d'entrée
-            output_crs (str): CRS de sortie (ex: 'EPSG:3857', 'EPSG:4326')
-            resampling_method: Méthode de rééchantillonnage
-        
-        Returns:
-            str: Chemin vers le fichier reprojeté
-        """
-        output_path = input_path.replace('.tif', f'_{output_crs.replace(":", "_")}.tif')
-        
-        with rasterio.open(input_path) as src:
-            dst_crs = CRS.from_string(output_crs)
-            
-            # Calculer la transformation
-            transform, width, height = calculate_default_transform(
-                src.crs, dst_crs, src.width, src.height, *src.bounds
-            )
-            
-            # Métadonnées pour le fichier de sortie
-            kwargs = src.meta.copy()
-            kwargs.update({
-                'crs': dst_crs,
-                'transform': transform,
-                'width': width,
-                'height': height
-            })
-            
-            with rasterio.open(output_path, 'w', **kwargs) as dst:
-                reproject(
-                    source=rasterio.band(src, 1),
-                    destination=rasterio.band(dst, 1),
-                    src_transform=src.transform,
-                    src_crs=src.crs,
-                    dst_transform=transform,
-                    dst_crs=dst_crs,
-                    resampling=resampling_method
-                )
-        
-        print(f"DEM reprojeté sauvegardé: {output_path}")
-        return output_path
-    
-    def get_downloaded_list(self) -> List[dict]:
-        """
-        Retourne la liste des DEMs téléchargés.
-        
-        Returns:
-            List[dict]: Liste des informations sur les DEMs téléchargés
-        """
-        return self.downloaded_list
-    
-    def clear_downloaded_list(self):
-        """
-        Vide la liste des DEMs téléchargés.
-        """
-        self.downloaded_list.clear()
-        print("Liste des téléchargements vidée.")
-    
-    def print_downloaded_summary(self):
-        """
-        Affiche un résumé des DEMs téléchargés.
-        """
-        if not self.downloaded_list:
-            print("Aucun DEM téléchargé.")
-            return
-        
-        print(f"\n=== Résumé des {len(self.downloaded_list)} DEM(s) téléchargé(s) ===")
-        for i, dem in enumerate(self.downloaded_list, 1):
-            print(f"\n{i}. Source: {dem['source']} (via {dem['package']})")
-            print(f"   Fichier: {Path(dem['path']).name}")
-            print(f"   Zone: {dem['bbox']}")
-            print(f"   Résolution: {dem['resolution']}")
-            if 'crs' in dem:
-                print(f"   CRS: {dem['crs']}")
-    
-    def auto_download(self, 
-                     bbox: Tuple[float, float, float, float],
-                     prefer_high_res: bool = True) -> str:
-        """
-        Télécharge automatiquement le meilleur DEM disponible pour la zone.
-        
-        Args:
-            bbox (tuple): Bounding box (west, south, east, north)
-            prefer_high_res (bool): Préférer la haute résolution
-        
-        Returns:
-            str: Chemin vers le DEM téléchargé
-        """
-        west, south, east, north = bbox
-        
-        print(f"Téléchargement automatique pour la zone: {bbox}")
-        
-        # Détecter si c'est aux USA pour 3DEP
-        is_usa = (-180 <= west <= -65 and 15 <= south <= 72 and 
-                  -180 <= east <= -65 and 15 <= north <= 72)
-        
-        # Ordre de priorité selon les préférences
-        if prefer_high_res:
-            methods = [
-                ('USGS 3DEP 10m', lambda: self.download_usgs_3dep(bbox, resolution=10) if is_usa else None),
-                ('USGS 3DEP 30m', lambda: self.download_usgs_3dep(bbox, resolution=30) if is_usa else None),
-                ('ALOS World 3D', lambda: self.download_alos_elevation(bbox)),
-                ('SRTM 1s', lambda: self.download_srtm_elevation(bbox, resolution=1)),
-                ('NASADEM', lambda: self.download_nasadem(bbox))
-            ]
-        else:
-            methods = [
-                ('SRTM 1s', lambda: self.download_srtm_elevation(bbox, resolution=1)),
-                ('ALOS World 3D', lambda: self.download_alos_elevation(bbox)),
-                ('NASADEM', lambda: self.download_nasadem(bbox)),
-                ('USGS 3DEP 30m', lambda: self.download_usgs_3dep(bbox, resolution=30) if is_usa else None)
-            ]
-        
-        # Essayer chaque méthode
-        for method_name, method_func in methods:
-            try:
-                print(f"Tentative avec {method_name}...")
-                result = method_func()
-                if result:
-                    print(f"Succès avec {method_name}")
-                    return result
-            except Exception as e:
-                print(f"Échec avec {method_name}: {e}")
-                continue
-        
-        raise Exception("Impossible de télécharger des données DEM pour cette zone")
 
-    def download(self, 
-                bbox: Tuple[float, float, float, float],
-                source: Optional[str] = None,
-                resolution: Optional[Union[str, float]] = None) -> str:
-        """
-        Télécharge un DEM depuis une source priorisée (API → fallback local).
-        
-        Args:
-            bbox (tuple): (west, south, east, north)
-            source (str, optional): 'srtm', 'etopo', 'openelevation', 'fallback'
-            resolution (str|float, optional): résolution selon source
-        
-        Returns:
-            str: chemin vers le fichier DEM
-        """
-        try_sources = [source] if source else ['srtm', 'etopo', 'openelevation']
-        
-        for src in try_sources:
-            try:
-                print(f"👉 Tentative avec la source '{src}'...")
-                if src == 'srtm':
-                    res = resolution if resolution else 0.000277777778
-                    return self.download_srtm_opentopography(bbox, resolution=res)
-                elif src == 'etopo':
-                    res = resolution if resolution else '1m'
-                    return self.download_etopo_noaa(bbox, resolution=res)
-                elif src in ['open-elevation', 'openelevation']:
-                    res = resolution if resolution else 1000
-                    return self.download_elevation_api(bbox, samples=int(res))
-            except Exception as e:
-                print(f"⚠️ Échec avec la source '{src}': {e}")
-                continue
-
-        # 🛟 Fallback avec `elevation` (basé sur SRTM)
-        try:
-            print("🚨 Aucune source API n'a fonctionné. Fallback avec le package Python 'elevation'...")
-            import elevation
-            from rasterio import transform as rtransform
-
-            bounds = {'left': bbox[0], 'bottom': bbox[1], 'right': bbox[2], 'top': bbox[3]}
-            filename = f"fallback_srtm_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]}.tif"
-            filepath = os.path.join(self.output_dir, filename)
-
-            elevation.clip(bounds=bounds, output=filepath, product='SRTM1')
-            elevation.clean()
-
-            print(f"✅ Fichier DEM téléchargé avec fallback (elevation): {filepath}")
-            return filepath
-        
-        except Exception as e:
-            print(f"⚠️ Échec du fallback avec 'elevation': {e}")
-
-
-    def download_elevation_api(self, 
-                             bbox: Tuple[float, float, float, float],
-                             samples: int = 1500) -> str:
-        """
-        Télécharge des données d'élévation via Open-Elevation API (gratuit, sans clé).
-        
-        Args:
-            bbox (tuple): Bounding box (west, south, east, north) en degrés décimaux
-            samples (int): Nombre d'échantillons par dimension (max 100x100 recommandé)
-        
-        Returns:
-            str: Chemin vers le fichier téléchargé
-        """
-        west, south, east, north = bbox
-        
-        # Validation
-        if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
-            raise ValueError("Bounding box invalide. Vérifiez les coordonnées.")
-        
-        if samples > 100:
-            print("Attention: samples > 100 peut causer des timeouts")
-            samples = 100
-        
-        print(f"Téléchargement via Open-Elevation API pour la zone: {bbox}")
-        print(f"Résolution: {samples}x{samples} points")
-        
-        # Créer une grille de points
-        lats = np.linspace(south, north, samples)
-        lons = np.linspace(west, east, samples)
-        
-        # Initialiser la matrice d'élévation
-        elevation_data = np.zeros((samples, samples))
-        
-        # API Open-Elevation (limite: 100 points par requête)
-        base_url = "https://api.open-elevation.com/api/v1/lookup"
-        
-        batch_size = 100
-        total_points = samples * samples
-        processed = 0
-        
-        for i, lat in enumerate(lats):
-            for j in range(0, len(lons), batch_size):
-                batch_lons = lons[j:j+batch_size]
-                
-                # Préparer les locations pour cette batch
-                locations = []
-                for lon in batch_lons:
-                    locations.append({"latitude": lat, "longitude": lon})
-                
-                try:
-                    response = self.session.post(
-                        base_url,
-                        json={"locations": locations},
-                        timeout=30
-                    )
-                    response.raise_for_status()
-                    
-                    results = response.json()['results']
-                    
-                    # Remplir la matrice d'élévation
-                    for k, result in enumerate(results):
-                        col_idx = j + k
-                        if col_idx < len(lons):
-                            elevation_data[i, col_idx] = result['elevation']
-                    
-                    processed += len(results)
-                    if processed % 500 == 0:
-                        print(f"Progression: {processed}/{total_points} points")
-                
-                except requests.exceptions.RequestException as e:
-                    print(f"Erreur pour la batch lat={lat:.4f}: {e}")
-                    # Remplir avec des valeurs par défaut en cas d'erreur
-                    try :
-                        response = self.session.post(
-                            base_url,
-                            json={"locations": locations},
-                            timeout=30
-                        )
-                        response.raise_for_status()
-                        
-                        results = response.json()['results']
-                        
-                        # Remplir la matrice d'élévation
-                        for k, result in enumerate(results):
-                            col_idx = j + k
-                            if col_idx < len(lons):
-                                elevation_data[i, col_idx] = result['elevation']
-                        
-                        processed += len(results)
-                        if processed % 500 == 0:
-                            print(f"Progression: {processed}/{total_points} points")
-                    except :
-                        try :
-                            response = self.session.post(
-                                base_url,
-                                json={"locations": locations},
-                                timeout=30
-                            )
-                            response.raise_for_status()
-                            
-                            results = response.json()['results']
-                            
-                            # Remplir la matrice d'élévation
-                            for k, result in enumerate(results):
-                                col_idx = j + k
-                                if col_idx < len(lons):
-                                    elevation_data[i, col_idx] = result['elevation']
-                            
-                            processed += len(results)
-                            if processed % 500 == 0:
-                                print(f"Progression: {processed}/{total_points} points")
-                        except :
-
-                            response = self.session.post(
-                                base_url,
-                                json={"locations": locations},
-                                timeout=30
-                            )
-                            response.raise_for_status()
-                            
-                            results = response.json()['results']
-                            
-                            # Remplir la matrice d'élévation
-                            for k, result in enumerate(results):
-                                col_idx = j + k
-                                if col_idx < len(lons):
-                                    elevation_data[i, col_idx] = result['elevation']
-                            
-                            processed += len(results)
-                            if processed % 500 == 0:
-                                print(f"Progression: {processed}/{total_points} points")
-                            # except :
-                            #     # Remplir avec des valeurs par défaut en cas d'erreur
-                            #     for k in range(len(batch_lons)):
-                            #         col_idx = j + k
-                            #         if col_idx < len(lons):
-                            #             elevation_data[i, col_idx] = -9999
-        
-        # Créer le GeoTIFF
-        filename = f"open_elevation_{west}_{south}_{east}_{north}_{samples}x{samples}.tif"
-        filepath = os.path.join(self.output_dir, filename)
-        
-        # Transformation géospatiale
-        transform = rasterio.transform.from_bounds(west, south, east, north, samples, samples)
-        
-        # Sauvegarder
-        with rasterio.open(
-            filepath, 'w',
-            driver='GTiff',
-            height=samples,
-            width=samples,
-            count=1,
-            dtype=np.float32,
-            crs='EPSG:4326',
-            transform=transform,
-            nodata=-9999
-        ) as dst:
-            dst.write(elevation_data.astype(np.float32), 1)
-        
-        # Ajouter à la liste des téléchargements
-        dem_info = {
-            'path': filepath,
-            'bbox': bbox,
-            'source': 'Open-Elevation API',
-            'resolution': f"{samples}x{samples}"
-        }
-        self.downloaded_list.append(dem_info)
-        
-        print(f"DEM Open-Elevation téléchargé: {filepath}")
-        return filepath
-
-
-
-
-class SRTM:
-    """
-    Classe pour télécharger des tuiles SRTM depuis les serveurs NASA.
-    """
-    
-    BASE_URL = "https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL1.003/2000.02.11/"
-    AUTH_URL = "https://urs.earthdata.nasa.gov"
-    
-    def __init__(self, username: str, password: str, resolution: str = "1arc"):
-        """
-        Initialise le téléchargeur SRTM.
-        
-        Args:
-            username: Nom d'utilisateur NASA Earthdata
-            password: Mot de passe NASA Earthdata
-            resolution: Résolution des données ('1arc' pour ~30m, '3arc' pour ~90m)
-        """
-        self.username = username
-        self.password = password
-        self.resolution = resolution
-        self.session = None
-        self._setup_session()
-    
-    def _setup_session(self):
-        """Configure la session avec authentification."""
-        self.session = requests.Session()
-        self.session.auth = (self.username, self.password)
-        self.session.headers.update({
-            'User-Agent': 'SRTM-Downloader/3.2.3'
-        })
-    
-    def _get_tile_name(self, lat: float, lon: float) -> str:
-        """
-        Génère le nom de la tuile SRTM pour des coordonnées données.
-        
-        Args:
-            lat: Latitude
-            lon: Longitude
-            
-        Returns:
-            Nom du fichier de la tuile (ex: N48E002.hgt.zip)
-        """
-        # Latitude
-        if lat >= 0:
-            lat_str = f"N{int(math.floor(lat)):02d}"
-        else:
-            lat_str = f"S{int(math.ceil(abs(lat))):02d}"
-        
-        # Longitude
-        if lon >= 0:
-            lon_str = f"E{int(math.floor(lon)):03d}"
-        else:
-            lon_str = f"W{int(math.ceil(abs(lon))):03d}"
-        
-        return f"{lat_str}{lon_str}.SRTMGL1.hgt.zip"
-    
-    def _validate_coordinates(self, lat: float, lon: float) -> bool:
-        """
-        Valide que les coordonnées sont dans la zone de couverture SRTM.
-        
-        Args:
-            lat: Latitude
-            lon: Longitude
-            
-        Returns:
-            True si valide, False sinon
-        """
-        if lat < -56 or lat > 60:
-            return False
-        if lon < -180 or lon > 180:
-            return False
-        return True
-    
-    def download_tile(
-        self, 
-        latitude: float, 
-        longitude: float, 
-        output_dir: str = ".",
-        overwrite: bool = False
-    ) -> Optional[str]:
-        """
-        Télécharge une tuile SRTM individuelle.
-        
-        Args:
-            latitude: Latitude du point
-            longitude: Longitude du point
-            output_dir: Répertoire de sortie
-            overwrite: Si True, télécharge même si le fichier existe
-            
-        Returns:
-            Chemin du fichier téléchargé ou None en cas d'erreur
-        """
-        if not self._validate_coordinates(latitude, longitude):
-            print(f"❌ Coordonnées invalides ou hors zone de couverture SRTM: ({latitude}, {longitude})")
-            return None
-        
-        # Créer le répertoire de sortie
-        output_path = Path(output_dir)
-        output_path.mkdir(parents=True, exist_ok=True)
-        
-        # Nom de la tuile
-        tile_name = self._get_tile_name(latitude, longitude)
-        output_file = output_path / tile_name
-        
-        # Vérifier si le fichier existe déjà
-        if output_file.exists() and not overwrite:
-            print(f"⏭️  Tuile déjà téléchargée: {tile_name}")
-            return str(output_file)
-        
-        # URL de téléchargement
-        url = f"{self.BASE_URL}{tile_name}"
-        
-        print(f"📥 Téléchargement: {tile_name}")
-        
-        try:
-            # Effectuer la requête
-            response = self.session.get(url, stream=True, timeout=30)
-            response.raise_for_status()
-            
-            # Taille du fichier
-            total_size = int(response.headers.get('content-length', 0))
-            
-            # Télécharger avec barre de progression
-            with open(output_file, 'wb') as f:
-                with tqdm(total=total_size, unit='B', unit_scale=True, desc=tile_name) as pbar:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-                            pbar.update(len(chunk))
-            
-            print(f"✅ Téléchargé: {output_file}")
-            return str(output_file)
-            
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 401:
-                print(f"❌ Erreur d'authentification. Vérifiez vos identifiants NASA Earthdata.")
-            elif e.response.status_code == 404:
-                print(f"❌ Tuile non trouvée: {tile_name}")
-            else:
-                print(f"❌ Erreur HTTP {e.response.status_code}: {e}")
-            return None
-            
-        except requests.exceptions.RequestException as e:
-            print(f"❌ Erreur de téléchargement: {e}")
-            return None
-        
-        except Exception as e:
-            print(f"❌ Erreur inattendue: {e}")
-            return None
-    
-    def download_area(
+    def __init__(
         self,
-        west: float,
-        east: float,
-        south: float,
-        north: float,
-        output_dir: str = ".",
-        overwrite: bool = False
-    ) -> list:
-        """
-        Télécharge toutes les tuiles SRTM couvrant une zone géographique.
-        
-        Args:
-            west: Longitude ouest (min)
-            east: Longitude est (max)
-            south: Latitude sud (min)
-            north: Latitude nord (max)
-            output_dir: Répertoire de sortie
-            overwrite: Si True, télécharge même si les fichiers existent
-            
-        Returns:
-            Liste des chemins des fichiers téléchargés
-        """
-        # Validation
-        if west >= east:
-            print("❌ Erreur: west doit être inférieur à east")
-            return []
-        
+        work_dir: Union[str, Path] = "_dem_tiles",
+        timeout: int = 180,
+        keep_intermediate: bool = False,
+        output_dir: Optional[Union[str, Path]] = None,
+    ) -> None:
+        if output_dir is not None:
+            if work_dir != "_dem_tiles":
+                warnings.warn(
+                    "Les paramètres 'work_dir' et 'output_dir' sont tous deux fournis. "
+                    "'output_dir' est prioritaire.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            work_dir = output_dir
+
+        self.work_dir = Path(work_dir)
+        self.timeout = int(timeout)
+        self.keep_intermediate = bool(keep_intermediate)
+
+        self.gz_dir = self.work_dir / "hgt_gz"
+        self.tif_dir = self.work_dir / "tile_tif"
+        self.gz_dir.mkdir(parents=True, exist_ok=True)
+        self.tif_dir.mkdir(parents=True, exist_ok=True)
+
+        # Endpoint public (pas de clé)
+        self._base_url = "https://s3.amazonaws.com/elevation-tiles-prod/skadi"
+
+        # P3 : cache HTTP pour éviter re-téléchargements
+        self._session = CachedSession(
+            cache_name=str(self.work_dir / ".http_cache"),
+            backend="filesystem",
+            expire_after=datetime.timedelta(days=30),
+        )
+
+    # -----------------------
+    # Helpers (private)
+    # -----------------------
+    @staticmethod
+    def _lat_code(lat: int) -> str:
+        return f"{'N' if lat >= 0 else 'S'}{abs(lat):02d}"
+
+    @staticmethod
+    def _lon_code(lon: int) -> str:
+        return f"{'E' if lon >= 0 else 'W'}{abs(lon):03d}"
+
+    def _skadi_url(self, lat_ll: int, lon_ll: int) -> str:
+        latc = self._lat_code(lat_ll)
+        lonc = self._lon_code(lon_ll)
+        return f"{self._base_url}/{latc}/{latc}{lonc}.hgt.gz"
+
+    # Taille attendue d'un fichier .hgt.gz SRTM 1-arc-seconde (3601×3601 × 2 octets)
+    _HGT_RAW_SIZE = 3601 * 3601 * 2  # 25 934 402 octets non compressés
+    _MAX_RETRIES = 3
+    _RETRY_BACKOFF = 2  # secondes, sera doublé à chaque tentative
+
+    @staticmethod
+    def _validate_bbox(bbox: BBox) -> None:
+        west, south, east, north = bbox
+        if not (-180.0 <= west <= 180.0 and -180.0 <= east <= 180.0):
+            raise ValueError("Longitude hors limites [-180, 180].")
+        if not (-90.0 <= south <= 90.0 and -90.0 <= north <= 90.0):
+            raise ValueError("Latitude hors limites [-90, 90].")
         if south >= north:
-            print("❌ Erreur: south doit être inférieur à north")
-            return []
-        
-        # Calculer les tuiles nécessaires
-        lat_start = int(math.floor(south))
-        lat_end = int(math.floor(north))
-        lon_start = int(math.floor(west))
-        lon_end = int(math.floor(east))
-        
-        tiles = []
-        for lat in range(lat_start, lat_end + 1):
-            for lon in range(lon_start, lon_end + 1):
-                tiles.append((lat, lon))
-        
-        print(f"\n🌍 Zone de téléchargement:")
-        print(f"   Ouest: {west}°, Est: {east}°")
-        print(f"   Sud: {south}°, Nord: {north}°")
-        print(f"   Nombre de tuiles: {len(tiles)}\n")
-        
-        # Télécharger toutes les tuiles
-        downloaded_files = []
-        for i, (lat, lon) in enumerate(tiles, 1):
-            print(f"\n[{i}/{len(tiles)}]", end=" ")
-            file_path = self.download_tile(lat, lon, output_dir, overwrite)
-            if file_path:
-                downloaded_files.append(file_path)
-            
-            # Petit délai pour éviter de surcharger le serveur
-            if i < len(tiles):
-                time.sleep(0.5)
-        
-        print(f"\n\n✅ Téléchargement terminé: {len(downloaded_files)}/{len(tiles)} tuiles")
-        return downloaded_files
+            raise ValueError("BBox invalide: 'south' doit être < 'north'.")
+
+    @staticmethod
+    def _split_antimeridian_bbox(bbox: BBox) -> List[BBox]:
+        """Découpe une bbox traversant l'antiméridien en deux bbox valides."""
+        west, south, east, north = bbox
+        if west <= east:
+            return [bbox]
+        # west > east → traverse l'antiméridien
+        return [
+            (west, south, 180.0, north),   # partie est
+            (-180.0, south, east, north),  # partie ouest
+        ]
+
+    @staticmethod
+    def _iter_degree_tiles_for_bbox(bbox: BBox) -> List[Tuple[int, int]]:
+        """
+        Retourne la liste des tuiles 1°x1° (lat_ll, lon_ll) couvrant la bbox.
+        """
+        west, south, east, north = bbox
+
+        lat_start = math.floor(south)
+        lat_end = math.ceil(north) - 1
+        lon_start = math.floor(west)
+        lon_end = math.ceil(east) - 1
+
+        tiles: List[Tuple[int, int]] = []
+        for lat_ll in range(lat_start, lat_end + 1):
+            for lon_ll in range(lon_start, lon_end + 1):
+                tiles.append((lat_ll, lon_ll))
+        return tiles
+
+    def _download_file(self, url: str, dst: Path, allow_missing: bool = False) -> bool:
+        """Télécharge un fichier avec retry et écriture atomique.
+
+        Retourne True si le fichier a été téléchargé (ou existait déjà),
+        False si la tuile n'existe pas sur le serveur (HTTP 403/404)
+        et que allow_missing=True.
+        """
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if dst.exists() and dst.stat().st_size > 0:
+            return True
+
+        tmp_dst = dst.with_suffix(dst.suffix + ".part")
+        try:
+            if tmp_dst.exists():
+                tmp_dst.unlink()
+        except OSError:
+            pass
+
+        last_exc: Optional[Exception] = None
+        for attempt in range(1, self._MAX_RETRIES + 1):
+            try:
+                with self._session.get(url, stream=True, timeout=self.timeout) as r:
+                    # R4 : tuile manquante (océan) → ne pas lever d'erreur
+                    if r.status_code in (403, 404) and allow_missing:
+                        return False
+                    if not r.ok:
+                        raise DEMDownloadError(
+                            f"Échec téléchargement {url} (HTTP {r.status_code})."
+                        )
+                    with open(tmp_dst, "wb") as f:
+                        for chunk in r.iter_content(chunk_size=1024 * 1024):
+                            if chunk:
+                                f.write(chunk)
+
+                if not tmp_dst.exists() or tmp_dst.stat().st_size == 0:
+                    raise DEMDownloadError(f"Téléchargement incomplet ou vide: {url}")
+
+                # R3 : vérification d'intégrité — le .hgt.gz décompressé
+                # doit contenir exactement _HGT_RAW_SIZE octets
+                try:
+                    with gzip.open(tmp_dst, "rb") as gz:
+                        raw = gz.read()
+                    if len(raw) != self._HGT_RAW_SIZE:
+                        raise DEMDownloadError(
+                            f"Intégrité : {dst.name} → {len(raw)} octets "
+                            f"(attendu {self._HGT_RAW_SIZE})."
+                        )
+                except (gzip.BadGzipFile, OSError) as e:
+                    raise DEMDownloadError(
+                        f"Fichier corrompu (décompression échouée) : {dst.name}"
+                    ) from e
+
+                tmp_dst.replace(dst)
+                return True
+
+            except DEMDownloadError:
+                last_exc = None
+                # Ne pas retry les erreurs non récupérables
+                try:
+                    if tmp_dst.exists():
+                        tmp_dst.unlink()
+                except OSError:
+                    pass
+                raise
+            except (requests.RequestException, OSError) as exc:
+                last_exc = exc
+                wait = self._RETRY_BACKOFF * (2 ** (attempt - 1))
+                warnings.warn(
+                    f"Tentative {attempt}/{self._MAX_RETRIES} échouée pour {url} "
+                    f"({exc}). Nouvel essai dans {wait}s…",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                time.sleep(wait)
+                try:
+                    if tmp_dst.exists():
+                        tmp_dst.unlink()
+                except OSError:
+                    pass
+
+        # Toutes les tentatives épuisées
+        try:
+            if tmp_dst.exists():
+                tmp_dst.unlink()
+        except OSError:
+            pass
+        raise DEMDownloadError(
+            f"Échec après {self._MAX_RETRIES} tentatives pour {url}"
+        ) from last_exc
+
+    @staticmethod
+    def _make_nodata_geotiff(tif_path: Path, lat_ll: int, lon_ll: int) -> None:
+        """Crée une tuile GeoTIFF remplie de nodata (tuile océan manquante)."""
+        arr = np.full((3601, 3601), -32768, dtype=np.int16)
+        res = 1.0 / 3600.0
+        transform = Affine(
+            res, 0.0, lon_ll - res / 2.0,
+            0.0, -res, (lat_ll + 1) + res / 2.0,
+        )
+        profile = {
+            "driver": "GTiff", "height": 3601, "width": 3601,
+            "count": 1, "dtype": np.int16, "crs": "EPSG:4326",
+            "transform": transform, "compress": "deflate",
+            "predictor": 2, "tiled": True,
+            "blockxsize": 256, "blockysize": 256, "nodata": -32768,
+        }
+        tif_path.parent.mkdir(parents=True, exist_ok=True)
+        with rasterio.open(tif_path, "w", **profile) as dst:
+            dst.write(arr, 1)
+
+    @staticmethod
+    def _hgt_gz_to_geotiff(hgt_gz: Path, tif_path: Path, lat_ll: int, lon_ll: int) -> None:
+        """
+        Convertit une tuile .hgt.gz (3601×3601, int16 big-endian) en GeoTIFF (EPSG:4326).
+        """
+        with gzip.open(hgt_gz, "rb") as gz:
+            raw = gz.read()
+
+        arr = np.frombuffer(raw, dtype=">i2")
+        if arr.size != 3601 * 3601:
+            raise DEMDownloadError(
+                f"Taille inattendue pour {hgt_gz.name}: {arr.size} valeurs."
+            )
+
+        arr = arr.reshape((3601, 3601)).astype(np.int16)
+
+        res = 1.0 / 3600.0  # 1 arc-second en degrés
+
+        transform = Affine(
+            res, 0.0, lon_ll - res / 2.0,
+            0.0, -res, (lat_ll + 1) + res / 2.0
+        )
+
+        profile = {
+            "driver": "GTiff",
+            "height": arr.shape[0],
+            "width": arr.shape[1],
+            "count": 1,
+            "dtype": arr.dtype,
+            "crs": "EPSG:4326",
+            "transform": transform,
+            "compress": "deflate",
+            "predictor": 2,
+            "tiled": True,
+            "blockxsize": 256,
+            "blockysize": 256,
+            "nodata": -32768,
+        }
+
+        tif_path.parent.mkdir(parents=True, exist_ok=True)
+        with rasterio.open(tif_path, "w", **profile) as dst:
+            dst.write(arr, 1)
+
+    def _cleanup(self) -> None:
+        if self.keep_intermediate:
+            return
+
+        for p in self.gz_dir.glob("*.hgt.gz"):
+            try:
+                p.unlink()
+            except OSError:
+                pass
+        for p in self.tif_dir.glob("*.tif"):
+            try:
+                p.unlink()
+            except OSError:
+                pass
+
+    # -----------------------
+    # Public API
+    # -----------------------
+    def _download_and_convert_tile(
+        self, lat_ll: int, lon_ll: int
+    ) -> Path:
+        """Télécharge et convertit une tuile unique. Retourne le chemin du GeoTIFF."""
+        url = self._skadi_url(lat_ll, lon_ll)
+        gz_path = self.gz_dir / f"{self._lat_code(lat_ll)}{self._lon_code(lon_ll)}.hgt.gz"
+
+        downloaded = self._download_file(url, gz_path, allow_missing=True)
+
+        tif_path = self.tif_dir / f"{self._lat_code(lat_ll)}{self._lon_code(lon_ll)}.tif"
+        if not tif_path.exists() or tif_path.stat().st_size == 0:
+            if downloaded:
+                self._hgt_gz_to_geotiff(gz_path, tif_path, lat_ll, lon_ll)
+            else:
+                self._make_nodata_geotiff(tif_path, lat_ll, lon_ll)
+
+        return tif_path
+
+    def download(
+        self,
+        bbox: BBox,
+        out_tif: Union[str, Path],
+        verbose: bool = True,
+        max_workers: int = 4,
+    ) -> Path:
+        """
+        Télécharge un MNT SRTM (~30 m) pour une emprise (EPSG:4326),
+        sans clé API, via Skadi.
+
+        Paramètres
+        ----------
+        bbox : (west, south, east, north) ou GeoDataFrame.
+               Si west > east, la bbox est automatiquement découpée
+               en deux parties de part et d'autre de l'antiméridien.
+        out_tif : chemin du GeoTIFF final (mosaïque + clip bbox).
+        verbose : si True, affiche une barre de progression tqdm.
+        max_workers : nombre de threads pour le téléchargement parallèle.
+                      Mettre 1 pour un téléchargement séquentiel.
+
+        Retour
+        ------
+        Path vers le GeoTIFF final.
+        """
+        if isinstance(bbox, gpd.GeoDataFrame):
+            bbox = tuple(bbox.total_bounds)
+
+        west, south, east, north = bbox
+        sub_bboxes = self._split_antimeridian_bbox(bbox)
+        for sb in sub_bboxes:
+            self._validate_bbox(sb)
+
+        out_tif = Path(out_tif)
+
+        # Collecter toutes les tuiles de toutes les sous-bbox
+        all_tiles: List[Tuple[int, int]] = []
+        for sb in sub_bboxes:
+            all_tiles.extend(self._iter_degree_tiles_for_bbox(sb))
+        all_tiles = list(dict.fromkeys(all_tiles))
+
+        # F5 + P1 : téléchargement parallèle
+        tile_tifs: List[Path] = []
+        n_workers = max(1, min(max_workers, len(all_tiles)))
+
+        if n_workers == 1:
+            # Séquentiel (rétrocompatibilité / debug)
+            iterator = (
+                tqdm(all_tiles, desc="Téléchargement DEM", unit="tuile")
+                if verbose else all_tiles
+            )
+            for lat_ll, lon_ll in iterator:
+                tile_tifs.append(self._download_and_convert_tile(lat_ll, lon_ll))
+        else:
+            # Parallèle
+            futures = {}
+            with ThreadPoolExecutor(max_workers=n_workers) as pool:
+                for lat_ll, lon_ll in all_tiles:
+                    fut = pool.submit(self._download_and_convert_tile, lat_ll, lon_ll)
+                    futures[fut] = (lat_ll, lon_ll)
+
+                pbar = tqdm(
+                    total=len(futures), desc="Téléchargement DEM", unit="tuile",
+                    disable=not verbose,
+                )
+                for fut in as_completed(futures):
+                    fut.result()  # propage les exceptions
+                    pbar.update(1)
+                pbar.close()
+
+            # Reconstituer l'ordre des tuiles (important pour la mosaïque)
+            for lat_ll, lon_ll in all_tiles:
+                tif_path = self.tif_dir / f"{self._lat_code(lat_ll)}{self._lon_code(lon_ll)}.tif"
+                tile_tifs.append(tif_path)
+
+        # P2 : mosaïque — rio_merge accepte des datasets ouverts,
+        # on les ferme proprement via ExitStack
+        with ExitStack() as stack:
+            srcs = [stack.enter_context(rasterio.open(p)) for p in tile_tifs]
+            mosaic, mosaic_transform = rio_merge(srcs)
+            mosaic = mosaic[0]  # bande 1
+            crs = srcs[0].crs
+
+        # Découpage bbox — pour l'antiméridien on utilise la bbox englobante
+        # de la mosaïque (qui couvre déjà les bonnes tuiles) puis on clip
+        # normalement sur chaque sous-bbox.
+        if len(sub_bboxes) == 1:
+            clip_bounds = sub_bboxes[0]
+        else:
+            # Antiméridien : on clip sur l'emprise totale de la mosaïque
+            clip_bounds = (
+                min(sb[0] for sb in sub_bboxes),
+                south,
+                max(sb[2] for sb in sub_bboxes),
+                north,
+            )
+
+        cw, cs, ce, cn = clip_bounds
+        window = from_bounds(cw, cs, ce, cn, transform=mosaic_transform)
+        row_off = max(0, int(math.floor(window.row_off)))
+        col_off = max(0, int(math.floor(window.col_off)))
+        row_end = min(mosaic.shape[0], int(math.ceil(window.row_off + window.height)))
+        col_end = min(mosaic.shape[1], int(math.ceil(window.col_off + window.width)))
+
+        if row_end <= row_off or col_end <= col_off:
+            raise DEMDownloadError("Fenêtre de découpe invalide pour la bbox demandée.")
+
+        height, width = row_end - row_off, col_end - col_off
+        clipped = mosaic[row_off: row_off + height, col_off: col_off + width]
+
+        new_transform = mosaic_transform * Affine.translation(col_off, row_off)
+
+        profile = {
+            "driver": "GTiff",
+            "height": clipped.shape[0],
+            "width": clipped.shape[1],
+            "count": 1,
+            "dtype": clipped.dtype,
+            "crs": crs,
+            "transform": new_transform,
+            "compress": "deflate",
+            "predictor": 2,
+            "tiled": True,
+            "blockxsize": 256,
+            "blockysize": 256,
+            "nodata": -32768,
+        }
+
+        out_tif.parent.mkdir(parents=True, exist_ok=True)
+        with rasterio.open(out_tif, "w", **profile) as dst:
+            dst.write(clipped, 1)
+
+        self._cleanup()
+        return out_tif
+
+    # -----------------------
+    # Analyse & visualisation
+    # -----------------------
+
+    @staticmethod
+    def info(tif_path: Union[str, Path]) -> dict:
+        """
+        Affiche et retourne les métadonnées d'un GeoTIFF MNT.
+
+        Paramètres
+        ----------
+        tif_path : chemin vers un GeoTIFF.
+
+        Retour
+        ------
+        dict avec clés : crs, transform, resolution, bounds, shape, nodata,
+                         dtype, stats (min, max, mean, std).
+        """
+        tif_path = Path(tif_path)
+        with rasterio.open(tif_path) as ds:
+            arr = ds.read(1, masked=True)
+            res_x, res_y = ds.res
+            meta = {
+                "chemin": str(tif_path),
+                "crs": str(ds.crs),
+                "transform": ds.transform,
+                "résolution": (res_x, abs(res_y)),
+                "emprise": ds.bounds,
+                "dimensions": (ds.height, ds.width),
+                "nodata": ds.nodata,
+                "dtype": str(ds.dtypes[0]),
+                "stats": {
+                    "min": float(arr.min()) if arr.count() > 0 else None,
+                    "max": float(arr.max()) if arr.count() > 0 else None,
+                    "moyenne": float(arr.mean()) if arr.count() > 0 else None,
+                    "écart-type": float(arr.std()) if arr.count() > 0 else None,
+                },
+            }
+        # Affichage lisible
+        print(f"── Informations MNT : {tif_path.name} ──")
+        print(f"  CRS           : {meta['crs']}")
+        print(f"  Dimensions    : {meta['dimensions'][0]} × {meta['dimensions'][1]} pixels")
+        print(f"  Résolution    : {meta['résolution'][0]:.6f}° × {meta['résolution'][1]:.6f}°")
+        print(f"  Emprise       : {meta['emprise']}")
+        print(f"  Nodata        : {meta['nodata']}")
+        stats = meta["stats"]
+        if stats["min"] is not None:
+            print(f"  Altitude      : {stats['min']:.1f} m → {stats['max']:.1f} m "
+                  f"(moy. {stats['moyenne']:.1f} m, σ {stats['écart-type']:.1f} m)")
+        return meta
+
+    @staticmethod
+    def hillshade(
+        tif_path: Union[str, Path],
+        out_path: Optional[Union[str, Path]] = None,
+        azimuth: float = 315.0,
+        altitude: float = 45.0,
+    ) -> np.ndarray:
+        """
+        Calcule un ombrage (hillshade) à partir d'un GeoTIFF MNT.
+
+        Paramètres
+        ----------
+        tif_path  : chemin vers le GeoTIFF source.
+        out_path  : si fourni, sauvegarde le hillshade en GeoTIFF.
+        azimuth   : azimut solaire en degrés (défaut 315 = nord-ouest).
+        altitude  : élévation solaire en degrés (défaut 45).
+
+        Retour
+        ------
+        ndarray (float32) du hillshade (0–255).
+        """
+        tif_path = Path(tif_path)
+        with rasterio.open(tif_path) as ds:
+            elev = ds.read(1).astype(np.float32)
+            nodata = ds.nodata
+            transform = ds.transform
+            profile = ds.profile.copy()
+
+        # Masquer nodata
+        if nodata is not None:
+            elev[elev == nodata] = np.nan
+
+        # Résolution en mètres (approximation pour EPSG:4326)
+        cellsize_x = abs(transform.a)
+        cellsize_y = abs(transform.e)
+        # Conversion deg → m (approximation latitude moyenne)
+        lat_center = transform.f - (elev.shape[0] / 2) * cellsize_y
+        m_per_deg = 111_320 * math.cos(math.radians(lat_center))
+        dx = cellsize_x * m_per_deg
+        dy = cellsize_y * m_per_deg
+
+        # Gradients
+        dzdx = (
+            np.roll(elev, -1, axis=1) - np.roll(elev, 1, axis=1)
+        ) / (2 * dx)
+        dzdy = (
+            np.roll(elev, 1, axis=0) - np.roll(elev, -1, axis=0)
+        ) / (2 * dy)
+
+        # Angles solaires
+        az_rad = math.radians(360 - azimuth + 90)
+        alt_rad = math.radians(altitude)
+
+        slope_rad = np.arctan(np.sqrt(dzdx**2 + dzdy**2))
+        aspect_rad = np.arctan2(-dzdy, dzdx)
+
+        hs = (
+            np.sin(alt_rad) * np.cos(slope_rad)
+            + np.cos(alt_rad) * np.sin(slope_rad)
+            * np.cos(az_rad - aspect_rad)
+        )
+        hs = np.clip(hs * 255, 0, 255).astype(np.float32)
+        hs = np.nan_to_num(hs, nan=0.0)
+
+        if out_path is not None:
+            out_path = Path(out_path)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            profile.update(dtype="float32", count=1, nodata=0, compress="deflate")
+            with rasterio.open(out_path, "w", **profile) as dst:
+                dst.write(hs, 1)
+
+        return hs
+
+    @staticmethod
+    def slope(
+        tif_path: Union[str, Path],
+        out_path: Optional[Union[str, Path]] = None,
+        degrees: bool = True,
+    ) -> np.ndarray:
+        """
+        Calcule la pente à partir d'un GeoTIFF MNT.
+
+        Paramètres
+        ----------
+        tif_path : chemin vers le GeoTIFF source.
+        out_path : si fourni, sauvegarde en GeoTIFF.
+        degrees  : si True, retourne en degrés ; sinon en radians.
+
+        Retour
+        ------
+        ndarray (float32) de la pente.
+        """
+        tif_path = Path(tif_path)
+        with rasterio.open(tif_path) as ds:
+            elev = ds.read(1).astype(np.float32)
+            nodata = ds.nodata
+            transform = ds.transform
+            profile = ds.profile.copy()
+
+        if nodata is not None:
+            elev[elev == nodata] = np.nan
+
+        cellsize_x = abs(transform.a)
+        cellsize_y = abs(transform.e)
+        lat_center = transform.f - (elev.shape[0] / 2) * cellsize_y
+        m_per_deg = 111_320 * math.cos(math.radians(lat_center))
+        dx = cellsize_x * m_per_deg
+        dy = cellsize_y * m_per_deg
+
+        dzdx = (np.roll(elev, -1, axis=1) - np.roll(elev, 1, axis=1)) / (2 * dx)
+        dzdy = (np.roll(elev, 1, axis=0) - np.roll(elev, -1, axis=0)) / (2 * dy)
+
+        slp = np.arctan(np.sqrt(dzdx**2 + dzdy**2))
+        if degrees:
+            slp = np.degrees(slp)
+        slp = np.nan_to_num(slp, nan=0.0).astype(np.float32)
+
+        if out_path is not None:
+            out_path = Path(out_path)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            profile.update(dtype="float32", count=1, nodata=0, compress="deflate")
+            with rasterio.open(out_path, "w", **profile) as dst:
+                dst.write(slp, 1)
+
+        return slp
+
+    @staticmethod
+    def aspect(
+        tif_path: Union[str, Path],
+        out_path: Optional[Union[str, Path]] = None,
+    ) -> np.ndarray:
+        """
+        Calcule l'orientation (aspect) à partir d'un GeoTIFF MNT.
+
+        Paramètres
+        ----------
+        tif_path : chemin vers le GeoTIFF source.
+        out_path : si fourni, sauvegarde en GeoTIFF.
+
+        Retour
+        ------
+        ndarray (float32) de l'orientation en degrés (0–360, 0 = nord, sens horaire).
+        """
+        tif_path = Path(tif_path)
+        with rasterio.open(tif_path) as ds:
+            elev = ds.read(1).astype(np.float32)
+            nodata = ds.nodata
+            transform = ds.transform
+            profile = ds.profile.copy()
+
+        if nodata is not None:
+            elev[elev == nodata] = np.nan
+
+        cellsize_x = abs(transform.a)
+        cellsize_y = abs(transform.e)
+        lat_center = transform.f - (elev.shape[0] / 2) * cellsize_y
+        m_per_deg = 111_320 * math.cos(math.radians(lat_center))
+        dx = cellsize_x * m_per_deg
+        dy = cellsize_y * m_per_deg
+
+        dzdx = (np.roll(elev, -1, axis=1) - np.roll(elev, 1, axis=1)) / (2 * dx)
+        dzdy = (np.roll(elev, 1, axis=0) - np.roll(elev, -1, axis=0)) / (2 * dy)
+
+        # Convention : 0 = nord, 90 = est, 180 = sud, 270 = ouest
+        asp = np.degrees(np.arctan2(-dzdx, dzdy))
+        asp = np.where(asp < 0, asp + 360, asp)
+        asp = np.nan_to_num(asp, nan=-1.0).astype(np.float32)
+
+        if out_path is not None:
+            out_path = Path(out_path)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            profile.update(dtype="float32", count=1, nodata=-1, compress="deflate")
+            with rasterio.open(out_path, "w", **profile) as dst:
+                dst.write(asp, 1)
+
+        return asp
+
+    @staticmethod
+    def plot(
+        tif_path: Union[str, Path],
+        cmap: str = "terrain",
+        title: Optional[str] = None,
+        figsize: Tuple[int, int] = (10, 8),
+        hillshade_alpha: float = 0.35,
+        colorbar: bool = True,
+    ) -> None:
+        """
+        Affiche un aperçu rapide du MNT avec ombrage superposé.
+
+        Paramètres
+        ----------
+        tif_path        : chemin vers le GeoTIFF.
+        cmap            : palette de couleurs matplotlib (défaut 'terrain').
+        title           : titre optionnel de la figure.
+        figsize         : taille de la figure (largeur, hauteur).
+        hillshade_alpha : transparence de l'ombrage (0 = invisible, 1 = opaque).
+        colorbar        : si True, ajoute une barre de couleurs.
+        """
+        import matplotlib.pyplot as plt
+
+        tif_path = Path(tif_path)
+        with rasterio.open(tif_path) as ds:
+            elev = ds.read(1).astype(np.float32)
+            nodata = ds.nodata
+            bounds = ds.bounds
+
+        if nodata is not None:
+            elev[elev == nodata] = np.nan
+
+        hs = DEM.hillshade(tif_path)
+
+        extent = [bounds.left, bounds.right, bounds.bottom, bounds.top]
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        im = ax.imshow(
+            elev, cmap=cmap, extent=extent, origin="upper", aspect="auto",
+        )
+        ax.imshow(
+            hs, cmap="gray", extent=extent, origin="upper",
+            alpha=hillshade_alpha, aspect="auto",
+        )
+        if colorbar:
+            cbar = fig.colorbar(im, ax=ax, shrink=0.7, pad=0.02)
+            cbar.set_label("Altitude (m)")
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
+        if title:
+            ax.set_title(title)
+        else:
+            ax.set_title(f"MNT — {tif_path.name}")
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def reproject(
+        tif_path: Union[str, Path],
+        out_path: Union[str, Path],
+        dst_crs: str = "EPSG:3857",
+        resampling: str = "bilinear",
+    ) -> Path:
+        """
+        Reprojette un GeoTIFF MNT vers un autre CRS.
+
+        Paramètres
+        ----------
+        tif_path   : chemin vers le GeoTIFF source (EPSG:4326).
+        out_path   : chemin du GeoTIFF reprojeté.
+        dst_crs    : CRS cible (défaut 'EPSG:3857').
+        resampling : méthode de rééchantillonnage ('nearest', 'bilinear',
+                     'cubic', 'lanczos'…). Défaut 'bilinear'.
+
+        Retour
+        ------
+        Path vers le GeoTIFF reprojeté.
+        """
+        resampling_methods = {
+            "nearest": Resampling.nearest,
+            "bilinear": Resampling.bilinear,
+            "cubic": Resampling.cubic,
+            "lanczos": Resampling.lanczos,
+        }
+        if resampling not in resampling_methods:
+            raise ValueError(
+                f"Méthode de rééchantillonnage inconnue : '{resampling}'. "
+                f"Valeurs possibles : {list(resampling_methods.keys())}"
+            )
+
+        tif_path = Path(tif_path)
+        out_path = Path(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with rasterio.open(tif_path) as src:
+            transform, width, height = calculate_default_transform(
+                src.crs, dst_crs, src.width, src.height, *src.bounds,
+            )
+            profile = src.profile.copy()
+            profile.update(
+                crs=dst_crs,
+                transform=transform,
+                width=width,
+                height=height,
+                compress="deflate",
+                predictor=2,
+                tiled=True,
+                blockxsize=256,
+                blockysize=256,
+            )
+
+            with rasterio.open(out_path, "w", **profile) as dst:
+                for band in range(1, src.count + 1):
+                    reproject(
+                        source=rasterio.band(src, band),
+                        destination=rasterio.band(dst, band),
+                        src_transform=src.transform,
+                        src_crs=src.crs,
+                        dst_transform=transform,
+                        dst_crs=dst_crs,
+                        resampling=resampling_methods[resampling],
+                    )
+        return out_path
+
+

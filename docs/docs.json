@@ -1,0 +1,39 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "cartograpy",
+  "colors": {
+    "primary": "#ff0000"
+  },
+"navigation": {
+    "groups": [
+      {
+        "group": "Getting started",
+        "icon": "play",
+        "pages": [
+          "quickstart",
+          {
+            "group": "Editing",
+            "expanded": false,
+            "icon": "pencil",
+            "pages": [
+              "installation",
+              "editor"
+            ]
+          }
+        ]
+      },
+      {
+        "group": "Writing content",
+        "icon": "notebook-text",
+        "tag": "NEW",
+        "pages": [
+          "writing-content/page",
+          "writing-content/text"
+        ]
+      }
+    ]
+  },
+  "description":"Packages python pour créer des cartes"
+
+}

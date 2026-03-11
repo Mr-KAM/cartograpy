@@ -30,6 +30,11 @@ import matplotlib.transforms as mtransforms
 from pyproj import Geod
 import rasterio
 from rasterio.plot import show as rasterio_show
+try:
+    import contextily as ctx
+    HAS_CONTEXTILY = True
+except ImportError:
+    HAS_CONTEXTILY = False
 from cartograpy.styling import *
 # ----------------------------------------------------------------------
 # ================global methodes ======================================
@@ -445,12 +450,12 @@ class Map:
         projection=ccrs.PlateCarree(),
         data_crs="EPSG:4326",
         dpi=300,
-
+        verbose=True,
     ):
         """
         Initialise une nouvelle carte avec cartopy.
 
-        Parameters:
+        Paramètres:
         -----------
         figsize : tuple, str, or dict
             - tuple: Taille de la figure (largeur, hauteur) en pouces
@@ -462,7 +467,10 @@ class Map:
             Projection cartographique (par défaut PlateCarree)
         data_crs : str
             Système de coordonnées des données (par défaut WGS84)
+        verbose : bool
+            Afficher les messages d'information (par défaut True)
         """
+        self.verbose = verbose
         self.figsize = self._process_figsize(figsize)
         self.paper_info = self._get_paper_info(figsize)
         self.dpi = dpi
@@ -489,12 +497,28 @@ class Map:
 
         # Affichage des informations sur le format de papier
         if self.paper_info:
-            print(
+            self._log(
                 f"📄 Format de papier: {self.paper_info['format']} "
                 f"({self.paper_info['orientation']}) - "
                 f"Dimensions: {self.paper_info['dimensions_mm']} mm - "
                 f'Figure: {self.figsize[0]:.1f}" x {self.figsize[1]:.1f}"'
             )
+
+    # --- Helpers internes -------------------------------------------------
+
+    def _log(self, *args, **kwargs):
+        """Affiche un message seulement si verbose est activé."""
+        if self.verbose:
+            print(*args, **kwargs)
+
+    def __enter__(self):
+        """Support du context manager (with Map(...) as m:)."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Ferme la figure matplotlib à la sortie du context manager."""
+        plt.close(self.fig)
+        return False
 
     # ----------------------------------------------------------------------
     # ================Custom paper size ====================================
@@ -504,7 +528,7 @@ class Map:
         """
         Traite le paramètre figsize pour déterminer la taille de la figure.
 
-        Parameters:
+        Paramètres:
         -----------
         figsize : tuple, str, or dict
             Format désiré
@@ -530,7 +554,7 @@ class Map:
         """
         Retourne les informations sur le format de papier utilisé.
 
-        Parameters:
+        Paramètres:
         -----------
         figsize : tuple, str, or dict
             Format désiré
@@ -564,7 +588,7 @@ class Map:
         """
         Convertit un format de papier en dimensions en pouces pour matplotlib.
 
-        Parameters:
+        Paramètres:
         -----------
         paper_format : str
             Format de papier (ex: 'A4', 'A3', 'B2')
@@ -603,7 +627,7 @@ class Map:
         """
         Définit le format de papier et l'orientation de la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         paper_format : str
             Format de papier (ex: 'A4', 'A3', 'B2', 'C1')
@@ -630,7 +654,7 @@ class Map:
         self.fig.set_size_inches(new_figsize[0], new_figsize[1])
 
         # Affichage des informations
-        print(
+        self._log(
             f"📄 Format mis à jour: {self.paper_info['format']} "
             f"({self.paper_info['orientation']}) - "
             f"Dimensions: {self.paper_info['dimensions_mm']} mm - "
@@ -677,7 +701,7 @@ class Map:
                     f'({width/25.4:4.1f}" x {height/25.4:4.1f}")'
                 )
 
-        print("\n💡 Utilisations courantes:")
+        print("\n Utilisations courantes:")
         print("   A4: Documents, lettres")
         print("   A3: Dessins, plans, affiches")
         print("   A2: Grandes affiches, plans")
@@ -696,7 +720,7 @@ class Map:
         """
         Valide et prépare un GeoDataFrame pour l'affichage.
 
-        Parameters:
+        Paramètres:
         -----------
         gdf : gpd.GeoDataFrame
             GeoDataFrame à valider
@@ -715,14 +739,14 @@ class Map:
 
         # Vérification de la colonne géométrie
         if gdf.geometry.isnull().any():
-            print(
+            self._log(
                 "⚠️  Attention: Le GeoDataFrame contient des géométries nulles qui seront ignorées"
             )
             gdf = gdf.dropna(subset=["geometry"])
 
         # Vérification du CRS
         if gdf.crs is None:
-            print(
+            self._log(
                 f"⚠️  Attention: Aucun CRS défini. Attribution du CRS par défaut: {self.data_crs}"
             )
             gdf = gdf.set_crs(self.data_crs)
@@ -731,18 +755,100 @@ class Map:
         if expected_geom_type:
             geom_types = gdf.geometry.geom_type.unique()
             if not all(geom_type == expected_geom_type for geom_type in geom_types):
-                print(
+                self._log(
                     f"⚠️  Attention: Types de géométries trouvés: {geom_types}. "
                     f"Type attendu: {expected_geom_type}"
                 )
 
         return gdf
 
+    def _add_gdf_layer(self, gdf, layer_type, style_kwargs, label,
+                       legend_factory=None, column=None, scheme=None,
+                       cmap="viridis", color_key="color"):
+        """
+        Méthode interne : logique commune pour ajouter un layer GeoDataFrame.
+
+        Paramètres:
+        -----------
+        gdf : gpd.GeoDataFrame
+            GeoDataFrame source
+        layer_type : str
+            Type du layer ('point', 'line', 'polygon')
+        style_kwargs : dict
+            Paramètres de style spécifiques au type
+        label : str
+            Étiquette pour la légende
+        legend_factory : callable(bool) -> artist, optional
+            Fonction créant l'élément de légende. Reçoit use_column (bool).
+        column : str, optional
+            Colonne pour la coloration par données
+        scheme : str, optional
+            Schéma de classification
+        cmap : str
+            Palette de couleurs
+        color_key : str
+            Clé de couleur à retirer si column est utilisé ('color' ou 'facecolor')
+        """
+        gdf = self._validate_geodataframe(gdf)
+
+        plot_kwargs = {
+            "ax": self.ax,
+            "transform": ccrs.PlateCarree(),
+            **style_kwargs,
+        }
+
+        # Gestion de la coloration par colonne
+        use_column = False
+        if column and column in gdf.columns:
+            plot_kwargs["column"] = column
+            if scheme:
+                plot_kwargs["scheme"] = scheme
+            plot_kwargs["cmap"] = cmap
+            plot_kwargs.pop(color_key, None)
+            use_column = True
+
+        # Ajout du layer
+        layer_info = {"type": layer_type, "gdf": gdf, "style": plot_kwargs, "label": label}
+        self.layers.append(layer_info)
+
+        # Ajout à la légende
+        if label and legend_factory:
+            self.legend_elements.append(legend_factory(use_column))
+
+        self._update_bounds(gdf)
+        return self
+
+    def _add_raw_layer(self, gdf, layer_type, style_kwargs, label, legend_factory=None):
+        """
+        Méthode interne : logique commune pour ajouter un layer à partir de coordonnées brutes.
+
+        Paramètres:
+        -----------
+        gdf : gpd.GeoDataFrame
+            GeoDataFrame construit à partir des coordonnées
+        layer_type : str
+            Type du layer ('point', 'line', 'polygon')
+        style_kwargs : dict
+            Paramètres de style
+        label : str
+            Étiquette pour la légende
+        legend_factory : callable() -> artist, optional
+            Fonction créant l'élément de légende
+        """
+        layer_info = {"type": layer_type, "gdf": gdf, "style": style_kwargs, "label": label}
+        self.layers.append(layer_info)
+
+        if label and legend_factory:
+            self.legend_elements.append(legend_factory())
+
+        self._update_bounds(gdf)
+        return self
+
     def add_layer(self, gdf, layer_type="auto", label=None, **style_kwargs):
         """
         Ajoute une couche générique à partir d'un GeoDataFrame.
 
-        Parameters:
+        Paramètres:
         -----------
         gdf : gpd.GeoDataFrame
             GeoDataFrame à ajouter
@@ -759,7 +865,6 @@ class Map:
         # Détection automatique du type de géométrie
         if layer_type == "auto":
             geom_types = gdf.geometry.geom_type.unique()
-            print(geom_types)
             if len(geom_types) == 1:
                 geom_type = geom_types[0]
                 if geom_type in ["Point", "MultiPoint"] :
@@ -792,7 +897,6 @@ class Map:
             return self.add_polygons(gdf, label=label, **style_kwargs)
         else:
             raise ValueError(f"Type de couche non supporté: {layer_type}")
-        return self
 
     def add_points(
         self,
@@ -802,7 +906,7 @@ class Map:
         size=50,
         marker="o",
         alpha=1.0,
-        edgecolor="black",
+        edge_color="black",
         linewidth=0.5,
         column=None,
         scheme=None,
@@ -811,8 +915,9 @@ class Map:
     ):
         """
         Ajoute des points à partir d'un GeoDataFrame.
+        Pour ajouter des points à partir de coordonnées brutes, utiliser add_point().
 
-        Parameters:
+        Paramètres:
         -----------
         gdf : gpd.GeoDataFrame
             GeoDataFrame contenant des géométries Point
@@ -826,7 +931,7 @@ class Map:
             Style du marqueur ('o', 's', '^', etc.)
         alpha : float
             Transparence (0-1)
-        edgecolor : str
+        edge_color : str
             Couleur du contour
         linewidth : float
             Épaisseur du contour
@@ -839,53 +944,22 @@ class Map:
         **kwargs : dict
             Autres paramètres pour geopandas.plot()
         """
-        # Validation
-        gdf = self._validate_geodataframe(gdf)
-
-        # Préparation des paramètres de style
-        plot_kwargs = {
-            "ax": self.ax,
-            "color": color,
-            "markersize": size,
-            "marker": marker,
-            "alpha": alpha,
-            "edgecolor": edgecolor,
-            "linewidth": linewidth,
-            "transform": ccrs.PlateCarree(),
+        style = {
+            "color": color, "markersize": size, "marker": marker,
+            "alpha": alpha, "edgecolor": edge_color, "linewidth": linewidth,
             **kwargs,
         }
 
-        # Gestion de la coloration par colonne
-        if column and column in gdf.columns:
-            plot_kwargs["column"] = column
-            if scheme:
-                plot_kwargs["scheme"] = scheme
-            plot_kwargs["cmap"] = cmap
-            plot_kwargs.pop("color", None)  # Retirer color si on utilise column
-
-        # Ajout du layer
-        layer_info = {"type": "point", "gdf": gdf, "style": plot_kwargs, "label": label}
-        self.layers.append(layer_info)
-
-        # Ajout à la légende si label fourni
-        if label:
-            legend_element = plt.scatter(
-                [],
-                [],
-                c=color if not column else "gray",
-                s=size,
-                marker=marker,
-                alpha=alpha,
-                edgecolors=edgecolor,
-                linewidth=linewidth,
-                label=label,
+        def _legend(use_column):
+            return plt.scatter(
+                [], [], c=color if not use_column else "gray",
+                s=size, marker=marker, alpha=alpha,
+                edgecolors=edge_color, linewidth=linewidth, label=label,
             )
-            self.legend_elements.append(legend_element)
 
-        # Mise à jour des limites
-        self._update_bounds(gdf)
-
-        return self
+        return self._add_gdf_layer(
+            gdf, "point", style, label, _legend, column, scheme, cmap, "color"
+        )
 
     def add_lines(
         self,
@@ -902,8 +976,9 @@ class Map:
     ):
         """
         Ajoute des lignes à partir d'un GeoDataFrame.
+        Pour ajouter des lignes à partir de coordonnées brutes, utiliser add_line().
 
-        Parameters:
+        Paramètres:
         -----------
         gdf : gpd.GeoDataFrame
             GeoDataFrame contenant des géométries LineString
@@ -926,49 +1001,20 @@ class Map:
         **kwargs : dict
             Autres paramètres pour geopandas.plot()
         """
-        # Validation
-        gdf = self._validate_geodataframe(gdf)
-
-        # Préparation des paramètres de style
-        plot_kwargs = {
-            "ax": self.ax,
-            "color": color,
-            "linewidth": linewidth,
-            "linestyle": linestyle,
-            "alpha": alpha,
-            "transform": ccrs.PlateCarree(),
-            **kwargs,
+        style = {
+            "color": color, "linewidth": linewidth, "linestyle": linestyle,
+            "alpha": alpha, **kwargs,
         }
 
-        # Gestion de la coloration par colonne
-        if column and column in gdf.columns:
-            plot_kwargs["column"] = column
-            if scheme:
-                plot_kwargs["scheme"] = scheme
-            plot_kwargs["cmap"] = cmap
-            plot_kwargs.pop("color", None)  # Retirer color si on utilise column
-
-        # Ajout du layer
-        layer_info = {"type": "line", "gdf": gdf, "style": plot_kwargs, "label": label}
-        self.layers.append(layer_info)
-
-        # Ajout à la légende si label fourni
-        if label:
-            legend_element = plt.Line2D(
-                [0],
-                [0],
-                color=color if not column else "gray",
-                linewidth=linewidth,
-                linestyle=linestyle,
-                alpha=alpha,
-                label=label,
+        def _legend(use_column):
+            return plt.Line2D(
+                [0], [0], color=color if not use_column else "gray",
+                linewidth=linewidth, linestyle=linestyle, alpha=alpha, label=label,
             )
-            self.legend_elements.append(legend_element)
 
-        # Mise à jour des limites
-        self._update_bounds(gdf)
-
-        return self
+        return self._add_gdf_layer(
+            gdf, "line", style, label, _legend, column, scheme, cmap, "color"
+        )
 
     def add_polygons(
         self,
@@ -976,7 +1022,7 @@ class Map:
         label=None,
         facecolor="green",
         alpha=0.5,
-        edgecolor="black",
+        edge_color="black",
         linewidth=1,
         column=None,
         scheme=None,
@@ -985,8 +1031,9 @@ class Map:
     ):
         """
         Ajoute des polygones à partir d'un GeoDataFrame.
+        Pour ajouter des polygones à partir de coordonnées brutes, utiliser add_polygon().
 
-        Parameters:
+        Paramètres:
         -----------
         gdf : gpd.GeoDataFrame
             GeoDataFrame contenant des géométries Polygon
@@ -996,7 +1043,7 @@ class Map:
             Couleur(s) de remplissage ou nom de colonne pour coloration
         alpha : float
             Transparence (0-1)
-        edgecolor : str
+        edge_color : str
             Couleur du contour
         linewidth : float
             Épaisseur du contour
@@ -1009,52 +1056,21 @@ class Map:
         **kwargs : dict
             Autres paramètres pour geopandas.plot()
         """
-        # Validation
-        gdf = self._validate_geodataframe(gdf)
-
-        # Préparation des paramètres de style
-        plot_kwargs = {
-            "ax": self.ax,
-            "facecolor": facecolor,
-            "alpha": alpha,
-            "edgecolor": edgecolor,
-            "linewidth": linewidth,
-            "transform": ccrs.PlateCarree(),
+        style = {
+            "facecolor": facecolor, "alpha": alpha,
+            "edgecolor": edge_color, "linewidth": linewidth,
             **kwargs,
         }
 
-        # Gestion de la coloration par colonne
-        if column and column in gdf.columns:
-            plot_kwargs["column"] = column
-            if scheme:
-                plot_kwargs["scheme"] = scheme
-            plot_kwargs["cmap"] = cmap
-            plot_kwargs.pop("facecolor", None)  # Retirer facecolor si on utilise column
-
-        # Ajout du layer
-        layer_info = {
-            "type": "polygon",
-            "gdf": gdf,
-            "style": plot_kwargs,
-            "label": label,
-        }
-        self.layers.append(layer_info)
-
-        # Ajout à la légende si label fourni
-        if label:
-            legend_element = Patch(
-                facecolor=facecolor if not column else "gray",
-                edgecolor=edgecolor,
-                linewidth=linewidth,
-                alpha=alpha,
-                label=label,
+        def _legend(use_column):
+            return Patch(
+                facecolor=facecolor if not use_column else "gray",
+                edgecolor=edge_color, linewidth=linewidth, alpha=alpha, label=label,
             )
-            self.legend_elements.append(legend_element)
 
-        # Mise à jour des limites
-        self._update_bounds(gdf)
-
-        return self
+        return self._add_gdf_layer(
+            gdf, "polygon", style, label, _legend, column, scheme, cmap, "facecolor"
+        )
 
     def add_point(
         self,
@@ -1065,13 +1081,13 @@ class Map:
         marker="o",
         alpha=1.0,
         edge_color="black",
-        edge_width=0.5,
+        linewidth=0.5,
         transform=None,
     ):
         """
         Ajoute un ou plusieurs points à la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         coordinates : tuple, list of tuples, or dict
             Coordonnées du/des point(s). Format: (lon, lat) ou [(lon1, lat1), (lon2, lat2), ...]
@@ -1088,7 +1104,7 @@ class Map:
             Transparence (0-1)
         edge_color : str
             Couleur du contour
-        edge_width : float
+        linewidth : float
             Épaisseur du contour
         transform : cartopy.crs
             Projection des données (par défaut utilise data_crs)
@@ -1104,64 +1120,38 @@ class Map:
         else:
             points = [Point(lon, lat) for lon, lat in coordinates]
 
-        # Création du GeoDataFrame
         gdf = gpd.GeoDataFrame(geometry=points, crs=self.data_crs)
-
-        # Transformation si nécessaire
         if transform is None:
             transform = ccrs.PlateCarree()
 
-        # Ajout du layer
-        layer_info = {
-            "type": "point",
-            "gdf": gdf,
-            "style": {
-                "color": color,
-                "markersize": size,
-                "marker": marker,
-                "alpha": alpha,
-                "edgecolor": edge_color,
-                "linewidth": edge_width,
-                "transform": transform,
-            },
-            "label": label,
+        style = {
+            "color": color, "markersize": size, "marker": marker,
+            "alpha": alpha, "edgecolor": edge_color, "linewidth": linewidth,
+            "transform": transform,
         }
-        self.layers.append(layer_info)
 
-        # Ajout à la légende si label fourni
-        if label:
-            legend_element = plt.scatter(
-                [],
-                [],
-                c=color,
-                s=size,
-                marker=marker,
-                alpha=alpha,
-                edgecolors=edge_color,
-                linewidth=edge_width,
-                label=label,
+        def _legend():
+            return plt.scatter(
+                [], [], c=color, s=size, marker=marker, alpha=alpha,
+                edgecolors=edge_color, linewidth=linewidth, label=label,
             )
-            self.legend_elements.append(legend_element)
 
-        # Mise à jour des limites
-        self._update_bounds(gdf)
-
-        return self
+        return self._add_raw_layer(gdf, "point", style, label, _legend)
 
     def add_line(
         self,
         coordinates,
         label=None,
         color="blue",
-        width=2,
-        style="-",
+        linewidth=2,
+        linestyle="-",
         alpha=1.0,
         transform=None,
     ):
         """
         Ajoute une ou plusieurs lignes à la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         coordinates : list of tuples or list of lists
             Coordonnées de la ligne. Format: [(lon1, lat1), (lon2, lat2), ...]
@@ -1170,9 +1160,9 @@ class Map:
             Étiquette pour la légende
         color : str
             Couleur de la ligne
-        width : float
+        linewidth : float
             Épaisseur de la ligne
-        style : str
+        linestyle : str
             Style de ligne ('-', '--', '-.', ':')
         alpha : float
             Transparence (0-1)
@@ -1181,51 +1171,26 @@ class Map:
         """
         # Vérification du format des coordonnées
         if isinstance(coordinates[0][0], (int, float)):
-            # Une seule ligne
             lines = [LineString(coordinates)]
         else:
-            # Plusieurs lignes
             lines = [LineString(coord) for coord in coordinates]
 
-        # Création du GeoDataFrame
         gdf = gpd.GeoDataFrame(geometry=lines, crs=self.data_crs)
-
-        # Transformation si nécessaire
         if transform is None:
             transform = ccrs.PlateCarree()
 
-        # Ajout du layer
-        layer_info = {
-            "type": "line",
-            "gdf": gdf,
-            "style": {
-                "color": color,
-                "linewidth": width,
-                "linestyle": style,
-                "alpha": alpha,
-                "transform": transform,
-            },
-            "label": label,
+        style = {
+            "color": color, "linewidth": linewidth, "linestyle": linestyle,
+            "alpha": alpha, "transform": transform,
         }
-        self.layers.append(layer_info)
 
-        # Ajout à la légende si label fourni
-        if label:
-            legend_element = plt.Line2D(
-                [0],
-                [0],
-                color=color,
-                linewidth=width,
-                linestyle=style,
-                alpha=alpha,
-                label=label,
+        def _legend():
+            return plt.Line2D(
+                [0], [0], color=color, linewidth=linewidth,
+                linestyle=linestyle, alpha=alpha, label=label,
             )
-            self.legend_elements.append(legend_element)
 
-        # Mise à jour des limites
-        self._update_bounds(gdf)
-
-        return self
+        return self._add_raw_layer(gdf, "line", style, label, _legend)
 
     def add_polygon(
         self,
@@ -1234,14 +1199,14 @@ class Map:
         color="green",
         alpha=0.5,
         edge_color="black",
-        edge_width=1,
+        linewidth=1,
         fill=True,
         transform=None,
     ):
         """
         Ajoute un ou plusieurs polygones à la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         coordinates : list of tuples or list of lists
             Coordonnées du polygone. Format: [(lon1, lat1), (lon2, lat2), ...]
@@ -1254,7 +1219,7 @@ class Map:
             Transparence (0-1)
         edge_color : str
             Couleur du contour
-        edge_width : float
+        linewidth : float
             Épaisseur du contour
         fill : bool
             Si True, remplit le polygone
@@ -1263,49 +1228,27 @@ class Map:
         """
         # Vérification du format des coordonnées
         if isinstance(coordinates[0][0], (int, float)):
-            # Un seul polygone
             polygons = [Polygon(coordinates)]
         else:
-            # Plusieurs polygones
             polygons = [Polygon(coord) for coord in coordinates]
 
-        # Création du GeoDataFrame
         gdf = gpd.GeoDataFrame(geometry=polygons, crs=self.data_crs)
-
-        # Transformation si nécessaire
         if transform is None:
             transform = ccrs.PlateCarree()
 
-        # Ajout du layer
-        layer_info = {
-            "type": "polygon",
-            "gdf": gdf,
-            "style": {
-                "color": color if fill else "none",
-                "edgecolor": edge_color,
-                "linewidth": edge_width,
-                "alpha": alpha,
-                "transform": transform,
-            },
-            "label": label,
+        style = {
+            "color": color if fill else "none",
+            "edgecolor": edge_color, "linewidth": linewidth,
+            "alpha": alpha, "transform": transform,
         }
-        self.layers.append(layer_info)
 
-        # Ajout à la légende si label fourni
-        if label:
-            legend_element = Patch(
+        def _legend():
+            return Patch(
                 facecolor=color if fill else "none",
-                edgecolor=edge_color,
-                linewidth=edge_width,
-                alpha=alpha,
-                label=label,
+                edgecolor=edge_color, linewidth=linewidth, alpha=alpha, label=label,
             )
-            self.legend_elements.append(legend_element)
 
-        # Mise à jour des limites
-        self._update_bounds(gdf)
-
-        return self
+        return self._add_raw_layer(gdf, "polygon", style, label, _legend)
 
     def add_natural_features(
         self,
@@ -1322,7 +1265,7 @@ class Map:
         """
         Ajoute des caractéristiques naturelles à la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         features : list
             Liste des caractéristiques à ajouter ('coastline', 'borders', 'land', 'ocean')
@@ -1364,6 +1307,289 @@ class Map:
 
         if rivers:
             self.ax.add_feature(cfeature.RIVERS, alpha=0.8)
+
+        return self
+
+    def add_basemap(
+        self,
+        source=None,
+        zoom="auto",
+        alpha=1.0,
+        attribution=True,
+        attribution_size=8,
+        crs=None,
+    ) -> "Map":
+        """
+        Ajoute un fond de carte (tuiles web) via contextily.
+
+        Paramètres:
+        -----------
+        source : contextily provider ou str, optional
+            Fournisseur de tuiles. Par défaut OpenStreetMap.Mapnik.
+            Exemples : ctx.providers.Stamen.Terrain, ctx.providers.CartoDB.Positron,
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        zoom : int ou 'auto'
+            Niveau de zoom des tuiles
+        alpha : float
+            Transparence du fond de carte (0–1)
+        attribution : bool
+            Afficher l'attribution du fournisseur
+        attribution_size : int
+            Taille de police de l'attribution
+        crs : str, optional
+            CRS cible (par défaut : celui de la projection de la carte)
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+        """
+        if not HAS_CONTEXTILY:
+            raise ImportError(
+                "contextily est requis pour add_basemap(). "
+                "Installez-le avec : pip install contextily"
+            )
+
+        if source is None:
+            source = ctx.providers.OpenStreetMap.Mapnik
+
+        try:
+            ctx.add_basemap(
+                self.ax,
+                source=source,
+                zoom=zoom,
+                alpha=alpha,
+                attribution=attribution,
+                attribution_size=attribution_size,
+                crs=crs or self.projection,
+            )
+            self._log("\U0001f5fa\ufe0f  Fond de carte ajouté")
+        except Exception as e:
+            self._log(f"\u26a0\ufe0f  Erreur lors de l'ajout du fond de carte : {e}")
+
+        return self
+
+    def add_inset_map(
+        self,
+        bounds=None,
+        position: Tuple[float, float, float, float] = (0.65, 0.02, 0.33, 0.33),
+        facecolor="white",
+        edgecolor="black",
+        linewidth=1.5,
+        alpha=0.9,
+        box_color="red",
+        box_linewidth=2,
+        land_color="lightgray",
+        ocean_color="lightblue",
+        projection=None,
+    ) -> "Map":
+        """
+        Ajoute une mini-carte de situation (inset map) montrant la zone étudiée
+        dans un contexte géographique plus large.
+
+        Paramètres:
+        -----------
+        bounds : list, optional
+            [minx, miny, maxx, maxy] de la zone à encadrer.
+            Par défaut utilise self.bounds.
+        position : tuple (x, y, w, h)
+            Position et taille de la mini-carte en coordonnées relatives
+            de la figure (0–1). (x, y) = coin inférieur gauche.
+        facecolor : str
+            Couleur de fond de la mini-carte
+        edgecolor : str
+            Couleur de la bordure
+        linewidth : float
+            Épaisseur de la bordure
+        alpha : float
+            Transparence
+        box_color : str
+            Couleur du rectangle montrant la zone étudiée
+        box_linewidth : float
+            Épaisseur du rectangle
+        land_color : str
+            Couleur des terres sur la mini-carte
+        ocean_color : str
+            Couleur des océans
+        projection : cartopy.crs, optional
+            Projection de la mini-carte (par défaut PlateCarree)
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+        """
+        if projection is None:
+            projection = ccrs.PlateCarree()
+
+        if bounds is None:
+            bounds = self.bounds  # [minx, miny, maxx, maxy]
+
+        # Création de l'axe inset
+        inset_ax = self.fig.add_axes(
+            position, projection=projection, frameon=True
+        )
+        inset_ax.set_global()
+        inset_ax.add_feature(cfeature.LAND, facecolor=land_color)
+        inset_ax.add_feature(cfeature.OCEAN, facecolor=ocean_color)
+        inset_ax.add_feature(cfeature.BORDERS, linewidth=0.3, edgecolor="gray")
+        inset_ax.coastlines(resolution="110m", linewidth=0.4)
+
+        # Rectangle de la zone étudiée
+        minx, miny, maxx, maxy = bounds[0], bounds[1], bounds[2], bounds[3]
+        rect = mpatches.Rectangle(
+            (minx, miny), maxx - minx, maxy - miny,
+            linewidth=box_linewidth, edgecolor=box_color,
+            facecolor="none", transform=ccrs.PlateCarree(), zorder=10,
+        )
+        inset_ax.add_patch(rect)
+
+        # Bordure de la mini-carte
+        for spine in inset_ax.spines.values():
+            spine.set_edgecolor(edgecolor)
+            spine.set_linewidth(linewidth)
+
+        inset_ax.patch.set_alpha(alpha)
+        inset_ax.patch.set_facecolor(facecolor)
+
+        self._inset_ax = inset_ax
+        self._log("\U0001f50d Carte de situation ajoutée")
+
+        return self
+
+    def set_background_color(self, color: str = "white") -> "Map":
+        """
+        Définit la couleur de fond de la carte.
+
+        Paramètres:
+        -----------
+        color : str
+            Couleur de fond (nom CSS, hex, etc.)
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+        """
+        self.ax.set_facecolor(color)
+        self.fig.patch.set_facecolor(color)
+        return self
+
+    def add_colorbar(
+        self,
+        cmap: str = "viridis",
+        vmin: float = 0,
+        vmax: float = 1,
+        label: str = None,
+        orientation: str = "vertical",
+        shrink: float = 0.6,
+        pad: float = 0.05,
+        aspect: int = 20,
+        ticks=None,
+        tick_labels=None,
+    ) -> "Map":
+        """
+        Ajoute une barre de couleurs autonome à la carte.
+
+        Paramètres:
+        -----------
+        cmap : str
+            Palette de couleurs
+        vmin : float
+            Valeur minimale
+        vmax : float
+            Valeur maximale
+        label : str, optional
+            Titre de la barre de couleurs
+        orientation : str
+            'vertical' ou 'horizontal'
+        shrink : float
+            Facteur de réduction (0–1)
+        pad : float
+            Espacement par rapport à la carte
+        aspect : int
+            Ratio longueur/largeur de la barre
+        ticks : list, optional
+            Positions des graduations
+        tick_labels : list, optional
+            Labels personnalisés pour les graduations
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+        """
+        cmap_obj = load_cmap(cmap)
+        norm = plt.Normalize(vmin=vmin, vmax=vmax)
+        sm = plt.cm.ScalarMappable(cmap=cmap_obj, norm=norm)
+        sm.set_array([])
+
+        cbar = plt.colorbar(
+            sm, ax=self.ax, orientation=orientation,
+            shrink=shrink, pad=pad, aspect=aspect,
+        )
+
+        if ticks is not None:
+            cbar.set_ticks(ticks)
+        if tick_labels is not None:
+            cbar.set_ticklabels(tick_labels)
+        if label:
+            if orientation == "vertical":
+                cbar.set_label(label, rotation=270, labelpad=20)
+            else:
+                cbar.set_label(label)
+
+        self._colorbar = cbar
+        return self
+
+    def zoom_to_layer(self, index: int = None, label: str = None,
+                      margin: float = 0.05) -> "Map":
+        """
+        Zoome sur l'étendue d'une couche spécifique.
+
+        Paramètres:
+        -----------
+        index : int, optional
+            Index de la couche (voir list_layers())
+        label : str, optional
+            Label de la couche
+        margin : float
+            Marge relative autour de la couche (0–1)
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+        """
+        if index is None and label is None:
+            raise ValueError("Fournir index ou label pour identifier la couche.")
+
+        target = None
+        if index is not None:
+            if not 0 <= index < len(self.layers):
+                raise IndexError(
+                    f"Index {index} hors limites (0\u2013{len(self.layers) - 1})."
+                )
+            target = self.layers[index]
+        else:
+            for layer in self.layers:
+                if layer.get("label") == label:
+                    target = layer
+                    break
+            if target is None:
+                raise ValueError(f"Aucune couche avec le label '{label}' trouvée.")
+
+        if "gdf" not in target:
+            raise ValueError(
+                "Cette couche ne contient pas de GeoDataFrame (ex: raster, scalebar)."
+            )
+
+        bounds = target["gdf"].total_bounds  # minx, miny, maxx, maxy
+        width = bounds[2] - bounds[0]
+        height = bounds[3] - bounds[1]
+        extent = [
+            bounds[0] - width * margin,
+            bounds[2] + width * margin,
+            bounds[1] - height * margin,
+            bounds[3] + height * margin,
+        ]
+        self.ax.set_extent(extent, crs=ccrs.PlateCarree())
+        self.bounds = [extent[0], extent[2], extent[1], extent[3]]
 
         return self
 
@@ -1448,10 +1674,11 @@ class Map:
             if title:
                 cbar.set_label(title, rotation=270, labelpad=20)
 
-        # Stockage des informations de la couche
+        # Stockage des informations de la couche (déjà rendu directement)
         layer_info = {
             "type": "raster",
             "data": raster_data,
+            "rendered": True,
             "style":
             {
             "extent": extent,
@@ -1466,14 +1693,14 @@ class Map:
 
         return im
 
-    def add_polygons_cloropleth(
+    def add_polygons_choropleth(
         self,
         gdf,
         column_to_plot,
         label_column=None,
         cmap="viridis",
         alpha=0.7,
-        edgecolor="black",
+        edge_color="black",
         linewidth=0.5,
         show_labels=True,
         label_size=10,
@@ -1498,7 +1725,7 @@ class Map:
             Palette de couleurs
         alpha : float
             Transparence
-        edgecolor : str
+        edge_color : str
             Couleur des contours
         linewidth : float
             Largeur des contours
@@ -1518,10 +1745,10 @@ class Map:
             CRS par défaut si geodf n'en a pas
         """
         # Vérifier et définir le CRS si nécessaire
-        geodf=gdf
+        geodf = gdf.copy()
         if geodf.crs is None:
-            print(
-                f"Warning: No CRS defined for geodf. Setting default CRS to {default_crs}"
+            self._log(
+                f"⚠️  Aucun CRS défini. Attribution du CRS par défaut: {default_crs}"
             )
             geodf = geodf.set_crs(default_crs)
 
@@ -1530,77 +1757,60 @@ class Map:
             try:
                 geodf = geodf.to_crs(self.projection)
             except Exception as e:
-                print(f"Error transforming CRS: {e}")
-                print("Trying to use original coordinates...")
+                self._log(f"⚠️  Erreur de transformation CRS: {e}")
+                self._log("Utilisation des coordonnées originales...")
 
         # Vérifier que la colonne existe
         if column_to_plot not in geodf.columns:
-            raise ValueError(f"Column '{column_to_plot}' not found in geodf")
+            raise ValueError(f"Colonne '{column_to_plot}' introuvable dans le GeoDataFrame")
 
-        # Normalisation des valeurs
+        # Filtrer les géométries nulles/vides
+        geodf = geodf[geodf.geometry.notna() & ~geodf.geometry.is_empty]
+
+        # Tracé vectorisé avec gdf.plot() (remplace la boucle par-feature)
+        cmap_obj = load_cmap(cmap)
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
-        cmap_obj = load_cmap(cmap)
 
-        # Tracé des polygones
-        for idx, row in geodf.iterrows():
-            geom = row.geometry
+        geodf.plot(
+            column=column_to_plot,
+            cmap=cmap_obj,
+            ax=self.ax,
+            alpha=alpha,
+            edgecolor=edge_color,
+            linewidth=linewidth,
+            vmin=vmin,
+            vmax=vmax,
+            transform=self.projection,
+        )
 
-            # Vérifier que la géométrie est valide
-            if geom is None or geom.is_empty:
-                continue
-
-            color = cmap_obj(norm(row[column_to_plot]))
-
-            if geom.geom_type == "Polygon":
-                polygons = [geom]
-            elif geom.geom_type == "MultiPolygon":
-                polygons = list(geom.geoms)
-            else:
-                continue
-
-            for poly in polygons:
-                if poly.is_empty:
-                    continue
-
-                x, y = poly.exterior.xy
-                self.ax.fill(
-                    x,
-                    y,
-                    color=color,
-                    alpha=alpha,
-                    edgecolor=edgecolor,
-                    linewidth=linewidth,
-                    transform=self.projection,
-                )
-
-                # Ajout des étiquettes
-                if show_labels and label_column and label_column in geodf.columns:
-                    try:
-                        centroid = poly.centroid
-                        label_text = f"{row[label_column]}\n{row[column_to_plot]:,.0f}"
-
-                        self.ax.text(
-                            centroid.x,
-                            centroid.y,
-                            label_text,
-                            fontsize=label_size,
-                            ha="center",
-                            va="center",
-                            color="#0f172a",
-                            transform=self.projection,
-                            path_effects=[
-                                patheffects.withStroke(
-                                    linewidth=text_outline_width,
-                                    foreground=text_outline_color,
-                                )
-                            ],
-                        )
-                    except Exception as e:
-                        print(
-                            f"Warning: Could not add label for {row.get(label_column, 'unknown')}: {e}"
-                        )
+        # Ajout des étiquettes (vectorisé via apply)
+        if show_labels and label_column and label_column in geodf.columns:
+            for idx, row in geodf.iterrows():
+                try:
+                    centroid = row.geometry.representative_point()
+                    label_text = f"{row[label_column]}\n{row[column_to_plot]:,.0f}"
+                    self.ax.text(
+                        centroid.x,
+                        centroid.y,
+                        label_text,
+                        fontsize=label_size,
+                        ha="center",
+                        va="center",
+                        color="#0f172a",
+                        transform=self.projection,
+                        path_effects=[
+                            patheffects.withStroke(
+                                linewidth=text_outline_width,
+                                foreground=text_outline_color,
+                            )
+                        ],
+                    )
+                except Exception as e:
+                    self._log(
+                        f"⚠️  Étiquette impossible pour {row.get(label_column, 'inconnu')}: {e}"
+                    )
 
         # Barre de couleur
         if show_colorbar:
@@ -1610,23 +1820,24 @@ class Map:
             if title:
                 cbar.set_label(title, rotation=270, labelpad=20)
 
-        # Stockage des informations
+        # Stockage des informations (déjà rendu directement)
         layer_info = {
             "type": "polygon",
             "gdf": geodf,
+            "rendered": True,
             "column_to_plot": column_to_plot,
-            "style":{
-            "cmap": cmap,
-            "alpha": alpha,
-            }
-
+            "style": {
+                "cmap": cmap,
+                "alpha": alpha,
+            },
         }
-        # self.layers.append(layer_info)
+        self.layers.append(layer_info)
         self._update_bounds(geodf)
         self._apply_smart_centering()
-        
 
-    def add_points_cloropleth(
+        return self
+
+    def add_points_choropleth(
         self,
         gdf,
         column_to_plot,
@@ -1636,7 +1847,7 @@ class Map:
         alpha=0.7,
         min_point_size=40,
         max_point_size=200,
-        edgecolor="black",
+        edge_color="black",
         linewidth=0.5,
         show_labels=True,
         label_size=10,
@@ -1668,7 +1879,7 @@ class Map:
             Taille minimale des points
         max_point_size : float
             Taille maximale des points
-        edgecolor : str
+        edge_color : str
             Couleur des contours
         linewidth : float
             Largeur des contours
@@ -1690,10 +1901,10 @@ class Map:
             CRS par défaut si geodf n'en a pas
         """
         # Vérifier et définir le CRS si nécessaire
-        geodf=gdf
+        geodf = gdf.copy()
         if geodf.crs is None:
-            print(
-                f"Warning: No CRS defined for geodf. Setting default CRS to {default_crs}"
+            self._log(
+                f"⚠️  Aucun CRS défini. Attribution du CRS par défaut: {default_crs}"
             )
             geodf = geodf.set_crs(default_crs)
 
@@ -1702,12 +1913,15 @@ class Map:
             try:
                 geodf = geodf.to_crs(self.projection)
             except Exception as e:
-                print(f"Error transforming CRS: {e}")
-                print("Trying to use original coordinates...")
+                self._log(f"⚠️  Erreur de transformation CRS: {e}")
+                self._log("Utilisation des coordonnées originales...")
 
         # Vérifier que la colonne existe
         if column_to_plot not in geodf.columns:
-            raise ValueError(f"Column '{column_to_plot}' not found in geodf")
+            raise ValueError(f"Colonne '{column_to_plot}' introuvable dans le GeoDataFrame")
+
+        # Filtrer les géométries nulles/vides
+        geodf = geodf[geodf.geometry.notna() & ~geodf.geometry.is_empty]
 
         # Normalisation des couleurs
         vmin = geodf[column_to_plot].min()
@@ -1715,63 +1929,47 @@ class Map:
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
         cmap_obj = load_cmap(cmap)
 
-        # Normalisation des tailles
+        # Calcul vectorisé des coordonnées (centroïde pour non-points)
+        xs = geodf.geometry.apply(lambda g: g.x if g.geom_type == "Point" else g.centroid.x)
+        ys = geodf.geometry.apply(lambda g: g.y if g.geom_type == "Point" else g.centroid.y)
+
+        # Calcul vectorisé des tailles
         if point_size_column:
             if point_size_column not in geodf.columns:
-                print(
-                    f"Warning: Column '{point_size_column}' not found. Using default point size."
+                self._log(
+                    f"⚠️  Colonne '{point_size_column}' introuvable. Taille par défaut utilisée."
                 )
                 point_size_column = None
-            else:
-                size_min = geodf[point_size_column].min()
-                size_max = geodf[point_size_column].max()
-                size_norm = plt.Normalize(vmin=size_min, vmax=size_max)
 
-        # Tracé des points
-        for idx, row in geodf.iterrows():
-            geom = row.geometry
-
-            # Vérifier que la géométrie est valide
-            if geom is None or geom.is_empty:
-                continue
-
-            color = cmap_obj(norm(row[column_to_plot]))
-
-            # Calcul de la taille du point
-            if point_size_column:
-                normalized_size = size_norm(row[point_size_column])
-                point_size = min_point_size + normalized_size * (
-                    max_point_size - min_point_size
-                )
-            else:
-                point_size = min_point_size
-
-            # Obtention des coordonnées
-            if geom.geom_type == "Point":
-                x, y = geom.x, geom.y
-            else:
-                # Utilisation du centroïde pour les autres géométries
-                centroid = geom.centroid
-                x, y = centroid.x, centroid.y
-
-            # Tracé du point
-            self.ax.scatter(
-                x,
-                y,
-                s=point_size,
-                color=color,
-                alpha=alpha,
-                edgecolor=edgecolor,
-                linewidth=linewidth,
-                transform=self.projection,
+        if point_size_column:
+            size_min = geodf[point_size_column].min()
+            size_max = geodf[point_size_column].max()
+            size_norm = plt.Normalize(vmin=size_min, vmax=size_max)
+            sizes = min_point_size + size_norm(geodf[point_size_column].values) * (
+                max_point_size - min_point_size
             )
+        else:
+            sizes = min_point_size
 
-            # Ajout des étiquettes
-            if show_labels and label_column and label_column in geodf.columns:
+        # Tracé vectorisé (un seul appel scatter)
+        colors = cmap_obj(norm(geodf[column_to_plot].values))
+        self.ax.scatter(
+            xs.values,
+            ys.values,
+            s=sizes,
+            c=colors,
+            alpha=alpha,
+            edgecolor=edge_color,
+            linewidth=linewidth,
+            transform=self.projection,
+        )
+
+        # Ajout des étiquettes
+        if show_labels and label_column and label_column in geodf.columns:
+            for idx, (x, y) in enumerate(zip(xs, ys)):
                 try:
-                    # label_text = f"{row[label_column]}\n{row[column_to_plot]:,.0f}"
+                    row = geodf.iloc[idx]
                     label_text = f"{row[label_column]}"
-
                     self.ax.text(
                         x,
                         y,
@@ -1789,8 +1987,8 @@ class Map:
                         ],
                     )
                 except Exception as e:
-                    print(
-                        f"Warning: Could not add label for {row.get(label_column, 'unknown')}: {e}"
+                    self._log(
+                        f"⚠️  Étiquette impossible pour {row.get(label_column, 'inconnu')}: {e}"
                     )
 
         # Barre de couleur
@@ -1834,6 +2032,13 @@ class Map:
             )
         self._update_bounds(geodf)
         self._apply_smart_centering()
+
+        return self
+
+    # Alias rétrocompatibles (anciens noms avec faute de frappe)
+    add_polygons_cloropleth = add_polygons_choropleth
+    add_points_cloropleth = add_points_choropleth
+
     # ----------------------------------------------------------------------
     # ================Custom map appearence=================================
     # ----------------------------------------------------------------------
@@ -1856,7 +2061,7 @@ class Map:
         """
         Ajoute une grille de coordonnées avec cartopy.
 
-        Parameters:
+        Paramètres:
         -----------
         draw_labels : bool
             Afficher les étiquettes de coordonnées
@@ -1932,7 +2137,7 @@ class Map:
         """
         Définit les limites de la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         bounds : list or tuple
             Limites [minx, miny, maxx, maxy] ou (minx, miny, maxx, maxy)
@@ -1951,7 +2156,7 @@ class Map:
         """
         Change la projection de la carte (nécessite de recréer l'axe).
 
-        Parameters:
+        Paramètres:
         -----------
         projection : cartopy.crs
             Nouvelle projection
@@ -1975,18 +2180,14 @@ class Map:
 
         return self
     
-    def hide_grideline(self):
+    def hide_gridline(self):
         """
-        Masque toutes les bordures, ticks et labels de l'axe matplotlib donné.
-
-        Args:
-            ax: Un objet matplotlib.axes.Axes
+        Masque toutes les bordures, ticks et labels de l'axe.
 
         Exemple :
-            fig, ax = plt.subplots()
-            # ... ton code de tracé ...
-            hide_grideline(ax)
-            plt.show()
+            m = Map()
+            m.hide_gridline()
+            m.show()
         """
         ax=self.ax
         # Cacher les spines (bordures)
@@ -2176,7 +2377,7 @@ class Map:
         """
         Ajoute du texte personnalisé à la carte.
 
-        Parameters:
+        Paramètres:
         -----------
         text : str
             Le texte à afficher
@@ -2238,8 +2439,8 @@ class Map:
         fontweight: str = "bold",
         color: str = "black",
         pad: float = 20,
-    ) -> "ChartBuilder":
-        """Set the chart title with customization options."""
+    ) -> "Map":
+        """Définit le titre de la carte avec des options de personnalisation."""
         self.ax.set_title(
             title, fontsize=fontsize, fontweight=fontweight, color=color, pad=pad
         )
@@ -2273,13 +2474,13 @@ class Map:
                         if os.path.isfile(fpath):
                             files.append(fpath)
             except Exception as e:
-                print(f"❌ Impossible de retrouver le dossier : {e}")
+                self._log(f"❌ Impossible de retrouver le dossier : {e}")
         return files
 
     def add_arrow(
         self,
-        arrow: 1,
-        position: Tuple[float, float],
+        arrow=1,
+        position: Tuple[float, float] = (0.95, 0.95),
         zoom: float = 1,
         color: str = "black",
     ):
@@ -2297,19 +2498,25 @@ class Map:
 
     def create_custom_palette(
         self, name: str, colors: List[str], save_palette: bool = True
-    ) -> "ChartBuilder":
+    ) -> "Map":
         """
-        Create a custom color palette.
+        Crée une palette de couleurs personnalisée.
 
-        Args:
-            name (str): Name for the custom palette
-            colors (List[str]): List of color values (hex codes, named colors, etc.)
-            save_palette (bool): Whether to save the palette for future use
+        Paramètres:
+        -----------
+        name : str
+            Nom de la palette personnalisée
+        colors : List[str]
+            Liste de valeurs de couleurs (codes hex, noms de couleurs, etc.)
+        save_palette : bool
+            Sauvegarder la palette pour une utilisation future
 
-        Returns:
-            ChartBuilder: Self for method chaining
-        example:
-            chart.create_custom_palette(name='my_palette',
+        Retourne:
+        ---------
+        Map : self pour le chaînage de méthodes
+
+        Exemple:
+            carte.create_custom_palette(name='ma_palette',
                                         colors=['#FF5733', 'blue', 'green'],
                                         save_palette=True)
         """
@@ -2321,10 +2528,10 @@ class Map:
                 mcolors.to_rgba(color)
                 valid_colors.append(color)
             except ValueError:
-                print(f"Warning: Invalid color '{color}' ignored")
+                self._log(f"Warning: Invalid color '{color}' ignored")
 
         if not valid_colors:
-            print("Error: No valid colors provided")
+            self._log("Error: No valid colors provided")
             return self
 
         if save_palette:
@@ -2333,7 +2540,7 @@ class Map:
         self.current_palette = valid_colors
         plt.rcParams["axes.prop_cycle"] = plt.cycler(color=valid_colors)
 
-        print(f"Custom palette '{name}' created with {len(valid_colors)} colors")
+        self._log(f"Custom palette '{name}' created with {len(valid_colors)} colors")
         return self
 
     def get_available_palettes(
@@ -2343,17 +2550,23 @@ class Map:
         include_matplotlib: bool = True,
     ) -> Dict[str, List[str]]:
         """
-        Get all available color palettes.
+        Récupère toutes les palettes de couleurs disponibles.
 
-        Args:
-            include_custom (bool): Include custom palettes
-            include_seaborn (bool): Include seaborn palettes
-            include_matplotlib (bool): Include matplotlib colormaps
+        Paramètres:
+        -----------
+        include_custom : bool
+            Inclure les palettes personnalisées
+        include_seaborn : bool
+            Inclure les palettes seaborn
+        include_matplotlib : bool
+            Inclure les colormaps matplotlib
 
-        Returns:
-            Dict[str, List[str]]: Dictionary of palette names and their categories
-        example:
-            palettes = chart.get_available_palettes(include_custom=True,
+        Retourne:
+        ---------
+        Dict[str, List[str]] : Dictionnaire des noms de palettes par catégorie
+
+        Exemple:
+            palettes = carte.get_available_palettes(include_custom=True,
                                                      include_seaborn=True,
                                                      include_matplotlib=True)
         """
@@ -2503,18 +2716,21 @@ class Map:
     @staticmethod
     def print_available_palettes(category: str = "all", limit: int = None) -> None:
         """
-        Print available color palettes in a formatted way.
+        Affiche les palettes de couleurs disponibles de manière formatée.
 
-        Args:
-            category (str): Category to display ('all', 'custom', 'seaborn', 'matplotlib', or specific category)
-            limit (int): Limit number of palettes per category
-        Returns: None
-        example:
-            ChartBuilder.print_available_palettes(category='seaborn', limit=5)
+        Paramètres:
+        -----------
+        category : str
+            Catégorie à afficher ('all', 'custom', 'seaborn', 'matplotlib', ou une catégorie spécifique)
+        limit : int
+            Limite le nombre de palettes par catégorie
+
+        Exemple:
+            Map.print_available_palettes(category='seaborn', limit=5)
         """
-        # Create temporary instance to access palettes
+        # Création d'une instance temporaire pour accéder aux palettes
         temp_df = pd.DataFrame({"x": [1], "y": [1]})
-        temp_chart = ChartBuilder(temp_df)
+        temp_chart = Map()
         palettes = temp_chart.get_available_palettes()
 
         categories_to_show = []
@@ -2550,17 +2766,23 @@ class Map:
                     remaining = len(palettes[cat]) - limit
                     print(f"    ... and {remaining} more")
 
-    def preview_palette(self, palette_name: str, n_colors: int = 8) -> "ChartBuilder":
+    def preview_palette(self, palette_name: str, n_colors: int = 8) -> "Map":
         """
-        Preview a color palette by creating a simple color bar.
+        Prévisualise une palette de couleurs sous forme de barre colorée.
 
-        Args:
-            palette_name (str): Name of the palette to preview
-            n_colors (int): Number of colors to show
-        Returns:
-            ChartBuilder: Self for method chaining
-        example:
-            chart.preview_palette('Set1', n_colors=5)
+        Paramètres:
+        -----------
+        palette_name : str
+            Nom de la palette à prévisualiser
+        n_colors : int
+            Nombre de couleurs à afficher
+
+        Retourne:
+        ---------
+        Map : self pour le chaînage de méthodes
+
+        Exemple:
+            carte.preview_palette('Set1', n_colors=5)
         """
         # Clear current plot
         self.ax.clear()
@@ -2579,7 +2801,7 @@ class Map:
                     cmap = load_cmap(palette_name)
                     colors = [cmap(i / (n_colors - 1)) for i in range(n_colors)]
                 except:
-                    print(f"Palette '{palette_name}' not found")
+                    self._log(f"Palette '{palette_name}' not found")
                     return self
 
         # Create color preview
@@ -2624,20 +2846,29 @@ class Map:
         end_color: str,
         n_colors: int = 10,
         save_palette: bool = True,
-    ):
+    ) -> "Map":
         """
-        Generate a gradient palette between two colors.
+        Génère une palette en dégradé entre deux couleurs.
 
-        Args:
-            name (str): Name for the palette
-            start_color (str): Starting color
-            end_color (str): Ending color
-            n_colors (int): Number of colors in the gradient
-            save_palette (bool): Whether to save the palette
-        Returns:
-            ChartBuilder: Self for method chaining
-        example:
-            chart.generate_gradient_palette(name='my_gradient',
+        Paramètres:
+        -----------
+        name : str
+            Nom de la palette
+        start_color : str
+            Couleur de départ
+        end_color : str
+            Couleur d'arrivée
+        n_colors : int
+            Nombre de couleurs dans le dégradé
+        save_palette : bool
+            Sauvegarder la palette
+
+        Retourne:
+        ---------
+        Map : self pour le chaînage de méthodes
+
+        Exemple:
+            carte.generate_gradient_palette(name='mon_degrade',
                                              start_color='blue',
                                              end_color='red',
                                              n_colors=5,
@@ -2664,11 +2895,11 @@ class Map:
             self.current_palette = colors
             plt.rcParams["axes.prop_cycle"] = plt.cycler(color=colors)
 
-            print(f"Gradient palette '{name}' created: {start_color} → {end_color}")
+            self._log(f"Gradient palette '{name}' created: {start_color} → {end_color}")
             return self
 
         except ValueError as e:
-            print(f"Error creating gradient: {e}")
+            self._log(f"Error creating gradient: {e}")
             return self
 
     # ----------------------------------------------------------------------
@@ -2677,16 +2908,21 @@ class Map:
 
     def get_available_fonts(self, pattern: str = None, sort: bool = True) -> List[str]:
         """
-        Get list of all available font names in the system.
+        Récupère la liste des polices disponibles sur le système.
 
-        Args:
-            pattern (str, optional): Filter fonts containing this pattern (case-insensitive)
-            sort (bool): Whether to sort the font names alphabetically
+        Paramètres:
+        -----------
+        pattern : str, optional
+            Filtre les polices contenant ce motif (insensible à la casse)
+        sort : bool
+            Trier les noms par ordre alphabétique
 
-        Returns:
-            List[str]: List of available font names
-        example:
-            ChartBuilder.get_available_fonts(pattern='Arial', sort=True)
+        Retourne:
+        ---------
+        List[str] : Liste des noms de polices disponibles
+
+        Exemple:
+            carte.get_available_fonts(pattern='Arial', sort=True)
         """
         # Get all font properties
         fonts = [f.name for f in fm.fontManager.ttflist]
@@ -2707,17 +2943,21 @@ class Map:
     @staticmethod
     def print_available_fonts(pattern: str = None, limit: int = None) -> None:
         """
-        Print available fonts to console in a formatted way.
+        Affiche les polices disponibles dans la console de manière formatée.
 
-        Args:
-            pattern (str, optional): Filter fonts containing this pattern
-            limit (int, optional): Limit number of fonts to display
-        example:
-            ChartBuilder.print_available_fonts(pattern='Arial', limit=10)
+        Paramètres:
+        -----------
+        pattern : str, optional
+            Filtre les polices contenant ce motif
+        limit : int, optional
+            Limite le nombre de polices affichées
+
+        Exemple:
+            Map.print_available_fonts(pattern='Arial', limit=10)
         """
-        # Create a temporary instance to use the method
+        # Création d'une instance temporaire pour utiliser la méthode
         temp_df = pd.DataFrame({"x": [1], "y": [1]})
-        temp_chart = ChartBuilder(temp_df)
+        temp_chart = Map()
         fonts = temp_chart.get_available_fonts(pattern)
 
         if limit:
@@ -2738,16 +2978,21 @@ class Map:
 
     def set_font(
         self, family: str = "sans-serif", size: int = 10, weight: str = "normal"
-    ):
+    ) -> "Map":
         """
-        Set global font properties.
+        Définit les propriétés globales de la police.
 
-        Args:
-            family (str): Font family name (use get_available_fonts() to see options)
-            size (int): Font size
-            weight (str): Font weight ('normal', 'bold', 'light', etc.)
-        example:
-            chart.set_font(family='Arial', size=12, weight='bold')
+        Paramètres:
+        -----------
+        family : str
+            Nom de la famille de police (utiliser get_available_fonts() pour voir les options)
+        size : int
+            Taille de la police
+        weight : str
+            Poids de la police ('normal', 'bold', 'light', etc.)
+
+        Exemple:
+            carte.set_font(family='Arial', size=12, weight='bold')
         """
         # Validate font exists
         available_fonts = self.get_available_fonts()
@@ -2755,10 +3000,10 @@ class Map:
             family not in ["sans-serif", "serif", "monospace", "fantasy", "cursive"]
             and family not in available_fonts
         ):
-            print(
+            self._log(
                 f"Warning: Font '{family}' not found. Available fonts can be checked with get_available_fonts()"
             )
-            print(f"Using default font instead.")
+            self._log(f"Using default font instead.")
             family = "sans-serif"
 
         plt.rcParams.update(
@@ -2853,14 +3098,14 @@ class Map:
         self.ax.set_extent(extent, crs=ccrs.PlateCarree())
 
         # Affichage d'informations de débogage
-        print(f"📊 Centrage intelligent appliqué:")
-        print(
+        self._log(f"📊 Centrage intelligent appliqué:")
+        self._log(
             f"   Format: {self.paper_info['format'] if self.paper_info else 'Personnalisé'} "
             f"({self.paper_info['orientation'] if self.paper_info else 'N/A'})"
         )
-        print(f"   Ratio figure: {fig_aspect_ratio:.2f}")
-        print(f"   Ratio données: {data_aspect_ratio:.2f}")
-        print(
+        self._log(f"   Ratio figure: {fig_aspect_ratio:.2f}")
+        self._log(f"   Ratio données: {data_aspect_ratio:.2f}")
+        self._log(
             f"   Étendue: [{extent[0]:.2f}, {extent[1]:.2f}, {extent[2]:.2f}, {extent[3]:.2f}]"
         )
 
@@ -2868,7 +3113,7 @@ class Map:
         """
         Centre la carte sur des limites spécifiques avec marges adaptées.
 
-        Parameters:
+        Paramètres:
         -----------
         bounds : list or tuple
             Limites [minx, miny, maxx, maxy] sur lesquelles centrer
@@ -2990,7 +3235,7 @@ class Map:
         """
         Crée une légende personnalisée avec contrôle total sur l'apparence.
 
-        Parameters:
+        Paramètres:
         -----------
         elements : list, optional
             Liste d'éléments de légende personnalisés. Si None, utilise self.legend_elements
@@ -3045,7 +3290,7 @@ class Map:
         --------
         Map: Instance de la carte pour chaînage
         """
-        print("🛑Element de légende ajouté", elements)
+        self._log("🛑Element de légende ajouté", elements)
         # Utilisation des éléments fournis ou de ceux stockés
         if elements is None:
             self.legend_elements = self.legend_elements
@@ -3054,7 +3299,7 @@ class Map:
         legend_elements = self.legend_elements
 
         if not legend_elements:
-            print("⚠️  Aucun élément de légende disponible")
+            self._log("⚠️  Aucun élément de légende disponible")
             return self
 
         # Préparation des paramètres de la légende
@@ -3101,7 +3346,7 @@ class Map:
         # Stockage de la référence pour modifications ultérieures
         self.current_legend = legend
 
-        print(f"✅ Légende personnalisée créée avec {len(legend_elements)} éléments")
+        self._log(f"✅ Légende personnalisée créée avec {len(legend_elements)} éléments")
 
         return self
 
@@ -3120,7 +3365,7 @@ class Map:
         """
         Ajoute un élément personnalisé à la légende.
 
-        Parameters:
+        Paramètres:
         -----------
         element_type : str
             Type d'élément ('point', 'line', 'patch', 'text')
@@ -3182,7 +3427,7 @@ class Map:
             raise ValueError(f"Type d'élément non supporté: {element_type}")
 
         self.legend_elements.append(element)
-        print(f"➕ Élément '{label}' ajouté à la légende")
+        self._log(f"➕ Élément '{label}' ajouté à la légende")
 
         return self
 
@@ -3201,7 +3446,7 @@ class Map:
         """
         Crée automatiquement une légende basée sur une colonne d'un GeoDataFrame.
 
-        Parameters:
+        Paramètres:
         -----------
         gdf : gpd.GeoDataFrame
             GeoDataFrame source
@@ -3246,7 +3491,7 @@ class Map:
 
         # Limitation du nombre d'éléments
         if len(unique_values) > max_items:
-            print(
+            self._log(
                 f"Il y a plus de 25 éléments uniques dans la colonne {column} ({len(unique_values)} valeurs exactement). Modifiez la valeur de max_items à {len(unique_values)} pour afficher tous les éléments."
             )
             unique_values = unique_values[: max_items - 1]
@@ -3323,7 +3568,7 @@ class Map:
             elements=legend_elements, title=legend_title, **legend_kwargs
         )
 
-        print(
+        self._log(
             f"📊 Légende créée pour la colonne '{column}' avec {len(legend_elements)} éléments"
         )
 
@@ -3333,7 +3578,7 @@ class Map:
         """
         Applique des préréglages de légende.
 
-        Parameters:
+        Paramètres:
         -----------
         preset : str
             Nom du préréglage ('default', 'minimal', 'fancy', 'academic', 'poster,'simple')
@@ -3426,11 +3671,11 @@ class Map:
 
         # Fusion des paramètres du préréglage avec les surcharges
         params = {**presets[preset], **override_kwargs}
-        print(params)
+        self._log(params)
 
         self.custom_legend(**params)
 
-        print(f"🎨 Préréglage '{preset}' appliqué à la légende")
+        self._log(f"🎨 Préréglage '{preset}' appliqué à la légende")
 
         return self
 
@@ -3444,9 +3689,9 @@ class Map:
         """
         if hasattr(self.ax, "legend_") and self.ax.legend_:
             self.ax.legend_.remove()
-            print("🗑️  Légende supprimée")
+            self._log("🗑️  Légende supprimée")
         else:
-            print("⚠️  Aucune légende à supprimer")
+            self._log("⚠️  Aucune légende à supprimer")
 
         return self
 
@@ -3459,8 +3704,97 @@ class Map:
         Map: Instance de la carte pour chaînage
         """
         self.legend_elements = []
-        print("🧹 Éléments de légende effacés")
+        self._log("🧹 Éléments de légende effacés")
 
+        return self
+
+    # ----------------------------------------------------------------------
+    # ================Layer management======================================
+    # ----------------------------------------------------------------------
+
+    def list_layers(self) -> List[Dict[str, Any]]:
+        """
+        Liste toutes les couches ajoutées à la carte.
+
+        Retourne:
+        ---------
+        List[Dict]: Liste de dictionnaires avec les infos de chaque couche
+            (index, type, label, rendered)
+        """
+        summary = []
+        for i, layer in enumerate(self.layers):
+            info = {
+                "index": i,
+                "type": layer.get("type", "unknown"),
+                "label": layer.get("label"),
+                "rendered": layer.get("rendered", False),
+            }
+            summary.append(info)
+            print(
+                f"  [{i}] {info['type']:10s} | "
+                f"label={info['label'] or '—':20s} | "
+                f"rendered={info['rendered']}"
+            )
+        print(f"📋 {len(self.layers)} couche(s) au total")
+        return summary
+
+    def remove_layer(self, index: int = None, label: str = None) -> "Map":
+        """
+        Supprime une couche par son index ou son label.
+
+        Paramètres:
+        -----------
+        index : int, optional
+            Index de la couche à supprimer (voir list_layers())
+        label : str, optional
+            Label de la couche à supprimer. Si plusieurs couches ont le même
+            label, seule la première trouvée est supprimée.
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+
+        Exemple:
+        --------
+        >>> m = Map()
+        >>> m.add_polygons(gdf, label="Régions")
+        >>> m.list_layers()
+        >>> m.remove_layer(label="Régions")   # par label
+        >>> m.remove_layer(index=0)            # par index
+        """
+        if index is None and label is None:
+            raise ValueError("Fournir index ou label pour identifier la couche à supprimer.")
+
+        if index is not None:
+            if not 0 <= index < len(self.layers):
+                raise IndexError(
+                    f"Index {index} hors limites (0–{len(self.layers) - 1})."
+                )
+            removed = self.layers.pop(index)
+            self._log(f"🗑️  Couche [{index}] ({removed.get('type')}) supprimée")
+        else:
+            for i, layer in enumerate(self.layers):
+                if layer.get("label") == label:
+                    removed = self.layers.pop(i)
+                    self._log(f"🗑️  Couche [{i}] label='{label}' ({removed.get('type')}) supprimée")
+                    break
+            else:
+                self._log(f"⚠️  Aucune couche avec le label '{label}' trouvée")
+
+        return self
+
+    def clear_layers(self) -> "Map":
+        """
+        Supprime toutes les couches de la carte.
+
+        Retourne:
+        ---------
+        Map: Instance de la carte pour chaînage
+        """
+        count = len(self.layers)
+        self.layers.clear()
+        self.legend_elements.clear()
+        self._log(f"🧹 {count} couche(s) supprimée(s)")
         return self
 
     # ----------------------------------------------------------------------
@@ -3512,7 +3846,7 @@ class Map:
             map_width_m, _, _ = geod.inv(x0, mid_lat, x1, mid_lat)
             map_width_km = abs(map_width_m) / 1000
         except Exception as e:
-            print(f"Erreur dans le calcul géodésique: {e}")
+            self._log(f"Erreur dans le calcul géodésique: {e}")
             map_width_km = 100
 
         if length is None:
@@ -3527,12 +3861,12 @@ class Map:
         x_ax, y_ax = location
         start_x = x0 + x_ax * (x1 - x0)
         start_y = y0 + y_ax * (y1 - y0)
-        print(f"Location est : ({x_ax}, {y_ax}). La bare d'échelle est placé à {x_ax*100} % de la longeur et à {y_ax*100} % de la hauteur)")
+        self._log(f"Location est : ({x_ax}, {y_ax}). La bare d'échelle est placé à {x_ax*100} % de la longeur et à {y_ax*100} % de la hauteur)")
         try:
             lon_end, lat_end, _ = geod.fwd(start_x, start_y, 90, length * 1000)
             bar_length_deg = lon_end - start_x
         except Exception as e:
-            print(f"Erreur dans le calcul géodésique forward: {e}")
+            self._log(f"Erreur dans le calcul géodésique forward: {e}")
             bar_length_deg = length * 1000 / (111320 * np.cos(np.radians(start_y)))
 
         scale_bar_start = (start_x, start_y)
@@ -3588,7 +3922,7 @@ class Map:
         """
         Affiche la carte avec tous les layers ajoutés.
 
-        Parameters:
+        Paramètres:
         -----------
         legend : bool
             Afficher la légende
@@ -3598,37 +3932,44 @@ class Map:
             Ajuster automatiquement la mise en page
         smart_centering : bool
             Centrage intelligent adapté aux dimensions du papier
+        title : str
+            Titre de la carte
+        """
+        self._render(legend=legend, auto_extent=auto_extent, tight_layout=tight_layout, smart_centering=smart_centering, title=title, **kwargs)
+        plt.show()
+
+        return self
+
+    def _render(self, legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs):
+        """
+        Rendu interne de la carte (layers, extent, légende) sans appeler plt.show().
+        Utilisé par show() et save() pour éviter le double rendu.
         """
         # Rendu de tous les layers
         for layer in self.layers:
-            if layer.get("type") != "scalebar" and layer.get("type") !="raster":
-                gdf = layer["gdf"]
-                style = layer["style"].copy()  # Copie pour éviter les modifications
+            # Ignorer les layers déjà rendus (choroplèthe, raster)
+            if layer.get("rendered"):
+                continue
 
-                # Retirer 'ax' et 'transform' des paramètres de style pour éviter les conflits
+            layer_type = layer.get("type")
+
+            if layer_type in ("point", "line", "polygon"):
+                gdf = layer["gdf"]
+                style = layer["style"].copy()
                 style.pop("ax", None)
                 style.pop("transform", None)
-            if layer["type"] == "point":
-                gdf = layer["gdf"]
                 gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
-            elif layer["type"] == "line":
-                gdf = layer["gdf"]
-                gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
-            elif layer["type"] == "polygon":
-                gdf = layer["gdf"] 
-                gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
-            elif layer["type"] == "raster":
-                self.ax.imshow(img=layer["data"], **layer["style"])
-            
+            elif layer_type == "raster":
+                self.ax.imshow(layer["data"], **layer["style"])
+
         if title is not None:
             self.ax.set_title(title)
 
-        # Ajustement automatique de l'étendue avec centrage intelligent
+        # Ajustement automatique de l'étendue
         if auto_extent and hasattr(self, "_first_layer"):
             if smart_centering:
                 self._apply_smart_centering()
             else:
-                # Ancien comportement par défaut
                 margin = 0.05
                 width = self.bounds[2] - self.bounds[0]
                 height = self.bounds[3] - self.bounds[1]
@@ -3641,26 +3982,21 @@ class Map:
                 self.ax.set_extent(extent, crs=ccrs.PlateCarree())
 
         legend_params = self.legend_params
-        # Légende
         if legend and self.legend_elements:
             self.custom_legend(**legend_params, **kwargs)
 
         for layer in self.layers:
             if layer.get("type") == "scalebar":
                 self._draw_scale_bar(**layer["params"])
-        # Mise en page
+
         if tight_layout:
             plt.tight_layout()
 
-        plt.show()
-
-        return self
-
-    def save(self, filename, dpi=300, bbox_inches="tight"):
+    def save(self, filename, dpi=300, bbox_inches="tight", legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs):
         """
         Sauvegarde la carte dans un fichier.
 
-        Parameters:
+        Paramètres:
         -----------
         filename : str
             Nom du fichier (avec extension)
@@ -3668,24 +4004,95 @@ class Map:
             Résolution
         bbox_inches : str
             Ajustement des marges
+        legend : bool
+            Afficher la légende
+        auto_extent : bool
+            Ajuster automatiquement l'étendue
+        tight_layout : bool
+            Ajuster automatiquement la mise en page
+        smart_centering : bool
+            Centrage intelligent
+        title : str
+            Titre de la carte
         """
-        # Rendu de tous les layers avant sauvegarde
-        # for layer in self.layers:
-        #     gdf = layer["gdf"]
-        #     style = layer["style"].copy()  # Copie pour éviter les modifications
-
-        #     # Retirer 'ax' et 'transform' des paramètres de style pour éviter les conflits
-        #     style.pop("ax", None)
-        #     style.pop("transform", None)
-
-        #     if layer["type"] == "point":
-        #         gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
-        #     elif layer["type"] == "line":
-        #         gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
-        #     elif layer["type"] == "polygon":
-        #         gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
-        self.show()
+        self._render(legend=legend, auto_extent=auto_extent, tight_layout=tight_layout, smart_centering=smart_centering, title=title, **kwargs)
         plt.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
-        print(f"Carte sauvegardée: {filename}")
+        self._log(f"Carte sauvegardée: {filename}")
 
         return self
+
+    def to_image(self, format: str = "png", dpi: int = 300,
+                 legend: bool = True, auto_extent: bool = True,
+                 tight_layout: bool = True, smart_centering: bool = True,
+                 title: str = None, **kwargs) -> Image.Image:
+        """
+        Exporte la carte en objet PIL.Image (en mémoire, sans fichier).
+
+        Paramètres:
+        -----------
+        format : str
+            Format d'image ('png', 'jpeg', etc.)
+        dpi : int
+            Résolution
+        legend : bool
+            Afficher la légende
+        auto_extent : bool
+            Ajuster l'étendue
+        tight_layout : bool
+            Ajuster la mise en page
+        smart_centering : bool
+            Centrage intelligent
+        title : str
+            Titre de la carte
+
+        Retourne:
+        ---------
+        PIL.Image.Image : Image en mémoire
+        """
+        buf = self.to_bytes(format=format, dpi=dpi, legend=legend,
+                            auto_extent=auto_extent, tight_layout=tight_layout,
+                            smart_centering=smart_centering, title=title, **kwargs)
+        buf.seek(0)
+        return Image.open(buf).copy()
+
+    def to_bytes(self, format: str = "png", dpi: int = 300,
+                 bbox_inches: str = "tight",
+                 legend: bool = True, auto_extent: bool = True,
+                 tight_layout: bool = True, smart_centering: bool = True,
+                 title: str = None, **kwargs) -> BytesIO:
+        """
+        Exporte la carte en BytesIO (en mémoire, sans fichier).
+        Utile pour les notebooks Jupyter, applications web, etc.
+
+        Paramètres:
+        -----------
+        format : str
+            Format d'image ('png', 'jpeg', 'svg', 'pdf')
+        dpi : int
+            Résolution
+        bbox_inches : str
+            Ajustement des marges
+        legend : bool
+            Afficher la légende
+        auto_extent : bool
+            Ajuster l'étendue
+        tight_layout : bool
+            Ajuster la mise en page
+        smart_centering : bool
+            Centrage intelligent
+        title : str
+            Titre de la carte
+
+        Retourne:
+        ---------
+        BytesIO : Buffer contenant l'image
+        """
+        self._render(
+            legend=legend, auto_extent=auto_extent,
+            tight_layout=tight_layout, smart_centering=smart_centering,
+            title=title, **kwargs,
+        )
+        buf = BytesIO()
+        self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches=bbox_inches)
+        buf.seek(0)
+        return buf
