@@ -16,6 +16,12 @@ __pycache__/
 country-flag-icons/
 cartograpy/__pycache__/
 
+# === Build / packaging ===
+*.egg-info/
+build/
+.eggs/
+*.whl
+
 # === Fichiers compilés Python ===
 *.pyc
 *.pyo

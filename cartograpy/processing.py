@@ -95,7 +95,7 @@ def fusion(dataframes_list, reset_index=True, ignore_crs=True):
     return result
 
 
-def add_column(df, column_name, expression,globals_dict=None):
+def add_column(df, column_name, expression, globals_dict=None):
     """
     Ajoute une nouvelle colonne à un DataFrame/GeoDataFrame selon une expression.
 
@@ -105,19 +105,27 @@ def add_column(df, column_name, expression,globals_dict=None):
         Tableau de données d'entrée.
     column_name : str
         Nom de la nouvelle colonne à créer.
-    expression : str
-        Expression à évaluer, utilisant 'row' (ex: "row['col1'] + row['col2']").
-    global_dic : Liste de package à importer
-    
+    expression : callable ou str
+        - callable : fonction prenant une ligne (row) et retournant la valeur.
+          Exemple : lambda row: row['col1'] + row['col2']
+        - str : Expression pandas passée à df.eval().
+          Exemple : "col1 + col2"
+    globals_dict : dict, optional
+        Dictionnaire de variables supplémentaires accessibles dans l'expression.
+
     Retourne
     -------
     Le DataFrame/GeoDataFrame modifié (avec la nouvelle colonne).
     """
-
-    _globals = {"random": random, "np":np}
-    if globals_dict:
-        _globals.update(globals_dict)
-    df[column_name] = df.apply(lambda row: eval(expression, _globals, {'row': row}), axis=1)
+    if callable(expression):
+        df[column_name] = df.apply(expression, axis=1)
+    elif isinstance(expression, str):
+        local_dict = {"random": random, "np": np}
+        if globals_dict:
+            local_dict.update(globals_dict)
+        df[column_name] = df.eval(expression, local_dict=local_dict)
+    else:
+        raise TypeError("expression doit être un callable ou une chaîne (str)")
     return df
 
 def split_multipolygon(multipolygon: Union[MultiPolygon, str,gpd.GeoDataFrame], 

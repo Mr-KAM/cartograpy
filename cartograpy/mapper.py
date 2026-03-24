@@ -36,203 +36,10 @@ try:
 except ImportError:
     HAS_CONTEXTILY = False
 from cartograpy.styling import *
+
 # ----------------------------------------------------------------------
 # ================global methodes ======================================
 # ----------------------------------------------------------------------
-
-
-def get_fonts(pattern: str = None, sort: bool = True) -> List[str]:
-    """
-    Get list of all available font names in the system.
-
-    Args:
-        pattern (str, optional): Filter fonts containing this pattern (case-insensitive)
-        sort (bool): Whether to sort the font names alphabetically
-
-    Returns:
-        List[str]: List of available font names
-    example:
-        get_fonts(pattern='Arial', sort=True)
-    """
-    # Get all font properties
-    fonts = [f.name for f in fm.fontManager.ttflist]
-
-    # Remove duplicates
-    fonts = list(set(fonts))
-
-    # Filter by pattern if provided
-    if pattern:
-        fonts = [font for font in fonts if pattern.lower() in font.lower()]
-
-    # Sort if requested
-    if sort:
-        fonts.sort()
-
-    return fonts
-
-
-def get_available_palettes(
-    include_custom: bool = True,
-    include_seaborn: bool = True,
-    include_matplotlib: bool = True,
-) -> Dict[str, List[str]]:
-    """
-    Get all available color palettes.
-
-    Args:
-        include_custom (bool): Include custom palettes
-        include_seaborn (bool): Include seaborn palettes
-        include_matplotlib (bool): Include matplotlib colormaps
-
-    Returns:
-        Dict[str, List[str]]: Dictionary of palette names and their categories
-    example:
-        palettes = get_available_palettes(include_custom=True,
-                                                    include_seaborn=True,
-                                                    include_matplotlib=True)
-    """
-    # list_custom=list(custom_palettes().keys)
-    custom_color_list=list(custom_palettes().keys())
-    palettes = {
-        "custom": [],
-        "seaborn_qualitative": [],
-        "seaborn_sequential": [],
-        "seaborn_diverging": [],
-        "matplotlib_sequential": [],
-        "matplotlib_diverging": [],
-        "matplotlib_cyclic": [],
-        "matplotlib_qualitative": [],
-    }
-    if include_custom:
-        palettes["custom"] = custom_color_list
-
-    # Seaborn palettes
-    if include_seaborn:
-        # Qualitative palettes
-        palettes["seaborn_qualitative"] = [
-            "deep",
-            "muted",
-            "bright",
-            "pastel",
-            "dark",
-            "colorblind",
-            "Set1",
-            "Set2",
-            "Set3",
-            "Paired",
-            "tab10",
-            "tab20",
-        ]
-
-        # Sequential palettes
-        palettes["seaborn_sequential"] = [
-            "Blues",
-            "BuGn",
-            "BuPu",
-            "GnBu",
-            "Greens",
-            "Greys",
-            "Oranges",
-            "OrRd",
-            "PuBu",
-            "PuBuGn",
-            "PuRd",
-            "Purples",
-            "RdPu",
-            "Reds",
-            "YlGn",
-            "YlGnBu",
-            "YlOrBr",
-            "YlOrRd",
-            "rocket",
-            "mako",
-            "flare",
-            "crest",
-        ]
-
-        # Diverging palettes
-        palettes["seaborn_diverging"] = [
-            "BrBG",
-            "PiYG",
-            "PRGn",
-            "PuOr",
-            "RdBu",
-            "RdGy",
-            "RdYlBu",
-            "RdYlGn",
-            "Spectral",
-            "coolwarm",
-            "bwr",
-            "seismic",
-            "icefire",
-            "vlag",
-        ]
-
-    # Matplotlib colormaps
-    if include_matplotlib:
-        # Sequential
-        palettes["matplotlib_sequential"] = [
-            "viridis",
-            "plasma",
-            "inferno",
-            "magma",
-            "cividis",
-            "Greys",
-            "Purples",
-            "Blues",
-            "Greens",
-            "Oranges",
-            "Reds",
-            "YlOrBr",
-            "YlOrRd",
-            "OrRd",
-            "PuRd",
-            "RdPu",
-            "BuPu",
-            "GnBu",
-            "PuBu",
-            "YlGnBu",
-            "PuBuGn",
-            "BuGn",
-            "YlGn",
-        ]
-
-        # Diverging
-        palettes["matplotlib_diverging"] = [
-            "PiYG",
-            "PRGn",
-            "BrBG",
-            "PuOr",
-            "RdGy",
-            "RdBu",
-            "RdYlBu",
-            "RdYlGn",
-            "Spectral",
-            "coolwarm",
-            "bwr",
-            "seismic",
-        ]
-
-        # Cyclic
-        palettes["matplotlib_cyclic"] = ["twilight", "twilight_shifted", "hsv"]
-
-        # Qualitative
-        palettes["matplotlib_qualitative"] = [
-            "Pastel1",
-            "Pastel2",
-            "Paired",
-            "Accent",
-            "Dark2",
-            "Set1",
-            "Set2",
-            "Set3",
-            "tab10",
-            "tab20",
-            "tab20b",
-            "tab20c",
-        ]
-
-    return palettes
 
 
 def read_image(path, color=None):
@@ -2275,9 +2082,9 @@ class Map:
             Le GeoDataFrame contenant les entités.
         label_column : str, optional
             La colonne à afficher comme texte (inutile si label_func est fourni).
-        custom_label : function, optional
-            Expression qui prend une ligne (row) et retourne le texte de l'étiquette.
-            Exemple : f"{row['nom']}\n{row['pop']:,d}"
+        custom_label : callable, optional
+            Fonction qui prend une ligne (row) et retourne le texte de l'étiquette.
+            Exemple : lambda row: f"{row['nom']}\n{row['pop']:,d}"
         filter_column : str, optional
             Nom de la colonne pour filtrer les entités à étiqueter.
         filter_values : list, optional
@@ -2318,8 +2125,12 @@ class Map:
 
             # Génération du label
             if custom_label is not None:
-                label_func = lambda row: eval(f'f"""{custom_label}"""')
-                label = label_func(row)
+                if callable(custom_label):
+                    label = custom_label(row)
+                else:
+                    raise TypeError(
+                        "custom_label doit être un callable (ex: lambda row: f\"{row['nom']}\")"
+                    )
             elif label_column is not None:
                 label = str(row[label_column])
                 if format_str:
@@ -2551,166 +2362,19 @@ class Map:
     ) -> Dict[str, List[str]]:
         """
         Récupère toutes les palettes de couleurs disponibles.
-
-        Paramètres:
-        -----------
-        include_custom : bool
-            Inclure les palettes personnalisées
-        include_seaborn : bool
-            Inclure les palettes seaborn
-        include_matplotlib : bool
-            Inclure les colormaps matplotlib
-
-        Retourne:
-        ---------
-        Dict[str, List[str]] : Dictionnaire des noms de palettes par catégorie
-
-        Exemple:
-            palettes = carte.get_available_palettes(include_custom=True,
-                                                     include_seaborn=True,
-                                                     include_matplotlib=True)
+        Délègue à styling.get_available_palettes() et y ajoute
+        les palettes personnalisées de cette instance.
         """
-        palettes = {
-            "custom": [],
-            "seaborn_qualitative": [],
-            "seaborn_sequential": [],
-            "seaborn_diverging": [],
-            "matplotlib_sequential": [],
-            "matplotlib_diverging": [],
-            "matplotlib_cyclic": [],
-            "matplotlib_qualitative": [],
-        }
-
-        # Custom palettes
+        palettes = get_available_palettes(
+            include_custom=include_custom,
+            include_seaborn=include_seaborn,
+            include_matplotlib=include_matplotlib,
+        )
+        # Override custom palettes with instance-specific ones
         if include_custom:
-            palettes["custom"] = list(self.custom_palettes.keys())
-
-        # Seaborn palettes
-        if include_seaborn:
-            # Qualitative palettes
-            palettes["seaborn_qualitative"] = [
-                "deep",
-                "muted",
-                "bright",
-                "pastel",
-                "dark",
-                "colorblind",
-                "Set1",
-                "Set2",
-                "Set3",
-                "Paired",
-                "tab10",
-                "tab20",
-            ]
-
-            # Sequential palettes
-            palettes["seaborn_sequential"] = [
-                "Blues",
-                "BuGn",
-                "BuPu",
-                "GnBu",
-                "Greens",
-                "Greys",
-                "Oranges",
-                "OrRd",
-                "PuBu",
-                "PuBuGn",
-                "PuRd",
-                "Purples",
-                "RdPu",
-                "Reds",
-                "YlGn",
-                "YlGnBu",
-                "YlOrBr",
-                "YlOrRd",
-                "rocket",
-                "mako",
-                "flare",
-                "crest",
-            ]
-
-            # Diverging palettes
-            palettes["seaborn_diverging"] = [
-                "BrBG",
-                "PiYG",
-                "PRGn",
-                "PuOr",
-                "RdBu",
-                "RdGy",
-                "RdYlBu",
-                "RdYlGn",
-                "Spectral",
-                "coolwarm",
-                "bwr",
-                "seismic",
-                "icefire",
-                "vlag",
-            ]
-
-        # Matplotlib colormaps
-        if include_matplotlib:
-            # Sequential
-            palettes["matplotlib_sequential"] = [
-                "viridis",
-                "plasma",
-                "inferno",
-                "magma",
-                "cividis",
-                "Greys",
-                "Purples",
-                "Blues",
-                "Greens",
-                "Oranges",
-                "Reds",
-                "YlOrBr",
-                "YlOrRd",
-                "OrRd",
-                "PuRd",
-                "RdPu",
-                "BuPu",
-                "GnBu",
-                "PuBu",
-                "YlGnBu",
-                "PuBuGn",
-                "BuGn",
-                "YlGn",
-            ]
-
-            # Diverging
-            palettes["matplotlib_diverging"] = [
-                "PiYG",
-                "PRGn",
-                "BrBG",
-                "PuOr",
-                "RdGy",
-                "RdBu",
-                "RdYlBu",
-                "RdYlGn",
-                "Spectral",
-                "coolwarm",
-                "bwr",
-                "seismic",
-            ]
-
-            # Cyclic
-            palettes["matplotlib_cyclic"] = ["twilight", "twilight_shifted", "hsv"]
-
-            # Qualitative
-            palettes["matplotlib_qualitative"] = [
-                "Pastel1",
-                "Pastel2",
-                "Paired",
-                "Accent",
-                "Dark2",
-                "Set1",
-                "Set2",
-                "Set3",
-                "tab10",
-                "tab20",
-                "tab20b",
-                "tab20c",
-            ]
-
+            instance_custom = list(self.custom_palettes.keys())
+            existing = palettes.get("custom", [])
+            palettes["custom"] = list(dict.fromkeys(instance_custom + existing))
         return palettes
 
     @staticmethod
@@ -4094,5 +3758,577 @@ class Map:
         )
         buf = BytesIO()
         self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches=bbox_inches)
+        buf.seek(0)
+        return buf
+
+
+# ======================================================================
+# Map2D – carte sans projection cartographique (matplotlib pur)
+# ======================================================================
+
+class Map2D(Map):
+    """
+    Carte 2D sans projection cartographique (axes matplotlib classiques).
+    Hérite de Map pour réutiliser la gestion des formats de papier, la
+    légende, les palettes, les polices, l'export, etc.
+
+    Utile pour des traitements locaux où la projection n'est pas nécessaire,
+    par exemple des plans urbains, des parcelles cadastrales ou des
+    visualisations rapides de GeoDataFrames.
+
+    Paramètres:
+    -----------
+    figsize : tuple
+        Taille de la figure (largeur, hauteur) en pouces
+    title : str
+        Titre de la carte
+    dpi : int
+        Résolution
+    verbose : bool
+        Afficher les messages d'information
+    """
+
+    def __init__(
+        self,
+        figsize=(12, 8),
+        title="Carte 2D",
+        dpi=150,
+        verbose=True,
+    ):
+        self.verbose = verbose
+        self.figsize = self._process_figsize(figsize)
+        self.paper_info = self._get_paper_info(figsize)
+        self.dpi = dpi
+        self.fig, self.ax = plt.subplots(figsize=self.figsize, dpi=dpi)
+        self.title = title
+        self.projection = None
+        self.data_crs = None
+        self.layers = []
+        self.legend_elements = []
+        self.gridlines = None
+        self.legend_params = {}
+        self.custom_palettes = {}
+        self.bounds = None
+
+        self.ax.set_title(title, fontsize=14, fontweight="bold")
+        self.ax.set_aspect("equal")
+
+        if self.paper_info:
+            self._log(
+                f"📄 Format de papier: {self.paper_info['format']} "
+                f"({self.paper_info['orientation']}) - "
+                f"Dimensions: {self.paper_info['dimensions_mm']} mm - "
+                f'Figure: {self.figsize[0]:.1f}" x {self.figsize[1]:.1f}"'
+            )
+
+    # -- rendu interne (sans cartopy) --------------------------------------
+
+    def _render(self, legend=True, auto_extent=True, tight_layout=True,
+                smart_centering=False, title=None, **kwargs):
+        """Rendu simplifié sans projection cartographique."""
+        for layer in self.layers:
+            if layer.get("rendered"):
+                continue
+            layer_type = layer.get("type")
+            if layer_type in ("point", "line", "polygon"):
+                gdf = layer["gdf"]
+                style = layer["style"].copy()
+                style.pop("ax", None)
+                style.pop("transform", None)
+                gdf.plot(ax=self.ax, **style)
+
+        if title is not None:
+            self.ax.set_title(title)
+
+        legend_params = self.legend_params
+        if legend and self.legend_elements:
+            self.custom_legend(**legend_params, **kwargs)
+
+        if tight_layout:
+            plt.tight_layout()
+
+    # -- couche vectorielle (sans transform cartopy) -----------------------
+
+    def add_layer(self, gdf, column=None, cmap="viridis", label=None,
+                  edgecolor="black", linewidth=0.5, alpha=0.8, **kwargs):
+        """
+        Ajoute un GeoDataFrame comme couche.
+
+        Paramètres:
+        -----------
+        gdf : gpd.GeoDataFrame
+            Données géographiques
+        column : str, optional
+            Colonne pour la coloration
+        cmap : str
+            Palette de couleurs
+        label : str
+            Étiquette pour la légende
+        edgecolor : str
+            Couleur des contours
+        linewidth : float
+            Largeur des contours
+        alpha : float
+            Transparence (0-1)
+        """
+        plot_kwargs = dict(
+            ax=self.ax, edgecolor=edgecolor, linewidth=linewidth,
+            alpha=alpha, **kwargs,
+        )
+        if column:
+            plot_kwargs["column"] = column
+            plot_kwargs["cmap"] = cmap
+            plot_kwargs["legend"] = True
+        else:
+            plot_kwargs["color"] = kwargs.pop("color", "steelblue")
+
+        gdf.plot(**plot_kwargs)
+        self.layers.append({"gdf": gdf, "label": label, "rendered": True})
+        if label:
+            self.legend_elements.append(
+                Patch(facecolor="steelblue", edgecolor=edgecolor,
+                      alpha=alpha, label=label)
+            )
+        return self
+
+    # -- étiquettes --------------------------------------------------------
+
+    def add_labels(self, gdf, label_column, fontsize=9, color="black",
+                   outline_width=2, outline_color="white", **text_kwargs):
+        """
+        Ajoute des étiquettes au centroïde / position des géométries.
+        """
+        for _, row in gdf.iterrows():
+            geom = row.geometry
+            if geom is None or geom.is_empty:
+                continue
+            pt = geom.centroid if geom.geom_type not in ("Point",) else geom
+            self.ax.text(
+                pt.x, pt.y, str(row[label_column]),
+                fontsize=fontsize, ha="center", va="center", color=color,
+                path_effects=[
+                    patheffects.withStroke(
+                        linewidth=outline_width, foreground=outline_color
+                    )
+                ],
+                **text_kwargs,
+            )
+        return self
+
+    # -- apparence ---------------------------------------------------------
+
+    def hide_axes(self):
+        """Masque les axes."""
+        self.ax.axis("off")
+        return self
+
+
+# ======================================================================
+# WebMap – carte interactive (folium)
+# ======================================================================
+
+class WebMap:
+    """
+    Carte interactive basée sur Folium / Leaflet.
+
+    Paramètres:
+    -----------
+    location : tuple
+        Centre initial (latitude, longitude)
+    zoom_start : int
+        Niveau de zoom initial
+    tiles : str
+        Fond de carte (ex: 'OpenStreetMap', 'CartoDB positron', 'Stamen Terrain')
+    width : str
+        Largeur de la carte ('100%' ou pixels)
+    height : str
+        Hauteur de la carte ('600px' ou pourcentage)
+
+    Exemple:
+    --------
+    >>> wm = WebMap(location=(5.35, -4.0), zoom_start=7)
+    >>> wm.add_layer(gdf, column="population", cmap="YlOrRd")
+    >>> wm.show()
+    """
+
+    def __init__(
+        self,
+        location=(0, 0),
+        zoom_start=6,
+        tiles="OpenStreetMap",
+        width="100%",
+        height="600px",
+    ):
+        try:
+            import folium
+        except ImportError:
+            raise ImportError(
+                "folium est requis pour WebMap. "
+                "Installez-le avec : pip install folium"
+            )
+        self._folium = folium
+        self.map = folium.Map(
+            location=location,
+            zoom_start=zoom_start,
+            tiles=tiles,
+            width=width,
+            height=height,
+        )
+
+    # -- couche vectorielle ------------------------------------------------
+
+    def add_layer(self, gdf, column=None, cmap="YlOrRd",
+                  style_function=None, tooltip_columns=None,
+                  popup_columns=None, name=None, **kwargs):
+        """
+        Ajoute un GeoDataFrame comme couche GeoJson ou Choropleth.
+
+        Paramètres:
+        -----------
+        gdf : gpd.GeoDataFrame
+            Données géographiques
+        column : str, optional
+            Colonne pour la coloration choroplèthe
+        cmap : str
+            Palette de couleurs
+        style_function : callable, optional
+            Fonction de style folium
+        tooltip_columns : list, optional
+            Colonnes affichées au survol
+        popup_columns : list, optional
+            Colonnes affichées au clic
+        name : str, optional
+            Nom de la couche (pour le contrôle de couches)
+        """
+        import branca.colormap as bcm
+
+        gdf_wgs84 = gdf.to_crs(epsg=4326) if gdf.crs and gdf.crs.to_epsg() != 4326 else gdf
+
+        if column and column in gdf_wgs84.columns:
+            vmin = gdf_wgs84[column].min()
+            vmax = gdf_wgs84[column].max()
+            colormap = bcm.linear.YlOrRd_09.scale(vmin, vmax)
+            colormap.caption = column
+
+            def _style(feature):
+                val = feature["properties"].get(column, vmin)
+                return {
+                    "fillColor": colormap(val) if val is not None else "gray",
+                    "color": "black",
+                    "weight": 0.5,
+                    "fillOpacity": 0.7,
+                }
+
+            layer = self._folium.GeoJson(
+                gdf_wgs84.__geo_interface__,
+                style_function=style_function or _style,
+                name=name or column,
+            )
+            colormap.add_to(self.map)
+        else:
+            default_style = {
+                "fillColor": "steelblue",
+                "color": "black",
+                "weight": 0.5,
+                "fillOpacity": 0.6,
+            }
+            layer = self._folium.GeoJson(
+                gdf_wgs84.__geo_interface__,
+                style_function=style_function or (lambda f: default_style),
+                name=name or "layer",
+            )
+
+        if tooltip_columns:
+            layer.add_child(
+                self._folium.GeoJsonTooltip(fields=tooltip_columns)
+            )
+        if popup_columns:
+            layer.add_child(
+                self._folium.GeoJsonPopup(fields=popup_columns)
+            )
+
+        layer.add_to(self.map)
+        return self
+
+    # -- marqueurs ---------------------------------------------------------
+
+    def add_marker(self, location, popup=None, tooltip=None, icon=None):
+        """
+        Ajoute un marqueur.
+
+        Paramètres:
+        -----------
+        location : tuple
+            (latitude, longitude)
+        popup : str, optional
+            Texte affiché au clic
+        tooltip : str, optional
+            Texte affiché au survol
+        icon : folium.Icon, optional
+            Icône personnalisée
+        """
+        self._folium.Marker(
+            location=location, popup=popup, tooltip=tooltip, icon=icon,
+        ).add_to(self.map)
+        return self
+
+    # -- apparence ---------------------------------------------------------
+
+    def add_layer_control(self):
+        """Ajoute un contrôle de couches (LayerControl)."""
+        self._folium.LayerControl().add_to(self.map)
+        return self
+
+    def fit_bounds(self, gdf):
+        """Adapte le zoom aux limites d'un GeoDataFrame."""
+        gdf_wgs84 = gdf.to_crs(epsg=4326) if gdf.crs and gdf.crs.to_epsg() != 4326 else gdf
+        bounds = gdf_wgs84.total_bounds  # minx, miny, maxx, maxy
+        self.map.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
+        return self
+
+    # -- sortie ------------------------------------------------------------
+
+    def show(self):
+        """Renvoie la carte Folium (affichage automatique dans un notebook)."""
+        return self.map
+
+    def save(self, filename="map.html"):
+        """Sauvegarde la carte en HTML."""
+        self.map.save(filename)
+        return self
+
+    def _repr_html_(self):
+        return self.map._repr_html_()
+
+
+# ======================================================================
+# SituationMap – carte principale + mini-carte de situation
+# ======================================================================
+
+class SituationMap:
+    """
+    Crée une figure composite avec une carte principale et une mini-carte
+    de situation (inset map) montrant où se situe la zone d'étude dans un
+    contexte géographique plus large.
+
+    Paramètres:
+    -----------
+    figsize : tuple
+        Taille de la figure
+    title : str
+        Titre de la carte principale
+    projection : cartopy.crs
+        Projection de la carte principale
+    inset_position : tuple (x, y, w, h)
+        Position et taille de la mini-carte (coordonnées relatives 0-1)
+    inset_projection : cartopy.crs, optional
+        Projection de la mini-carte (par défaut PlateCarree)
+    dpi : int
+        Résolution
+    verbose : bool
+        Afficher les messages d'information
+
+    Exemple:
+    --------
+    >>> sm = SituationMap(title="Côte d'Ivoire")
+    >>> sm.add_main_layer(gdf_civ, facecolor="khaki")
+    >>> sm.set_inset_box_from_gdf(gdf_civ)
+    >>> sm.show()
+    """
+
+    def __init__(
+        self,
+        figsize=(14, 10),
+        title="Carte",
+        projection=None,
+        inset_position=(0.65, 0.02, 0.33, 0.33),
+        inset_projection=None,
+        dpi=200,
+        verbose=True,
+    ):
+        if projection is None:
+            projection = ccrs.PlateCarree()
+        if inset_projection is None:
+            inset_projection = ccrs.PlateCarree()
+
+        self.verbose = verbose
+        self.figsize = figsize
+        self.dpi = dpi
+        self.projection = projection
+        self.inset_projection = inset_projection
+
+        # carte principale
+        self.fig = plt.figure(figsize=figsize, dpi=dpi)
+        self.ax = self.fig.add_subplot(111, projection=projection)
+        self.ax.set_title(title, fontsize=16, fontweight="bold")
+        self.ax.coastlines(resolution="50m", linewidth=0.5)
+        self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+
+        # mini-carte de situation
+        self.inset_ax = self.fig.add_axes(
+            inset_position, projection=inset_projection, frameon=True,
+        )
+        self.inset_ax.set_global()
+        self.inset_ax.add_feature(cfeature.LAND, facecolor="lightgray")
+        self.inset_ax.add_feature(cfeature.OCEAN, facecolor="lightblue")
+        self.inset_ax.add_feature(cfeature.BORDERS, linewidth=0.3, edgecolor="gray")
+        self.inset_ax.coastlines(resolution="110m", linewidth=0.4)
+
+        self._box_patch = None
+
+    def _log(self, *args, **kwargs):
+        if self.verbose:
+            print(*args, **kwargs)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        plt.close(self.fig)
+        return False
+
+    # -- couche principale -------------------------------------------------
+
+    def add_main_layer(self, gdf, facecolor="green", edgecolor="black",
+                       linewidth=0.5, alpha=0.7, column=None, cmap="viridis",
+                       **kwargs):
+        """
+        Ajoute un GeoDataFrame à la carte principale.
+        """
+        plot_kwargs = dict(
+            ax=self.ax, transform=ccrs.PlateCarree(),
+            edgecolor=edgecolor, linewidth=linewidth, alpha=alpha,
+            **kwargs,
+        )
+        if column and column in gdf.columns:
+            plot_kwargs["column"] = column
+            plot_kwargs["cmap"] = cmap
+        else:
+            plot_kwargs["facecolor"] = facecolor
+
+        gdf.plot(**plot_kwargs)
+
+        # auto-zoom sur la couche
+        bounds = gdf.total_bounds
+        margin = 0.05
+        w = bounds[2] - bounds[0]
+        h = bounds[3] - bounds[1]
+        self.ax.set_extent(
+            [bounds[0] - w * margin, bounds[2] + w * margin,
+             bounds[1] - h * margin, bounds[3] + h * margin],
+            crs=ccrs.PlateCarree(),
+        )
+        return self
+
+    # -- rectangle de situation --------------------------------------------
+
+    def set_inset_box(self, bounds, box_color="red", box_linewidth=2):
+        """
+        Dessine un rectangle sur la mini-carte délimitant la zone d'étude.
+
+        Paramètres:
+        -----------
+        bounds : list
+            [minx, miny, maxx, maxy] en coordonnées géographiques
+        box_color : str
+            Couleur du rectangle
+        box_linewidth : float
+            Épaisseur du trait
+        """
+        if self._box_patch is not None:
+            self._box_patch.remove()
+
+        minx, miny, maxx, maxy = bounds
+        rect = mpatches.Rectangle(
+            (minx, miny), maxx - minx, maxy - miny,
+            linewidth=box_linewidth, edgecolor=box_color,
+            facecolor="none", transform=ccrs.PlateCarree(), zorder=10,
+        )
+        self.inset_ax.add_patch(rect)
+        self._box_patch = rect
+        return self
+
+    def set_inset_box_from_gdf(self, gdf, **kwargs):
+        """
+        Place le rectangle de situation à partir de l'étendue d'un GeoDataFrame.
+        """
+        bounds = gdf.total_bounds.tolist()
+        return self.set_inset_box(bounds, **kwargs)
+
+    # -- grille et apparence -----------------------------------------------
+
+    def add_gridlines(self, **kwargs):
+        """Ajoute des lignes de grille à la carte principale."""
+        defaults = dict(draw_labels=True, dms=True, x_inline=False, y_inline=False,
+                        color="gray", linestyle="--", linewidth=0.5, alpha=0.7)
+        defaults.update(kwargs)
+        self.ax.gridlines(**defaults)
+        return self
+
+    def add_scale_bar(self, length=None, location=(0.1, 0.05), **kwargs):
+        """
+        Ajoute une barre d'échelle à la carte principale.
+        """
+        x0, x1 = self.ax.get_xlim()
+        y0, y1 = self.ax.get_ylim()
+        geod = Geod(ellps="WGS84")
+        mid_lat = (y0 + y1) / 2
+        try:
+            map_width_m, _, _ = geod.inv(x0, mid_lat, x1, mid_lat)
+            map_width_km = abs(map_width_m) / 1000
+        except Exception:
+            map_width_km = 100
+
+        if length is None:
+            raw = map_width_km / 5
+            if raw <= 0:
+                raw = 10
+            pow10 = 10 ** int(np.floor(np.log10(raw)))
+            length = int(raw / pow10) * pow10
+            if length == 0:
+                length = max(1, int(raw))
+
+        units = kwargs.pop("units", "km")
+        color = kwargs.pop("color", "black")
+        fontsize = kwargs.pop("fontsize", 11)
+        linewidth = kwargs.pop("linewidth", 2)
+
+        x_ax, y_ax = location
+        start_x = x0 + x_ax * (x1 - x0)
+        start_y = y0 + y_ax * (y1 - y0)
+        try:
+            lon_end, _, _ = geod.fwd(start_x, start_y, 90, length * 1000)
+            bar_len = lon_end - start_x
+        except Exception:
+            bar_len = length * 1000 / (111320 * np.cos(np.radians(start_y)))
+
+        self.ax.plot(
+            [start_x, start_x + bar_len], [start_y, start_y],
+            color=color, linewidth=linewidth, solid_capstyle="butt",
+        )
+        self.ax.text(
+            start_x + bar_len / 2, start_y + 0.05,
+            f"{length} {units}", ha="center", va="bottom",
+            color=color, fontsize=fontsize, fontweight="bold",
+        )
+        return self
+
+    # -- sortie ------------------------------------------------------------
+
+    def show(self):
+        plt.tight_layout()
+        plt.show()
+        return self
+
+    def save(self, filename, dpi=300, bbox_inches="tight"):
+        plt.tight_layout()
+        plt.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
+        self._log(f"Carte sauvegardée : {filename}")
+        return self
+
+    def to_bytes(self, format="png", dpi=300) -> BytesIO:
+        plt.tight_layout()
+        buf = BytesIO()
+        self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches="tight")
         buf.seek(0)
         return buf
