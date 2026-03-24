@@ -1,7 +1,7 @@
 # Base de données cache
 http_cache.sqlite
 *.sqlite
-data/other/
+data/
 data/QGIS-Training-Data/
 dist/
 dist_old/
