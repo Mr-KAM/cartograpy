@@ -183,19 +183,19 @@ def extract_gpx_data(file_path):
         return None
 
 # Exemple d'utilisation
-if __name__ == "__main__":
-    file_path = "votre_fichier.gpx"  # Remplacez par le chemin vers votre fichier GPX
-    gpx_data = extract_gpx_data(file_path)
+# if __name__ == "__main__":
+#     file_path = "votre_fichier.gpx"  # Remplacez par le chemin vers votre fichier GPX
+#     gpx_data = extract_gpx_data(file_path)
 
-    if gpx_data:
-        print("Waypoints:", gpx_data['waypoints'])
-        print("Tracks:", gpx_data['tracks'])
+#     if gpx_data:
+#         print("Waypoints:", gpx_data['waypoints'])
+#         print("Tracks:", gpx_data['tracks'])
 
-# Exemple d'utilisation
-if __name__ == "__main__":
-    file_path = "votre_fichier.gpx"  # Remplacez par le chemin vers votre fichier (GPX, GeoJSON, KML)
-    processor = converter(file_path)
+# # Exemple d'utilisation
+# if __name__ == "__main__":
+#     file_path = "votre_fichier.gpx"  # Remplacez par le chemin vers votre fichier (GPX, GeoJSON, KML)
+#     processor = converter(file_path)
 
-    # Conversion en GeoJSON
-    geojson_data = processor.to_geojson()
-    print(geojson.dumps(geojson_data, indent=2))
+#     # Conversion en GeoJSON
+#     geojson_data = processor.to_geojson()
+#     print(geojson.dumps(geojson_data, indent=2))

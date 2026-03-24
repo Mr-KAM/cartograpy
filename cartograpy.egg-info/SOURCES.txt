@@ -12,9 +12,11 @@ cartograpy/geocoder.py
 cartograpy/iso3_codes.py
 cartograpy/iso_code.py
 cartograpy/mapper.py
+cartograpy/mapper2.py
 cartograpy/processing.py
 cartograpy/situation_map.py
 cartograpy/styling.py
+cartograpy/tools.py
 cartograpy.egg-info/PKG-INFO
 cartograpy.egg-info/SOURCES.txt
 cartograpy.egg-info/dependency_links.txt
