@@ -1,1 +1,0 @@
-quarto render .\docs.ipynb --to html --output docs/index.html    

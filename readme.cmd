@@ -1,1 +1,0 @@
-quarto render .\docs.ipynb --to md --output README.md

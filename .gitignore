@@ -28,6 +28,13 @@ build/
 *.pyd
 *.so
 
+
+
+# === Fichiers bash (cmd) ===
+*.cmd
+*.bat
+
+
 # === Sauvegardes et fichiers temporaires ===
 *.swp
 *.swo
