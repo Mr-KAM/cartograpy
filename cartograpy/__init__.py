@@ -11,6 +11,7 @@ from .processing import (
     fusion,
     add_column,
     split_multipolygon,
+    VectorTools,
 )
 
 from .mapper import (
@@ -47,6 +48,8 @@ from .geocoder import (
 
 from .converter import converter, extract_gpx_data
 
+from .project import Project, init_project
+
 import os
 
 
@@ -54,7 +57,7 @@ __all__ = [
     # data
     "load", "save", "list_geofiles", "GeoBoundaries", "Bound", "WorldBank", "OSM", "Hydro", "DEM",
     # processing
-    "centroids", "join", "fusion", "add_column", "split_multipolygon",
+    "centroids", "join", "fusion", "add_column", "split_multipolygon", "VectorTools",
     # mapper
     "Map", "Map2D", "WebMap", "SituationMap",
     "plot_choropleth", "read_image",
@@ -71,33 +74,8 @@ __all__ = [
     # iso
     "COUNTRY_ISO3",
     # project
-    "init_project",
+    "Project", "init_project",
 ]
 
-def init_project(path=None):
-    """
-    Initialise un projet cartograpy en créant les dossiers 'data' et 'output'.
-
-    Args:
-        path: Chemin du répertoire où créer les dossiers.
-              Si None, utilise le répertoire courant.
-
-    Returns:
-        str: Chemin du projet initialisé.
-    """
-    if path is None:
-        path = os.getcwd()
-
-    data_dir = os.path.join(path, "data")
-    output_dir = os.path.join(path, "output")
-
-    os.makedirs(data_dir, exist_ok=True)
-    os.makedirs(output_dir, exist_ok=True)
-
-    print(f"✅ Projet initialisé dans : {os.path.abspath(path)}")
-    print(f"   📁 {data_dir}")
-    print(f"   📁 {output_dir}")
-
-    return os.path.abspath(path)
 
 

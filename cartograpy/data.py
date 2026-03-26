@@ -976,23 +976,6 @@ class Geocoder:
 
 
 
-class WorldBank:
-    def __init__(self):
-        self.api_key = "_si_necessite_se_presente"
-    
-    def get_sources(self):
-        # Renvoie une liste de sources de données disponibles sur le site de la Banque mondiale.
-        return wbdata.get_sources()
-    
-    def get_indicators(self,source=1,query=None):
-        return wbdata.get_indicators(source=source)
-    
-    def get_countries(self,query):
-        return wbdata.get_countries(query= query)
-    
-    def get_data(self, indicators, country='all', **kwargs):
-        return wbdata.get_dataframe(indicators, country, **kwargs)
-
 
 class OSM :
     def __init__(self):
@@ -2167,4 +2150,21 @@ class DEM:
                     )
         return out_path
 
+
+class WorldBank:
+    def __init__(self):
+        self.api_key = "_si_necessite_se_presente"
+    
+    def get_sources(self):
+        # Renvoie une liste de sources de données disponibles sur le site de la Banque mondiale.
+        return wbdata.get_sources()
+    
+    def get_indicators(self,source=1,query=None):
+        return wbdata.get_indicators(source=source)
+    
+    def get_countries(self,query):
+        return wbdata.get_countries(query= query)
+    
+    def get_data(self, indicators, country='all', **kwargs):
+        return wbdata.get_dataframe(indicators, country, **kwargs)
 

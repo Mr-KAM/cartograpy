@@ -3,12 +3,7 @@ revision = 3
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
-<<<<<<< HEAD
     "python_full_version >= '3.12' and python_full_version < '3.14'",
-=======
-    "python_full_version == '3.13.*'",
-    "python_full_version == '3.12.*'",
->>>>>>> 6ee72b92912677e2d6ba2cc33c0d099a1e72c29f
     "python_full_version < '3.12'",
 ]
 
@@ -35,23 +30,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
-name = "anywidget"
-version = "0.9.21"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "ipywidgets" },
-    { name = "psygnal" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/be/5e/cbea445bf062b81e4d366ca29dae4f0aedc7a64f384afc24670e07bec560/anywidget-0.9.21.tar.gz", hash = "sha256:b8d0172029ac426573053c416c6a587838661612208bb390fa0607862e594b27", size = 390517, upload-time = "2025-11-12T17:06:03.035Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5b/03/c17464bbf682ea87e7e3de2ddc63395e359a78ae9c01f55fc78759ecbd79/anywidget-0.9.21-py3-none-any.whl", hash = "sha256:78c268e0fbdb1dfd15da37fb578f9cf0a0df58a430e68d9156942b7a9391a761", size = 231797, upload-time = "2025-11-12T17:06:01.564Z" },
-]
-
-[[package]]
->>>>>>> 6ee72b92912677e2d6ba2cc33c0d099a1e72c29f
 name = "appdirs"
 version = "1.4.4"
 source = { registry = "https://pypi.org/simple" }
@@ -235,37 +213,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
-name = "bqplot"
-version = "0.12.45"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "ipywidgets" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "traitlets" },
-    { name = "traittypes" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/e0/727335c5ff8cee68d21a8c79f5b8406011639a76ecd7a6462a60aa8b0608/bqplot-0.12.45.tar.gz", hash = "sha256:ede00e9fdf7d92e43cc2d1b9691c7da176b6216fdd187c8e92f19d7beaca5e2a", size = 1205882, upload-time = "2025-05-21T17:32:29.143Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/03/6b5370fc626e6f480c4a0b4cb25b3459d390745010618b21b4b573423a53/bqplot-0.12.45-py2.py3-none-any.whl", hash = "sha256:cf2e046adb401670902ab53a18d9f63540091279bc45c4ef281bfdadf6e7e92c", size = 1237450, upload-time = "2025-05-21T17:32:27.617Z" },
-]
-
-[[package]]
-name = "branca"
-version = "0.8.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "jinja2" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/32/14/9d409124bda3f4ab7af3802aba07181d1fd56aa96cc4b999faea6a27a0d2/branca-0.8.2.tar.gz", hash = "sha256:e5040f4c286e973658c27de9225c1a5a7356dd0702a7c8d84c0f0dfbde388fe7", size = 27890, upload-time = "2025-10-06T10:28:20.305Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/50/fc9680058e63161f2f63165b84c957a0df1415431104c408e8104a3a18ef/branca-0.8.2-py3-none-any.whl", hash = "sha256:2ebaef3983e3312733c1ae2b793b0a8ba3e1c4edeb7598e10328505280cf2f7c", size = 26193, upload-time = "2025-10-06T10:28:19.255Z" },
-]
-
-[[package]]
->>>>>>> 6ee72b92912677e2d6ba2cc33c0d099a1e72c29f
 name = "cachetools"
 version = "5.5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -303,10 +250,6 @@ dependencies = [
     { name = "executing" },
     { name = "fonttools" },
     { name = "freetype-py" },
-<<<<<<< HEAD
-=======
-    { name = "geemap" },
->>>>>>> 6ee72b92912677e2d6ba2cc33c0d099a1e72c29f
     { name = "geographiclib" },
     { name = "geojson" },
     { name = "geopandas" },
@@ -413,10 +356,6 @@ requires-dist = [
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "fonttools", specifier = "==4.61.1" },
     { name = "freetype-py", specifier = "==2.5.1" },
-<<<<<<< HEAD
-=======
-    { name = "geemap", specifier = ">=0.37.1" },
->>>>>>> 6ee72b92912677e2d6ba2cc33c0d099a1e72c29f
     { name = "geographiclib", specifier = "==2.1" },
     { name = "geojson", specifier = "==3.2.0" },
     { name = "geopandas", specifier = "==1.1.2" },
