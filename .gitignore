@@ -25,6 +25,8 @@ build/
 .idea/
 .pytest_cache/
 .venv/
+.github/instructions/
+
 # === Fichiers compilés Python ===
 *.pyc
 *.pyo
