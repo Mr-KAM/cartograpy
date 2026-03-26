@@ -57,5 +57,5 @@ build/
 Thumbs.db
 .pypirc
 
-# === Optionnel : ignorer les svg du dossier cartograpy/svg/ (sauf si tu veux les garder sur GitHub) ===
-# cartograpy/svg/
+# === SVG files ===
+cartograpy/svg/
