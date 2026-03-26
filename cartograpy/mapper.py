@@ -2627,9 +2627,8 @@ class Map:
         if limit:
             fonts = fonts[:limit]
 
-        print(
-            f"Available fonts{f' (filtered by \"{pattern}\")' if pattern else ''}: {len(fonts)} found"
-        )
+        filter_info = f' (filtered by "{pattern}")' if pattern else ''
+        print(f"Available fonts{filter_info}: {len(fonts)} found")
         print("-" * 50)
 
         # Print in columns for better readability
