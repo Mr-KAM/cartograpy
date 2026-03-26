@@ -3,7 +3,6 @@
 import pytest
 import pandas as pd
 import geopandas as gpd
-import numpy as np
 from shapely.geometry import Point, Polygon, MultiPolygon
 from cartograpy.processing import (
     centroids,

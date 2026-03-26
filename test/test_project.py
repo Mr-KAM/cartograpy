@@ -1,9 +1,7 @@
 """Tests pour le module project."""
 
 import os
-import pytest
 import tempfile
-import shutil
 from cartograpy.project import Project, VECTOR_EXTENSIONS, RASTER_EXTENSIONS, TABULAR_EXTENSIONS
 
 

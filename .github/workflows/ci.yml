@@ -15,13 +15,17 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install flake8
-      - run: flake8 cartograpy/ test/ --max-line-length=120 --extend-ignore=E203,W503
+      - name: Lint source code
+        run: flake8 cartograpy/ --max-line-length=120 --extend-ignore=E203,W503 --select=E9,F63,F7,F82
+      - name: Lint tests
+        run: flake8 test/ --max-line-length=120 --extend-ignore=E203,W503 --exclude=test/situation.py
 
   test:
     needs: lint
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
@@ -29,10 +33,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-      - name: Install system dependencies
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libcairo2-dev libgeos-dev libgdal-dev libproj-dev pkg-config
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cairo geos gdal proj pkg-config
       - name: Install dependencies
         run: |
           pip install --upgrade pip

@@ -2,11 +2,9 @@
 
 import os
 import pytest
-import tempfile
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Point, Polygon
-from unittest.mock import patch, MagicMock
+from shapely.geometry import Point
 
 from cartograpy.data import load, save, list_geofiles, GeoBoundaries, Bound
 

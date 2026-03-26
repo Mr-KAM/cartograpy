@@ -1,16 +1,13 @@
 """Tests pour le module styling."""
 
-import pytest
 from cartograpy.styling import (
     get_fonts,
     color_palettes,
     custom_palettes,
     get_available_palettes,
-    show_palette_details,
     palettes_by_popularity,
     palettes_with_color,
     to_cmap,
-    load_cmap,
     set_style,
     list_all_styles,
 )

@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from requests_cache import CachedSession
 import json
+from geopy.geocoders import Nominatim
 
 
 @dataclass
