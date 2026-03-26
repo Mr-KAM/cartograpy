@@ -1,13 +1,11 @@
 """Tests de base pour le package cartograpy."""
 
-import pytest
-
 
 class TestImports:
     """Vérifie que le package et ses sous-modules s'importent correctement."""
 
     def test_import_package(self):
-        import cartograpy
+        import cartograpy  # noqa: F401
 
     def test_import_all_exports(self):
         from cartograpy import __all__
@@ -17,30 +15,30 @@ class TestImports:
             assert hasattr(cartograpy, name), f"{name} absent de cartograpy"
 
     def test_import_map(self):
-        from cartograpy import Map
+        from cartograpy import Map  # noqa: F401
 
     def test_import_map2d(self):
-        from cartograpy import Map2D
+        from cartograpy import Map2D  # noqa: F401
 
     def test_import_webmap(self):
-        from cartograpy import WebMap
+        from cartograpy import WebMap  # noqa: F401
 
     def test_import_situation_map(self):
-        from cartograpy import SituationMap
+        from cartograpy import SituationMap  # noqa: F401
 
     def test_map2d_inherits_map(self):
         from cartograpy import Map, Map2D
         assert issubclass(Map2D, Map)
 
     def test_import_data(self):
-        from cartograpy import load, save, list_geofiles
-        from cartograpy import GeoBoundaries, Bound, WorldBank, OSM, Hydro, DEM
+        from cartograpy import load, save, list_geofiles  # noqa: F401
+        from cartograpy import GeoBoundaries, Bound, WorldBank, OSM, Hydro, DEM  # noqa: F401
 
     def test_import_processing(self):
-        from cartograpy import centroids, join, fusion, add_column, split_multipolygon
+        from cartograpy import centroids, join, fusion, add_column, split_multipolygon  # noqa: F401
 
     def test_import_styling(self):
-        from cartograpy import (
+        from cartograpy import (  # noqa: F401
             get_fonts,
             get_available_palettes,
             color_palettes,
@@ -57,7 +55,7 @@ class TestImports:
         )
 
     def test_import_geocoder(self):
-        from cartograpy import (
+        from cartograpy import (  # noqa: F401
             GeocodingProvider,
             NominatimProvider,
             OpenCageProvider,
@@ -65,7 +63,7 @@ class TestImports:
         )
 
     def test_import_converter(self):
-        from cartograpy import converter, extract_gpx_data
+        from cartograpy import converter, extract_gpx_data  # noqa: F401
 
     def test_import_country_iso3(self):
         from cartograpy import COUNTRY_ISO3

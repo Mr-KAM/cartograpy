@@ -1,6 +1,5 @@
 """Tests pour le module iso_code."""
 
-import pytest
 from cartograpy.iso_code import countries_iso3, iso_codes, iso2_iso3_dict
 
 

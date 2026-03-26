@@ -288,10 +288,10 @@ def get_multipolygon_info(multipolygon: Union[MultiPolygon, str]) -> dict:
     }
 
 def get_geometry_types(df: gpd.GeoDataFrame) -> str:
-    types = gdf.geometry.geom_type.value_counts()
+    types = df.geometry.geom_type.value_counts()
     output={}
     for geom_type, count in types.items():
-        percentage = (count / len(gdf)) * 100
+        percentage = (count / len(df)) * 100
         output[geom_type] = {"count":count,"percentage":percentage}
         print(f"{geom_type}: {count} ({percentage:.1f}%)")
 

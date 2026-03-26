@@ -1,9 +1,7 @@
 """Tests pour le module converter."""
 
-import os
 import json
 import pytest
-import tempfile
 from cartograpy.converter import converter, extract_gpx_data
 
 

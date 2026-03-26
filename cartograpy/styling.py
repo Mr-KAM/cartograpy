@@ -377,7 +377,7 @@ def preview_multiple_palettes(palette_names: list, n_colors: int = 8, custom_pal
         axes = [axes]
     
     for i, palette_name in enumerate(palette_names):
-        preview_palette(palette_name, n_colors, custom_palettes, axes[i])
+        show_palette(palette_name, n_colors, custom_palettes, axes[i])
     
     plt.tight_layout()
     return fig, axes

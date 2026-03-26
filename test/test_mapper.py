@@ -1,10 +1,8 @@
 """Tests pour le module mapper."""
 
 import pytest
-import os
 import geopandas as gpd
-from shapely.geometry import Point, Polygon
-from unittest.mock import patch, MagicMock
+from shapely.geometry import Polygon
 from cartograpy.mapper import Map, Map2D, WebMap, SituationMap, read_image, plot_choropleth
 import matplotlib
 matplotlib.use("Agg")  # Non-interactive backend for testing
