@@ -1,6 +1,6 @@
 
 
-<img src="data/logo.png" alt="Logo" style="width: 30vw;min-width:200px">
+<img src="assets\img\logo.png" alt="Logo" style="width: 30vw;min-width:200px">
 <p>
 Mapping in Python, the way it was always meant to be.
 </p>
@@ -13,7 +13,7 @@ intuitive. Grâce à ses nombreuses fonctionnalités, il permet aussi bien
 aux débutants qu’aux experts de visualiser, analyser et mettre en valeur
 des données spatiales en quelques lignes de code.
 
-<img src="data\create_python_maps.py.png" alt="Logo" style="min-width:300px;max-width:550px; width:60vw">
+<img src="assets\img\create_python_maps.py.png" alt="Logo" style="min-width:300px;max-width:550px; width:60vw">
 <p>
 And you have all you need !
 </p>
@@ -97,7 +97,7 @@ données - **mapper** : pour la visualisation des données sur une carte -
 
 <figure class=''>
 
-<img src="docs_files\figure-markdown_strict\mermaid-figure-1.png"
+<img src="assets\figure-markdown_strict\mermaid-figure-1.png"
 style="width:11.36in;height:2.06in" />
 
 </figure>
@@ -119,7 +119,7 @@ création de vos cartes.
 
 <figure class=''>
 
-<img src="docs_files\figure-markdown_strict\mermaid-figure-4.png"
+<img src="assets\figure-markdown_strict\mermaid-figure-4.png"
 style="width:15in;height:3.06in" />
 
 </figure>
@@ -239,7 +239,7 @@ world.head()
 world.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-6-output-1.png)
+![](assets/figure-markdown_strict/cell-6-output-1.png)
 
 Si vous souhaitez obtenir la limite d’un seul continent, il vous suffit
 de passer son nom en paramètre. Dans l’exemple ci-dessous, on récupère
@@ -250,7 +250,7 @@ africa=bound.continents("africa")
 africa.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-7-output-1.png)
+![](assets/figure-markdown_strict/cell-7-output-1.png)
 
 Si vous souhaitez obtenir la limite de plusieurs continents, il vous
 suffit de passer leur liste en paramètre. Dans l’exemple ci-dessous, on
@@ -261,7 +261,7 @@ africa_asia=bound.continents(["africa","asia"])
 africa_asia.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-8-output-1.png)
+![](assets/figure-markdown_strict/cell-8-output-1.png)
 
 #### **Telecharger les limites administratifs de pays**
 
@@ -469,7 +469,7 @@ civ_data.head()
 civ_data.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-16-output-1.png)
+![](assets/figure-markdown_strict/cell-16-output-1.png)
 
 **Télécharger les données administratives de plusieurs pays:**
 
@@ -1137,7 +1137,7 @@ rivers_africa.head()
 rivers_africa.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-36-output-1.png)
+![](assets/figure-markdown_strict/cell-36-output-1.png)
 
 ### **Télécharger données de OpenStreeMap**
 
@@ -1622,7 +1622,7 @@ data-valign="top">way</td>
 highway.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-43-output-1.png)
+![](assets/figure-markdown_strict/cell-43-output-1.png)
 
 -   Ou un **GeoDataFrame polygonal** :
 
@@ -1826,7 +1826,7 @@ data-valign="top">relation</td>
 buildings.plot(facecolor="red")
 ```
 
-![](docs_files/figure-markdown_strict/cell-45-output-1.png)
+![](assets/figure-markdown_strict/cell-45-output-1.png)
 
 ### **Obtenir des données de la Bank Mondiale**
 
@@ -1957,7 +1957,7 @@ le chargement, le traitement et la sauvegarde de données vectorielles.
 
 <figure class=''>
 
-<img src="docs_files\figure-markdown_strict\mermaid-figure-3.png"
+<img src="assets\figure-markdown_strict\mermaid-figure-3.png"
 style="width:12.95in;height:2.81in" />
 
 </figure>
@@ -2168,7 +2168,7 @@ polygones_bouna.head()
 polygones_bouna.plot()
 ```
 
-![](docs_files/figure-markdown_strict/cell-56-output-1.png)
+![](assets/figure-markdown_strict/cell-56-output-1.png)
 
 ### **Sauvegarder un GeoDataFrame**
 
@@ -2629,7 +2629,7 @@ coundtries_centroids.head()
 coundtries_centroids.plot(markersize=50, color='red',label="Centroïde")
 ```
 
-![](docs_files/figure-markdown_strict/cell-63-output-1.png)
+![](assets/figure-markdown_strict/cell-63-output-1.png)
 
 ### **Découper selon un masque de geodataframe**
 
@@ -2811,7 +2811,7 @@ C’est aussi simple que ça !
 
 <figure class=''>
 
-<img src="docs_files\figure-markdown_strict\mermaid-figure-2.png"
+<img src="assets\figure-markdown_strict\mermaid-figure-2.png"
 style="width:14.3in;height:0.98in" />
 
 </figure>
@@ -3046,7 +3046,7 @@ carte_dem.show()
 
     Location est : (0.1, 0.05). La bare d'échelle est placé à 10.0 % de la longeur et à 5.0 % de la hauteur)
 
-![](docs_files/figure-markdown_strict/cell-69-output-3.png)
+![](assets/figure-markdown_strict/cell-69-output-3.png)
 
 ### **Visualiser des données vectorielles**
 
@@ -3125,9 +3125,9 @@ carte2.show()
        Ratio données: 0.91
        Étendue: [-9.82, -1.18, 4.50, 10.61]
 
-![](docs_files/figure-markdown_strict/cell-72-output-2.png)
+![](assets/figure-markdown_strict/cell-72-output-2.png)
 
-![](docs_files/figure-markdown_strict/cell-72-output-3.png)
+![](assets/figure-markdown_strict/cell-72-output-3.png)
 
 #### **Creer une carte de ppersonnalisé de vecteurs (etiquette, orientation du nord, légende et echelle)**
 
@@ -3225,7 +3225,7 @@ carte1.show(smart_centering=True)
     ✅ Légende personnalisée créée avec 2 éléments
     Location est : (0.02, 0.03). La bare d'échelle est placé à 2.0 % de la longeur et à 3.0 % de la hauteur)
 
-![](docs_files/figure-markdown_strict/cell-74-output-3.png)
+![](assets/figure-markdown_strict/cell-74-output-3.png)
 
 #### **Carte de lignes**
 
@@ -3267,7 +3267,7 @@ carte4.show()
     Location est : (0.05, 0.05). La bare d'échelle est placé à 5.0 % de la longeur et à 5.0 % de la hauteur)
     Location est : (0.15, 0.05). La bare d'échelle est placé à 15.0 % de la longeur et à 5.0 % de la hauteur)
 
-![](docs_files/figure-markdown_strict/cell-75-output-3.png)
+![](assets/figure-markdown_strict/cell-75-output-3.png)
 
 ### **Améliorer le style des cartes**
 
@@ -3613,15 +3613,15 @@ carte3.show()
        Ratio données: 1.47
        Étendue: [-19.27, 5.99, 8.64, 26.50]
 
-![](docs_files/figure-markdown_strict/cell-90-output-4.png)
+![](assets/figure-markdown_strict/cell-90-output-4.png)
 
-![](docs_files/figure-markdown_strict/cell-90-output-5.png)
+![](assets/figure-markdown_strict/cell-90-output-5.png)
 
-![](docs_files/figure-markdown_strict/cell-90-output-6.png)
+![](assets/figure-markdown_strict/cell-90-output-6.png)
 
-![](docs_files/figure-markdown_strict/cell-90-output-7.png)
+![](assets/figure-markdown_strict/cell-90-output-7.png)
 
-![](docs_files/figure-markdown_strict/cell-90-output-8.png)
+![](assets/figure-markdown_strict/cell-90-output-8.png)
 
 Changeons le style en dark_background
 
@@ -3653,7 +3653,7 @@ carte3.show()
        Ratio données: 1.47
        Étendue: [-19.27, 5.99, 8.64, 26.50]
 
-![](docs_files/figure-markdown_strict/cell-91-output-4.png)
+![](assets/figure-markdown_strict/cell-91-output-4.png)
 
 ``` python
 get_fonts("script")
@@ -3861,7 +3861,7 @@ carteRiversCiv.save(dpi=600,filename="carte reseau hydrographique ci")
     🛑Element de légende ajouté None
     ✅ Légende personnalisée créée avec 5 éléments
 
-![](docs_files/figure-markdown_strict/cell-96-output-2.png)
+![](assets/figure-markdown_strict/cell-96-output-2.png)
 
     📊 Centrage intelligent appliqué:
        Format: A4 (landscape)
@@ -4020,4 +4020,4 @@ carte5.show()
     🛑Element de légende ajouté None
     ✅ Légende personnalisée créée avec 2 éléments
 
-![](docs_files/figure-markdown_strict/cell-100-output-4.png)
+![](assets/figure-markdown_strict/cell-100-output-4.png)
