@@ -10,6 +10,8 @@ temp_countries/
 cache/
 _extensions/
 *.tif
+README.ipynb
+
 # === Dossiers de données volumineuses à ignorer ===
 
 __pycache__/
