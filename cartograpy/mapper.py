@@ -19,6 +19,7 @@ import matplotlib.colors as mcolors
 import matplotlib.patheffects as patheffects
 import importlib.resources
 import os
+import warnings
 from typing import Optional, Union, List, Tuple, Dict, Any
 import matplotlib.font_manager as fm
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
@@ -35,7 +36,54 @@ try:
     HAS_CONTEXTILY = True
 except ImportError:
     HAS_CONTEXTILY = False
-from cartograpy.styling import *
+try:
+    from matplotlib_scalebar.scalebar import ScaleBar as MplScaleBar
+    HAS_MPL_SCALEBAR = True
+except ImportError:
+    HAS_MPL_SCALEBAR = False
+try:
+    from matplotlib_map_utils.core.north_arrow import (
+        NorthArrow as MmuNorthArrow,
+        north_arrow as mmu_north_arrow,
+    )
+    from matplotlib_map_utils.core.scale_bar import (
+        ScaleBar as MmuScaleBar,
+        scale_bar as mmu_scale_bar,
+    )
+    from matplotlib_map_utils.core.inset_map import (
+        InsetMap as MmuInsetMap,
+        ExtentIndicator as MmuExtentIndicator,
+        DetailIndicator as MmuDetailIndicator,
+        inset_map as mmu_inset_map,
+        indicate_extent as mmu_indicate_extent,
+        indicate_detail as mmu_indicate_detail,
+    )
+    from matplotlib_map_utils import set_size as mmu_set_size
+    HAS_MAP_UTILS = True
+    # Patch: matplotlib-map-utils uses type()==match instead of isinstance()
+    # which rejects cartopy GeoAxes (a subclass of matplotlib Axes).
+    try:
+        from matplotlib_map_utils.validation.inset_map import _VALIDATE_EXTENT
+        _orig_validate_type = _VALIDATE_EXTENT["pax"]["func"]
+        def _isinstance_validate_type(prop, val, match, none_ok=False):
+            if not none_ok and val is None:
+                raise ValueError(f"None is not a valid value for {prop}")
+            if none_ok and val is None:
+                return val
+            if not isinstance(val, match):
+                raise ValueError(
+                    f"'{val}' is not a valid value for {prop}, "
+                    f"please provide an object of type {match}"
+                )
+            return val
+        _VALIDATE_EXTENT["pax"]["func"] = _isinstance_validate_type
+        _VALIDATE_EXTENT["bax"]["func"] = _isinstance_validate_type
+    except Exception:
+        pass
+except ImportError:
+    HAS_MAP_UTILS = False
+from cartograpy.styling import load_cmap, get_available_palettes
+import seaborn as sns
 
 # ----------------------------------------------------------------------
 # ================global methodes ======================================
@@ -65,14 +113,14 @@ def read_image(path, color=None):
             tmp_svg.write(svg_content)
             tmp_svg_path = tmp_svg.name
 
-        drawing = svg2rlg(tmp_svg_path)
-        buf = BytesIO()
-        renderPM.drawToFile(drawing, buf, fmt="PNG")
-        buf.seek(0)
-        img = Image.open(buf)
-
-        # Nettoyage temporaire
-        os.remove(tmp_svg_path)
+        try:
+            drawing = svg2rlg(tmp_svg_path)
+            buf = BytesIO()
+            renderPM.drawToFile(drawing, buf, fmt="PNG")
+            buf.seek(0)
+            img = Image.open(buf)
+        finally:
+            os.remove(tmp_svg_path)
     else:
         img = Image.open(path)
     return img
@@ -123,19 +171,12 @@ def plot_choropleth(
     """
 
     # Création du graphique
-    fig, ax = plt.subplots(figsize=(10 * size, 8.5 * size))
     if axes:
-        if grid:
-            ax.set_facecolor("#f8f9fa")
-            ax.grid(True)
-        else:
-            ax.grid(False)
-        ax.axis("off")
-        ax = plt.axes(projection=ccrs.PlateCarree())
-        # ax.set_global()
-        # ax.coastlines(resolution='50m')
+        fig = plt.figure(figsize=(10 * size, 8.5 * size))
+        ax = fig.add_subplot(111, projection=ccrs.PlateCarree())
         ax.gridlines(draw_labels=True, dms=True, x_inline=False, y_inline=False)
     else:
+        fig, ax = plt.subplots(figsize=(10 * size, 8.5 * size))
         ax.grid(False)
         ax.axis("off")
     # Normalisation des valeurs pour la colorisation
@@ -290,7 +331,10 @@ class Map:
         self.legend_elements = []
         self.gridlines = None
         self.legend_params = {}
-        self.custom_palettes={}
+        self.custom_palettes = {}
+        self._north_arrow_artist = None
+        self._scale_bar_artist = None
+        self._first_layer = False
 
         # Configuration de base
         self.ax.set_title(title, fontsize=16, fontweight="bold")
@@ -317,6 +361,22 @@ class Map:
         """Affiche un message seulement si verbose est activé."""
         if self.verbose:
             print(*args, **kwargs)
+
+    def _invalidate_render(self):
+        """Réinitialise le canvas et marque les couches pour re-rendu."""
+        self.ax.clear()
+        self.ax.set_title(
+            self.title,
+            fontsize=16 if self.projection else 14,
+            fontweight="bold",
+        )
+        if self.projection is not None:
+            self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
+            self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+        else:
+            self.ax.set_aspect("equal")
+        for layer in self.layers:
+            layer["rendered"] = False
 
     def __enter__(self):
         """Support du context manager (with Map(...) as m:)."""
@@ -553,9 +613,9 @@ class Map:
 
         # Vérification du CRS
         if gdf.crs is None:
-            self._log(
-                f"⚠️  Attention: Aucun CRS défini. Attribution du CRS par défaut: {self.data_crs}"
-            )
+            msg = f"Aucun CRS défini. Attribution du CRS par défaut: {self.data_crs}"
+            warnings.warn(msg, UserWarning, stacklevel=3)
+            self._log(f"⚠️  Attention: {msg}")
             gdf = gdf.set_crs(self.data_crs)
 
         # Vérification du type de géométrie si spécifié
@@ -597,6 +657,10 @@ class Map:
             Clé de couleur à retirer si column est utilisé ('color' ou 'facecolor')
         """
         gdf = self._validate_geodataframe(gdf)
+
+        # Reprojection en EPSG:4326 pour compatibilité cartopy PlateCarree
+        if gdf.crs is not None and not gdf.crs.equals("EPSG:4326"):
+            gdf = gdf.to_crs(epsg=4326)
 
         plot_kwargs = {
             "ax": self.ax,
@@ -651,30 +715,135 @@ class Map:
         self._update_bounds(gdf)
         return self
 
-    def add_layer(self, gdf, layer_type="auto", label=None, **style_kwargs):
+    def add_layer(self, data=None, layer_type="auto", label=None, name=None,
+                  style: Optional[Dict[str, Any]] = None, **style_kwargs):
         """
-        Ajoute une couche générique à partir d'un GeoDataFrame.
+        Ajoute une couche générique à la carte (vecteur ou raster).
+
+        Le type de données est détecté automatiquement :
+        - GeoDataFrame → couche vectorielle (point, line, polygon)
+        - numpy.ndarray → couche raster (nécessite extent dans style_kwargs)
+        - str (chemin fichier) → raster ou vecteur selon l'extension
 
         Paramètres:
         -----------
-        gdf : gpd.GeoDataFrame
-            GeoDataFrame à ajouter
+        data : gpd.GeoDataFrame, numpy.ndarray, str, or None
+            Données à ajouter. Peut être :
+            - un GeoDataFrame (couche vectorielle)
+            - un numpy.ndarray (couche raster, fournir extent)
+            - un chemin fichier str (.tif, .shp, .geojson, .gpkg, etc.)
         layer_type : str
-            Type de couche ('auto', 'point', 'line', 'polygon')
+            Type de couche ('auto', 'point', 'line', 'polygon', 'raster').
+            Par défaut 'auto' détecte le type automatiquement.
         label : str
-            Étiquette pour la légende
+            Étiquette pour la légende (alias de name, rétrocompatible)
+        name : str, optional
+            Nom de la couche affiché dans la légende. Prioritaire sur label.
+        style : dict, optional
+            Dictionnaire de style avec les clés suivantes :
+            - font : FontProperties (police pour les étiquettes, via google_font/local_font/path_font)
+            - color : str ou list (couleur de remplissage/points/lignes)
+            - palette : str (palette de couleurs, alias de cmap)
+            - border : str (couleur de bordure)
+            - border_width : float (épaisseur de bordure)
+            - column : str (colonne pour la coloration par données)
+            - scheme : str (schéma de classification : 'quantiles', 'equal_interval', etc.)
+            - alpha : float (transparence 0-1)
+            - size : int (taille des points)
+            - marker : str (style du marqueur : 'o', 's', '^', etc.)
+            - linewidth : float (épaisseur des lignes)
+            - linestyle : str (style de ligne : '-', '--', '-.', ':')
+            - legend : bool (afficher dans la légende, par défaut True)
         **style_kwargs : dict
-            Paramètres de style spécifiques au type de géométrie
+            Paramètres de style spécifiques au type de couche (rétrocompatible).
+            Pour les rasters : cmap, alpha, vmin, vmax, extent, title,
+            show_colorbar.
+            Pour les vecteurs : color, facecolor, edge_color, linewidth, etc.
+            Les clés de style_kwargs sont écrasées par celles du dict style.
         """
-        # Validation du GeoDataFrame
-        gdf = self._validate_geodataframe(gdf)
+        # --- Fusion du dictionnaire style dans style_kwargs ---
+        if style is not None:
+            _STYLE_KEY_MAP = {
+                "palette": "cmap",
+                "border": "edge_color",
+                "border_width": "border_linewidth",
+            }
+            for key, value in style.items():
+                mapped_key = _STYLE_KEY_MAP.get(key, key)
+                style_kwargs[mapped_key] = value
+
+        # name est prioritaire sur label
+        legend_label = name if name is not None else label
+
+        # --- Extensions raster et vecteur connues ---
+        _RASTER_EXTENSIONS = (".tif", ".tiff", ".img", ".nc", ".hdf", ".vrt", ".jp2")
+        _VECTOR_EXTENSIONS = (
+            ".shp", ".geojson", ".json", ".gpkg", ".fgb", ".kml",
+            ".gml", ".parquet", ".feather", ".csv", ".xlsx",
+        )
+
+        def _extract_raster_kwargs():
+            raster_kwargs = {}
+            for key in ("cmap", "alpha", "vmin", "vmax", "extent",
+                        "title", "show_colorbar", "transform"):
+                if key in style_kwargs:
+                    raster_kwargs[key] = style_kwargs.pop(key)
+            return raster_kwargs
+
+        # --- 1) Raster explicite via layer_type ---
+        if layer_type == "raster":
+            raster_kwargs = _extract_raster_kwargs()
+            if isinstance(data, np.ndarray):
+                return self.add_raster(raster_array=data, **raster_kwargs)
+            elif isinstance(data, str):
+                return self.add_raster(raster_path=data, **raster_kwargs)
+            else:
+                raise TypeError(
+                    "layer_type='raster' nécessite un chemin fichier (str) "
+                    "ou un numpy.ndarray."
+                )
+
+        # --- 2) numpy.ndarray → raster ---
+        if isinstance(data, np.ndarray):
+            raster_kwargs = _extract_raster_kwargs()
+            return self.add_raster(raster_array=data, **raster_kwargs)
+
+        # --- 3) Chemin fichier (str) → détection par extension ---
+        if isinstance(data, str):
+            ext = os.path.splitext(data)[1].lower()
+            if ext in _RASTER_EXTENSIONS:
+                raster_kwargs = _extract_raster_kwargs()
+                return self.add_raster(raster_path=data, **raster_kwargs)
+            elif ext in _VECTOR_EXTENSIONS:
+                data = gpd.read_file(data)
+                # on continue vers la branche vectorielle ci-dessous
+            else:
+                raise TypeError(
+                    f"Extension '{ext}' non reconnue. "
+                    f"Extensions raster supportées : {_RASTER_EXTENSIONS}. "
+                    f"Extensions vecteur supportées : {_VECTOR_EXTENSIONS}."
+                )
+
+        # --- 4) GeoDataFrame → couche vectorielle ---
+        if data is None:
+            raise ValueError(
+                "Fournir data (GeoDataFrame, ndarray ou chemin fichier)."
+            )
+
+        if not isinstance(data, gpd.GeoDataFrame):
+            raise TypeError(
+                f"Type non supporté : {type(data).__name__}. "
+                f"Attendu : GeoDataFrame, numpy.ndarray ou str (chemin fichier)."
+            )
+
+        gdf = self._validate_geodataframe(data)
 
         # Détection automatique du type de géométrie
         if layer_type == "auto":
             geom_types = gdf.geometry.geom_type.unique()
             if len(geom_types) == 1:
                 geom_type = geom_types[0]
-                if geom_type in ["Point", "MultiPoint"] :
+                if geom_type in ["Point", "MultiPoint"]:
                     layer_type = "point"
                 elif geom_type in ["LineString", "MultiLineString"]:
                     layer_type = "line"
@@ -695,15 +864,50 @@ class Map:
                     f"Spécifiez explicitement le layer_type."
                 )
 
+        # --- Préparation des kwargs selon le type de couche ---
+        def _prepare_kwargs(layer_t):
+            kw = dict(style_kwargs)
+            # Mapping border_linewidth → linewidth du contour
+            bw = kw.pop("border_linewidth", None)
+            # font est stocké mais pas envoyé aux méthodes plot
+            font = kw.pop("font", None)
+            # legend contrôle l'affichage dans la légende
+            show_legend = kw.pop("legend", True)
+            effective_label = legend_label if show_legend else None
+
+            if layer_t == "polygon":
+                # color → facecolor pour les polygones
+                if "color" in kw and "facecolor" not in kw:
+                    kw["facecolor"] = kw.pop("color")
+                if bw is not None:
+                    kw.setdefault("linewidth", bw)
+            elif layer_t == "point":
+                if bw is not None:
+                    kw.setdefault("linewidth", bw)
+            elif layer_t == "line":
+                if bw is not None:
+                    kw.setdefault("linewidth", bw)
+
+            return kw, effective_label, font
+
         # Ajout de la couche selon le type
         if layer_type == "point":
-            return self.add_points(gdf, label=label, **style_kwargs)
+            kw, effective_label, font = _prepare_kwargs("point")
+            result = self.add_points(gdf, label=effective_label, **kw)
         elif layer_type == "line":
-            return self.add_lines(gdf, label=label, **style_kwargs)
+            kw, effective_label, font = _prepare_kwargs("line")
+            result = self.add_lines(gdf, label=effective_label, **kw)
         elif layer_type == "polygon":
-            return self.add_polygons(gdf, label=label, **style_kwargs)
+            kw, effective_label, font = _prepare_kwargs("polygon")
+            result = self.add_polygons(gdf, label=effective_label, **kw)
         else:
             raise ValueError(f"Type de couche non supporté: {layer_type}")
+
+        # Stockage de la font dans le dernier layer ajouté
+        if font is not None and self.layers:
+            self.layers[-1]["font"] = font
+
+        return result
 
     def add_points(
         self,
@@ -1188,10 +1392,37 @@ class Map:
         land_color="lightgray",
         ocean_color="lightblue",
         projection=None,
+        style: str = "auto",
+        location: str = "lower right",
+        size: Union[float, Tuple[float, float]] = None,
+        pad: Union[float, Tuple[float, float]] = None,
+        coords: Tuple[float, float] = None,
+        transform=None,
+        global_view: bool = True,
+        extent: list = None,
+        indicator: str = "extent",
+        indicator_facecolor: str = "red",
+        indicator_linecolor: str = "red",
+        indicator_alpha: float = 0.5,
+        indicator_linewidth: float = 1,
+        indicator_straighten: bool = True,
+        indicator_pad: float = 0.05,
+        connector_color: str = "black",
+        connector_width: float = 1,
+        data=None,
+        inset_size: str = None,
+        zorder: int = 99,
+        show_borders: bool = True,
+        show_coastlines: bool = True,
+        **kwargs,
     ) -> "Map":
         """
         Ajoute une mini-carte de situation (inset map) montrant la zone étudiée
         dans un contexte géographique plus large.
+
+        Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
+        positionnement intelligent et des indicateurs d'étendue, sinon revient
+        au placement manuel.
 
         Paramètres:
         -----------
@@ -1200,29 +1431,87 @@ class Map:
             Par défaut utilise self.bounds.
         position : tuple (x, y, w, h)
             Position et taille de la mini-carte en coordonnées relatives
-            de la figure (0–1). (x, y) = coin inférieur gauche.
+            de la figure (0–1). (x, y) = coin inférieur gauche (mode classique).
         facecolor : str
-            Couleur de fond de la mini-carte
+            Couleur de fond de la mini-carte.
         edgecolor : str
-            Couleur de la bordure
+            Couleur de la bordure.
         linewidth : float
-            Épaisseur de la bordure
+            Épaisseur de la bordure.
         alpha : float
-            Transparence
+            Transparence.
         box_color : str
-            Couleur du rectangle montrant la zone étudiée
+            Couleur du rectangle montrant la zone étudiée (mode classique).
         box_linewidth : float
-            Épaisseur du rectangle
+            Épaisseur du rectangle (mode classique).
         land_color : str
-            Couleur des terres sur la mini-carte
+            Couleur des terres sur la mini-carte.
         ocean_color : str
-            Couleur des océans
+            Couleur des océans.
         projection : cartopy.crs, optional
-            Projection de la mini-carte (par défaut PlateCarree)
+            Projection de la mini-carte (par défaut PlateCarree).
+        style : str
+            Mode de rendu :
+            - ``"auto"`` : matplotlib-map-utils si disponible, sinon classique.
+            - ``"map-utils"`` : force le mode map-utils.
+            - ``"classic"`` : placement fig.add_axes (ancien comportement).
+        location : str
+            Position (mode map-utils) : "upper left", "upper right",
+            "lower left", "lower right", "center", etc.
+        size : float or tuple, optional
+            Taille de l'inset en pouces (mode map-utils). Peut être un
+            scalaire (carré) ou un tuple (largeur, hauteur).
+        pad : float or tuple, optional
+            Espacement en pouces (mode map-utils).
+        coords : tuple (x, y), optional
+            Position exacte en coordonnées axes (mode map-utils).
+            Remplace ``location`` si fourni.
+        transform : matplotlib.transforms.Transform, optional
+            Transformation pour les coordonnées (mode map-utils).
+        global_view : bool
+            Si True (défaut), l'inset montre le globe entier via set_global().
+            Si False, l'inset est zoomé sur ``extent`` ou ajusté automatiquement.
+        extent : list, optional
+            [x0, x1, y0, y1] pour restreindre l'étendue de l'inset.
+            Utile quand ``global_view=False``.
+        indicator : str
+            Type d'indicateur : "extent", "detail", ou "none".
+        indicator_facecolor : str
+            Couleur de remplissage de l'indicateur.
+        indicator_linecolor : str
+            Couleur de bordure de l'indicateur.
+        indicator_alpha : float
+            Transparence de l'indicateur.
+        indicator_linewidth : float
+            Épaisseur de trait de l'indicateur.
+        indicator_straighten : bool
+            Si True (défaut), aligne le rectangle indicateur sur les axes.
+        indicator_pad : float
+            Espacement du rectangle indicateur (défaut 0.05).
+        connector_color : str
+            Couleur des lignes de connexion (mode "detail").
+        connector_width : float
+            Épaisseur des lignes de connexion (mode "detail").
+        data : GeoDataFrame or list, optional
+            Données à afficher sur l'inset map.
+            Peut être un GeoDataFrame unique ou une liste de dicts
+            ``[{"data": gdf, "kwargs": {...}}, ...]``.
+        inset_size : str, optional
+            Taille prédéfinie ("xs", "sm", "md", "lg", "xl") — mode map-utils.
+            Appelle ``InsetMap.set_size()`` pour ajuster les défauts globaux.
+        zorder : int
+            Z-order de l'inset (défaut 99).
+        show_borders : bool
+            Afficher les frontières sur l'inset (défaut True).
+        show_coastlines : bool
+            Afficher les côtes sur l'inset (défaut True).
+        **kwargs
+            Paramètres supplémentaires passés à ``InsetMap`` ou à
+            l'axe inset (ex. ``xticks=[], yticks=[]``).
 
         Retourne:
         ---------
-        Map: Instance de la carte pour chaînage
+        Map: Instance de la carte pour chaînage.
         """
         if projection is None:
             projection = ccrs.PlateCarree()
@@ -1230,15 +1519,146 @@ class Map:
         if bounds is None:
             bounds = self.bounds  # [minx, miny, maxx, maxy]
 
-        # Création de l'axe inset
+        if style == "auto":
+            style = "map-utils" if HAS_MAP_UTILS else "classic"
+
+        if style == "map-utils":
+            if not HAS_MAP_UTILS:
+                warnings.warn(
+                    "matplotlib-map-utils n'est pas installé, "
+                    "mode classique utilisé. "
+                    "Installez-le avec : pip install matplotlib-map-utils",
+                    RuntimeWarning, stacklevel=2,
+                )
+                style = "classic"
+            else:
+                # Appliquer set_size() sur les défauts globaux AVANT création
+                if inset_size is not None:
+                    MmuInsetMap.set_size(inset_size)
+
+                # Préparer to_plot
+                to_plot = None
+                if data is not None:
+                    if isinstance(data, list):
+                        to_plot = data
+                    else:
+                        to_plot = [{"data": data}]
+
+                im_kwargs = dict(location=location, zorder=zorder)
+                if size is not None:
+                    im_kwargs["size"] = size
+                if pad is not None:
+                    im_kwargs["pad"] = pad
+                if coords is not None:
+                    im_kwargs["coords"] = coords
+                if transform is not None:
+                    im_kwargs["transform"] = transform
+                if to_plot is not None:
+                    im_kwargs["to_plot"] = to_plot
+                im_kwargs.update(kwargs)
+
+                # Créer l'axe inset via map-utils
+                im = MmuInsetMap(**im_kwargs)
+                inset_ax = im.create(self.ax, projection=projection)
+
+                # Vue globale ou restreinte
+                if global_view:
+                    inset_ax.set_global()
+                elif extent is not None:
+                    inset_ax.set_extent(extent, crs=ccrs.PlateCarree())
+
+                # Ajouter les features cartographiques
+                inset_ax.add_feature(cfeature.LAND, facecolor=land_color)
+                inset_ax.add_feature(cfeature.OCEAN, facecolor=ocean_color)
+                if show_borders:
+                    inset_ax.add_feature(
+                        cfeature.BORDERS, linewidth=0.3, edgecolor="gray"
+                    )
+                if show_coastlines:
+                    inset_ax.coastlines(resolution="110m", linewidth=0.4)
+
+                # Appliquer le style visuel
+                for spine in inset_ax.spines.values():
+                    spine.set_edgecolor(edgecolor)
+                    spine.set_linewidth(linewidth)
+                inset_ax.patch.set_alpha(alpha)
+                inset_ax.patch.set_facecolor(facecolor)
+
+                # Indicateur d'étendue ou de détail
+                pcrs = self.projection
+                bcrs = projection
+                _indicator_ok = False
+                if indicator == "extent":
+                    try:
+                        mmu_indicate_extent(
+                            pax=inset_ax, bax=self.ax,
+                            pcrs=bcrs, bcrs=pcrs,
+                            facecolor=indicator_facecolor,
+                            linecolor=indicator_linecolor,
+                            alpha=indicator_alpha,
+                            linewidth=indicator_linewidth,
+                            straighten=indicator_straighten,
+                            pad=indicator_pad,
+                            zorder=zorder,
+                        )
+                        _indicator_ok = True
+                    except (ValueError, TypeError) as e:
+                        self._log(f"⚠️  Indicateur extent échoué : {e}")
+                        _indicator_ok = False
+                elif indicator == "detail":
+                    try:
+                        mmu_indicate_detail(
+                            pax=self.ax, iax=inset_ax,
+                            pcrs=pcrs, icrs=bcrs,
+                            facecolor=indicator_facecolor,
+                            linecolor=indicator_linecolor,
+                            alpha=indicator_alpha,
+                            linewidth=indicator_linewidth,
+                            straighten=indicator_straighten,
+                            pad=indicator_pad,
+                            connector_color=connector_color,
+                            connector_width=connector_width,
+                            zorder=zorder,
+                        )
+                        _indicator_ok = True
+                    except (ValueError, TypeError) as e:
+                        self._log(f"⚠️  Indicateur detail échoué : {e}")
+                        _indicator_ok = False
+
+                # Fallback : dessiner manuellement le rectangle d'étendue
+                if not _indicator_ok and indicator in ("extent", "detail"):
+                    minx, miny, maxx, maxy = bounds
+                    rect = mpatches.Rectangle(
+                        (minx, miny), maxx - minx, maxy - miny,
+                        linewidth=box_linewidth, edgecolor=box_color,
+                        facecolor=indicator_facecolor,
+                        alpha=indicator_alpha,
+                        transform=ccrs.PlateCarree(), zorder=10,
+                    )
+                    inset_ax.add_patch(rect)
+
+                self._inset_ax = inset_ax
+                self._inset_map_obj = im
+                self._log("🔍 Carte de situation ajoutée (map-utils)")
+                return self
+
+        # ------- mode classique (fallback) -------
         inset_ax = self.fig.add_axes(
             position, projection=projection, frameon=True
         )
-        inset_ax.set_global()
+        if global_view:
+            inset_ax.set_global()
+        elif extent is not None:
+            inset_ax.set_extent(extent, crs=ccrs.PlateCarree())
+        else:
+            inset_ax.set_global()
+
         inset_ax.add_feature(cfeature.LAND, facecolor=land_color)
         inset_ax.add_feature(cfeature.OCEAN, facecolor=ocean_color)
-        inset_ax.add_feature(cfeature.BORDERS, linewidth=0.3, edgecolor="gray")
-        inset_ax.coastlines(resolution="110m", linewidth=0.4)
+        if show_borders:
+            inset_ax.add_feature(cfeature.BORDERS, linewidth=0.3, edgecolor="gray")
+        if show_coastlines:
+            inset_ax.coastlines(resolution="110m", linewidth=0.4)
 
         # Rectangle de la zone étudiée
         minx, miny, maxx, maxy = bounds[0], bounds[1], bounds[2], bounds[3]
@@ -1257,10 +1677,21 @@ class Map:
         inset_ax.patch.set_alpha(alpha)
         inset_ax.patch.set_facecolor(facecolor)
 
+        # Dessiner les données optionnelles sur l'inset classique
+        if data is not None:
+            items = data if isinstance(data, list) else [{"data": data}]
+            for item in items:
+                gdf = item["data"] if isinstance(item, dict) else item
+                plot_kw = item.get("kwargs", {}) if isinstance(item, dict) else {}
+                gdf.plot(ax=inset_ax, transform=ccrs.PlateCarree(), **plot_kw)
+
         self._inset_ax = inset_ax
-        self._log("\U0001f50d Carte de situation ajoutée")
+        self._log("🔍 Carte de situation ajoutée")
 
         return self
+
+    # Alias
+    add_inset = add_inset_map
 
     def set_background_color(self, color: str = "white") -> "Map":
         """
@@ -1437,6 +1868,7 @@ class Map:
         show_colorbar : bool
             Afficher la barre de couleur
         """
+        raster_crs = None
         if raster_path:
             with rasterio.open(raster_path) as src:
                 raster_data = src.read(1)
@@ -1446,7 +1878,7 @@ class Map:
                     src.bounds.bottom,
                     src.bounds.top,
                 ]
-                transform = src.transform
+                raster_crs = src.crs
         elif raster_array is not None:
             raster_data = raster_array
             if extent is None:
@@ -1463,11 +1895,24 @@ class Map:
         if vmax is None:
             vmax = np.nanmax(raster_data)
 
+        # Détermination du CRS cartopy pour le raster
+        data_transform = ccrs.PlateCarree()  # défaut pour EPSG:4326
+        if raster_crs is not None:
+            epsg = raster_crs.to_epsg()
+            if epsg and epsg != 4326:
+                try:
+                    data_transform = ccrs.epsg(epsg)
+                except Exception:
+                    self._log(
+                        f"⚠️  CRS EPSG:{epsg} non supporté par cartopy, "
+                        f"utilisation de PlateCarree par défaut"
+                    )
+
         # Affichage du raster
         im = self.ax.imshow(
             raster_data,
             extent=extent,
-            transform=self.projection,
+            transform=data_transform,
             cmap=cmap,
             alpha=alpha,
             vmin=vmin,
@@ -1486,14 +1931,14 @@ class Map:
             "type": "raster",
             "data": raster_data,
             "rendered": True,
-            "style":
-            {
-            "extent": extent,
-            "cmap": cmap,
-            "alpha": alpha,
-            "vmin": vmin,
-            "vmax": vmax,
-            "origin":"upper"
+            "style": {
+                "extent": extent,
+                "transform": data_transform,
+                "cmap": cmap,
+                "alpha": alpha,
+                "vmin": vmin,
+                "vmax": vmax,
+                "origin": "upper",
             }
         }
         self.layers.append(layer_info)
@@ -1559,10 +2004,10 @@ class Map:
             )
             geodf = geodf.set_crs(default_crs)
 
-        # Projection des données si nécessaire
-        if geodf.crs != self.projection:
+        # Reprojection en EPSG:4326 pour compatibilité cartopy
+        if geodf.crs is not None and not geodf.crs.equals("EPSG:4326"):
             try:
-                geodf = geodf.to_crs(self.projection)
+                geodf = geodf.to_crs(epsg=4326)
             except Exception as e:
                 self._log(f"⚠️  Erreur de transformation CRS: {e}")
                 self._log("Utilisation des coordonnées originales...")
@@ -1589,7 +2034,7 @@ class Map:
             linewidth=linewidth,
             vmin=vmin,
             vmax=vmax,
-            transform=self.projection,
+            transform=ccrs.PlateCarree(),
         )
 
         # Ajout des étiquettes (vectorisé via apply)
@@ -1606,7 +2051,7 @@ class Map:
                         ha="center",
                         va="center",
                         color="#0f172a",
-                        transform=self.projection,
+                        transform=ccrs.PlateCarree(),
                         path_effects=[
                             patheffects.withStroke(
                                 linewidth=text_outline_width,
@@ -1715,10 +2160,10 @@ class Map:
             )
             geodf = geodf.set_crs(default_crs)
 
-        # Projection des données si nécessaire
-        if geodf.crs != self.projection:
+        # Reprojection en EPSG:4326 pour compatibilité cartopy
+        if geodf.crs is not None and not geodf.crs.equals("EPSG:4326"):
             try:
-                geodf = geodf.to_crs(self.projection)
+                geodf = geodf.to_crs(epsg=4326)
             except Exception as e:
                 self._log(f"⚠️  Erreur de transformation CRS: {e}")
                 self._log("Utilisation des coordonnées originales...")
@@ -1768,7 +2213,7 @@ class Map:
             alpha=alpha,
             edgecolor=edge_color,
             linewidth=linewidth,
-            transform=self.projection,
+            transform=ccrs.PlateCarree(),
         )
 
         # Ajout des étiquettes
@@ -1785,7 +2230,7 @@ class Map:
                         ha="center",
                         va="center",
                         color="#0f172a",
-                        transform=self.projection,
+                        transform=ccrs.PlateCarree(),
                         path_effects=[
                             patheffects.withStroke(
                                 linewidth=text_outline_width,
@@ -1843,8 +2288,25 @@ class Map:
         return self
 
     # Alias rétrocompatibles (anciens noms avec faute de frappe)
-    add_polygons_cloropleth = add_polygons_choropleth
-    add_points_cloropleth = add_points_choropleth
+    def add_polygons_cloropleth(self, *args, **kwargs):
+        """Alias déprécié — utiliser add_polygons_choropleth."""
+        warnings.warn(
+            "add_polygons_cloropleth est déprécié, "
+            "utiliser add_polygons_choropleth à la place.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.add_polygons_choropleth(*args, **kwargs)
+
+    def add_points_cloropleth(self, *args, **kwargs):
+        """Alias déprécié — utiliser add_points_choropleth."""
+        warnings.warn(
+            "add_points_cloropleth est déprécié, "
+            "utiliser add_points_choropleth à la place.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.add_points_choropleth(*args, **kwargs)
 
     # ----------------------------------------------------------------------
     # ================Custom map appearence=================================
@@ -1984,6 +2446,10 @@ class Map:
 
         # Réinitialisation de la grille
         self.gridlines = None
+
+        # Marquer les couches pour re-rendu
+        for layer in self.layers:
+            layer["rendered"] = False
 
         return self
     
@@ -2288,19 +2754,364 @@ class Map:
                 self._log(f"❌ Impossible de retrouver le dossier : {e}")
         return files
 
-    def add_arrow(
+    def add_north_arrow(
         self,
         arrow=1,
         position: Tuple[float, float] = (0.95, 0.95),
         zoom: float = 1,
         color: str = "black",
+        style: str = "auto",
+        location: str = "upper right",
+        scale: float = None,
+        rotation: Union[float, dict, str] = "auto",
+        label: str = "N",
+        fancy: bool = True,
+        shadow: bool = True,
+        size: str = None,
+        base: dict = None,
+        pack: dict = None,
+        aob: dict = None,
+        zorder: int = 99,
+        **kwargs,
     ):
+        """
+        Ajoute une flèche du Nord sur la carte.
 
+        Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
+        rendu professionnel (NorthArrow), sinon les SVG embarquées.
+
+        Parameters
+        ----------
+        arrow : int
+            Numéro de la flèche SVG (mode svg, 1-based).
+        position : tuple (x, y)
+            Position en coordonnées axes fraction 0-1 (mode svg).
+        zoom : float
+            Facteur de zoom (mode svg).
+        color : str
+            Couleur de la flèche.
+        style : str
+            Mode de rendu :
+            - ``"auto"`` : matplotlib-map-utils si disponible, sinon SVG.
+            - ``"svg"`` : flèches vectorielles embarquées.
+            - ``"fancy"`` : flèche 3D avec ombre (matplotlib-map-utils).
+            - ``"simple"`` : flèche plate (matplotlib-map-utils).
+        location : str
+            Position ("upper left", "upper right", etc.) — mode map-utils.
+        scale : float, optional
+            Hauteur en pouces (mode map-utils). Auto si None.
+        rotation : float, dict ou "auto"
+            - ``"auto"`` : calculée d'après la projection.
+            - ``float`` : degrés manuels.
+            - ``dict`` : passé directement (ex. {"crs": ..., "reference": ...}).
+        label : str or dict
+            Texte de la flèche (défaut "N"). Peut être un dict complet :
+            ``{"text": "N", "fontsize": 14, "color": "black"}``.
+        fancy : bool or dict
+            Style fancy avec ombre (mode map-utils). Peut être un dict pour
+            configurer les couleurs : ``{"facecolor": "black", "edgecolor": "k"}``.
+        shadow : bool or dict
+            Ombre portée (mode map-utils). Peut être un dict :
+            ``{"facecolor": "gray", "alpha": 0.5}``.
+        size : str, optional
+            Taille prédéfinie ("xs", "sm", "md", "lg", "xl") — mode map-utils.
+            Appelle ``NorthArrow.set_size()`` pour ajuster les défauts globaux
+            **avant** la création de l'artiste.
+        base : dict, optional
+            Configuration de la base de la flèche (mode map-utils).
+        pack : dict, optional
+            Configuration du packing (mode map-utils).
+        aob : dict, optional
+            Configuration de l'AnnotationBbox (mode map-utils).
+        zorder : int
+            Z-order de l'artiste (défaut 99).
+        **kwargs
+            Paramètres supplémentaires pour ``NorthArrow``.
+
+        Returns
+        -------
+        Map : Instance de la carte pour chaînage.
+        """
+        if style == "auto":
+            style = "map-utils" if HAS_MAP_UTILS else "svg"
+
+        if style in ("map-utils", "fancy", "simple"):
+            if not HAS_MAP_UTILS:
+                warnings.warn(
+                    "matplotlib-map-utils n'est pas installé, "
+                    "utilisation du mode SVG. "
+                    "Installez-le avec : pip install matplotlib-map-utils",
+                    RuntimeWarning, stacklevel=2,
+                )
+                style = "svg"
+            else:
+                # Appliquer set_size() sur les défauts globaux AVANT création
+                if size is not None:
+                    MmuNorthArrow.set_size(size)
+
+                if rotation == "auto":
+                    rot = {"crs": self.projection, "reference": "center"}
+                elif isinstance(rotation, (int, float)):
+                    rot = {"degrees": rotation}
+                else:
+                    rot = rotation
+
+                na_kwargs = dict(location=location, rotation=rot, zorder=zorder)
+                if scale is not None:
+                    na_kwargs["scale"] = scale
+
+                # fancy / shadow : accepte bool ou dict
+                if style == "simple":
+                    na_kwargs["fancy"] = False
+                    na_kwargs["shadow"] = False
+                else:
+                    na_kwargs["fancy"] = fancy
+                    na_kwargs["shadow"] = shadow
+
+                # label : accepte str ou dict
+                if isinstance(label, dict):
+                    na_kwargs["label"] = label
+                elif label:
+                    na_kwargs["label"] = {"text": label}
+
+                if base is not None:
+                    na_kwargs["base"] = base
+                if pack is not None:
+                    na_kwargs["pack"] = pack
+                if aob is not None:
+                    na_kwargs["aob"] = aob
+                na_kwargs.update(kwargs)
+
+                na = MmuNorthArrow(**na_kwargs)
+                self.ax.add_artist(na)
+                self._north_arrow_artist = na
+                self._log("🧭 Flèche du Nord ajoutée (map-utils)")
+                return self
+
+        # Mode SVG (ancien comportement)
         arrow_path = self.get_north_arrows()[arrow - 1]
         img = read_image(arrow_path, color)
         imagebox = OffsetImage(img, zoom=zoom)
-        ab = AnnotationBbox(imagebox, position, frameon=False)
+        ab = AnnotationBbox(
+            imagebox, position, frameon=False, xycoords="axes fraction"
+        )
         self.ax.add_artist(ab)
+        self._north_arrow_artist = ab
+        self._log("🧭 Flèche du Nord ajoutée (SVG)")
+        return self
+
+    # Alias pour compatibilité
+    add_arrow = add_north_arrow
+
+    def set_north_arrow(self, **kwargs) -> "Map":
+        """
+        Modifie la flèche du Nord existante créée par ``add_north_arrow``.
+
+        Fonctionne uniquement si la flèche a été créée avec le mode
+        ``map-utils`` (objet ``NorthArrow``). Chaque paramètre passé est
+        directement appliqué via les property-setters de ``NorthArrow``.
+
+        Parameters
+        ----------
+        location : str, optional
+            Nouvelle position ("upper left", "lower right", …).
+        scale : float, optional
+            Nouvelle hauteur en pouces.
+        rotation : dict or float, optional
+            Nouvelle rotation (dict ou degrés).
+        fancy : bool or dict, optional
+            Activer/configurer le style fancy.
+        shadow : bool or dict, optional
+            Activer/configurer l'ombre.
+        label : dict, optional
+            Configuration du texte (ex. {"text": "N", "fontsize": 14}).
+        base : dict, optional
+            Configuration de la base de la flèche.
+        pack : dict, optional
+            Configuration du packing.
+        aob : dict, optional
+            Configuration de l'AnnotationBbox.
+        zorder : int, optional
+            Z-order.
+        size : str, optional
+            Taille prédéfinie ("xs", "sm", "md", "lg", "xl").
+            Applique ``NorthArrow.set_size()`` sur les défauts globaux,
+            supprime l'ancienne flèche et en recrée une nouvelle.
+
+        Returns
+        -------
+        Map : Instance de la carte pour chaînage.
+        """
+        if self._north_arrow_artist is None:
+            raise RuntimeError(
+                "Aucune flèche du Nord n'a été ajoutée. "
+                "Utilisez add_north_arrow() d'abord."
+            )
+        if not HAS_MAP_UTILS or not isinstance(
+            self._north_arrow_artist, MmuNorthArrow
+        ):
+            raise RuntimeError(
+                "set_north_arrow() nécessite une flèche créée avec "
+                "matplotlib-map-utils (style='map-utils', 'fancy' ou 'simple')."
+            )
+
+        na = self._north_arrow_artist
+
+        if "size" in kwargs:
+            # set_size modifie les défauts globaux, il faut recréer l'artiste
+            MmuNorthArrow.set_size(kwargs.pop("size"))
+            na.remove()
+            new_na = MmuNorthArrow(
+                location=na.location,
+                rotation=na.rotation,
+                zorder=na.zorder,
+            )
+            self.ax.add_artist(new_na)
+            self._north_arrow_artist = new_na
+            na = new_na
+
+        for key, value in kwargs.items():
+            if hasattr(na, key):
+                setattr(na, key, value)
+            else:
+                self._log(f"⚠️  Propriété inconnue : {key}")
+
+        self._log("🧭 Flèche du Nord mise à jour")
+        return self
+
+    def set_scale_bar(self, **kwargs) -> "Map":
+        """
+        Modifie la barre d'échelle existante créée par ``add_scale_bar``.
+
+        Fonctionne avec les artistes ``MmuScaleBar`` ou ``MplScaleBar``.
+        Pour ``MmuScaleBar``, chaque paramètre est appliqué via ses
+        property-setters.
+
+        Parameters
+        ----------
+        style : str, optional
+            Style de barre ("ticks" ou "boxes") — MmuScaleBar seulement.
+        location : str, optional
+            Nouvelle position.
+        bar : dict, optional
+            Paramètres de barre (projection, unit, length, major_div, etc.).
+        labels : dict, optional
+            Paramètres d'étiquettes (style, loc, fontsize, etc.).
+        units : dict, optional
+            Paramètres d'unités (loc, label, fontsize, etc.).
+        text : dict, optional
+            Paramètres de texte.
+        aob : dict, optional
+            Configuration de l'AnnotationBbox.
+        zorder : int, optional
+            Z-order.
+        size : str, optional
+            Taille prédéfinie ("xs", "sm", "md", "lg", "xl").
+            Applique ``ScaleBar.set_size()`` sur les défauts globaux,
+            supprime l'ancienne barre et en recrée une nouvelle.
+
+        Returns
+        -------
+        Map : Instance de la carte pour chaînage.
+        """
+        if self._scale_bar_artist is None:
+            raise RuntimeError(
+                "Aucune barre d'échelle n'a été ajoutée. "
+                "Utilisez add_scale_bar() d'abord."
+            )
+
+        sb = self._scale_bar_artist
+
+        if HAS_MAP_UTILS and isinstance(sb, MmuScaleBar):
+            if "size" in kwargs:
+                # set_size modifie les défauts globaux, il faut recréer
+                MmuScaleBar.set_size(kwargs.pop("size"))
+                sb.remove()
+                new_sb = MmuScaleBar(
+                    style=sb.style,
+                    location=sb.location,
+                    bar=sb.bar,
+                    zorder=sb.zorder,
+                )
+                self.ax.add_artist(new_sb)
+                self._scale_bar_artist = new_sb
+                sb = new_sb
+
+            for key, value in kwargs.items():
+                if hasattr(sb, key):
+                    setattr(sb, key, value)
+                else:
+                    self._log(f"⚠️  Propriété inconnue : {key}")
+        elif HAS_MPL_SCALEBAR and isinstance(sb, MplScaleBar):
+            for key, value in kwargs.items():
+                if hasattr(sb, key):
+                    setattr(sb, key, value)
+                else:
+                    self._log(f"⚠️  Propriété inconnue : {key}")
+        else:
+            raise RuntimeError(
+                "set_scale_bar() nécessite une barre d'échelle créée avec "
+                "matplotlib-map-utils ou matplotlib-scalebar."
+            )
+
+        self._log("📏 Barre d'échelle mise à jour")
+        return self
+
+    def set_inset(self, **kwargs) -> "Map":
+        """
+        Modifie la mini-carte de situation (inset map) existante.
+
+        Paramètres:
+        -----------
+        facecolor : str, optional
+            Nouvelle couleur de fond.
+        edgecolor : str, optional
+            Nouvelle couleur de bordure.
+        linewidth : float, optional
+            Nouvelle épaisseur de bordure.
+        alpha : float, optional
+            Nouvelle transparence.
+        land_color : str, optional
+            Nouvelle couleur des terres (re-dessine la feature).
+        ocean_color : str, optional
+            Nouvelle couleur des océans (re-dessine la feature).
+        global_view : bool, optional
+            Si True, affiche la carte globale via set_global().
+        extent : list, optional
+            [x0, x1, y0, y1] pour restreindre l'étendue de l'inset.
+
+        Retourne:
+        ---------
+        Map : Instance de la carte pour chaînage.
+        """
+        if not hasattr(self, "_inset_ax") or self._inset_ax is None:
+            raise RuntimeError(
+                "Aucune carte de situation n'a été ajoutée. "
+                "Utilisez add_inset_map() d'abord."
+            )
+
+        iax = self._inset_ax
+
+        if "facecolor" in kwargs:
+            iax.patch.set_facecolor(kwargs["facecolor"])
+        if "alpha" in kwargs:
+            iax.patch.set_alpha(kwargs["alpha"])
+        if "edgecolor" in kwargs:
+            for spine in iax.spines.values():
+                spine.set_edgecolor(kwargs["edgecolor"])
+        if "linewidth" in kwargs:
+            for spine in iax.spines.values():
+                spine.set_linewidth(kwargs["linewidth"])
+        if "global_view" in kwargs and kwargs["global_view"]:
+            iax.set_global()
+        if "extent" in kwargs:
+            iax.set_extent(kwargs["extent"], crs=ccrs.PlateCarree())
+        if "land_color" in kwargs:
+            iax.add_feature(cfeature.LAND, facecolor=kwargs["land_color"])
+        if "ocean_color" in kwargs:
+            iax.add_feature(cfeature.OCEAN, facecolor=kwargs["ocean_color"])
+
+        self._log("🔍 Carte de situation mise à jour")
         return self
 
     # ----------------------------------------------------------------------
@@ -2392,10 +3203,8 @@ class Map:
         Exemple:
             Map.print_available_palettes(category='seaborn', limit=5)
         """
-        # Création d'une instance temporaire pour accéder aux palettes
-        temp_df = pd.DataFrame({"x": [1], "y": [1]})
-        temp_chart = Map()
-        palettes = temp_chart.get_available_palettes()
+        # Récupération directe des palettes sans créer une instance Map
+        palettes = get_available_palettes()
 
         categories_to_show = []
         if category == "all":
@@ -2459,12 +3268,12 @@ class Map:
             try:
                 # Try seaborn palette
                 colors = sns.color_palette(palette_name, n_colors)
-            except:
+            except (ValueError, KeyError):
                 try:
                     # Try matplotlib colormap
                     cmap = load_cmap(palette_name)
                     colors = [cmap(i / (n_colors - 1)) for i in range(n_colors)]
-                except:
+                except Exception:
                     self._log(f"Palette '{palette_name}' not found")
                     return self
 
@@ -2619,13 +3428,11 @@ class Map:
         Exemple:
             Map.print_available_fonts(pattern='Arial', limit=10)
         """
-        # Création d'une instance temporaire pour utiliser la méthode
-        temp_df = pd.DataFrame({"x": [1], "y": [1]})
-        temp_chart = Map()
-        fonts = temp_chart.get_available_fonts(pattern)
-
-        if limit:
-            fonts = fonts[:limit]
+        # Récupération directe des polices sans créer une instance Map
+        all_fonts = sorted(set(f.name for f in fm.fontManager.ttflist))
+        if pattern:
+            all_fonts = [f for f in all_fonts if pattern.lower() in f.lower()]
+        fonts = all_fonts[:limit] if limit else all_fonts
 
         filter_info = f' (filtered by "{pattern}")' if pattern else ''
         print(f"Available fonts{filter_info}: {len(fonts)} found")
@@ -2635,8 +3442,8 @@ class Map:
         for i, font in enumerate(fonts, 1):
             print(f"{i:3d}. {font}")
 
-        if limit and len(temp_chart.get_available_fonts(pattern)) > limit:
-            remaining = len(temp_chart.get_available_fonts(pattern)) - limit
+        if limit and len(all_fonts) > limit:
+            remaining = len(all_fonts) - limit
             print(f"\n... and {remaining} more fonts")
 
     def set_font(
@@ -2681,7 +3488,7 @@ class Map:
     def _update_bounds(self, gdf):
         """Mise à jour automatique des limites basée sur les données ajoutées."""
         bounds = gdf.total_bounds
-        if hasattr(self, "_first_layer"):
+        if self._first_layer:
             self.bounds = [
                 min(self.bounds[0], bounds[0]),
                 min(self.bounds[1], bounds[1]),
@@ -3444,6 +4251,7 @@ class Map:
             else:
                 self._log(f"⚠️  Aucune couche avec le label '{label}' trouvée")
 
+        self._invalidate_render()
         return self
 
     def clear_layers(self) -> "Map":
@@ -3457,6 +4265,7 @@ class Map:
         count = len(self.layers)
         self.layers.clear()
         self.legend_elements.clear()
+        self._invalidate_render()
         self._log(f"🧹 {count} couche(s) supprimée(s)")
         return self
 
@@ -3465,13 +4274,80 @@ class Map:
     # ----------------------------------------------------------------------
 
 
-    def add_scale_bar(self, length=None, location=(0.1, 0.05), linewidth=2,
-                    units="km", color="black", fontsize=11,
-                    pad=0.1, alpha=1, label=None, add_as_layer=True, **kwargs):
+    def add_scale_bar(self, length=None, location="lower left", linewidth=2,
+                      units="km", color="black", fontsize=11,
+                      pad=0.1, alpha=1, label=None,
+                      style="auto", box_color="white", box_alpha=0.8,
+                      scale_loc="bottom", label_loc="top",
+                      add_as_layer=True,
+                      bar_style="boxes", major_div=4, minor_div=2,
+                      size=None, bar=None, labels=None, text=None,
+                      **kwargs):
         """
-        Ajoute une barre d'échelle (scale bar) sur la carte, et peut l'ajouter comme un layer.
+        Ajoute une barre d'échelle sur la carte.
+
+        Sélectionne automatiquement le meilleur moteur disponible :
+        ``matplotlib-map-utils`` > ``matplotlib-scalebar`` > tracé manuel.
+
+        Parameters
+        ----------
+        length : float, optional
+            Longueur souhaitée (en *units*). Auto-calculée si None.
+        location : str or tuple
+            Position : chaîne matplotlib ("lower left", "upper right", …)
+            ou tuple (x, y) en coordonnées relatives 0-1 (mode manuel).
+        linewidth : float
+            Épaisseur du trait.
+        units : str
+            Unité d'affichage : "km", "m", "mi", "ft", "nmi".
+        color : str
+            Couleur principale.
+        fontsize : int
+            Taille de police.
+        pad : float
+            Espacement texte / barre (mode manuel uniquement).
+        alpha : float
+            Transparence.
+        label : str, optional
+            Étiquette personnalisée.
+        style : str
+            Mode de rendu :
+            - ``"auto"`` : meilleure bibliothèque disponible
+              (map-utils > scalebar > manual).
+            - ``"map-utils"`` / ``"ticks"`` / ``"boxes"`` :
+              force matplotlib-map-utils.
+            - ``"scalebar"`` : force matplotlib-scalebar.
+            - ``"manual"`` : tracé à la main (ancien comportement).
+        box_color : str
+            Couleur de fond (mode scalebar).
+        box_alpha : float
+            Transparence du fond (mode scalebar).
+        scale_loc : str
+            Position du trait ("top", "bottom") — mode scalebar.
+        label_loc : str
+            Position du texte ("top", "bottom", "left", "right") —
+            mode scalebar.
+        add_as_layer : bool
+            Si True, rendu différé lors de show()/save().
+        bar_style : str
+            Style de barre pour map-utils : "boxes" ou "ticks".
+        major_div : int
+            Nombre de divisions majeures (mode map-utils).
+        minor_div : int
+            Nombre de divisions mineures (mode map-utils).
+        size : str, optional
+            Taille prédéfinie ("sm", "md", "lg", "xl") — mode map-utils.
+        bar : dict, optional
+            Dictionnaire de paramètres de barre (mode map-utils).
+            Clés : projection, unit, max, length, major_div, minor_div, etc.
+        labels : dict, optional
+            Dictionnaire de paramètres d'étiquettes (mode map-utils).
+            Clés : style, loc, format, fontsize, textcolors, etc.
+        text : dict, optional
+            Dictionnaire de paramètres de texte (mode map-utils).
+        **kwargs
+            Paramètres supplémentaires passés à la bibliothèque.
         """
-        # Stocke les paramètres pour affichage différé
         scale_bar_info = {
             "length": length,
             "location": location,
@@ -3482,7 +4358,19 @@ class Map:
             "pad": pad,
             "alpha": alpha,
             "label": label,
-            "kwargs": kwargs
+            "style": style,
+            "box_color": box_color,
+            "box_alpha": box_alpha,
+            "scale_loc": scale_loc,
+            "label_loc": label_loc,
+            "bar_style": bar_style,
+            "major_div": major_div,
+            "minor_div": minor_div,
+            "size": size,
+            "bar": bar,
+            "labels": labels,
+            "text": text,
+            "kwargs": kwargs,
         }
         if add_as_layer:
             self.layers.append({"type": "scalebar", "params": scale_bar_info})
@@ -3490,18 +4378,135 @@ class Map:
             self._draw_scale_bar(**scale_bar_info)
         return self
 
-    def _draw_scale_bar(self, length=None, location=(0, 0), linewidth=2,
+    def _compute_scalebar_dx(self):
+        """Calcule *dx* (mètres par unité d'axe) pour matplotlib-scalebar."""
+        is_geographic = isinstance(
+            self.projection, (ccrs.PlateCarree, ccrs.Geodetic)
+        )
+        if is_geographic:
+            x0, x1 = self.ax.get_xlim()
+            y0, y1 = self.ax.get_ylim()
+            mid_lat = float(np.clip((y0 + y1) / 2, -89, 89))
+            mid_lon = float((x0 + x1) / 2)
+            geod = Geod(ellps="WGS84")
+            _, _, dist = geod.inv(mid_lon, mid_lat, mid_lon + 1, mid_lat)
+            return abs(dist)
+        return 1
+
+    def _draw_scale_bar(self, length=None, location="lower left", linewidth=2,
                         units="km", color="black", fontsize=11,
-                        pad=0.05, alpha=1, label=None, kwargs=None):
-        """
-        Trace la barre d'échelle sur self.ax (mêmes paramètres que add_scale_bar)
-        """
+                        pad=0.05, alpha=1, label=None,
+                        style="auto", box_color="white", box_alpha=0.8,
+                        scale_loc="bottom", label_loc="top",
+                        bar_style="boxes", major_div=4, minor_div=2,
+                        size=None, bar=None, labels=None, text=None,
+                        kwargs=None):
+        """Trace la barre d'échelle sur self.ax."""
+        if kwargs is None:
+            kwargs = {}
 
+        # ------- résolution du style -------
+        if style == "auto":
+            if HAS_MAP_UTILS:
+                style = "map-utils"
+            elif HAS_MPL_SCALEBAR:
+                style = "scalebar"
+            else:
+                style = "manual"
+
+        # Aliases for map-utils sub-styles
+        if style in ("ticks", "boxes"):
+            bar_style = style
+            style = "map-utils"
+
+        # ------- matplotlib-map-utils -------
+        if style == "map-utils":
+            if not HAS_MAP_UTILS:
+                warnings.warn(
+                    "matplotlib-map-utils n'est pas installé, "
+                    "mode scalebar/manuel utilisé. "
+                    "Installez-le avec : pip install matplotlib-map-utils",
+                    RuntimeWarning, stacklevel=2,
+                )
+                style = "scalebar" if HAS_MPL_SCALEBAR else "manual"
+            else:
+                # Appliquer set_size() sur les défauts globaux AVANT création
+                if size is not None:
+                    MmuScaleBar.set_size(size)
+
+                loc = location if isinstance(location, str) else "lower left"
+                bar_dict = dict(
+                    projection=self.projection,
+                    major_div=major_div,
+                    minor_div=minor_div,
+                )
+                if length is not None:
+                    bar_dict["length"] = length
+                    bar_dict["unit"] = units
+                if bar is not None:
+                    bar_dict.update(bar)
+
+                labels_dict = dict(fontsize=fontsize)
+                if labels is not None:
+                    labels_dict.update(labels)
+
+                sb_kwargs = dict(
+                    style=bar_style,
+                    location=loc,
+                    bar=bar_dict,
+                    labels=labels_dict,
+                )
+                if text is not None:
+                    sb_kwargs["text"] = text
+                sb_kwargs.update(kwargs)
+
+                sb = MmuScaleBar(**sb_kwargs)
+                self.ax.add_artist(sb)
+                self._scale_bar_artist = sb
+                return
+
+        # ------- matplotlib-scalebar -------
+        if style == "scalebar":
+            if not HAS_MPL_SCALEBAR:
+                warnings.warn(
+                    "matplotlib-scalebar n'est pas installé, "
+                    "mode manuel utilisé. "
+                    "Installez-le avec : pip install matplotlib-scalebar",
+                    RuntimeWarning, stacklevel=2,
+                )
+                style = "manual"
+            else:
+                dx = self._compute_scalebar_dx()
+                loc = location if isinstance(location, str) else "lower left"
+                dimension = (
+                    "imperial-length" if units in ("mi", "ft", "yd")
+                    else "si-length"
+                )
+                sb_kwargs = dict(
+                    location=loc,
+                    color=color,
+                    box_color=box_color,
+                    box_alpha=box_alpha,
+                    scale_loc=scale_loc,
+                    label_loc=label_loc,
+                    font_properties={"size": fontsize},
+                    length_fraction=0.2,
+                )
+                if label:
+                    sb_kwargs["label"] = label
+                if length is not None:
+                    sb_kwargs["fixed_value"] = length
+                    sb_kwargs["fixed_units"] = units
+                sb_kwargs.update(kwargs)
+                sb = MplScaleBar(dx, units="m", dimension=dimension,
+                                 **sb_kwargs)
+                self.ax.add_artist(sb)
+                self._scale_bar_artist = sb
+                return
+
+        # ------- mode manuel (fallback) -------
         x0, x1 = self.ax.get_xlim()
-        # print("x0:{} x1:{}".format(x0, x1))
         y0, y1 = self.ax.get_ylim()
-        # print("y0:{} y1:{}".format(y0, y1))
-
         geod = Geod(ellps="WGS84")
         mid_lat = (y0 + y1) / 2
 
@@ -3509,7 +4514,7 @@ class Map:
             map_width_m, _, _ = geod.inv(x0, mid_lat, x1, mid_lat)
             map_width_km = abs(map_width_m) / 1000
         except Exception as e:
-            self._log(f"Erreur dans le calcul géodésique: {e}")
+            self._log(f"Erreur calcul géodésique : {e}")
             map_width_km = 100
 
         if length is None:
@@ -3521,51 +4526,57 @@ class Map:
             if length == 0:
                 length = max(1, int(raw))
 
+        if isinstance(location, str):
+            _loc_map = {
+                "lower left": (0.1, 0.05), "lower right": (0.7, 0.05),
+                "upper left": (0.1, 0.9), "upper right": (0.7, 0.9),
+                "lower center": (0.4, 0.05), "upper center": (0.4, 0.9),
+                "center": (0.4, 0.45),
+            }
+            location = _loc_map.get(location, (0.1, 0.05))
+
         x_ax, y_ax = location
         start_x = x0 + x_ax * (x1 - x0)
         start_y = y0 + y_ax * (y1 - y0)
-        self._log(f"Location est : ({x_ax}, {y_ax}). La bare d'échelle est placé à {x_ax*100} % de la longeur et à {y_ax*100} % de la hauteur)")
+        self._log(
+            f"Scale bar placée à {x_ax * 100:.0f}% × {y_ax * 100:.0f}%"
+        )
+
         try:
-            lon_end, lat_end, _ = geod.fwd(start_x, start_y, 90, length * 1000)
+            lon_end, _, _ = geod.fwd(start_x, start_y, 90, length * 1000)
             bar_length_deg = lon_end - start_x
-        except Exception as e:
-            self._log(f"Erreur dans le calcul géodésique forward: {e}")
-            bar_length_deg = length * 1000 / (111320 * np.cos(np.radians(start_y)))
+        except Exception:
+            bar_length_deg = (
+                length * 1000 / (111320 * np.cos(np.radians(start_y)))
+            )
 
-        scale_bar_start = (start_x, start_y)
-        scale_bar_end = (start_x + bar_length_deg, start_y)
-
-        # Filtrer les kwargs
-        if kwargs is None:
-            kwargs = {}
-        line_kwargs = {k: v for k, v in kwargs.items() if k not in ['ha', 'va', 'fontweight']}
-        text_kwargs = {k: v for k, v in kwargs.items() if k not in ['solid_capstyle']}
+        line_kwargs = {
+            k: v for k, v in kwargs.items()
+            if k not in ("ha", "va", "fontweight")
+        }
+        text_kwargs = {
+            k: v for k, v in kwargs.items()
+            if k not in ("solid_capstyle",)
+        }
 
         self.ax.plot(
-            [scale_bar_start[0], scale_bar_end[0]],
-            [scale_bar_start[1], scale_bar_end[1]],
-            color=color,
-            linewidth=linewidth,
-            solid_capstyle="butt",
-            alpha=alpha,
-            **line_kwargs
+            [start_x, start_x + bar_length_deg],
+            [start_y, start_y],
+            color=color, linewidth=linewidth,
+            solid_capstyle="butt", alpha=alpha,
+            **line_kwargs,
         )
 
         if label is None:
             label = f"{length} {units}"
-        text_y = start_y + pad
 
         self.ax.text(
-            (scale_bar_start[0] + scale_bar_end[0]) / 2,
-            text_y,
+            start_x + bar_length_deg / 2,
+            start_y + pad,
             label,
-            ha="center",
-            va="bottom",
-            color=color,
-            fontsize=fontsize,
-            alpha=alpha,
-            fontweight="bold",
-            **text_kwargs
+            ha="center", va="bottom", color=color,
+            fontsize=fontsize, alpha=alpha, fontweight="bold",
+            **text_kwargs,
         )
 
 
@@ -3621,9 +4632,17 @@ class Map:
                 style = layer["style"].copy()
                 style.pop("ax", None)
                 style.pop("transform", None)
+                # Ré-rendu des couches choroplèthes avec column_to_plot
+                column_to_plot = layer.get("column_to_plot")
+                if column_to_plot:
+                    style["column"] = column_to_plot
                 gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
             elif layer_type == "raster":
-                self.ax.imshow(layer["data"], **layer["style"])
+                rstyle = layer["style"].copy()
+                data_transform = rstyle.pop("transform", ccrs.PlateCarree())
+                self.ax.imshow(layer["data"], transform=data_transform, **rstyle)
+
+            layer["rendered"] = True
 
         if title is not None:
             self.ax.set_title(title)
@@ -3649,8 +4668,9 @@ class Map:
             self.custom_legend(**legend_params, **kwargs)
 
         for layer in self.layers:
-            if layer.get("type") == "scalebar":
+            if layer.get("type") == "scalebar" and not layer.get("rendered"):
                 self._draw_scale_bar(**layer["params"])
+                layer["rendered"] = True
 
         if tight_layout:
             plt.tight_layout()
@@ -3852,6 +4872,10 @@ class Map2D(Map):
                   edgecolor="black", linewidth=0.5, alpha=0.8, **kwargs):
         """
         Ajoute un GeoDataFrame comme couche.
+
+        Note : la signature diffère volontairement de Map.add_layer()
+        car Map2D ne gère que des GeoDataFrames (pas de rasters ni de
+        détection automatique de type).
 
         Paramètres:
         -----------
@@ -4110,6 +5134,10 @@ class SituationMap:
     de situation (inset map) montrant où se situe la zone d'étude dans un
     contexte géographique plus large.
 
+    Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
+    positionnement intelligent et des indicateurs d'étendue/détail, sinon
+    revient au placement manuel classique.
+
     Paramètres:
     -----------
     figsize : tuple
@@ -4119,9 +5147,19 @@ class SituationMap:
     projection : cartopy.crs
         Projection de la carte principale
     inset_position : tuple (x, y, w, h)
-        Position et taille de la mini-carte (coordonnées relatives 0-1)
+        Position et taille de la mini-carte (coordonnées relatives 0-1,
+        mode classique uniquement).
     inset_projection : cartopy.crs, optional
         Projection de la mini-carte (par défaut PlateCarree)
+    inset_location : str
+        Position de l'inset (mode map-utils) : "upper left", "upper right",
+        "lower left", "lower right", etc.
+    inset_size : float or tuple, optional
+        Taille de l'inset en pouces (mode map-utils).
+    inset_pad : float or tuple, optional
+        Espacement en pouces (mode map-utils).
+    style : str
+        Mode de rendu : "auto", "map-utils", "classic".
     dpi : int
         Résolution
     verbose : bool
@@ -4142,6 +5180,10 @@ class SituationMap:
         projection=None,
         inset_position=(0.65, 0.02, 0.33, 0.33),
         inset_projection=None,
+        inset_location="lower right",
+        inset_size=None,
+        inset_pad=None,
+        style="auto",
         dpi=200,
         verbose=True,
     ):
@@ -4155,6 +5197,7 @@ class SituationMap:
         self.dpi = dpi
         self.projection = projection
         self.inset_projection = inset_projection
+        self._style = style
 
         # carte principale
         self.fig = plt.figure(figsize=figsize, dpi=dpi)
@@ -4163,17 +5206,60 @@ class SituationMap:
         self.ax.coastlines(resolution="50m", linewidth=0.5)
         self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 
-        # mini-carte de situation
-        self.inset_ax = self.fig.add_axes(
-            inset_position, projection=inset_projection, frameon=True,
-        )
+        # Résolution du style
+        resolved = style
+        if resolved == "auto":
+            resolved = "map-utils" if HAS_MAP_UTILS else "classic"
+
+        self._inset_map_obj = None
+        self._box_patch = None
+
+        if resolved == "map-utils" and HAS_MAP_UTILS:
+            # Création différée : l'inset sera créé après le premier
+            # add_main_layer pour que l'axe principal soit correctement
+            # dimensionné. On stocke les paramètres.
+            self._inset_params = dict(
+                location=inset_location,
+                projection=inset_projection,
+            )
+            if inset_size is not None:
+                self._inset_params["size"] = inset_size
+            if inset_pad is not None:
+                self._inset_params["pad"] = inset_pad
+            self.inset_ax = None
+            self._resolved_style = "map-utils"
+        else:
+            # mode classique : créer l'inset immédiatement
+            self.inset_ax = self.fig.add_axes(
+                inset_position, projection=inset_projection, frameon=True,
+            )
+            self.inset_ax.set_global()
+            self.inset_ax.add_feature(cfeature.LAND, facecolor="lightgray")
+            self.inset_ax.add_feature(cfeature.OCEAN, facecolor="lightblue")
+            self.inset_ax.add_feature(cfeature.BORDERS, linewidth=0.3, edgecolor="gray")
+            self.inset_ax.coastlines(resolution="110m", linewidth=0.4)
+            self._inset_params = None
+            self._resolved_style = "classic"
+
+    def _ensure_inset_ax(self):
+        """Crée l'axe inset map-utils s'il n'existe pas encore."""
+        if self.inset_ax is not None:
+            return
+        if self._inset_params is None:
+            return
+
+        params = self._inset_params
+        proj = params.pop("projection", ccrs.PlateCarree())
+        im_kwargs = {k: v for k, v in params.items() if k != "projection"}
+
+        im = MmuInsetMap(**im_kwargs)
+        self.inset_ax = im.create(self.ax, projection=proj)
         self.inset_ax.set_global()
         self.inset_ax.add_feature(cfeature.LAND, facecolor="lightgray")
         self.inset_ax.add_feature(cfeature.OCEAN, facecolor="lightblue")
         self.inset_ax.add_feature(cfeature.BORDERS, linewidth=0.3, edgecolor="gray")
         self.inset_ax.coastlines(resolution="110m", linewidth=0.4)
-
-        self._box_patch = None
+        self._inset_map_obj = im
 
     def _log(self, *args, **kwargs):
         if self.verbose:
@@ -4217,26 +5303,78 @@ class SituationMap:
              bounds[1] - h * margin, bounds[3] + h * margin],
             crs=ccrs.PlateCarree(),
         )
+
+        # Créer l'inset si mode map-utils (différé)
+        self._ensure_inset_ax()
+
         return self
 
     # -- rectangle de situation --------------------------------------------
 
-    def set_inset_box(self, bounds, box_color="red", box_linewidth=2):
+    def set_inset_box(self, bounds, box_color="red", box_linewidth=2,
+                      indicator="extent", indicator_facecolor="red",
+                      indicator_linecolor="red", indicator_alpha=0.5,
+                      indicator_linewidth=1):
         """
         Dessine un rectangle sur la mini-carte délimitant la zone d'étude.
+
+        En mode map-utils, utilise ``indicate_extent`` pour un indicateur
+        automatique et précis. Sinon, dessine un rectangle manuellement.
 
         Paramètres:
         -----------
         bounds : list
             [minx, miny, maxx, maxy] en coordonnées géographiques
         box_color : str
-            Couleur du rectangle
+            Couleur du rectangle (mode classique)
         box_linewidth : float
-            Épaisseur du trait
+            Épaisseur du trait (mode classique)
+        indicator : str
+            Type d'indicateur : "extent", "detail", ou "none" (mode map-utils)
+        indicator_facecolor : str
+            Couleur de remplissage de l'indicateur
+        indicator_linecolor : str
+            Couleur de bordure de l'indicateur
+        indicator_alpha : float
+            Transparence de l'indicateur
+        indicator_linewidth : float
+            Épaisseur de trait de l'indicateur
         """
+        self._ensure_inset_ax()
+
         if self._box_patch is not None:
             self._box_patch.remove()
+            self._box_patch = None
 
+        if (self._resolved_style == "map-utils" and HAS_MAP_UTILS
+                and indicator != "none"):
+            pcrs = self.inset_projection
+            bcrs = self.projection
+            try:
+                if indicator == "extent":
+                    mmu_indicate_extent(
+                        pax=self.inset_ax, bax=self.ax,
+                        pcrs=pcrs, bcrs=bcrs,
+                        facecolor=indicator_facecolor,
+                        linecolor=indicator_linecolor,
+                        alpha=indicator_alpha,
+                        linewidth=indicator_linewidth,
+                    )
+                elif indicator == "detail":
+                    mmu_indicate_detail(
+                        pax=self.ax, iax=self.inset_ax,
+                        pcrs=bcrs, icrs=pcrs,
+                        facecolor=indicator_facecolor,
+                        linecolor=indicator_linecolor,
+                        alpha=indicator_alpha,
+                        linewidth=indicator_linewidth,
+                    )
+                return self
+            except (ValueError, TypeError) as e:
+                self._log(f"⚠️  Indicateur {indicator} échoué : {e}, "
+                          "utilisation du rectangle classique")
+
+        # Fallback : rectangle classique
         minx, miny, maxx, maxy = bounds
         rect = mpatches.Rectangle(
             (minx, miny), maxx - minx, maxy - miny,
@@ -4254,20 +5392,120 @@ class SituationMap:
         bounds = gdf.total_bounds.tolist()
         return self.set_inset_box(bounds, **kwargs)
 
-    # -- grille et apparence -----------------------------------------------
+    # -- flèche du Nord & barre d'échelle ---------------------------------
 
-    def add_gridlines(self, **kwargs):
-        """Ajoute des lignes de grille à la carte principale."""
-        defaults = dict(draw_labels=True, dms=True, x_inline=False, y_inline=False,
-                        color="gray", linestyle="--", linewidth=0.5, alpha=0.7)
-        defaults.update(kwargs)
-        self.ax.gridlines(**defaults)
+    def add_north_arrow(self, style="auto", location="upper right", **kwargs):
+        """
+        Ajoute une flèche du Nord à la carte principale.
+
+        Utilise ``matplotlib-map-utils`` si disponible.
+        """
+        resolved = style
+        if resolved == "auto":
+            resolved = "map-utils" if HAS_MAP_UTILS else "svg"
+
+        if resolved in ("map-utils", "fancy", "simple") and HAS_MAP_UTILS:
+            rot = kwargs.pop("rotation", {"crs": self.projection, "reference": "center"})
+            if isinstance(rot, (int, float)):
+                rot = {"degrees": rot}
+            na_kwargs = dict(location=location, rotation=rot)
+            na_kwargs["fancy"] = kwargs.pop("fancy", resolved != "simple")
+            na_kwargs["shadow"] = kwargs.pop("shadow", True)
+            label = kwargs.pop("label", "N")
+            if isinstance(label, dict):
+                na_kwargs["label"] = label
+            elif label:
+                na_kwargs["label"] = {"text": label}
+            na_kwargs.update(kwargs)
+            na = MmuNorthArrow(**na_kwargs)
+            self.ax.add_artist(na)
+            return self
+
+        # Fallback simplifié : pas de SVG dans SituationMap
+        self._log("⚠️  Flèche du Nord nécessite matplotlib-map-utils "
+                  "ou utilisez Map.add_north_arrow() pour les SVG")
         return self
 
-    def add_scale_bar(self, length=None, location=(0.1, 0.05), **kwargs):
+    def add_scale_bar(self, length=None, location="lower left", units="km",
+                      color="black", fontsize=11, linewidth=2,
+                      style="auto", bar_style="boxes",
+                      major_div=4, minor_div=2,
+                      box_color="white", box_alpha=0.8,
+                      scale_loc="bottom", label_loc="top", **kwargs):
         """
         Ajoute une barre d'échelle à la carte principale.
+
+        Utilise ``matplotlib-map-utils`` > ``matplotlib-scalebar`` > manuel.
         """
+        resolved = style
+        if resolved == "auto":
+            if HAS_MAP_UTILS:
+                resolved = "map-utils"
+            elif HAS_MPL_SCALEBAR:
+                resolved = "scalebar"
+            else:
+                resolved = "manual"
+
+        if resolved in ("map-utils", "ticks", "boxes") and HAS_MAP_UTILS:
+            if resolved in ("ticks", "boxes"):
+                bar_style = resolved
+            loc = location if isinstance(location, str) else "lower left"
+            bar_dict = dict(
+                projection=self.projection,
+                major_div=major_div,
+                minor_div=minor_div,
+            )
+            if length is not None:
+                bar_dict["length"] = length
+                bar_dict["unit"] = units
+            labels_dict = dict(fontsize=fontsize)
+            sb_kwargs = dict(
+                style=bar_style, location=loc,
+                bar=bar_dict, labels=labels_dict,
+            )
+            sb_kwargs.update(kwargs)
+            try:
+                sb = MmuScaleBar(**sb_kwargs)
+                self.ax.add_artist(sb)
+                return self
+            except (TypeError, ValueError) as e:
+                self._log(f"⚠️  ScaleBar map-utils échoué : {e}, "
+                          "utilisation de la méthode alternative")
+                resolved = "scalebar" if HAS_MPL_SCALEBAR else "manual"
+
+        if resolved == "scalebar" and HAS_MPL_SCALEBAR:
+            is_geo = isinstance(self.projection, (ccrs.PlateCarree, ccrs.Geodetic))
+            if is_geo:
+                x0, x1 = self.ax.get_xlim()
+                y0, y1 = self.ax.get_ylim()
+                mid_lat = float(np.clip((y0 + y1) / 2, -89, 89))
+                mid_lon = float((x0 + x1) / 2)
+                geod = Geod(ellps="WGS84")
+                _, _, dist = geod.inv(mid_lon, mid_lat, mid_lon + 1, mid_lat)
+                dx = abs(dist)
+            else:
+                dx = 1
+            loc = location if isinstance(location, str) else "lower left"
+            dimension = (
+                "imperial-length" if units in ("mi", "ft", "yd")
+                else "si-length"
+            )
+            sb_kwargs = dict(
+                location=loc, color=color,
+                box_color=box_color, box_alpha=box_alpha,
+                scale_loc=scale_loc, label_loc=label_loc,
+                font_properties={"size": fontsize},
+                length_fraction=0.2,
+            )
+            if length is not None:
+                sb_kwargs["fixed_value"] = length
+                sb_kwargs["fixed_units"] = units
+            sb_kwargs.update(kwargs)
+            sb = MplScaleBar(dx, units="m", dimension=dimension, **sb_kwargs)
+            self.ax.add_artist(sb)
+            return self
+
+        # ------- mode manuel (fallback) -------
         x0, x1 = self.ax.get_xlim()
         y0, y1 = self.ax.get_ylim()
         geod = Geod(ellps="WGS84")
@@ -4287,10 +5525,13 @@ class SituationMap:
             if length == 0:
                 length = max(1, int(raw))
 
-        units = kwargs.pop("units", "km")
-        color = kwargs.pop("color", "black")
-        fontsize = kwargs.pop("fontsize", 11)
-        linewidth = kwargs.pop("linewidth", 2)
+        if isinstance(location, str):
+            _loc_map = {
+                "lower left": (0.1, 0.05), "lower right": (0.7, 0.05),
+                "upper left": (0.1, 0.9), "upper right": (0.7, 0.9),
+                "lower center": (0.4, 0.05), "upper center": (0.4, 0.9),
+            }
+            location = _loc_map.get(location, (0.1, 0.05))
 
         x_ax, y_ax = location
         start_x = x0 + x_ax * (x1 - x0)
@@ -4310,6 +5551,16 @@ class SituationMap:
             f"{length} {units}", ha="center", va="bottom",
             color=color, fontsize=fontsize, fontweight="bold",
         )
+        return self
+
+    # -- grille et apparence -----------------------------------------------
+
+    def add_gridlines(self, **kwargs):
+        """Ajoute des lignes de grille à la carte principale."""
+        defaults = dict(draw_labels=True, dms=True, x_inline=False, y_inline=False,
+                        color="gray", linestyle="--", linewidth=0.5, alpha=0.7)
+        defaults.update(kwargs)
+        self.ax.gridlines(**defaults)
         return self
 
     # -- sortie ------------------------------------------------------------

@@ -1,0 +1,93 @@
+---
+title: "Organisation de projet"
+description: "Structurer un répertoire de travail avec Project, add_data et organize_project."
+---
+
+# Organisation de projet
+
+La classe `Project` sert à standardiser un répertoire de travail cartographique avec une structure simple et prévisible.
+
+## Quand utiliser Project
+
+Utilisez `Project` si vous voulez :
+
+- centraliser les données d'entrée et les sorties
+- enregistrer rapidement des couches dans `data/`
+- garder une structure cohérente entre plusieurs notebooks ou scripts
+- classer automatiquement les fichiers par type
+
+## Structure créée
+
+Au minimum, `Project.init()` crée deux dossiers :
+
+- `data/`
+- `output/`
+
+Après `organize_project()`, le contenu de `data/` peut être réparti dans :
+
+- `data/vector/`
+- `data/raster/`
+- `data/tabular/`
+
+## Exemple de départ
+
+```python
+from cartograpy.project import Project
+
+project = Project(
+    path="./mon_projet",
+    data_dir="data",
+    output_dir="output",
+    crs="EPSG:4326",
+)
+
+project.init()
+```
+
+## Ajouter des données au projet
+
+```python
+from cartograpy.data import load
+
+regions = load("../data/vector/gadm41_CIV.gpkg")
+project.add_data(regions, "geojson", filename="regions_civ")
+```
+
+Cette méthode écrit les fichiers dans le dossier `data/` du projet, en s'appuyant sur `cartograpy.data.save`.
+
+## Organiser automatiquement les fichiers
+
+```python
+project.organize_project()
+```
+
+La méthode inspecte les extensions et répartit les fichiers entre données vectorielles, raster et tabulaires.
+
+## Choisir un CRS de projet
+
+```python
+crs_list = Project.available_crs(contains="WGS")
+crs_list[:3]
+```
+
+Le CRS choisi lors de l'initialisation est stocké comme objet `pyproj.CRS` dans `project.crs`.
+
+## Workflow recommandé
+
+1. créer un répertoire de projet avec `Project`
+2. charger ou télécharger les données
+3. enregistrer les jeux de données utiles avec `add_data`
+4. exécuter `organize_project` pour ranger le dossier `data`
+5. produire les cartes et exporter les sorties dans `output`
+
+## Limites actuelles
+
+- `Project` ne gère pas encore de métadonnées de projet ou de manifeste
+- le classement automatique repose uniquement sur les extensions de fichiers
+- les sous-dossiers ne sont pas personnalisables au-delà de `data_dir` et `output_dir`
+
+## Pages liées
+
+- `Prise en main > Premier projet`
+- `Reference API > Project`
+- `Guides > Charger et enregistrer des données`

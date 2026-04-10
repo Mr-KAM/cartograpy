@@ -5,35 +5,65 @@
   "colors": {
     "primary": "#ff0000"
   },
-"navigation": {
+  "navigation": {
     "groups": [
       {
-        "group": "Getting started",
-        "icon": "play",
+        "group": "Accueil",
+        "icon": "house",
         "pages": [
-          "quickstart",
-          {
-            "group": "Editing",
-            "expanded": false,
-            "icon": "pencil",
-            "pages": [
-              "installation",
-              "editor"
-            ]
-          }
+          "index"
         ]
       },
       {
-        "group": "Writing content",
-        "icon": "notebook-text",
-        "tag": "NEW",
+        "group": "Prise en main",
+        "icon": "play",
         "pages": [
-          "writing-content/page",
-          "writing-content/text"
+          "getting-started/installation",
+          "getting-started/quickstart",
+          "getting-started/first-project"
+        ]
+      },
+      {
+        "group": "Guides",
+        "icon": "book-open",
+        "pages": [
+          "guides/load-and-save-data",
+          "guides/project-organization",
+          "guides/boundaries-and-admin-data",
+          "guides/osm-and-online-data",
+          "guides/vector-processing",
+          "guides/raster-processing",
+          "guides/static-maps",
+          "guides/web-maps",
+          "guides/styling-and-palettes"
+        ]
+      },
+      {
+        "group": "Reference API",
+        "icon": "braces",
+        "pages": [
+          "reference/api-overview",
+          "reference/data",
+          "reference/processing-functions",
+          "reference/vector-tools",
+          "reference/raster-tools",
+          "reference/mapper",
+          "reference/styling",
+          "reference/project",
+          "reference/converter"
+        ]
+      },
+      {
+        "group": "Explications",
+        "icon": "messages-square",
+        "pages": [
+          "explanations/package-architecture",
+          "explanations/crs-and-projections",
+          "explanations/data-sources-and-dependencies",
+          "explanations/known-gaps"
         ]
       }
     ]
   },
-  "description":"Packages python pour créer des cartes"
-
+  "description": "Package Python pour charger, traiter et cartographier des données géographiques"
 }
