@@ -53,17 +53,17 @@ project = Project("./mon_projet")
 project.init()
 ```
 
-### `available_crs(auth_name="EPSG", crs_type=None, contains="")`
+### `available_crs(auth_name="EPSG", crs_type=None, name_contains="")`
 
 Méthode statique qui interroge les CRS disponibles via `pyproj.database.query_crs_info`.
 
 ```python
-Project.available_crs(contains="UTM")
+Project.available_crs(name_contains="UTM")
 ```
 
 Retour attendu : une liste de dictionnaires contenant au minimum l'autorité, le code, le nom, le type et la zone d'usage.
 
-### `add_data(data, file_extension=None, filename="output", timestamp=False, raster_meta=None)`
+### `add_data(data, file_extension=None, filename="output", timestamp=False, raster_meta=None, overwrite=False, mode="copy", category=None)`
 
 Enregistre un jeu de données directement dans le dossier `data/` du projet en réutilisant `cartograpy.data.save`.
 Accepte aussi un chemin vers un fichier existant : le fichier est copié et ses sidecars (.shx, .dbf, .prj, etc.) sont copiés automatiquement pour les shapefiles.
@@ -74,17 +74,27 @@ project.add_data(gdf, "geojson", filename="limites")
 
 # Depuis un chemin de fichier (extension déduite automatiquement)
 project.add_data("../source/carte.shp")
+
+# Avec écrasement autorisé
+project.add_data("../source/carte.shp", overwrite=True)
+
+# Déplacer au lieu de copier
+project.add_data("../source/carte.shp", mode="move")
+
+# Ranger directement dans data/vector/
+project.add_data("../source/carte.shp", category="vector")
 ```
 
-Paramètres importants :
+Paramètres :
 
 - `data` : `GeoDataFrame`, `DataFrame`, raster ouvert, tableau raster, ou chemin (`str`/`Path`) vers un fichier
 - `file_extension` : extension cible. Optionnel si `data` est un chemin (déduit depuis le fichier source)
 - `filename` : nom de base du fichier dans le dossier `data/`
 - `timestamp` : ajoute un suffixe temporel au nom si activé
 - `raster_meta` : métadonnées raster requises si la source est un tableau NumPy
-
-Particularité : les fichiers sidecars shapefile (.shx, .dbf, .prj, .cpg, etc.) sont copiés automatiquement.
+- `overwrite` : si `True`, écrase un fichier existant. Par défaut `False` (lève `FileExistsError`)
+- `mode` : `"copy"` (défaut), `"move"` ou `"link"`. N'a d'effet que pour les chemins de fichier
+- `category` : sous-dossier cible dans `data/` (`"vector"`, `"raster"`, `"tabular"`). Si `None`, écrit à la racine de `data/`
 
 ### `organize_project()`
 
@@ -114,6 +124,20 @@ project.list_data(type_filter="vector")
 
 Retour attendu : une liste de dictionnaires contenant `name`, `extension`, `type`, `size`, `path` et `relative_path`.
 
+### `list_datasets(type_filter=None)`
+
+Liste les jeux de données logiques : un shapefile + ses sidecars comptent comme une seule entrée.
+
+```python
+# Tous les jeux de données
+project.list_datasets()
+
+# Seulement les rasters
+project.list_datasets(type_filter="raster")
+```
+
+Retour attendu : une liste de dictionnaires contenant `name`, `type`, `main_file`, `extension`, `sidecars`, `total_size`, `path`.
+
 ### `load_data(name, layer=None)`
 
 Charge un fichier depuis le dossier `data/` du projet via `cartograpy.data.load`. Le fichier est recherché par nom exact ou par nom de base (sans extension).
@@ -130,6 +154,18 @@ Supprime un fichier (et ses sidecars shapefile/tab) du dossier `data/`.
 
 ```python
 project.remove_data("carte.shp")  # supprime aussi .shx, .dbf, .prj, .cpg…
+```
+
+### `rename_data(old, new)`
+
+Renomme un jeu de données (fichier principal + ses sidecars).
+
+```python
+project.rename_data("old_name.shp", "new_name")
+# Renomme old_name.shp → new_name.shp, old_name.shx → new_name.shx, etc.
+
+# Par nom de base (sans extension)
+project.rename_data("cities", "towns")
 ```
 
 ### `get_path(name, folder="data")`
@@ -149,6 +185,30 @@ Change le CRS du projet.
 project.set_crs("EPSG:32630")  # UTM zone 30N
 ```
 
+### `save_output(data, file_extension, filename="output", timestamp=False, raster_meta=None, overwrite=False)`
+
+Pendant de `add_data` pour le dossier `output/`. Sauvegarde des données directement dans le dossier de sortie.
+
+```python
+project.save_output(gdf, "geojson", filename="carte_finale")
+project.save_output(gdf, "geojson", filename="carte_finale", overwrite=True)
+```
+
+### `save_manifest()` / `load_manifest()`
+
+Le manifeste (`project.json`) décrit le projet : CRS, dates, inventaire des données.
+
+```python
+# Sauvegarder
+project.save_manifest()
+
+# Charger
+manifest = project.load_manifest()
+print(manifest["crs"])
+print(manifest["datasets"])
+print(manifest["created_at"])
+```
+
 ### `clean_output()`
 
 Supprime tous les fichiers et sous-dossiers du dossier `output/`.
@@ -157,12 +217,22 @@ Supprime tous les fichiers et sous-dossiers du dossier `output/`.
 project.clean_output()
 ```
 
-### `validate()`
+### `validate(deep=False)`
 
 Vérifie l'intégrité du projet : existence des dossiers, lisibilité des fichiers, présence des sidecars obligatoires (.shx, .dbf) pour chaque shapefile.
 
+Avec `deep=True`, effectue des vérifications supplémentaires :
+- détection des sidecars orphelins (sans fichier principal associé)
+- noms de base ambigus (même nom avec des extensions primaires différentes)
+- tentative d'ouverture réelle des fichiers géospatiaux pour vérifier leur lisibilité
+
 ```python
+# Validation rapide
 report = project.validate()
+
+# Validation approfondie
+report = project.validate(deep=True)
+
 # report["valid"] → True/False
 # report["warnings"] → liste d'avertissements
 # report["errors"] → liste d'erreurs
@@ -211,17 +281,32 @@ project.init()
 # Ajouter un shapefile (avec ses sidecars)
 project.add_data("../source/gadm41_CIV.shp")
 
+# Ajouter avec rangement dans data/vector/
+project.add_data("../source/regions.geojson", category="vector")
+
 # Lister les fichiers
 project.list_data()
+
+# Lister les jeux de données logiques
+project.list_datasets()
 
 # Charger les données
 gdf = project.load_data("gadm41_CIV")
 
+# Renommer un jeu de données
+project.rename_data("gadm41_CIV", "civ_admin")
+
+# Sauvegarder une sortie
+project.save_output(gdf, "geojson", filename="carte_finale")
+
+# Sauvegarder le manifeste du projet
+project.save_manifest()
+
 # Organiser en sous-dossiers
 project.organize_project()
 
-# Vérifier l'intégrité
-project.validate()
+# Vérifier l'intégrité (validation approfondie)
+project.validate(deep=True)
 
 # Informations du projet
 project.infos()
