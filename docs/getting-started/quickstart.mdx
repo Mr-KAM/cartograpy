@@ -1,0 +1,37 @@
+---
+title: "Quickstart"
+description: "Créer une première carte avec les objets principaux du package."
+---
+
+# Quickstart
+
+Cartograpy s'organise autour de quelques blocs simples.
+
+- `data` pour charger ou télécharger des données
+- `processing` pour transformer les couches
+- `mapper` pour créer des cartes statiques ou web
+- `styling` pour les palettes et les polices
+- `project` pour organiser un projet cartographique
+
+## Exemple minimal
+
+```python
+from cartograpy.data import Bound
+from cartograpy.mapper import Map
+
+bound = Bound()
+civ = bound.get_admin("CIV", adm=0)
+
+m = Map(title="Côte d'Ivoire")
+m.add_polygons(civ, facecolor="lightyellow", edgecolor="black")
+m.add_north_arrow()
+m.add_scale_bar()
+m.show()
+```
+
+## Suite recommandée
+
+1. Initialiser un projet
+2. Charger ses propres données
+3. Produire une première carte statique
+4. Explorer les outils vectoriels et raster

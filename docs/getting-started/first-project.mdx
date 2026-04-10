@@ -1,0 +1,34 @@
+---
+title: "Premier projet"
+description: "Initialiser une arborescence de travail avec Project."
+---
+
+# Premier projet
+
+La classe `Project` sert à créer une structure simple pour stocker les données et les sorties cartographiques.
+
+## Initialiser un projet
+
+```python
+from cartograpy.project import Project
+
+project = Project(
+    path="./mon_projet",
+    data_dir="data",
+    output_dir="output",
+    crs="EPSG:4326",
+)
+project.init()
+```
+
+## Capacités principales
+
+- créer les dossiers du projet
+- lister des CRS disponibles
+- enregistrer des données dans `data/`
+- réorganiser les fichiers par familles
+
+## Pages liées
+
+- `Reference API > Project`
+- `Guides > Charger et enregistrer des données`

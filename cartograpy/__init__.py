@@ -12,6 +12,7 @@ from .processing import (
     add_column,
     split_multipolygon,
     VectorTools,
+    RasterTools,
 )
 
 from .mapper import (
@@ -25,6 +26,9 @@ from .mapper import (
 
 from .styling import (
     get_fonts,
+    google_font,
+    path_font,
+    local_font,
     get_available_palettes,
     color_palettes,
     custom_palettes,
@@ -39,14 +43,16 @@ from .styling import (
     list_all_styles,
 )
 
-from .geocoder import (
-    GeocodingProvider,
-    NominatimProvider,
-    OpenCageProvider,
-    GeocodingResult,
-)
+try:
+    from .geocoder import (
+        GeocodingProvider,
+        NominatimProvider,
+        OpenCageProvider,
+        GeocodingResult,
+    )
+except ImportError:
+    pass
 
-from .converter import converter, extract_gpx_data
 
 from .project import Project, init_project
 
@@ -57,7 +63,7 @@ __all__ = [
     # data
     "load", "save", "list_geofiles", "GeoBoundaries", "Bound", "WorldBank", "OSM", "Hydro", "DEM",
     # processing
-    "centroids", "join", "fusion", "add_column", "split_multipolygon", "VectorTools",
+    "centroids", "join", "fusion", "add_column", "split_multipolygon", "VectorTools", "RasterTools",
     # mapper
     "Map", "Map2D", "WebMap", "SituationMap",
     "plot_choropleth", "read_image",
@@ -67,8 +73,6 @@ __all__ = [
     "show_palette", "show_palette_details", "palettes_by_popularity",
     "palettes_with_color", "preview_multiple_palettes",
     "set_style", "list_all_styles",
-    # geocoder
-    "GeocodingProvider", "NominatimProvider", "OpenCageProvider", "GeocodingResult",
     # converter
     "converter", "extract_gpx_data",
     # iso
@@ -76,6 +80,13 @@ __all__ = [
     # project
     "Project", "init_project",
 ]
+
+# Conditionally add geocoder exports if the module is available
+try:
+    from .geocoder import GeocodingProvider  # noqa: F401
+    __all__ += ["GeocodingProvider", "NominatimProvider", "OpenCageProvider", "GeocodingResult"]
+except ImportError:
+    pass
 
 
 

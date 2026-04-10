@@ -1,5 +1,4 @@
 
-
 <img src="assets\img\logo.png" alt="Logo" style="width: 30vw;min-width:200px">
 <p>
 Mapping in Python, the way it was always meant to be.

@@ -1,0 +1,27 @@
+---
+title: "Frontières et données administratives"
+description: "Télécharger des limites de pays, continents et niveaux administratifs."
+---
+
+# Frontières et données administratives
+
+Les classes `GeoBoundaries` et `Bound` couvrent la récupération des limites administratives et de certaines métadonnées territoriales.
+
+## Points d'entrée
+
+- `GeoBoundaries`
+- `Bound`
+- `COUNTRY_ISO3`
+
+## Parcours à traiter
+
+- récupérer un pays par nom ou code ISO3
+- télécharger un niveau `ADM0` à `ADM5`
+- fusionner plusieurs pays dans un seul GeoDataFrame
+- lister les continents et récupérer leurs géométries
+
+## Risques à expliquer
+
+- dépendance réseau
+- hétérogénéité des niveaux administratifs selon les pays
+- nécessité de valider le CRS avant analyses ou cartes

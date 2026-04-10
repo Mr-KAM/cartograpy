@@ -1,5 +1,6 @@
 import pypalettes
-from pypalettes import create_cmap, show_cmap
+from pypalettes import create_cmap, show_cmap, load_palette, load_cmap
+from pyfonts import load_google_font, load_font
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
@@ -8,30 +9,100 @@ import matplotlib.font_manager as fm
 # ----------------------------------------------------------------------
 # ================gestion des styles de polices ========================
 # ----------------------------------------------------------------------
+
+def google_font(family: str, weight: Union[int, str, None] = None, italic: Optional[bool] = None) -> fm.FontProperties:
+    """
+    Charge une police depuis Google Fonts.
+
+    Paramètres:
+    -----------
+    family : str
+        Nom de la famille de police (ex: "Roboto", "Open Sans", "Cascadia Mono")
+    weight : int ou str, optional
+        Poids de la police (ex: 400, 700, "bold", "light", "regular")
+    italic : bool, optional
+        Utiliser la variante italique
+
+    Retourne:
+    ---------
+    FontProperties : Objet police matplotlib utilisable avec le paramètre `font`
+
+    Exemple:
+        font = google_font("Roboto", weight="bold")
+        ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
+    """
+    return load_google_font(family, weight=weight, italic=italic)
+
+
+def path_font(font_url: str) -> fm.FontProperties:
+    """
+    Charge une police depuis une URL (ex: fichier .ttf/.otf sur GitHub).
+
+    Paramètres:
+    -----------
+    font_url : str
+        URL vers le fichier de police (ajouter ?raw=true pour les fichiers GitHub)
+
+    Retourne:
+    ---------
+    FontProperties : Objet police matplotlib utilisable avec le paramètre `font`
+
+    Exemple:
+        font = path_font("https://github.com/google/fonts/blob/main/ofl/amaranth/Amaranth-Bold.ttf?raw=true")
+        ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
+    """
+    return load_font(font_url=font_url)
+
+
+def local_font(font_path: str) -> fm.FontProperties:
+    """
+    Charge une police depuis un fichier local sur votre ordinateur.
+
+    Paramètres:
+    -----------
+    font_path : str
+        Chemin vers le fichier de police local (ex: "C:/Fonts/MaPolice.ttf")
+
+    Retourne:
+    ---------
+    FontProperties : Objet police matplotlib utilisable avec le paramètre `font`
+
+    Exemple:
+        font = local_font("chemin/vers/mapolice/Ultra-Regular.ttf")
+        ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
+    """
+    return load_font(font_path=font_path)
+
+
 def get_fonts(pattern: str = None, sort: bool = True) -> List[str]:
     """
-    Get list of all available font names in the system.
+    Récupère la liste de toutes les polices disponibles sur le système.
 
-    Args:
-        pattern (str, optional): Filter fonts containing this pattern (case-insensitive)
-        sort (bool): Whether to sort the font names alphabetically
+    Paramètres:
+    -----------
+    pattern : str, optional
+        Filtre les polices contenant ce motif (insensible à la casse)
+    sort : bool
+        Trier les noms par ordre alphabétique
 
-    Returns:
-        List[str]: List of available font names
-    example:
+    Retourne:
+    ---------
+    List[str] : Liste des noms de polices disponibles
+
+    Exemple:
         get_fonts(pattern='Arial', sort=True)
     """
-    # Get all font properties
+    # Récupération de toutes les polices
     fonts = [f.name for f in fm.fontManager.ttflist]
 
-    # Remove duplicates
+    # Suppression des doublons
     fonts = list(set(fonts))
 
-    # Filter by pattern if provided
+    # Filtrage par motif si fourni
     if pattern:
         fonts = [font for font in fonts if pattern.lower() in font.lower()]
 
-    # Sort if requested
+    # Tri si demandé
     if sort:
         fonts.sort()
 
@@ -141,6 +212,7 @@ color_palettes = {
 
 
 def load_cmap(cmap):
+    """Charge un colormap depuis pypalettes."""
     return pypalettes.load_cmap(cmap)
 
 # Fonction pour afficher une palette
@@ -177,7 +249,7 @@ def palettes_with_color(couleur_recherchee):
 
 
 def to_cmap(colors,cmap_type="continuous"):
-    """Convertit une liste de couleurs en cmap matplotlib"""
+    """Convertit une liste de couleurs en colormap matplotlib."""
     return create_cmap(colors,cmap_type)
 
 
@@ -196,21 +268,27 @@ def get_available_palettes(
     include_matplotlib: bool = True,
 ) -> Dict[str, List[str]]:
     """
-    Get all available color palettes.
+    Récupère toutes les palettes de couleurs disponibles.
 
-    Args:
-        include_custom (bool): Include custom palettes
-        include_seaborn (bool): Include seaborn palettes
-        include_matplotlib (bool): Include matplotlib colormaps
+    Paramètres:
+    -----------
+    include_custom : bool
+        Inclure les palettes personnalisées
+    include_seaborn : bool
+        Inclure les palettes seaborn
+    include_matplotlib : bool
+        Inclure les colormaps matplotlib
 
-    Returns:
-        Dict[str, List[str]]: Dictionary of palette names and their categories
-    example:
+    Retourne:
+    ---------
+    Dict[str, List[str]] : Dictionnaire des noms de palettes par catégorie
+
+    Exemple:
         palettes = get_available_palettes(include_custom=True,
-                                                    include_seaborn=True,
-                                                    include_matplotlib=True)
+                                          include_seaborn=True,
+                                          include_matplotlib=True)
     """
-    # list_custom=list(custom_palettes().keys)
+    # liste des palettes personnalisées
     custom_color_list=list(custom_palettes().keys())
     palettes = {
         "custom": [],
@@ -225,9 +303,9 @@ def get_available_palettes(
     if include_custom:
         palettes["custom"] = custom_color_list
 
-    # Seaborn palettes
+    # Palettes Seaborn
     if include_seaborn:
-        # Qualitative palettes
+        # Palettes qualitatives
         palettes["seaborn_qualitative"] = [
             "deep",
             "muted",
@@ -243,7 +321,7 @@ def get_available_palettes(
             "tab20",
         ]
 
-        # Sequential palettes
+        # Palettes séquentielles
         palettes["seaborn_sequential"] = [
             "Blues",
             "BuGn",
@@ -269,7 +347,7 @@ def get_available_palettes(
             "crest",
         ]
 
-        # Diverging palettes
+        # Palettes divergentes
         palettes["seaborn_diverging"] = [
             "BrBG",
             "PiYG",
@@ -287,9 +365,9 @@ def get_available_palettes(
             "vlag",
         ]
 
-    # Matplotlib colormaps
+    # Colormaps Matplotlib
     if include_matplotlib:
-        # Sequential
+        # Séquentielles
         palettes["matplotlib_sequential"] = [
             "viridis",
             "plasma",
@@ -316,7 +394,7 @@ def get_available_palettes(
             "YlGn",
         ]
 
-        # Diverging
+        # Divergentes
         palettes["matplotlib_diverging"] = [
             "PiYG",
             "PRGn",
@@ -332,10 +410,10 @@ def get_available_palettes(
             "seismic",
         ]
 
-        # Cyclic
+        # Cycliques
         palettes["matplotlib_cyclic"] = ["twilight", "twilight_shifted", "hsv"]
 
-        # Qualitative
+        # Qualitatives
         palettes["matplotlib_qualitative"] = [
             "Pastel1",
             "Pastel2",
@@ -356,23 +434,28 @@ def get_available_palettes(
 
 def preview_multiple_palettes(palette_names: list, n_colors: int = 8, custom_palettes= get_available_palettes()):
     """
-    Preview multiple color palettes in a grid layout.
+    Aperçu de plusieurs palettes de couleurs dans une grille.
 
-    Args:
-        palette_names (list): List of palette names to preview
-        n_colors (int): Number of colors to show per palette
-        custom_palettes (dict): Dictionary of custom palettes (optional)
-    
-    Returns:
-        tuple: (figure, axes) objects
-    
-    Example:
+    Paramètres:
+    -----------
+    palette_names : list
+        Liste des noms de palettes à prévisualiser
+    n_colors : int
+        Nombre de couleurs à afficher par palette
+    custom_palettes : dict
+        Dictionnaire de palettes personnalisées (optionnel)
+
+    Retourne:
+    ---------
+    tuple : Objets (figure, axes)
+
+    Exemple:
         preview_multiple_palettes(['p1', 'p2', 'p3'], custom_palettes=color_palettes)
     """
     n_palettes = len(palette_names)
     fig, axes = plt.subplots(n_palettes, 1, figsize=(10, 2 * n_palettes))
     
-    # Handle single palette case
+    # Cas d'une seule palette
     if n_palettes == 1:
         axes = [axes]
     
@@ -384,20 +467,26 @@ def preview_multiple_palettes(palette_names: list, n_colors: int = 8, custom_pal
 
 def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=None):
     """
-    Preview a color palette by creating a simple color bar.
+    Aperçu d'une palette de couleurs sous forme de barre colorée.
 
-    Args:
-        palette: Name of the palette (str), list of colors, or colormap object.
-        n_colors (int): Number of colors to show
-        custom_palettes (dict): Dictionary of custom palettes (optional)
-        ax: Matplotlib axes object (optional, creates new if None)
+    Paramètres:
+    -----------
+    palette : str, list ou objet colormap
+        Nom de la palette, liste de couleurs ou objet colormap
+    n_colors : int
+        Nombre de couleurs à afficher
+    custom_palettes : dict
+        Dictionnaire de palettes personnalisées (optionnel)
+    ax : matplotlib.axes.Axes
+        Objet axes matplotlib (optionnel, en crée un nouveau si None)
 
-    Returns:
-        matplotlib.axes.Axes: The axes object with the palette preview
+    Retourne:
+    ---------
+    matplotlib.axes.Axes : L'objet axes avec l'aperçu de la palette
     """
     import matplotlib.colors as mcolors
 
-    # Create axes if not provided
+    # Création des axes si non fournis
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 2), dpi=300)
     else:
@@ -408,21 +497,21 @@ def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=No
 
     colors = []
 
-    # 1. Si c'est une liste de couleurs (list ou tuple)
+    # 1. Liste de couleurs (list ou tuple)
     if isinstance(palette, (list, tuple)):
         colors = palette[:n_colors]
-    # 2. Si c'est un colormap matplotlib
+    # 2. Objet colormap matplotlib
     elif hasattr(palette, "__call__") and hasattr(palette, "colors") is False:
         # Génère n_colors à partir du colormap
         colors = [mcolors.to_hex(palette(i / (n_colors - 1))) for i in range(n_colors)]
-    # 3. Si c'est une palette personnalisée par nom (str)
+    # 3. Palette personnalisée par nom (str)
     elif isinstance(palette, str) and palette in custom_palettes:
         val = custom_palettes[palette]
         if isinstance(val, dict) and 'couleurs' in val:
             colors = val['couleurs'][:n_colors]
         else:
             colors = val[:n_colors]
-    # 4. Si c'est un nom de palette seaborn ou matplotlib
+    # 4. Nom de palette seaborn ou matplotlib
     elif isinstance(palette, str):
         try:
             colors = sns.color_palette(palette, n_colors)
@@ -435,13 +524,13 @@ def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=No
                     show_cmap(palette)
                     return
                 except Exception:
-                    print(f"Palette '{palette}' not found")
+                    print(f"Palette '{palette}' introuvable")
                     return None
     else:
         print("Format de palette non reconnu. Fournir un nom, une liste de couleurs ou un colormap.")
         return None
 
-    # Create color preview
+    # Création de l'aperçu des couleurs
     for i, color in enumerate(colors):
         ax.barh(0, 1, left=i, color=color, edgecolor="white", linewidth=0.5)
 
@@ -450,9 +539,9 @@ def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=No
     ax.set_yticks([])
     ax.set_xticks(range(len(colors)))
     ax.set_xticklabels([f"C{i+1}" for i in range(len(colors))])
-    ax.set_title(f"Palette Preview: {getattr(palette, 'name', palette) if not isinstance(palette, (list, tuple)) else 'Custom list'}")
+    ax.set_title(f"Aperçu palette : {getattr(palette, 'name', palette) if not isinstance(palette, (list, tuple)) else 'Liste personnalisée'}")
 
-    # Add color codes as text
+    # Ajout des codes couleurs en texte
     for i, color in enumerate(colors):
         color_text = color if isinstance(color, str) else mcolors.to_hex(color)
         ax.text(
@@ -477,9 +566,13 @@ def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=No
 def set_style(style_name, source="matplotlib"):
     """
     Applique un style graphique depuis Matplotlib, Seaborn, mplcyberpunk ou SciencePlots.
-    
-    style_name : nom du style à appliquer
-    source : "matplotlib", "seaborn", "mplcyberpunk", "SciencePlots"
+
+    Paramètres:
+    -----------
+    style_name : str
+        Nom du style à appliquer
+    source : str
+        Source du style : "matplotlib", "seaborn", "mplcyberpunk", "SciencePlots"
     """
     import matplotlib.pyplot as plt
     
@@ -527,6 +620,13 @@ def set_style(style_name, source="matplotlib"):
 
 
 def list_all_styles():
+    """
+    Liste tous les styles graphiques disponibles par source.
+
+    Retourne:
+    ---------
+    dict : Dictionnaire des styles disponibles par source
+    """
     import matplotlib.pyplot as plt
     styles = {}
     
@@ -536,7 +636,7 @@ def list_all_styles():
     # 2. Styles Seaborn
     try:
         import seaborn as sns
-        # Les styles Seaborn sont bien nommés et définis ici :
+        # Les styles Seaborn sont bien définis ici :
         seaborn_styles = ["darkgrid", "whitegrid", "dark", "white", "ticks"]
         styles['seaborn'] = seaborn_styles
     except ImportError:
@@ -545,7 +645,7 @@ def list_all_styles():
     # 3. Styles mplcyberpunk
     try:
         import mplcyberpunk
-        # mplcyberpunk ajoute le style "cyberpunk" à matplotlib
+        # mplcyberpunk ajoute le style "cyberpunk" à Matplotlib
         if "cyberpunk" in plt.style.available:
             styles['mplcyberpunk'] = ["cyberpunk"]
         else:
@@ -557,8 +657,8 @@ def list_all_styles():
     try:
         import scienceplots
 
-        # Les styles SciencePlots sont généralement ajoutés à Matplotlib lors de l'installation
-        # Voici une liste classique, mais on peut filtrer via plt.style.available
+        # Les styles SciencePlots sont ajoutés à Matplotlib lors de l'installation
+        # Liste classique, filtrée via plt.style.available
         scienceplot_styles = [
             "science", "nature", "ieee", "acm", "vibrant", "bright", "muted", 
             "retro", "notebook", "scatter", "grid", "ieee_trans", "seaborn-v0_8"
@@ -570,3 +670,17 @@ def list_all_styles():
     
     return styles
 
+
+def create_palette(colors,mode="continuous"):
+    cmap = create_cmap(
+    colors=colors,
+    cmap_type=mode,
+    )
+    return cmap
+
+def palette(name,mode="continuous"):
+    cmap = load_cmap(name, cmap_type=mode)
+    return cmap
+
+
+    

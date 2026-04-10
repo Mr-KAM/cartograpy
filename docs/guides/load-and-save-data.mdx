@@ -1,0 +1,28 @@
+---
+title: "Charger et enregistrer des données"
+description: "Utiliser load, save et list_geofiles pour gérer les formats courants."
+---
+
+# Charger et enregistrer des données
+
+Ce guide couvre les opérations de base du module `data`.
+
+## Fonctions concernées
+
+- `load(filepath, layer=None)`
+- `save(data, file_extension, filename="output", ...)`
+- `list_geofiles(folder_path)`
+
+## Cas d'usage à documenter
+
+- lecture de GeoJSON, Shapefile, GeoPackage et CSV
+- lecture de GPX avec sélection de couche
+- lecture et fermeture correcte des rasters
+- export vers GeoJSON, Shapefile, CSV et GeoTIFF
+- découverte automatique des fichiers géographiques dans un dossier
+
+## Exemples à prévoir
+
+- lecture d'un GeoPackage multi-couches
+- sauvegarde dans le dossier `data/` d'un projet
+- gestion des formats non supportés
