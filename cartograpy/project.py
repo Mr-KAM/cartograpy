@@ -1,6 +1,8 @@
 import os
 import shutil
 import glob
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from pyproj import CRS
@@ -26,9 +28,37 @@ TABULAR_EXTENSIONS = {
     ".parquet", ".feather", ".dbf",
 }
 
+# Extensions principales des formats multi-fichiers (celles qu'on charge)
+_PRIMARY_EXTENSIONS = {".shp", ".tab"}
+
 # Familles de fichiers multi-composants (sidecars)
 SHAPEFILE_SIDECARS = {".shx", ".dbf", ".prj", ".cpg", ".sbn", ".sbx", ".qix"}
 TAB_SIDECARS = {".dat", ".map", ".id"}
+
+# Toutes les extensions sidecar (jamais des fichiers principaux à charger)
+_ALL_SIDECAR_EXTENSIONS = SHAPEFILE_SIDECARS | TAB_SIDECARS
+
+
+def _classify_extension(ext):
+    """Retourne le type ('vector', 'raster', 'tabular', 'other') d'une extension."""
+    ext = ext.lower()
+    if ext in VECTOR_EXTENSIONS:
+        return "vector"
+    if ext in RASTER_EXTENSIONS:
+        return "raster"
+    if ext in TABULAR_EXTENSIONS:
+        return "tabular"
+    return "other"
+
+
+def _get_sidecars_for(ext):
+    """Retourne le set de sidecars associé à une extension principale."""
+    ext = ext.lower()
+    if ext == ".shp":
+        return SHAPEFILE_SIDECARS
+    if ext == ".tab":
+        return TAB_SIDECARS
+    return set()
 
 
 class Project:
@@ -70,7 +100,7 @@ class Project:
         return self.path
 
     @staticmethod
-    def available_crs(auth_name="EPSG", crs_type=None, contains=""):
+    def available_crs(auth_name="EPSG", crs_type=None, name_contains=""):
         """
         Liste les CRS disponibles.
 
@@ -78,18 +108,20 @@ class Project:
             auth_name: Autorité (par défaut "EPSG"). Mettre None pour toutes.
             crs_type: Type de CRS à filtrer (ex: "GEOGRAPHIC_2D", "PROJECTED").
                       None pour tous les types.
-            contains: Filtre textuel sur le nom du CRS.
+            name_contains: Filtre textuel sur le nom du CRS (insensible à la casse).
 
         Returns:
-            list[dict]: Liste de dictionnaires {code, name, type, area}.
+            list[dict]: Liste de dictionnaires {authority, code, name, type, area}.
         """
         results = []
         crs_infos = query_crs_info(
             auth_name=auth_name,
             pj_types=crs_type,
-            contains=contains,
         )
+        filter_text = name_contains.lower()
         for info in crs_infos:
+            if filter_text and filter_text not in info.name.lower():
+                continue
             results.append({
                 "authority": info.auth_name,
                 "code": info.code,
@@ -99,14 +131,11 @@ class Project:
             })
         return results
 
-    def add_data(self, data, file_extension=None, filename="output", timestamp=False, raster_meta=None):
+    def add_data(self, data, file_extension=None, filename="output",
+                 timestamp=False, raster_meta=None,
+                 overwrite=False, mode="copy", category=None):
         """
         Ajoute des données dans le dossier data du projet.
-
-        Utilise la fonction save() de cartograpy.data pour sauvegarder
-        les données directement dans le dossier data du projet.
-        Si data est un chemin vers un fichier existant, le fichier est copié
-        directement dans le dossier data du projet.
 
         Args:
             data: Données à sauvegarder (GeoDataFrame, DataFrame, DatasetReader,
@@ -116,19 +145,32 @@ class Project:
             filename: Nom de base du fichier (sans extension). Par défaut "output".
             timestamp: Si True, ajoute un horodatage au nom. Par défaut False.
             raster_meta: Métadonnées raster si data est un numpy array.
+            overwrite: Si True, écrase un fichier existant. Par défaut False.
+            mode: "copy" (défaut), "move" ou "link" (lien symbolique).
+                  N'a d'effet que si data est un chemin de fichier.
+            category: Sous-dossier cible dans data/ ("vector", "raster", "tabular").
+                      Si None, écrit directement dans data/.
 
         Returns:
             str: Chemin absolu vers le fichier sauvegardé ou copié.
-        """
-        os.makedirs(self.data_dir, exist_ok=True)
 
-        # Si data est un chemin vers un fichier existant, le copier
+        Raises:
+            FileNotFoundError: Si data est un chemin et que le fichier n'existe pas.
+            FileExistsError: Si le fichier existe déjà et overwrite=False.
+            ValueError: Si file_extension manque pour un objet en mémoire
+                        ou si mode est invalide.
+        """
+        target_dir = self.data_dir
+        if category:
+            target_dir = os.path.join(self.data_dir, category)
+        os.makedirs(target_dir, exist_ok=True)
+
+        # Si data est un chemin vers un fichier existant
         if isinstance(data, (str, os.PathLike)):
             src = os.path.abspath(str(data))
             if not os.path.isfile(src):
                 raise FileNotFoundError(f"Fichier introuvable : {src}")
 
-            # Déduire le nom et l'extension depuis le fichier source
             src_basename = os.path.basename(src)
             src_name, src_ext = os.path.splitext(src_basename)
 
@@ -138,40 +180,58 @@ class Project:
                 file_extension = src_ext.lstrip(".")
 
             dest_name = f"{filename}.{file_extension}"
-            dest = os.path.join(self.data_dir, dest_name)
-            shutil.copy2(src, dest)
+            dest = os.path.join(target_dir, dest_name)
 
-            # Copier les fichiers secondaires (sidecars) pour les formats multi-fichiers
+            if os.path.isfile(dest) and not overwrite:
+                raise FileExistsError(
+                    f"Le fichier existe déjà : {dest}. "
+                    "Utilisez overwrite=True pour écraser."
+                )
+
+            _transfer = {
+                "copy": shutil.copy2,
+                "move": shutil.move,
+                "link": os.symlink,
+            }
+            if mode not in _transfer:
+                raise ValueError(f"mode invalide : {mode!r}. Attendu : 'copy', 'move' ou 'link'.")
+            transfer_fn = _transfer[mode]
+            transfer_fn(src, dest)
+
+            # Transférer les sidecars
             copied_sidecars = []
-            if src_ext.lower() == ".shp":
-                sidecars = SHAPEFILE_SIDECARS
-            elif src_ext.lower() == ".tab":
-                sidecars = TAB_SIDECARS
-            else:
-                sidecars = set()
-
+            sidecars = _get_sidecars_for(src_ext)
             src_dir = os.path.dirname(src)
             for sidecar_ext in sidecars:
                 sidecar_src = os.path.join(src_dir, src_name + sidecar_ext)
                 if os.path.isfile(sidecar_src):
-                    sidecar_dest = os.path.join(self.data_dir, f"{filename}{sidecar_ext}")
-                    shutil.copy2(sidecar_src, sidecar_dest)
+                    sidecar_dest = os.path.join(target_dir, f"{filename}{sidecar_ext}")
+                    transfer_fn(sidecar_src, sidecar_dest)
                     copied_sidecars.append(sidecar_ext)
 
+            verb = {"copy": "copiées", "move": "déplacées", "link": "liées"}[mode]
             if copied_sidecars:
-                print(f"✅ Données copiées : {dest} (+ {', '.join(copied_sidecars)})")
+                print(f"✅ Données {verb} : {dest} (+ {', '.join(copied_sidecars)})")
             else:
-                print(f"✅ Données copiées : {dest}")
+                print(f"✅ Données {verb} : {dest}")
             return dest
 
         if file_extension is None:
             raise ValueError("file_extension est requis quand data n'est pas un chemin de fichier.")
 
         # Réouvrir le DatasetReader s'il est fermé
-        if isinstance(data, rasterio.io.DatasetReader) and data.closed:
+        if isinstance(data, rasterio.DatasetReader) and data.closed:
             data = rasterio.open(data.name)
 
-        filepath = os.path.join(self.data_dir, filename)
+        filepath = os.path.join(target_dir, filename)
+
+        expected_dest = f"{filepath}.{file_extension}"
+        if os.path.isfile(expected_dest) and not overwrite:
+            raise FileExistsError(
+                f"Le fichier existe déjà : {expected_dest}. "
+                "Utilisez overwrite=True pour écraser."
+            )
+
         result = save(data, file_extension, filename=filepath, timestamp=timestamp, raster_meta=raster_meta)
         print(f"✅ Données ajoutées : {result}")
         return result
@@ -279,6 +339,68 @@ class Project:
         print(f"   raster/  → {len(self.raster_files)} fichier(s)")
         print(f"   tabular/ → {len(self.tabular_files)} fichier(s)")
 
+    def _resolve_data(self, name, base_dir=None, strict=True):
+        """
+        Résout le chemin d'un fichier dans un dossier du projet.
+
+        Cherche par nom exact, puis par nom de base (sans extension).
+        Ignore les fichiers sidecar (.shx, .dbf, .prj…) lors d'une
+        recherche par nom de base pour éviter les ambiguïtés.
+
+        Args:
+            name: Nom du fichier (avec ou sans extension).
+            base_dir: Dossier de recherche. Par défaut self.data_dir.
+            strict: Si True et que plusieurs fichiers correspondent au
+                    nom de base, lève une ValueError.
+
+        Returns:
+            str: Chemin absolu vers le fichier trouvé.
+
+        Raises:
+            FileNotFoundError: Si aucun fichier ne correspond.
+            ValueError: Si strict=True et plusieurs correspondances.
+        """
+        if base_dir is None:
+            base_dir = self.data_dir
+
+        # 1. Chemin direct
+        candidate = os.path.join(base_dir, name)
+        if os.path.isfile(candidate):
+            return candidate
+
+        if not os.path.isdir(base_dir):
+            raise FileNotFoundError(f"Dossier introuvable : {base_dir}")
+
+        # 2. Recherche par nom exact
+        for root, _dirs, files in os.walk(base_dir):
+            for f in files:
+                if f == name:
+                    return os.path.join(root, f)
+
+        # 3. Recherche par nom de base (ignore les sidecars)
+        matches = []
+        for root, _dirs, files in os.walk(base_dir):
+            for f in files:
+                ext = os.path.splitext(f)[1].lower()
+                if ext in _ALL_SIDECAR_EXTENSIONS:
+                    continue
+                if os.path.splitext(f)[0] == name:
+                    matches.append(os.path.join(root, f))
+
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            if strict:
+                raise ValueError(
+                    f"Nom ambigu '{name}' : {len(matches)} fichiers correspondent. "
+                    f"Précisez l'extension. Fichiers : {matches}"
+                )
+            return matches[0]
+
+        raise FileNotFoundError(
+            f"Fichier '{name}' introuvable dans {base_dir}"
+        )
+
     def list_data(self, type_filter=None):
         """
         Liste les fichiers présents dans le dossier data du projet.
@@ -299,15 +421,7 @@ class Project:
                 full_path = os.path.join(root, f)
                 name, ext = os.path.splitext(f)
                 ext_lower = ext.lower()
-
-                if ext_lower in VECTOR_EXTENSIONS:
-                    ftype = "vector"
-                elif ext_lower in RASTER_EXTENSIONS:
-                    ftype = "raster"
-                elif ext_lower in TABULAR_EXTENSIONS:
-                    ftype = "tabular"
-                else:
-                    ftype = "other"
+                ftype = _classify_extension(ext_lower)
 
                 if type_filter and ftype != type_filter:
                     continue
@@ -322,6 +436,68 @@ class Project:
                 })
 
         return results
+
+    def list_datasets(self, type_filter=None):
+        """
+        Liste les jeux de données logiques (un shapefile + ses sidecars = 1 entrée).
+
+        Args:
+            type_filter: Filtrer par type ("vector", "raster", "tabular").
+                         None pour tout retourner.
+
+        Returns:
+            list[dict]: Jeux de données avec name, type, main_file, sidecars,
+                        total_size, path.
+        """
+        all_files = self.list_data()
+        if not all_files:
+            return []
+
+        # Indexer par (répertoire, nom de base)
+        groups: dict[tuple[str, str], list[dict]] = {}
+        for entry in all_files:
+            key = (os.path.dirname(entry["path"]), entry["name"])
+            groups.setdefault(key, []).append(entry)
+
+        datasets = []
+        seen_keys: set[tuple[str, str]] = set()
+
+        for (dirpath, basename), entries in groups.items():
+            if (dirpath, basename) in seen_keys:
+                continue
+
+            # Séparer principal / sidecars
+            primary = []
+            sidecars = []
+            for e in entries:
+                if e["extension"] in _ALL_SIDECAR_EXTENSIONS:
+                    sidecars.append(e)
+                else:
+                    primary.append(e)
+
+            if not primary:
+                # Sidecars orphelins : les rattacher s'il y a un fichier principal
+                # avec le même basename dans le même dossier
+                continue
+
+            for p in primary:
+                ftype = p["type"]
+                if type_filter and ftype != type_filter:
+                    continue
+
+                ds = {
+                    "name": basename,
+                    "type": ftype,
+                    "main_file": p["path"],
+                    "extension": p["extension"],
+                    "sidecars": [s["path"] for s in sidecars],
+                    "total_size": p["size"] + sum(s["size"] for s in sidecars),
+                    "path": dirpath,
+                }
+                datasets.append(ds)
+                seen_keys.add((dirpath, basename))
+
+        return datasets
 
     def load_data(self, name, layer=None):
         """
@@ -338,23 +514,8 @@ class Project:
         Raises:
             FileNotFoundError: Si le fichier n'existe pas dans le dossier data.
         """
-        # Chemin direct
-        candidate = os.path.join(self.data_dir, name)
-        if os.path.isfile(candidate):
-            return _load_data(candidate, layer=layer)
-
-        # Recherche récursive
-        if not os.path.isdir(self.data_dir):
-            raise FileNotFoundError(f"Le dossier data n'existe pas : {self.data_dir}")
-
-        for root, _dirs, files in os.walk(self.data_dir):
-            for f in files:
-                if f == name or os.path.splitext(f)[0] == name:
-                    return _load_data(os.path.join(root, f), layer=layer)
-
-        raise FileNotFoundError(
-            f"Fichier '{name}' introuvable dans {self.data_dir}"
-        )
+        path = self._resolve_data(name)
+        return _load_data(path, layer=layer)
 
     def remove_data(self, name):
         """
@@ -369,41 +530,62 @@ class Project:
         Raises:
             FileNotFoundError: Si le fichier n'existe pas.
         """
-        target = None
-        for root, _dirs, files in os.walk(self.data_dir):
-            if name in files:
-                target = os.path.join(root, name)
-                break
-
-        if target is None:
-            raise FileNotFoundError(f"Fichier '{name}' introuvable dans {self.data_dir}")
+        target = self._resolve_data(name)
 
         removed = []
-        base_name, ext = os.path.splitext(name)
+        base_name, ext = os.path.splitext(os.path.basename(target))
         target_dir = os.path.dirname(target)
-
-        # Déterminer les sidecars à supprimer
-        if ext.lower() == ".shp":
-            sidecars = SHAPEFILE_SIDECARS
-        elif ext.lower() == ".tab":
-            sidecars = TAB_SIDECARS
-        else:
-            sidecars = set()
 
         # Supprimer le fichier principal
         os.remove(target)
         removed.append(target)
 
         # Supprimer les sidecars
-        for sidecar_ext in sidecars:
+        for sidecar_ext in _get_sidecars_for(ext):
             sidecar_path = os.path.join(target_dir, base_name + sidecar_ext)
             if os.path.isfile(sidecar_path):
                 os.remove(sidecar_path)
                 removed.append(sidecar_path)
 
-        print(f"🗑️ {len(removed)} fichier(s) supprimé(s) : {name}"
+        print(f"🗑️ {len(removed)} fichier(s) supprimé(s) : {os.path.basename(target)}"
               + (" (+ sidecars)" if len(removed) > 1 else ""))
         return removed
+
+    def rename_data(self, old, new):
+        """
+        Renomme un jeu de données (fichier principal + sidecars).
+
+        Args:
+            old: Nom actuel du fichier (avec ou sans extension).
+            new: Nouveau nom de base (sans extension).
+
+        Returns:
+            list[tuple[str, str]]: Paires (ancien chemin, nouveau chemin).
+
+        Raises:
+            FileNotFoundError: Si le fichier source n'existe pas.
+        """
+        target = self._resolve_data(old)
+        target_dir = os.path.dirname(target)
+        old_base, ext = os.path.splitext(os.path.basename(target))
+
+        renamed = []
+
+        # Renommer le fichier principal
+        new_path = os.path.join(target_dir, new + ext)
+        os.rename(target, new_path)
+        renamed.append((target, new_path))
+
+        # Renommer les sidecars
+        for sidecar_ext in _get_sidecars_for(ext):
+            sidecar_old = os.path.join(target_dir, old_base + sidecar_ext)
+            if os.path.isfile(sidecar_old):
+                sidecar_new = os.path.join(target_dir, new + sidecar_ext)
+                os.rename(sidecar_old, sidecar_new)
+                renamed.append((sidecar_old, sidecar_new))
+
+        print(f"✏️ {len(renamed)} fichier(s) renommé(s) : {old_base} → {new}")
+        return renamed
 
     def get_path(self, name, folder="data"):
         """
@@ -420,20 +602,7 @@ class Project:
             FileNotFoundError: Si le fichier n'existe pas.
         """
         base = self.data_dir if folder == "data" else self.output_dir
-
-        # Chemin direct
-        candidate = os.path.join(base, name)
-        if os.path.isfile(candidate):
-            return candidate
-
-        # Recherche récursive
-        if os.path.isdir(base):
-            for root, _dirs, files in os.walk(base):
-                for f in files:
-                    if f == name or os.path.splitext(f)[0] == name:
-                        return os.path.join(root, f)
-
-        raise FileNotFoundError(f"Fichier '{name}' introuvable dans {base}")
+        return self._resolve_data(name, base_dir=base)
 
     def set_crs(self, crs):
         """
@@ -448,6 +617,104 @@ class Project:
         self.crs = CRS.from_user_input(crs)
         print(f"🌐 CRS mis à jour : {self.crs}")
         return self.crs
+
+    def save_output(self, data, file_extension, filename="output",
+                    timestamp=False, raster_meta=None, overwrite=False):
+        """
+        Sauvegarde des données dans le dossier output du projet.
+
+        Pendant de add_data mais ciblant output_dir.
+
+        Args:
+            data: Données à sauvegarder (GeoDataFrame, DataFrame, DatasetReader,
+                  numpy array).
+            file_extension: Extension du fichier de sortie.
+            filename: Nom de base du fichier (sans extension).
+            timestamp: Si True, ajoute un horodatage au nom.
+            raster_meta: Métadonnées raster si data est un numpy array.
+            overwrite: Si True, écrase un fichier existant.
+
+        Returns:
+            str: Chemin absolu vers le fichier sauvegardé.
+
+        Raises:
+            FileExistsError: Si le fichier existe déjà et overwrite=False.
+        """
+        os.makedirs(self.output_dir, exist_ok=True)
+
+        filepath = os.path.join(self.output_dir, filename)
+        expected_dest = f"{filepath}.{file_extension}"
+        if os.path.isfile(expected_dest) and not overwrite:
+            raise FileExistsError(
+                f"Le fichier existe déjà : {expected_dest}. "
+                "Utilisez overwrite=True pour écraser."
+            )
+
+        if isinstance(data, rasterio.DatasetReader) and data.closed:
+            data = rasterio.open(data.name)
+
+        result = save(data, file_extension, filename=filepath,
+                      timestamp=timestamp, raster_meta=raster_meta)
+        print(f"✅ Sortie sauvegardée : {result}")
+        return result
+
+    def save_manifest(self):
+        """
+        Sauvegarde un fichier project.json décrivant le projet.
+
+        Le manifeste contient le CRS, les dates, l'inventaire des données
+        et les métadonnées du projet.
+
+        Returns:
+            str: Chemin vers le fichier project.json.
+        """
+        manifest_path = os.path.join(self.path, "project.json")
+
+        datasets_info = []
+        for ds in self.list_datasets():
+            datasets_info.append({
+                "name": ds["name"],
+                "type": ds["type"],
+                "extension": ds["extension"],
+                "main_file": os.path.relpath(ds["main_file"], self.path),
+                "sidecars": [os.path.relpath(s, self.path) for s in ds["sidecars"]],
+                "total_size": ds["total_size"],
+            })
+
+        manifest = {
+            "project_path": self.path,
+            "crs": str(self.crs),
+            "data_dir": os.path.relpath(self.data_dir, self.path),
+            "output_dir": os.path.relpath(self.output_dir, self.path),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "datasets": datasets_info,
+        }
+
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+        print(f"📄 Manifeste sauvegardé : {manifest_path}")
+        return manifest_path
+
+    def load_manifest(self):
+        """
+        Charge le fichier project.json et retourne son contenu.
+
+        Returns:
+            dict: Contenu du manifeste.
+
+        Raises:
+            FileNotFoundError: Si project.json n'existe pas.
+        """
+        manifest_path = os.path.join(self.path, "project.json")
+        if not os.path.isfile(manifest_path):
+            raise FileNotFoundError(
+                f"Manifeste introuvable : {manifest_path}. "
+                "Utilisez save_manifest() pour le créer."
+            )
+
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            return json.load(f)
 
     def clean_output(self):
         """
@@ -471,10 +738,14 @@ class Project:
         print(f"🧹 {count} fichier(s) supprimé(s) du dossier output.")
         return count
 
-    def validate(self):
+    def validate(self, deep=False):
         """
-        Vérifie l'intégrité du projet : existence des dossiers, lisibilité
-        des fichiers et cohérence des sidecars shapefile.
+        Vérifie l'intégrité du projet.
+
+        Args:
+            deep: Si True, effectue des vérifications approfondies :
+                  orphelins sidecars, noms de base ambigus, lisibilité
+                  réelle des fichiers géospatiaux.
 
         Returns:
             dict: Rapport de validation avec les statuts et éventuels avertissements.
@@ -500,6 +771,9 @@ class Project:
                 shp_basenames = set()
                 all_files = set(files)
 
+                # Collecter des infos pour la validation approfondie
+                basenames: dict[str, list[str]] = {}
+
                 for f in files:
                     full_path = os.path.join(root, f)
 
@@ -508,8 +782,13 @@ class Project:
                         report["warnings"].append(f"Fichier non lisible : {full_path}")
 
                     name, ext = os.path.splitext(f)
-                    if ext.lower() == ".shp":
+                    ext_lower = ext.lower()
+
+                    if ext_lower == ".shp":
                         shp_basenames.add(name)
+
+                    if deep:
+                        basenames.setdefault(name, []).append(ext_lower)
 
                 # Vérifier les sidecars obligatoires pour chaque shapefile
                 for basename in shp_basenames:
@@ -519,6 +798,58 @@ class Project:
                                 f"Sidecar manquant : {basename}{required_ext} "
                                 f"(requis pour {basename}.shp)"
                             )
+
+                if deep:
+                    # Sidecars orphelins
+                    for f in files:
+                        name, ext = os.path.splitext(f)
+                        if ext.lower() in _ALL_SIDECAR_EXTENSIONS:
+                            # Vérifier qu'un fichier principal existe
+                            primary_ext = ".shp" if ext.lower() in SHAPEFILE_SIDECARS else ".tab"
+                            if name + primary_ext not in all_files:
+                                report["warnings"].append(
+                                    f"Sidecar orphelin : {f} "
+                                    f"(pas de {name}{primary_ext} trouvé)"
+                                )
+
+                    # Noms de base ambigus (même nom, extensions différentes
+                    # qui sont toutes des primaires)
+                    for name, exts in basenames.items():
+                        primary_exts = [
+                            e for e in exts
+                            if e not in _ALL_SIDECAR_EXTENSIONS
+                        ]
+                        if len(primary_exts) > 1:
+                            report["warnings"].append(
+                                f"Nom ambigu : '{name}' existe avec les extensions "
+                                f"{primary_exts}"
+                            )
+
+                    # Tenter d'ouvrir les fichiers géospatiaux
+                    for f in files:
+                        full_path = os.path.join(root, f)
+                        _name, ext = os.path.splitext(f)
+                        ext_lower = ext.lower()
+
+                        if ext_lower in _ALL_SIDECAR_EXTENSIONS:
+                            continue
+
+                        if ext_lower in VECTOR_EXTENSIONS:
+                            try:
+                                import geopandas as gpd
+                                gpd.read_file(full_path, rows=0)
+                            except Exception as exc:
+                                report["warnings"].append(
+                                    f"Fichier vectoriel illisible : {f} ({exc})"
+                                )
+                        elif ext_lower in RASTER_EXTENSIONS:
+                            try:
+                                with rasterio.open(full_path) as src:
+                                    _ = src.meta
+                            except Exception as exc:
+                                report["warnings"].append(
+                                    f"Fichier raster illisible : {f} ({exc})"
+                                )
 
         status = "✅ valide" if report["valid"] else "❌ invalide"
         print(f"🔍 Validation du projet : {status}")
