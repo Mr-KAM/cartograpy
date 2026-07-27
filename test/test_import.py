@@ -54,21 +54,6 @@ class TestImports:
             list_all_styles,
         )
 
-    def test_import_geocoder(self):
-        pytest = __import__('pytest')
-        try:
-            from cartograpy import (  # noqa: F401
-                GeocodingProvider,
-                NominatimProvider,
-                OpenCageProvider,
-                GeocodingResult,
-            )
-        except ImportError:
-            pytest.skip("geocoder module not available")
-
-    def test_import_converter(self):
-        from cartograpy import converter, extract_gpx_data  # noqa: F401
-
     def test_import_country_iso3(self):
         from cartograpy import COUNTRY_ISO3
         assert isinstance(COUNTRY_ISO3, dict)

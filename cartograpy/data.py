@@ -4,7 +4,8 @@ from __future__ import annotations
 import pandas as pd
 import geopandas as gpd
 import geojson
-from typing import Union, List, Optional, Tuple
+from importlib import import_module
+from typing import TYPE_CHECKING, Union, List, Optional, Tuple
 import math
 import numpy as np
 
@@ -23,12 +24,6 @@ import zipfile
 import io
 import os
 from pathlib import Path
-
-# Packages pour les données de la worldbank
-import wbdata
-
-# Package pour les données de OSM 
-import osmnx as ox
 
 # Packages pour la lecture des données Rasters
 
@@ -53,8 +48,38 @@ import gzip
 from contextlib import ExitStack
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import struct
-import ee
-import geemap
+
+if TYPE_CHECKING:
+    import ee
+    import geemap
+
+
+def _import_optional_dependency(module_name: str, package_name: Optional[str] = None):
+    """Importe une dépendance optionnelle avec un message d'erreur explicite."""
+    try:
+        return import_module(module_name)
+    except ImportError as e:
+        install_name = package_name or module_name
+        raise ImportError(
+            f"Cette fonctionnalité nécessite le paquet optionnel '{install_name}'. "
+            f"Installez-le avec: pip install {install_name}"
+        ) from e
+
+
+def _require_wbdata():
+    return _import_optional_dependency("wbdata")
+
+
+def _require_osmnx():
+    return _import_optional_dependency("osmnx")
+
+
+def _require_ee():
+    return _import_optional_dependency("ee", "earthengine-api")
+
+
+def _require_geemap():
+    return _import_optional_dependency("geemap")
  
 
 
@@ -129,7 +154,7 @@ def load(filepath,layer=None):
         raise ValueError(f"Format '{ext}' non supporté pour le chargement.")
 
 
-def describe(filepath):
+def describe(filepath) -> dict:
     """
     Affiche un résumé des couches et métadonnées d'un fichier géospatial.
 
@@ -365,6 +390,12 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
     if isinstance(data, (gpd.GeoDataFrame, pd.DataFrame)):
         # Formats vectoriels natifs (via fiona/GDAL)
         if file_extension in _VECTOR_DRIVERS:
+            if not isinstance(data, gpd.GeoDataFrame):
+                raise TypeError(
+                    f"Le format '{file_extension}' nécessite un GeoDataFrame "
+                    f"(pas un DataFrame sans géométrie). "
+                    f"Utilisez un format tabulaire (csv, parquet, xlsx) pour un DataFrame."
+                )
             data.to_file(output_path, driver=_VECTOR_DRIVERS[file_extension])  # type: ignore[call-overload]
 
         # Formats tabulaires (géométrie retirée sauf geoparquet)
@@ -483,6 +514,7 @@ class GeoBoundaries:
         self._session = CachedSession(expire_after=cache_expire_seconds)
         self._base_url = "https://www.geoboundaries.org/api/current/gbOpen"
         self._continents_gdf = None
+        self._countries_gdf = None
     
     def clear_cache(self):
         """Vide le cache des requêtes."""
@@ -512,9 +544,18 @@ class GeoBoundaries:
         Returns:
             bool: True si le niveau ADM est valide
         """
-        url = f"{self._base_url}/{iso3}/"
-        html = self._session.get(url, verify=True).text
-        return adm in html
+        url = f"{self._base_url}/{iso3}/{adm}/"
+        resp = self._session.get(url, verify=True)
+        if resp.status_code != 200:
+            return False
+        try:
+            data = resp.json()
+            # L'API retourne un dict (ou liste) avec des données si le niveau existe
+            if isinstance(data, list):
+                return len(data) > 0
+            return bool(data and not data.get("error"))
+        except (ValueError, AttributeError):
+            return False
     
     def _validate_adm(self, adm: Union[str, int]) -> str:
         """
@@ -714,7 +755,7 @@ class GeoBoundaries:
         
         return self._session.get(json_uri).text
     
-    def adm(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> Union[gpd.GeoDataFrame, dict]:
+    def adm(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> gpd.GeoDataFrame:
         """
         Récupère les limites administratives des territoires spécifiés.
         
@@ -729,7 +770,7 @@ class GeoBoundaries:
             simplified: Si True, utilise la géométrie simplifiée (défaut: True)
             
         Returns:
-            gpd.GeoDataFrame si territories est un str, dict de GeoDataFrames si c'est une liste
+            gpd.GeoDataFrame: GeoDataFrame des territoires demandés
             
         Note:
             Valeurs autorisées pour territories :
@@ -738,16 +779,16 @@ class GeoBoundaries:
             - Nom du pays en plusieurs langues supportées
         """
         if isinstance(territories, str):
-            geo_df=gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territories, adm, simplified)))
-            return geo_df
+            territories = [territories]
         
-        # Traitement pour une liste de territoires
-        geojsons_dic = {}
+        gdfs = []
         for territory in territories:
-            data = gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territory, adm, simplified)))
-            geojsons_dic[territory]=data
+            gdf = gpd.GeoDataFrame.from_features(
+                geojson.loads(self._get_data(territory, adm, simplified))
+            )
+            gdfs.append(gdf)
 
-        return geojsons_dic
+        return pd.concat(gdfs, ignore_index=True) if len(gdfs) > 1 else gdfs[0]
 
 
     def continents(self,continents: Optional[Union[str, List[str]]] = None) -> gpd.GeoDataFrame:
@@ -833,37 +874,22 @@ class Bound(GeoBoundaries):
     def get_admin(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> gpd.GeoDataFrame:
         """
         Récupère les limites administratives des territoires spécifiés.
-        
+        Délègue à ``adm()`` de la classe parente.
+
         Args:
             territories: Territoire(s) à récupérer. Peut être :
                 - Un string unique : "Senegal", "SEN", "เซเนกัล"
-                - Une liste de strings : ["SEN", "Mali"], ["セネガル", "մալի"]
+                - Une liste de strings : ["SEN", "Mali"], ["セネガル", "մալి"]
             adm: Niveau administratif :
                 - 'ADM0' à 'ADM5' (si existant pour le pays)
                 - int de 0 à 5
                 - int -1 (retourne le plus petit niveau ADM disponible)
             simplified: Si True, utilise la géométrie simplifiée (défaut: True)
-            
+
         Returns:
             gpd.GeoDataFrame: GeoDataFrame des territoires
-            
-        Note:
-            Valeurs autorisées pour territories :
-            - ISO 3166-1 (alpha2) : AFG, QAT, YEM, etc.
-            - ISO 3166-1 (alpha3) : AF, QA, YE, etc.
-            - Nom du pays en plusieurs langues supportées
         """
-        if isinstance(territories, str):
-            geo_df = gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territories, adm, simplified)))
-            return geo_df
-        
-        # Traitement pour une liste de territoires
-        geojsons_dic = {}
-        for territory in territories:
-            data = gpd.GeoDataFrame.from_features(geojson.loads(self._get_data(territory, adm, simplified)))
-            geojsons_dic[territory] = data
-
-        return pd.concat(geojsons_dic, axis=0, ignore_index=True)
+        return self.adm(territories, adm, simplified)
 
     def get_country(self, name: Union[str, List[str]]) -> gpd.GeoDataFrame:
         """
@@ -875,26 +901,16 @@ class Bound(GeoBoundaries):
 
         Returns:
             gpd.GeoDataFrame: GeoDataFrame contenant la/les géométrie(s) du/des pays (niveau ADM0).
-                Si un seul pays est fourni, retourne un GeoDataFrame.
-                Si une liste est fournie, retourne un GeoDataFrame concaténé de tous les pays.
 
         Raises:
             KeyError: Si un pays n'est pas trouvé.
 
         Exemples:
-            >>> b = bound()
+            >>> b = Bound()
             >>> france = b.get_country("France")
             >>> pays = b.get_country(["France", "SEN", "Mali"])
         """
-        if isinstance(name, str):
-            return self.get_admin(name, adm=0, simplified=True)
-        
-        gdfs = []
-        for country in name:
-            gdf = self.get_admin(country, adm=0, simplified=True)
-            gdfs.append(gdf)
-        return pd.concat(gdfs, ignore_index=True)
-
+        return self.get_admin(name, adm=0, simplified=True)
 
     def get_continent(self, name: Union[str, List[str]]) -> gpd.GeoDataFrame:
         """
@@ -911,7 +927,7 @@ class Bound(GeoBoundaries):
             ValueError: Si un continent n'est pas trouvé.
 
         Exemples:
-            >>> b = bound()
+            >>> b = Bound()
             >>> afrique = b.get_continent("Afrique")
             >>> europe = b.get_continent("Europe")
             >>> plusieurs = b.get_continent(["Afrique", "Europe", "Asia"])
@@ -934,7 +950,7 @@ class Bound(GeoBoundaries):
             ValueError: Si le niveau spécifié n'est pas "continent" ou "country".
 
         Exemples:
-            >>> b = bound()
+            >>> b = Bound()
             >>> continents = b.get_world("continent")
             >>> pays = b.get_world("country")
         """
@@ -942,12 +958,237 @@ class Bound(GeoBoundaries):
         if level == "continent":
             return self.continents()
         elif level == "country":
-            naturalearth_url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
-            return gpd.read_file(naturalearth_url)
+            return self._load_countries()
         else:
             raise ValueError(
                 f"Niveau '{level}' non supporté. Utilisez 'continent' ou 'country'."
             )
+
+    def _load_countries(self) -> gpd.GeoDataFrame:
+        """Charge et met en cache les pays Natural Earth."""
+        if self._countries_gdf is None:
+            naturalearth_url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
+            world = gpd.read_file(naturalearth_url)
+            self._countries_gdf = world[['NAME', 'ISO_A3', 'CONTINENT', 'geometry']].rename(
+                columns={'NAME': 'name', 'ISO_A3': 'iso3', 'CONTINENT': 'continent'}
+            )
+        return self._countries_gdf.copy()
+
+    def get_neighbors(self, territory: Union[str, List[str]]) -> gpd.GeoDataFrame:
+        """
+        Retourne les pays voisins (adjacents) d'un ou plusieurs territoires.
+
+        Args:
+            territory: Nom du pays, code ISO2/ISO3, ou liste de noms/codes.
+                       Exemples : "France", "CIV", ["SEN", "Mali"]
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame des pays voisins (sans le pays lui-même).
+
+        Exemples:
+            >>> b = Bound()
+            >>> voisins = b.get_neighbors("CIV")
+            >>> voisins = b.get_neighbors(["SEN", "Mali"])
+        """
+        target = self.get_country(territory)
+        all_countries = self._load_countries()
+
+        # Union des géométries du territoire cible
+        target_union = target.union_all()
+
+        # Filtrer les pays qui touchent la géométrie cible
+        mask = all_countries.geometry.intersects(target_union)
+        neighbors = all_countries[mask].copy()
+
+        # Retirer le(s) pays cible(s) eux-mêmes (par intersection > 95% de la surface)
+        target_iso_codes = set()
+        if isinstance(territory, str):
+            iso3 = self.get_iso3(territory)
+            if isinstance(iso3, str):
+                target_iso_codes.add(iso3)
+        else:
+            for t in territory:
+                iso3 = self.get_iso3(t)
+                if isinstance(iso3, str):
+                    target_iso_codes.add(iso3)
+
+        if target_iso_codes:
+            neighbors = neighbors[~neighbors['iso3'].isin(target_iso_codes)]
+
+        return neighbors.reset_index(drop=True)
+
+    def get_countries_by_continent(self, continent: str, adm: Union[str, int] = 0,
+                                    simplified: bool = True) -> gpd.GeoDataFrame:
+        """
+        Retourne tous les pays d'un continent via GeoBoundaries.
+
+        Args:
+            continent: Nom du continent (français ou anglais).
+                       Exemples : "Africa", "Afrique", "Europe"
+            adm: Niveau administratif (défaut: 0 = frontières nationales).
+            simplified: Si True, utilise la géométrie simplifiée.
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame de tous les pays du continent.
+
+        Exemples:
+            >>> b = Bound()
+            >>> afrique = b.get_countries_by_continent("Afrique")
+        """
+        all_countries = self._load_countries()
+        mapping = self._CONTINENT_MAPPING
+        continent_name = mapping.get(continent.lower(), continent)
+
+        mask = all_countries['continent'].str.contains(continent_name, case=False, na=False)
+        countries_in_continent = all_countries[mask]
+
+        if countries_in_continent.empty:
+            available = ', '.join(all_countries['continent'].unique())
+            raise ValueError(f"Continent '{continent}' non trouvé. Disponibles : {available}")
+
+        iso_codes_list = countries_in_continent['iso3'].tolist()
+        # Filtrer les codes invalides (-99, etc.)
+        iso_codes_list = [c for c in iso_codes_list if len(c) == 3 and c != '-99']
+
+        return self.get_admin(iso_codes_list, adm=adm, simplified=simplified)
+
+    def get_bbox(self, territory: Union[str, List[str]]) -> tuple:
+        """
+        Retourne la bounding box d'un ou plusieurs territoires.
+
+        Args:
+            territory: Nom du pays, code ISO2/ISO3, ou liste de noms/codes.
+
+        Returns:
+            tuple: (west, south, east, north) en WGS-84.
+
+        Exemples:
+            >>> b = Bound()
+            >>> b.get_bbox("CIV")
+            (-8.599..., 4.357..., -2.494..., 10.740...)
+        """
+        gdf = self.get_country(territory)
+        west, south, east, north = gdf.total_bounds
+        return (west, south, east, north)
+
+    def get_centroid(self, territory: Union[str, List[str]]) -> gpd.GeoDataFrame:
+        """
+        Retourne le centroïde d'un ou plusieurs territoires.
+
+        Args:
+            territory: Nom du pays, code ISO2/ISO3, ou liste de noms/codes.
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame avec les centroïdes (Point) comme géométrie.
+
+        Exemples:
+            >>> b = Bound()
+            >>> centre = b.get_centroid("CIV")
+        """
+        gdf = self.get_country(territory)
+        centroids = gdf.copy()
+        centroids['geometry'] = centroids.geometry.centroid
+        return centroids
+
+    def clip(self, gdf: gpd.GeoDataFrame, territory: Union[str, List[str]],
+             adm: Union[str, int] = 0) -> gpd.GeoDataFrame:
+        """
+        Découpe un GeoDataFrame selon les frontières d'un territoire.
+
+        Args:
+            gdf: GeoDataFrame à découper.
+            territory: Nom du pays, code ISO, ou liste de noms/codes.
+            adm: Niveau administratif pour les frontières de découpe (défaut: 0).
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame découpé.
+
+        Exemples:
+            >>> b = Bound()
+            >>> routes_civ = b.clip(routes_gdf, "CIV")
+        """
+        mask_gdf = self.get_admin(territory, adm=adm, simplified=False)
+        return gpd.clip(gdf, mask_gdf)
+
+    def contains(self, territory: str, point: Union[tuple, list]) -> bool:
+        """
+        Vérifie si un point (latitude, longitude) est à l'intérieur d'un territoire.
+
+        Args:
+            territory: Nom du pays ou code ISO.
+            point: Tuple ou liste (latitude, longitude).
+
+        Returns:
+            bool: True si le point est dans le territoire.
+
+        Exemples:
+            >>> b = Bound()
+            >>> b.contains("CIV", (6.85, -5.28))
+            True
+        """
+        gdf = self.get_country(territory)
+        lat, lon = point
+        pt = Point(lon, lat)
+        return bool(gdf.union_all().contains(pt))
+
+    def search_country(self, keyword: str) -> List[tuple]:
+        """
+        Recherche floue dans les noms de pays.
+
+        Args:
+            keyword: Mot-clé à rechercher (insensible à la casse).
+
+        Returns:
+            List[tuple]: Liste de tuples (nom_pays, code_iso3) correspondants.
+
+        Exemples:
+            >>> b = Bound()
+            >>> b.search_country("ivo")
+            [("Côte d'Ivoire", 'CIV')]
+        """
+        keyword_lower = keyword.lower()
+        results = [
+            (name, iso)
+            for name, iso in countries_iso3.items()
+            if keyword_lower in name.lower()
+        ]
+        if not results:
+            print(f"Aucun pays trouvé pour '{keyword}'.")
+        return results
+
+    def get_area(self, territory: Union[str, List[str]], unit: str = "km2") -> Union[float, gpd.GeoDataFrame]:
+        """
+        Retourne la superficie d'un ou plusieurs territoires.
+
+        Args:
+            territory: Nom du pays, code ISO, ou liste de noms/codes.
+            unit: Unité de surface. "km2" (défaut), "m2", ou "ha".
+
+        Returns:
+            float: Superficie si un seul territoire.
+            gpd.GeoDataFrame: GeoDataFrame avec colonne 'area' si plusieurs territoires.
+
+        Raises:
+            ValueError: Si l'unité n'est pas supportée.
+
+        Exemples:
+            >>> b = Bound()
+            >>> b.get_area("CIV")
+            322460.0  # approximatif
+            >>> b.get_area(["SEN", "Mali"])
+        """
+        divisors = {"m2": 1, "km2": 1e6, "ha": 1e4}
+        if unit not in divisors:
+            raise ValueError(f"Unité '{unit}' non supportée. Utilisez : {list(divisors.keys())}")
+
+        gdf = self.get_country(territory)
+        # Projeter en Equal Area (Mollweide) pour un calcul de surface correct
+        gdf_proj = gdf.to_crs("ESRI:54009")
+        gdf['area'] = gdf_proj.geometry.area / divisors[unit]
+
+        if isinstance(territory, str):
+            return float(gdf['area'].sum())
+        return gdf
 
 
 
@@ -962,7 +1203,7 @@ class Geocoder:
         delay (float): Délai en secondes entre les requêtes pour éviter de surcharger l'API.
     """
 
-    def __init__(self, user_agent="mon_geocoder_geopandas", delay=1.0):
+    def __init__(self, user_agent="mon_geocoder_geopandas_cartograpy", delay=1.0):
         """
         Initialise l'objet Geocoder.
 
@@ -1012,12 +1253,12 @@ class Geocoder:
             print(f"Une erreur inattendue est survenue lors du géocodage de '{location_str}': {e}")
             return None, location_str
 
-    def geocode(self, localities):
+    def geocode(self, places):
         """
         Géocode une ou plusieurs localités et renvoie une GeoDataFrame.
 
         Args:
-            localities (str or list): Une seule chaîne de caractères représentant une localité,
+            places (str or list): Une seule chaîne de caractères représentant une localité,
                                       ou une liste de chaînes de caractères de localités.
 
         Returns:
@@ -1026,20 +1267,20 @@ class Geocoder:
                                             et une colonne 'geometry' contenant des objets Point.
                    - list: Une liste de chaînes de caractères des localités non trouvées.
         """
-        if isinstance(localities, str):
-            localities = [localities]
+        if isinstance(places, str):
+            places = [places]
 
         found_locations_data = []
-        not_found_localities = []
+        not_found_places = []
 
-        print(f"Début du géocodage de {len(localities)} localité(s)...")
+        print(f"Début du géocodage de {len(places)} localité(s)...")
 
-        for locality in localities:
-            location_info, not_found_locality = self._geocode_single(locality)
+        for place in places:
+            location_info, not_found_place = self._geocode_single(place)
             if location_info:
                 found_locations_data.append(location_info)
             else:
-                not_found_localities.append(not_found_locality)
+                not_found_places.append(not_found_place)
             
         print("Géocodage terminé.")
 
@@ -1055,7 +1296,7 @@ class Geocoder:
             # Crée une GeoDataFrame vide avec les colonnes attendues
             geodataframe = gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'altitude', 'raw', 'geometry'], geometry=[], crs="EPSG:4326")
 
-        return geodataframe, not_found_localities
+        return geodataframe, not_found_places
 
 
     def _reverse_geocode_single(self, coordinates_tuple):
@@ -1141,11 +1382,283 @@ class Geocoder:
 
         return geodataframe, not_found_coordinates
 
-    def bbox(self, locality: str) -> tuple:
-        import osmnx as ox
-        gdf = ox.geocode_to_gdf(locality)
+    def bbox(self, place: str) -> tuple:
+        ox = _require_osmnx()
+        gdf = ox.geocode_to_gdf(place)
         west, south, east, north = gdf.total_bounds
         return (west, south, east, north)
+
+    def search(self, place: str, limit: int = 5,
+               country_codes: Optional[Union[str, List[str]]] = None,
+               viewbox: Optional[tuple] = None,
+               bounded: bool = False) -> gpd.GeoDataFrame:
+        """
+        Recherche plusieurs candidats pour un lieu et retourne une GeoDataFrame.
+
+        Args:
+            place: Nom du lieu à rechercher.
+            limit: Nombre maximum de résultats (défaut : 5).
+            country_codes: Code(s) pays ISO alpha-2 pour limiter la recherche.
+                           Exemples : "fr", ["fr", "de"]
+            viewbox: Tuple (west, south, east, north) pour limiter la zone de recherche.
+            bounded: Si True et viewbox fourni, restreint strictement la recherche à la viewbox.
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame des candidats trouvés.
+        """
+        try:
+            time.sleep(self.delay)
+            locations = self.geolocator.geocode(
+                place,
+                exactly_one=False,
+                limit=limit,
+                country_codes=country_codes,
+                viewbox=viewbox,
+                bounded=bounded,
+            )
+        except GeocoderTimedOut:
+            print(f"Avertissement : Délai d'attente dépassé pour '{place}'.")
+            return gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'geometry'], crs="EPSG:4326")
+        except GeocoderServiceError as e:
+            print(f"Erreur du service de géocodage pour '{place}': {e}")
+            return gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'geometry'], crs="EPSG:4326")
+
+        if not locations:
+            print(f"Aucun résultat pour '{place}'.")
+            return gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'geometry'], crs="EPSG:4326")
+
+        rows = []
+        for loc in locations:
+            l: Location = loc
+            rows.append({
+                'query': place,
+                'address': l.address,
+                'latitude': l.latitude,
+                'longitude': l.longitude,
+                'raw': l.raw,
+            })
+        df = pd.DataFrame(rows)
+        geometry = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]
+        return gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+
+    def geocode_in_country(self, places: Union[str, List[str]],
+                           country_codes: Union[str, List[str]]) -> tuple:
+        """
+        Géocode en contraignant la recherche à un ou plusieurs pays.
+
+        Args:
+            places: Localité ou liste de localités.
+            country_codes: Code(s) pays ISO alpha-2. Exemples : "ci", ["fr", "de"]
+
+        Returns:
+            tuple: (GeoDataFrame des résultats, liste des localités non trouvées).
+        """
+        if isinstance(places, str):
+            places = [places]
+
+        found_data = []
+        not_found: List[str] = []
+        for place in places:
+            try:
+                time.sleep(self.delay)
+                location = self.geolocator.geocode(place, country_codes=country_codes)
+                if location:
+                    l: Location = location
+                    found_data.append({
+                        'query': place,
+                        'address': l.address,
+                        'latitude': l.latitude,
+                        'longitude': l.longitude,
+                        'altitude': l.altitude,
+                        'raw': l.raw,
+                    })
+                else:
+                    not_found.append(place)
+            except (GeocoderTimedOut, GeocoderServiceError, Exception) as e:
+                print(f"Erreur pour '{place}': {e}")
+                not_found.append(place)
+
+        if found_data:
+            df = pd.DataFrame(found_data)
+            geometry = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]
+            gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+        else:
+            gdf = gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'altitude', 'raw', 'geometry'], crs="EPSG:4326")
+        return gdf, not_found
+
+    def geocode_in_bbox(self, places: Union[str, List[str]],
+                        bbox: tuple,
+                        bounded: bool = True) -> tuple:
+        """
+        Géocode en contraignant la recherche à une bounding box.
+
+        Args:
+            places: Localité ou liste de localités.
+            bbox: Tuple (west, south, east, north) définissant la zone.
+            bounded: Si True (défaut), restreint strictement à la bbox.
+
+        Returns:
+            tuple: (GeoDataFrame des résultats, liste des localités non trouvées).
+        """
+        if isinstance(places, str):
+            places = [places]
+
+        found_data = []
+        not_found: List[str] = []
+        for place in places:
+            try:
+                time.sleep(self.delay)
+                location = self.geolocator.geocode(place, viewbox=bbox, bounded=bounded)
+                if location:
+                    l: Location = location
+                    found_data.append({
+                        'query': place,
+                        'address': l.address,
+                        'latitude': l.latitude,
+                        'longitude': l.longitude,
+                        'altitude': l.altitude,
+                        'raw': l.raw,
+                    })
+                else:
+                    not_found.append(place)
+            except (GeocoderTimedOut, GeocoderServiceError, Exception) as e:
+                print(f"Erreur pour '{place}': {e}")
+                not_found.append(place)
+
+        if found_data:
+            df = pd.DataFrame(found_data)
+            geometry = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]
+            gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+        else:
+            gdf = gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'altitude', 'raw', 'geometry'], crs="EPSG:4326")
+        return gdf, not_found
+
+    def boundary(self, place: str) -> gpd.GeoDataFrame:
+        """
+        Retourne la géométrie polygonale (contour) d'un lieu via osmnx.
+
+        Args:
+            place: Nom du lieu (ville, commune, pays, région…).
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame avec la géométrie du lieu.
+        """
+        ox = _require_osmnx()
+        return ox.geocode_to_gdf(place)
+
+    def geocode_dataframe(self, df: pd.DataFrame, column: str) -> gpd.GeoDataFrame:
+        """
+        Enrichit un DataFrame pandas avec les coordonnées géocodées d'une colonne de noms de lieux.
+
+        Args:
+            df: DataFrame pandas contenant une colonne de noms de lieux.
+            column: Nom de la colonne contenant les lieux à géocoder.
+
+        Returns:
+            gpd.GeoDataFrame: GeoDataFrame avec les colonnes latitude, longitude et geometry ajoutées.
+                             Les lignes non trouvées ont des valeurs NaN pour ces colonnes.
+
+        Raises:
+            ValueError: Si la colonne spécifiée n'existe pas dans le DataFrame.
+        """
+        if column not in df.columns:
+            raise ValueError(f"La colonne '{column}' n'existe pas dans le DataFrame.")
+
+        result = df.copy()
+        latitudes = []
+        longitudes = []
+        print(f"Géocodage de {len(result)} ligne(s) depuis la colonne '{column}'...")
+        for place in result[column]:
+            loc_info, _ = self._geocode_single(str(place))
+            if loc_info:
+                latitudes.append(loc_info['latitude'])
+                longitudes.append(loc_info['longitude'])
+            else:
+                latitudes.append(None)
+                longitudes.append(None)
+
+        result['latitude'] = latitudes
+        result['longitude'] = longitudes
+        geometry = [
+            Point(lon, lat) if lon is not None and lat is not None else None
+            for lon, lat in zip(result['longitude'], result['latitude'])
+        ]
+        return gpd.GeoDataFrame(result, geometry=geometry, crs="EPSG:4326")
+
+    def components(self, place: str) -> dict:
+        """
+        Extrait les composants d'adresse (pays, région, ville, code postal…) d'un lieu.
+
+        Args:
+            place: Nom du lieu ou adresse à analyser.
+
+        Returns:
+            dict: Dictionnaire des composants d'adresse (country, state, city, postcode, road, etc.).
+                  Retourne un dict vide si le lieu n'est pas trouvé.
+        """
+        loc_info, _ = self._geocode_single(place)
+        if loc_info is None:
+            return {}
+        raw = loc_info.get('raw', {})
+        return raw.get('address', {})
+
+    def distance(self, place_a: str, place_b: str, unit: str = "km") -> float:
+        """
+        Calcule la distance géodésique entre deux lieux géocodés.
+
+        Args:
+            place_a: Premier lieu.
+            place_b: Deuxième lieu.
+            unit: Unité de distance : "km" (défaut), "m", "mi".
+
+        Returns:
+            float: Distance géodésique entre les deux lieux.
+
+        Raises:
+            ValueError: Si l'un des lieux n'est pas trouvé ou si l'unité est invalide.
+        """
+        from geopy.distance import geodesic
+
+        valid_units = {"km", "m", "mi"}
+        if unit not in valid_units:
+            raise ValueError(f"Unité '{unit}' non supportée. Utilisez : {valid_units}")
+
+        loc_a, _ = self._geocode_single(place_a)
+        if loc_a is None:
+            raise ValueError(f"Lieu non trouvé : '{place_a}'.")
+        loc_b, _ = self._geocode_single(place_b)
+        if loc_b is None:
+            raise ValueError(f"Lieu non trouvé : '{place_b}'.")
+
+        coords_a = (loc_a['latitude'], loc_a['longitude'])
+        coords_b = (loc_b['latitude'], loc_b['longitude'])
+        dist = geodesic(coords_a, coords_b)
+        if unit == "km":
+            return dist.km
+        elif unit == "m":
+            return dist.m
+        else:
+            return dist.miles
+
+    def within(self, place: str, point: Union[tuple, list]) -> bool:
+        """
+        Vérifie si un point (latitude, longitude) est à l'intérieur du polygone d'un lieu.
+
+        Args:
+            place: Nom du lieu (ville, pays, région…).
+            point: Tuple ou liste (latitude, longitude).
+
+        Returns:
+            bool: True si le point est dans le polygone du lieu.
+
+        Raises:
+            ImportError: Si osmnx n'est pas installé.
+        """
+        ox = _require_osmnx()
+        gdf = ox.geocode_to_gdf(place)
+        lat, lon = point
+        pt = Point(lon, lat)
+        return bool(gdf.union_all().contains(pt))
 
 
 
@@ -1153,6 +1666,7 @@ class Geocoder:
 class OSM :
     def __init__(self):
         self.api_key = ""
+        self._ox = _require_osmnx()
     
     def get_data(self,place, tags, data_type="all"):
         """
@@ -1195,21 +1709,21 @@ class OSM :
         
         # Cas 1 : Nom de lieu (str)
         if isinstance(place, str):
-            return handle_osm_request(ox.features_from_place, place, tags)
+            return handle_osm_request(self._ox.features_from_place, place, tags)
         
         # Cas 2 : Bounding box (tuple/list de 4 valeurs)
         elif isinstance(place, (tuple, list)) and len(place) == 4:
             minx, miny, maxx, maxy = place
             # bbox = (maxy, minx, miny, maxx)
             # OSMnx attend : north, south, east, west
-            return handle_osm_request(ox.features_from_bbox, place, tags)
+            return handle_osm_request(self._ox.features_from_bbox, place, tags)
         
         # Cas 3 : GeoDataFrame (on prend l'enveloppe extérieure)
         elif isinstance(place, gpd.GeoDataFrame):
             try:
                 # Utilise unary_union pour garder la forme exacte (sans convex_hull)
                 polygon = place.union_all()
-                return handle_osm_request(ox.features_from_polygon, polygon, tags)
+                return handle_osm_request(self._ox.features_from_polygon, polygon, tags)
             except Exception as e:
                 print(f"Erreur lors du traitement du GeoDataFrame : {e}")
                 return gpd.GeoDataFrame()
@@ -1523,8 +2037,6 @@ class Hydro :
         return description
 
 
-
-BBox = Tuple[float, float, float, float]  # (west, south, east, north)
 
 class DEMDownloadError(RuntimeError):
     """Erreur de téléchargement/traitement DEM."""
@@ -2327,19 +2839,20 @@ class DEM:
 class WorldBank:
     def __init__(self):
         self.api_key = "_si_necessite_se_presente"
+        self._wbdata = _require_wbdata()
     
     def get_sources(self):
         # Renvoie une liste de sources de données disponibles sur le site de la Banque mondiale.
-        return wbdata.get_sources()
+        return self._wbdata.get_sources()
     
     def get_indicators(self,source=1,query=None):
-        return wbdata.get_indicators(source=source)
+        return self._wbdata.get_indicators(source=source)
     
     def get_countries(self,query):
-        return wbdata.get_countries(query= query)
+        return self._wbdata.get_countries(query=query)
     
     def get_data(self, indicators, country='all', **kwargs):
-        return wbdata.get_dataframe(indicators, country, **kwargs)
+        return self._wbdata.get_dataframe(indicators, country, **kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -2401,9 +2914,11 @@ class Gee:
         key_file : str, optional
             Chemin vers le fichier JSON de clé du compte de service.
         """
+        self._ee = _require_ee()
+        self._geemap = _require_geemap()
         self.project = project or os.environ.get("GEE_PROJECT")
-        self._map: Optional[geemap.Map] = None   # carte lazy-init
-        self._last_collection: Optional[ee.ImageCollection] = None
+        self._map = None   # carte lazy-init
+        self._last_collection = None
  
         self._authenticate(service_account, key_file)
  
@@ -2413,6 +2928,7 @@ class Gee:
  
     def _authenticate(self, service_account: Optional[str], key_file: Optional[str]) -> None:
         """Authentifie et initialise Earth Engine."""
+        ee = self._ee
         try:
             if service_account and key_file:
                 credentials = ee.ServiceAccountCredentials(service_account, key_file)
@@ -2433,6 +2949,7 @@ class Gee:
     @staticmethod
     def bbox_to_geometry(bbox: BBox) -> ee.Geometry.Rectangle:
         """Convertit une bbox [xmin, ymin, xmax, ymax] en ee.Geometry."""
+        ee = _require_ee()
         xmin, ymin, xmax, ymax = bbox
         return ee.Geometry.Rectangle([xmin, ymin, xmax, ymax])
  
@@ -2495,6 +3012,7 @@ class Gee:
         -------
         ee.Image si mosaic=True, sinon ee.ImageCollection
         """
+        ee = self._ee
         geom  = self.bbox_to_geometry(bbox)
         bands = bands or self.S2_BANDS
  
@@ -2541,6 +3059,7 @@ class Gee:
         Identiques à get_sentinel2.
         cloud : filtre sur CLOUD_COVER (fraction)
         """
+        ee = self._ee
         geom  = self.bbox_to_geometry(bbox)
         bands = bands or self.L9_BANDS
  
@@ -2587,6 +3106,7 @@ class Gee:
         polarization    : "VV", "VH" ou les deux ["VV","VH"]
         pass_direction  : "ASCENDING" | "DESCENDING"
         """
+        ee = self._ee
         geom = self.bbox_to_geometry(bbox)
         bands = [polarization] if isinstance(polarization, str) else polarization
  
@@ -2652,6 +3172,7 @@ class Gee:
         -------
         ee.ImageCollection filtrée
         """
+        ee = self._ee
         col = ee.ImageCollection(collection_id)
  
         if bbox is not None:
@@ -2723,6 +3244,8 @@ class Gee:
         -------
         Path vers le fichier téléchargé
         """
+        ee = self._ee
+        geemap = self._geemap
         # Résolution d'une éventuelle collection
         if isinstance(data, ee.ImageCollection):
             print("ℹ️  Collection détectée → médiane appliquée avant export.")
@@ -2760,7 +3283,7 @@ class Gee:
         folder: str = "GEE_exports",
         scale: int = 10,
         crs: str = "EPSG:4326",
-        max_pixels: int = 1e13,
+        max_pixels: int = int(1e13),
     ) -> None:
         """
         Lance une tâche d'export vers Google Drive (asynchrone).
@@ -2770,6 +3293,7 @@ class Gee:
         description : nom de la tâche et du fichier dans Drive
         folder      : dossier Drive de destination
         """
+        ee = self._ee
         if isinstance(data, ee.ImageCollection):
             data = data.median()
  
@@ -2801,6 +3325,7 @@ class Gee:
         center : [lat, lon] du centre de la carte
         zoom   : niveau de zoom initial
         """
+        geemap = self._geemap
         if self._map is None:
             self._map = geemap.Map()
         if center:
@@ -2823,6 +3348,7 @@ class Gee:
         name       : nom du layer dans la carte
         bbox       : si fourni, centre la carte sur la bbox
         """
+        ee = self._ee
         m = self.map()
  
         if isinstance(data, ee.ImageCollection):
@@ -2869,6 +3395,7 @@ class Gee:
         -------
         dict {band: valeur}
         """
+        ee = self._ee
         reducers = {
             "mean":   ee.Reducer.mean(),
             "median": ee.Reducer.median(),
@@ -2878,7 +3405,7 @@ class Gee:
         }
         r = reducers.get(reducer, ee.Reducer.mean())
         geom = self.bbox_to_geometry(bbox)
-        stats = image.reduceRegion(reducer=r, geometry=geom, scale=scale, maxPixels=1e10)
+        stats = image.reduceRegion(reducer=r, geometry=geom, scale=scale, maxPixels=int(1e10))
         return stats.getInfo()
  
     # ------------------------------------------------------------------ #
