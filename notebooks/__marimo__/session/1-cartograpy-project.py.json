@@ -34,7 +34,14 @@
     {
       "id": "vblA",
       "code_hash": "68eb39a05bc25abdbad092b6267e8e6e",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -55,23 +62,23 @@
       "code_hash": "ec2d41309fd1b0d5eb073f7e4bbb26ee",
       "outputs": [
         {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "No module named 'cartograpy.converter'",
-          "traceback": null
+          "type": "data",
+          "data": {
+            "text/html": "<pre class='text-xs'>&#x27;C:\\\\Users\\\\Ordinateur\\\\OneDrive\\\\cartograpy\\\\notebooks\\\\mon_projet&#x27;</pre>"
+          }
         }
       ],
       "console": [
         {
           "type": "stream",
-          "name": "stderr",
-          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\.venv\\Lib\\site-packages\\marimo\\_runtime\\executor.py&quot;</span>, line <span class=\"m\">138</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;C:\\Users\\Ordinateur\\AppData\\Local\\Temp\\marimo_15680\\__marimo__cell_lEQa_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"kn\">import</span><span class=\"w\"> </span><span class=\"nn\">cartograpy.project</span><span class=\"w\"> </span><span class=\"k\">as</span><span class=\"w\"> </span><span class=\"nn\">project</span>\n  File <span class=\"nb\">&quot;C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\cartograpy\\__init__.py&quot;</span>, line <span class=\"m\">56</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">.converter</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">converter</span><span class=\"p\">,</span> <span class=\"n\">extract_gpx_data</span>\n<span class=\"gr\">ModuleNotFoundError</span>: <span class=\"n\">No module named &#39;cartograpy.converter&#39;</span>\n</pre></div>\n</span>",
-          "mimetype": "application/vnd.marimo+traceback"
+          "name": "stdout",
+          "text": "\u2705 Projet initialis\u00e9 dans : C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\notebooks\\mon_projet\n   \ud83d\udcc1 C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\notebooks\\mon_projet\\data\n   \ud83d\udcc1 C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\notebooks\\mon_projet\\output\n",
+          "mimetype": "text/plain"
         }
       ]
     },
     {
-      "id": "ahjW",
+      "id": "PKri",
       "code_hash": "5284d799156d1abd316546809f6cf2aa",
       "outputs": [
         {
@@ -82,6 +89,46 @@
         }
       ],
       "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "629c8942ee3f086c76b1f19f30226471",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<pre class='text-xs'>&#x27;C:\\\\Users\\\\Ordinateur\\\\OneDrive\\\\cartograpy\\\\notebooks\\\\mon_projet\\\\data\\\\altitude.tif&#x27;</pre>"
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u2705 Donn\u00e9es copi\u00e9es : C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\notebooks\\mon_projet\\data\\gadm41_CIV.gpkg\n\u2705 Donn\u00e9es copi\u00e9es : C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\notebooks\\mon_projet\\data\\altitude.tif\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "RUbF",
+      "code_hash": "5340d6102fb83fb1d8b0b92bf233bc5d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/json": "{\"path\": \"C:\\\\Users\\\\Ordinateur\\\\OneDrive\\\\cartograpy\\\\notebooks\\\\mon_projet\", \"crs\": \"EPSG:4326\", \"data_dir\": \"C:\\\\Users\\\\Ordinateur\\\\OneDrive\\\\cartograpy\\\\notebooks\\\\mon_projet\\\\data\", \"output_dir\": \"C:\\\\Users\\\\Ordinateur\\\\OneDrive\\\\cartograpy\\\\notebooks\\\\mon_projet\\\\output\", \"data_exists\": true, \"output_exists\": true, \"vector_files\": 3, \"raster_files\": 2, \"tabular_files\": 0, \"other_files\": 0, \"total_data_files\": 5, \"output_files\": 0}"
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\ud83d\udccb Projet : C:\\Users\\Ordinateur\\OneDrive\\cartograpy\\notebooks\\mon_projet\n   \ud83c\udf10 CRS : EPSG:4326\n   \ud83d\udcc1 data/   : \u2705 (5 fichier(s))\n      \u251c\u2500\u2500 vectoriel : 3\n      \u251c\u2500\u2500 raster    : 2\n      \u251c\u2500\u2500 tabulaire : 0\n      \u2514\u2500\u2500 autre     : 0\n   \ud83d\udcc1 output/ : \u2705 (0 fichier(s))\n",
+          "mimetype": "text/plain"
+        }
+      ]
     }
   ]
 }

@@ -43,20 +43,7 @@ from .styling import (
     list_all_styles,
 )
 
-try:
-    from .geocoder import (
-        GeocodingProvider,
-        NominatimProvider,
-        OpenCageProvider,
-        GeocodingResult,
-    )
-except ImportError:
-    pass
-
-
 from .project import Project, init_project
-
-import os
 
 
 __all__ = [
@@ -73,20 +60,9 @@ __all__ = [
     "show_palette", "show_palette_details", "palettes_by_popularity",
     "palettes_with_color", "preview_multiple_palettes",
     "set_style", "list_all_styles",
-    # converter
-    "converter", "extract_gpx_data",
     # iso
     "COUNTRY_ISO3",
     # project
     "Project", "init_project",
 ]
-
-# Conditionally add geocoder exports if the module is available
-try:
-    from .geocoder import GeocodingProvider  # noqa: F401
-    __all__ += ["GeocodingProvider", "NominatimProvider", "OpenCageProvider", "GeocodingResult"]
-except ImportError:
-    pass
-
-
 

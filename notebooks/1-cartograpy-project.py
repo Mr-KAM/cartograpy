@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.0"
-app = marimo.App()
+app = marimo.App(layout_file="layouts/1-cartograpy-project.slides.json")
 
 
 @app.cell(hide_code=True)
@@ -67,6 +67,37 @@ def _(projet):
 
     # Copier avec un nom personnalisé
     projet.add_data("../data/raster/DEM.tif", filename="altitude")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Information sur le projet
+    """)
+    return
+
+
+@app.cell
+def _(projet):
+    projet.infos()
+    return
+
+
+@app.cell
+def _(projet):
+    projet.list_data()
+    return
+
+
+@app.cell
+def _(projet):
+    projet.list_datasets()
+    return
+
+
+@app.cell
+def _():
     return
 
 

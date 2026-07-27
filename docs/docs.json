@@ -49,8 +49,7 @@
           "reference/raster-tools",
           "reference/mapper",
           "reference/styling",
-          "reference/project",
-          "reference/converter"
+          "reference/project"
         ]
       },
       {
