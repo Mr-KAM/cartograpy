@@ -1,0 +1,120 @@
+---
+title: "Installation"
+description: "Installer cartograpy et préparer son environnement Python."
+---
+
+Cette page présente le parcours d'installation recommandé pour utiliser cartograpy
+en local.
+
+## Pré-requis
+
+- Python 3.11 ou supérieur
+- Un environnement virtuel dédié (`venv`, `conda` ou `uv`)
+- Les bibliothèques système requises par `geopandas`, `rasterio`, `fiona` et
+  `cartopy` (GDAL, GEOS, PROJ) — voir la section par plateforme ci-dessous
+
+## Installation rapide
+
+```bash
+pip install cartograpy
+```
+
+## Installation pour le développement
+
+```bash
+git clone https://github.com/mr-kam/cartograpy.git
+cd cartograpy
+pip install -e .[dev]
+```
+
+`[dev]` ajoute `pytest`, `black`, `flake8`, `mypy` et `jupyterlab` — nécessaires pour
+contribuer, inutiles pour un simple usage du package.
+
+## Dépendances par plateforme
+
+::: {.panel-tabset}
+## Windows
+
+Les roues précompilées (`.whl`) de `geopandas`, `rasterio`, `fiona`, `cartopy` et
+`pyproj` couvrent la majorité des cas via `pip install cartograpy` directement —
+aucune compilation locale requise dans la plupart des configurations récentes
+de Python 3.11+/pip.
+
+::: {.callout-tip}
+En cas d'échec d'installation (erreurs de compilation liées à GDAL/GEOS/PROJ),
+passez par `conda`/`mamba` (canal `conda-forge`) qui gère ces dépendances
+binaires plus fiablement que pip sur Windows :
+
+```bash
+conda install -c conda-forge geopandas rasterio cartopy fiona
+pip install cartograpy --no-deps
+pip install cartograpy  # puis les dépendances Python restantes
+```
+:::
+
+## macOS
+
+Installez GDAL/GEOS/PROJ via Homebrew avant `pip install cartograpy` si vous
+n'utilisez pas de roues précompilées :
+
+```bash
+brew install gdal geos proj
+pip install cartograpy
+```
+
+## Linux
+
+Selon la distribution, installez les bibliothèques de développement avant
+`pip install cartograpy` :
+
+```bash
+# Debian / Ubuntu
+sudo apt-get install libgdal-dev libgeos-dev libproj-dev
+
+pip install cartograpy
+```
+:::
+
+## Dépendances importantes
+
+- `geopandas` pour les données vectorielles
+- `rasterio` pour les rasters
+- `cartopy` et `matplotlib` pour les cartes statiques
+- `folium` (via `WebMap`) et `geemap` pour les usages web et Google Earth Engine
+
+Voir [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd)
+pour la liste complète et les dépendances optionnelles (`contextily`,
+`matplotlib-scalebar`, `earthengine-api`).
+
+## Jupyter et Marimo
+
+`jupyter` et `marimo` font partie des dépendances cœur : aucune installation
+supplémentaire n'est nécessaire pour utiliser cartograpy dans un notebook.
+
+::: {.panel-tabset}
+## Jupyter
+
+```bash
+jupyter lab
+```
+
+## Marimo
+
+```bash
+marimo edit mon_notebook.py
+```
+:::
+
+## Vérifier l'installation
+
+```python
+import cartograpy
+
+print(cartograpy.COUNTRY_ISO3["france"])  # "fra"
+```
+
+::: {.callout-note}
+Si cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème vient
+des dépendances système (voir la section par plateforme ci-dessus), pas de
+cartograpy lui-même.
+:::

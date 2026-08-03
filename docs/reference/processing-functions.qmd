@@ -1,0 +1,197 @@
+---
+title: "Reference processing functions"
+description: "Référence des fonctions utilitaires du module processing."
+---
+
+Dix fonctions autonomes (pas besoin d'instancier une classe) définies dans
+`cartograpy/processing/vector.py`, aux côtés de `VectorTools` (voir
+[Reference VectorTools](/reference/vector-tools.qmd)). Elles couvrent les opérations
+vectorielles les plus courantes : agrégation, jointure, colonnes calculées, et
+manipulation de `MultiPolygon`.
+
+## `centroids(geodf)`
+
+Remplace la géométrie d'un GeoDataFrame par les centroïdes de chaque entité.
+
+- **`geodf`** (`GeoDataFrame`, requis) : Doit contenir une colonne `geometry`.
+- **`retour`** (`GeoDataFrame`) : Copie de `geodf` avec des géométries `Point`, même CRS.
+
+```python
+from cartograpy.processing import centroids
+
+centres = centroids(regions_gdf)
+```
+
+::: {.callout-warning}
+Si le CRS est géographique (degrés, ex. EPSG:4326), le centroïde est calculé sans
+reprojection — geopandas émet un avertissement, le résultat peut être imprécis pour
+des polygones étendus. Reprojeter en CRS métrique avant si la précision compte.
+:::
+
+## `join(from_tuple, to_tuple, columns_to_join=None, how="left", suffixes=("_from", "_to"))`
+
+Jointure attributaire (non spatiale) entre deux GeoDataFrames, sur une paire de
+colonnes.
+
+- **`from_tuple`** (`(GeoDataFrame, str)`, requis) : GeoDataFrame source et nom de la colonne de jointure côté source.
+- **`to_tuple`** (`(GeoDataFrame, str)`, requis) : GeoDataFrame cible et nom de la colonne de jointure côté cible.
+- **`columns_to_join`** (`list[str]`) : Sous-ensemble de colonnes à ramener depuis la cible. Toutes les colonnes si `None`.
+- **`how`** (`str`, défaut `left`) : Type de jointure pandas : `"left"`, `"right"`, `"inner"`, `"outer"`.
+
+```python
+from cartograpy.processing import join
+
+result = join(
+    (regions_gdf, "code_insee"),
+    (population_df, "code_insee"),
+    columns_to_join=["population", "densite"],
+)
+```
+
+Le CRS du GeoDataFrame source est conservé sur le résultat.
+
+## `fusion(dataframes_list, reset_index=True, ignore_crs=True)`
+
+Concatène verticalement une liste de `DataFrame`/`GeoDataFrame`.
+
+- **`dataframes_list`** (`list`, requis) : Liste de DataFrame ou GeoDataFrame à empiler.
+- **`ignore_crs`** (`bool`, défaut `True`) : Si `False`, lève `ValueError` en cas de CRS différents entre les éléments.
+
+```python
+from cartograpy.processing import fusion
+
+toutes_regions = fusion([regions_2021, regions_2022, regions_2023])
+```
+
+::: {.callout-note}
+Si un des éléments est un `GeoDataFrame`, le résultat force le CRS du **premier**
+élément de la liste — vérifiez l'ordre si vos couches ont des CRS différents et
+`ignore_crs=True`.
+:::
+
+## `add_column(df, column_name, expression, globals_dict=None)`
+
+Ajoute une colonne calculée, à partir d'une fonction ou d'une expression texte.
+
+- **`expression`** (`callable | str`, requis) : Callable : fonction `row -> valeur` appliquée avec `df.apply(..., axis=1)`. String : expression passée à `df.eval()` (plus rapide sur de gros volumes).
+- **`globals_dict`** (`dict`) : Variables additionnelles accessibles dans l'expression string. `random` et `np` sont déjà disponibles par défaut.
+
+::: {.panel-tabset}
+## callable
+
+```python
+add_column(gdf, "surface_ha", lambda row: row.geometry.area / 10_000)
+```
+
+## expression
+
+```python
+add_column(gdf, "densite", "population / surface_km2")
+```
+:::
+
+## `split_multipolygon(multipolygon, return_type="geodataframe")`
+
+Sépare un `MultiPolygon` (objet Shapely ou WKT) en polygones individuels.
+
+- **`multipolygon`** (`MultiPolygon | str | GeoDataFrame`, requis) : Géométrie à séparer, ou sa représentation WKT.
+- **`return_type`** (`str`, défaut `geodataframe`) : `"list"` (liste de `Polygon`) ou `"geodataframe"` (colonnes `polygon_id`, `area`, `geometry`).
+
+```python
+from cartograpy.processing import split_multipolygon
+
+polys = split_multipolygon(commune.geometry.iloc[0])
+```
+
+::: {.callout-note}
+Si l'entrée est déjà un `Polygon` simple, la fonction le renvoie tel quel (dans une
+liste ou un GeoDataFrame à une ligne) plutôt que de lever une erreur. Si l'entrée
+est un GeoDataFrame, la fonction délègue automatiquement à
+`split_multipolygon_from_gdf`.
+:::
+
+## `split_multipolygon_from_gdf(gdf, multipolygon_column="geometry", preserve_attributes=True)`
+
+Version « GeoDataFrame entier » de `split_multipolygon` : chaque `MultiPolygon` du
+GeoDataFrame est éclaté en plusieurs lignes (une par polygone), les `Polygon` simples
+sont conservés tels quels.
+
+- **`preserve_attributes`** (`bool`, défaut `True`) : Si `True`, toutes les colonnes de la ligne d'origine sont dupliquées pour chaque polygone issu de l'éclatement.
+
+Ajoute systématiquement deux colonnes : `original_index` (index de la ligne d'origine)
+et `polygon_part` (rang du polygone dans le `MultiPolygon` d'origine).
+
+```python
+from cartograpy.processing import split_multipolygon_from_gdf
+
+eclate = split_multipolygon_from_gdf(communes_gdf)
+```
+
+## `get_multipolygon_info(multipolygon)`
+
+Renvoie des statistiques descriptives sur un `MultiPolygon` (ou `Polygon`, ou WKT).
+
+- **`retour`** (`dict`) : `type`, `num_polygons`, `total_area`, `bounds`, `areas` — et pour un vrai `MultiPolygon` : `largest_polygon_area`, `smallest_polygon_area`.
+
+```python
+from cartograpy.processing import get_multipolygon_info
+
+info = get_multipolygon_info(pays.geometry.iloc[0])
+info["num_polygons"], info["largest_polygon_area"]
+```
+
+## `get_geometry_types(df)`
+
+Affiche (via le logger) la répartition des types de géométrie (`Polygon`, `Point`,
+`LineString`...) d'un GeoDataFrame, avec le compte et le pourcentage de chacun.
+
+```python
+from cartograpy.processing import get_geometry_types
+
+get_geometry_types(gdf)
+# Polygon: 42 (95.5%)
+# MultiPolygon: 2 (4.5%)
+```
+
+::: {.callout-warning}
+Cette fonction n'a pas de valeur de retour exploitable (elle affiche via `logging`
+et ne renvoie rien) — à utiliser pour de l'inspection interactive, pas dans un
+pipeline qui a besoin du résultat.
+:::
+
+## `clip_gdf_by_mask(gdf_source, gdf_emprise, buffer_distance=0, crs="EPSG:4326")`
+
+Découpe géométriquement `gdf_source` selon l'emprise (union des géométries) de
+`gdf_emprise`.
+
+- **`buffer_distance`** (`float`, défaut `0`) : Distance de buffer appliquée à l'emprise avant découpage (dans l'unité du CRS de `gdf_source`).
+- **`crs`** (`str`, défaut `EPSG:4326`) : CRS attribué par défaut si l'un des GeoDataFrames n'en a pas.
+
+```python
+from cartograpy.processing import clip_gdf_by_mask
+
+routes_civ = clip_gdf_by_mask(routes_gdf, frontiere_civ)
+routes_civ_buffer = clip_gdf_by_mask(routes_gdf, frontiere_civ, buffer_distance=5000)
+```
+
+::: {.callout-note}
+Reprojette automatiquement `gdf_emprise` dans le CRS de `gdf_source` si les deux
+diffèrent. Les géométries vides après découpage sont retirées du résultat.
+:::
+
+## `clip_gdf_by_bbox(gdf_source, gdf_emprise, crs="EPSG:4326")`
+
+Même principe que `clip_gdf_by_mask`, mais découpe selon la **bounding box** de
+l'emprise plutôt que sa géométrie exacte — plus rapide, moins précis (garde des
+zones hors de l'emprise réelle si elle n'est pas rectangulaire).
+
+```python
+from cartograpy.processing import clip_gdf_by_bbox
+
+apercu_rapide = clip_gdf_by_bbox(gros_raster_vecteur, zone_interet)
+```
+
+::: {.callout-tip}
+Utile pour un premier découpage rapide sur un très gros jeu de données avant
+d'appliquer `clip_gdf_by_mask` (précis) sur le résultat déjà réduit.
+:::

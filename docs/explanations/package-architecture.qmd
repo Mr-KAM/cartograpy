@@ -1,0 +1,57 @@
+---
+title: "Architecture du package"
+description: "Comprendre comment cartograpy organise chargement, traitement et rendu."
+---
+
+Le package suit un flux logique.
+
+1. acquisition ou lecture des données
+2. préparation et transformation
+3. rendu cartographique
+4. export et organisation du projet
+
+## Modules pivots
+
+- `data`
+- `processing`
+- `mapper`
+- `styling`
+- `project`
+
+Ces cinq noms restent l'unique point d'entrée public (`from cartograpy.data import ...`,
+`from cartograpy.mapper import ...`, etc.) et ne changent pas si leur implémentation
+interne évolue.
+
+## Organisation interne
+
+`data`, `processing` et `mapper` sont chacun un sous-package (un dossier), pas un seul
+fichier — découpage nécessaire une fois que chacun a dépassé plusieurs milliers de
+lignes et mélangé plusieurs responsabilités indépendantes dans un seul fichier plat :
+
+- `cartograpy/data/` — un fichier par source de données : `io.py` (lecture/écriture
+  générique), `boundaries.py` (`GeoBoundaries`, `Bound`), `geocoding.py` (`Geocoder`),
+  `osm.py` (`OSM`), `hydro.py` (`Hydro`), `dem.py` (`DEM`), `worldbank.py` (`WorldBank`),
+  `gee.py` (`Gee`), plus `_optional.py`/`_types.py` pour le code partagé en interne.
+- `cartograpy/processing/` — `vector.py` (fonctions vectorielles + `VectorTools`) et
+  `raster.py` (`RasterTools`).
+- `cartograpy/mapper/` — `helpers.py` (`read_image`, `plot_choropleth`), `map.py`
+  (`Map`), `map2d.py` (`Map2D`), `webmap.py` (`WebMap`), `situation.py`
+  (`SituationMap`), plus `_optional_deps.py` pour les dépendances graphiques
+  optionnelles (`contextily`, `matplotlib-scalebar`, `matplotlib-map-utils`) partagées
+  entre `Map` et `SituationMap`.
+
+`Map` (dans `mapper/map.py`) reste volontairement une seule classe de grande taille —
+son découpage interne en mixins thématiques est un chantier à part, pas encore fait.
+
+## Messages et journalisation
+
+Les méthodes qui affichent un statut (`Project.init()`, `Project.infos()`, `Bound.get_country()`, etc.) passent par le module `logging` standard plutôt que par `print()` directement. Par défaut, ces messages restent visibles exactement comme avant — aucune configuration requise. Pour les couper :
+
+```python
+import logging
+logging.getLogger("cartograpy").setLevel(logging.ERROR)
+```
+
+## But de cette page
+
+Expliquer quand utiliser une fonction simple, quand passer à `VectorTools` ou `RasterTools`, et quand structurer le travail avec `Project`.

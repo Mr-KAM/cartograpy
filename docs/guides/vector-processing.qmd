@@ -1,0 +1,156 @@
+---
+title: "Traitements vectoriels"
+description: "Utiliser les fonctions utilitaires et la classe VectorTools."
+---
+
+`cartograpy.processing` expose une API en deux niveaux : des fonctions simples pour
+les opérations fréquentes, et `VectorTools` — une classe chaînable de plus de 100
+méthodes — pour les workflows plus avancés.
+
+## Fonctions rapides
+
+Pour un besoin ponctuel, pas besoin d'instancier `VectorTools` :
+
+```python
+from cartograpy.processing import centroids, join, fusion, add_column, clip_gdf_by_mask
+
+centres = centroids(regions_gdf)
+
+pop = join((regions_gdf, "code_insee"), (population_df, "code_insee"))
+
+toutes = fusion([regions_2021, regions_2022])
+
+add_column(gdf, "densite", "population / surface_km2")
+
+routes_civ = clip_gdf_by_mask(routes_gdf, frontiere_civ)
+```
+
+Détail complet de chacune : [Reference processing functions](/reference/processing-functions.qmd).
+
+## VectorTools — l'API chaînable
+
+`VectorTools` encapsule un `GeoDataFrame`. Chaque méthode de transformation renvoie
+une **nouvelle** instance (rien n'est modifié sur place) — on chaîne donc les
+opérations et on récupère le résultat avec `.gdf` :
+
+```python
+from cartograpy.processing import VectorTools
+
+vt = VectorTools(gdf)
+
+result = (
+    vt.fix_invalid()
+      .remove_empty()
+      .reproject_layer("EPSG:32630")
+      .filter_by_attribute("statut", "actif")
+      .buffer(500)
+      .simplify_geometry(tolerance=10)
+      .gdf
+)
+```
+
+::: {.callout-note}
+Quelques méthodes sortent de ce pattern et renvoient directement une valeur
+(`dict`, `DataFrame`, chemin de fichier) plutôt qu'un `VectorTools` — la liste
+exacte est dans [Reference VectorTools](/reference/vector-tools.qmd).
+:::
+
+## Par tâche
+
+::: {.callout-note collapse="true"}
+## Nettoyer une couche avant analyse
+
+```python
+propre = (
+    VectorTools(gdf)
+    .fix_invalid()
+    .remove_empty()
+    .drop_duplicates()
+    .remove_slivers(min_area=1.0)
+    .gdf
+)
+```
+:::
+::: {.callout-note collapse="true"}
+## Découper et sélectionner
+
+```python
+zone = (
+    VectorTools(gdf)
+    .clip(frontiere_civ)
+    .filter_by_attribute("type", ["route_primaire", "route_secondaire"])
+    .gdf
+)
+```
+:::
+::: {.callout-note collapse="true"}
+## Mesurer (surface, périmètre, compacité)
+
+```python
+mesures = (
+    VectorTools(gdf.to_crs("EPSG:32630"))  # reprojeter avant de mesurer
+    .area(column_name="surface_m2")
+    .perimeter(column_name="perimetre_m")
+    .compactness()
+    .gdf
+)
+```
+:::
+::: {.callout-note collapse="true"}
+## Jointure spatiale et agrégation
+
+```python
+enrichi = VectorTools(points_gdf).spatial_join(regions_gdf, predicate="within").gdf
+
+par_region = (
+    VectorTools(points_gdf)
+    .point_in_polygon_join(regions_gdf)
+    .group_and_summarize(by="nom_region", summary={"population": "sum"})
+    .gdf
+)
+```
+:::
+::: {.callout-note collapse="true"}
+## Analyse de proximité et clustering
+
+```python
+distances = VectorTools(ecoles_gdf).distance_to_nearest(hopitaux_gdf).gdf
+
+clusters = VectorTools(points_gdf).spatial_clustering(eps=500, min_samples=5).gdf
+# nécessite scikit-learn installé séparément
+```
+:::
+::: {.callout-note collapse="true"}
+## Statistiques spatiales et autocorrélation
+
+```python
+rapport = VectorTools(regions_gdf).spatial_autocorrelation_report("taux_pauvrete")
+# nécessite libpysal + esda installés séparément
+```
+:::
+::: {.callout-note collapse="true"}
+## Exporter le résultat
+
+```python
+VectorTools(gdf).fix_invalid().to_gpkg("resultat.gpkg")
+VectorTools(gdf).to_csv("resultat.csv", include_geometry=False)
+```
+:::
+
+## Toutes les familles de méthodes
+
+Qualité et validation géométrique · Projection et schéma attributaire · Sélection,
+filtrage et découpage · Transformations géométriques · Mesures et indicateurs ·
+Analyse topologique · Overlay, jointures et agrégation spatiale · Proximité, réseau
+et densité · Statistiques spatiales et autocorrélation · Changement, fragmentation
+et paysage · Accessibilité et modèles spatiaux · Interpolation et surfaces ·
+Reclassement, scoring et export.
+
+Liste complète des méthodes par famille : [Reference VectorTools](/reference/vector-tools.qmd).
+
+::: {.callout-warning}
+Certaines familles avancées (réseau/accessibilité, clustering, statistiques
+spatiales, krigeage) chargent une dépendance optionnelle à l'appel
+(`networkx`, `scikit-learn`, `libpysal`/`esda`, `pykrige`) — non incluse dans les
+dépendances cœur de cartograpy, à installer séparément si vous les utilisez.
+:::

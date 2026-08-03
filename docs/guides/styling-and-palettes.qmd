@@ -1,0 +1,127 @@
+---
+title: "Styles, palettes et polices"
+description: "Configurer palettes, styles Matplotlib et polices pour les cartes."
+---
+
+`cartograpy.styling` complète `mapper` pour la qualité visuelle des sorties : polices,
+palettes de couleurs/colormaps, et styles graphiques globaux.
+
+## Polices
+
+::: {.panel-tabset}
+## Google Fonts
+
+```python
+from cartograpy.styling import google_font
+
+font = google_font("Roboto", weight="bold")
+m.add_title("Titre", font=font)  # ou tout paramètre `font=` matplotlib
+```
+
+## Fichier local ou URL
+
+```python
+from cartograpy.styling import local_font, path_font
+
+font = local_font("C:/Fonts/MaPolice.ttf")
+font = path_font("https://github.com/.../Amaranth-Bold.ttf?raw=true")
+```
+:::
+
+```python
+from cartograpy.styling import get_fonts
+
+get_fonts(pattern="Arial")   # polices installées sur le système, filtrées
+```
+
+## Palettes de couleurs
+
+Cartograpy embarque 16 palettes personnalisées (`p1`–`p16`), en plus des palettes
+seaborn et matplotlib standard.
+
+```python
+from cartograpy.styling import get_available_palettes, show_palette
+
+palettes = get_available_palettes()
+palettes["custom"]  # ['p1', 'p2', ..., 'p16']
+
+show_palette("p9")          # aperçu d'une palette personnalisée
+show_palette("viridis")     # aperçu d'un colormap matplotlib
+```
+
+### Comparer plusieurs palettes
+
+```python
+from cartograpy.styling import preview_multiple_palettes
+
+preview_multiple_palettes(["p1", "p9", "p12"])
+```
+
+### Chercher une palette par popularité ou par couleur
+
+```python
+from cartograpy.styling import palettes_by_popularity, palettes_with_color
+
+palettes_by_popularity(min_likes=50_000)
+palettes_with_color("#FFD700")
+```
+
+## Utiliser une palette comme colormap
+
+```python
+from cartograpy.styling import to_cmap, custom_palettes
+
+cmap = to_cmap(["#4A90E2", "#17A2B8", "#1E3A8A"])         # depuis une liste de couleurs
+cmaps = custom_palettes()                                  # toutes les p1-p16 en colormaps
+
+m.add_polygons_choropleth(regions_gdf, column_to_plot="densite", cmap=cmaps["p9"])
+```
+
+::: {.callout-tip}
+Une palette discrète (qualitative, catégories) et une palette continue (séquentielle,
+valeurs numériques) ne se choisissent pas pour les mêmes données — utilisez
+`to_cmap(colors, cmap_type="discrete")` pour des catégories, `"continuous"`
+(défaut) pour des valeurs continues.
+:::
+
+## Styles graphiques globaux
+
+```python
+from cartograpy.styling import set_style, list_all_styles
+
+list_all_styles()               # tout ce qui est disponible, par source
+
+set_style("ggplot")                              # matplotlib
+set_style("whitegrid", source="seaborn")          # seaborn
+set_style("cyberpunk", source="mplcyberpunk")     # nécessite mplcyberpunk installé
+set_style("ieee", source="scienceplots")          # nécessite SciencePlots installé
+```
+
+::: {.callout-warning}
+`set_style` s'applique globalement (via `matplotlib.pyplot.style.use`) — appelez-la
+avant de créer vos objets `Map`, pas après, pour que le style s'applique à toute la
+figure.
+:::
+
+## Exemple complet
+
+```python
+from cartograpy.styling import set_style, google_font, to_cmap
+from cartograpy.mapper import Map
+
+set_style("whitegrid", source="seaborn")
+titre_font = google_font("Roboto", weight="bold")
+
+m = Map(title="Densité de population")
+m.add_polygons_choropleth(
+    regions_gdf, column_to_plot="densite",
+    cmap=to_cmap(["#4A5D23", "#FFF8DC", "#D2691E"]),
+)
+m.set_title("Densité de population", font=titre_font)
+m.show()
+```
+
+## Aller plus loin
+
+- [Cartes statiques](/guides/static-maps.qmd) — appliquer polices et palettes à une `Map`
+- [Reference styling](/reference/styling.qmd) — toutes les fonctions en détail

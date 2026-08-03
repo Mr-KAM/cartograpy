@@ -1,0 +1,117 @@
+---
+title: "Sources de données et dépendances"
+description: "Dépendances réseau, bibliothèques optionnelles et contraintes externes."
+---
+
+Cartograpy combine des traitements 100% locaux (aucun réseau requis) et des appels à
+des services externes. Cette page indique, pour chaque fonctionnalité, si elle a
+besoin du réseau et quelle dépendance Python la rend possible.
+
+## Sources externes
+
+#### GeoBoundaries
+
+Frontières administratives (ADM0–ADM5) via l'API publique
+`geoboundaries.org`. Utilisé par `GeoBoundaries`/`Bound`. Réponses mises en
+cache localement (`requests_cache`, 7 jours par défaut).
+
+#### Natural Earth
+
+Géométries de continents et de pays (niveau mondial, faible résolution) via un
+export téléchargé depuis `naturalearth.s3.amazonaws.com`. Utilisé par
+`Bound.continents()` / `Bound.get_world()`.
+
+#### OpenStreetMap
+
+Données OSM (routes, POI, bâtiments...) via Overpass, à travers `osmnx`.
+Utilisé par la classe `OSM` et par `Geocoder.bbox()`/`.search()`.
+
+#### Nominatim
+
+Géocodage et géocodage inverse (adresse ↔ coordonnées) via `geopy`. Utilisé par
+`Geocoder.geocode()`/`.reverse_geocode()`/`.search()`.
+
+#### HydroSHEDS
+
+Réseaux hydrographiques (HydroRIVERS) par région continentale, téléchargés
+depuis `data.hydrosheds.org`. Utilisé par `Hydro.download()`.
+
+#### SRTM (tuiles Skadi)
+
+Modèle numérique de terrain (~30m) téléchargé tuile par tuile depuis un miroir
+AWS S3, puis mosaïqué. Utilisé par `DEM`.
+
+#### World Bank
+
+Indicateurs socio-économiques par pays, via `wbdata`. Utilisé par `WorldBank`.
+
+#### Google Earth Engine
+
+Imagerie satellite et analyses à grande échelle. Utilisé par `Gee` — nécessite
+en plus un compte Google Earth Engine et une authentification (`ee.Authenticate()`),
+au-delà de l'installation des paquets Python.
+
+## Ce qui a besoin du réseau — et ce qui n'en a pas besoin
+
+| Fonctionnalité | Réseau requis ? |
+|---|---|
+| `load`, `save`, `describe`, `list_geofiles` | Non — fichiers locaux uniquement |
+| `VectorTools`, `RasterTools`, `centroids`, `join`, `fusion`, `add_column`, `split_multipolygon`, `clip_gdf_by_*` | Non |
+| `Project` (toutes les méthodes) | Non |
+| `styling` (polices Google Fonts exceptées, voir ci-dessous) | Non |
+| `GeoBoundaries` / `Bound` | Oui (geoboundaries.org, Natural Earth) — mis en cache après le premier appel |
+| `OSM` | Oui (Overpass via osmnx) |
+| `Geocoder` | Oui (Nominatim et/ou Overpass) |
+| `Hydro` | Oui (hydrosheds.org), puis lecture locale une fois téléchargé |
+| `DEM` | Oui (AWS S3), puis lecture locale une fois téléchargé |
+| `WorldBank` | Oui (API World Bank) |
+| `Gee` | Oui, + authentification Google Earth Engine préalable |
+| `google_font()` (styling) | Oui (Google Fonts) — `path_font()`/`local_font()` sont locaux |
+| `Map.add_basemap()` | Oui (tuiles web via `contextily`) |
+| `WebMap` | Non pour la génération de la carte (tuiles chargées côté navigateur au moment de l'affichage, pas au moment de l'appel Python) |
+
+::: {.callout-tip}
+`GeoBoundaries` utilise `requests_cache` : une fois une requête effectuée, les
+appels identiques suivants (même territoire, même niveau ADM) sont servis depuis
+le cache local sans repasser par le réseau, y compris hors connexion.
+`clear_cache()` et `set_cache_expire_time()` permettent d'ajuster ce comportement.
+:::
+
+## Dépendances cœur
+
+Toutes déclarées dans `pyproject.toml`, installées automatiquement avec
+`pip install cartograpy` :
+
+`cartopy`, `click`, `geopandas`, `geojson`, `geopy`, `gpxpy`, `matplotlib`, `numpy`,
+`osmnx`, `pandas`, `pillow`, `pykml`, `pypalettes`, `pyproj`, `rasterio`,
+`reportlab`, `requests`, `requests-cache`, `seaborn`, `shapely`, `svglib`,
+`tabulate`, `tqdm`, `wbdata`, `fiona`, `matplotlib-map-utils`, `jupyter`, `geemap`,
+`pyfonts`, `marimo`.
+
+::: {.callout-warning}
+Plusieurs de ces paquets (`cartopy`, `rasterio`, `fiona`, `geopandas`, `shapely`,
+`pyproj`) s'appuient sur des bibliothèques système natives (GDAL, GEOS, PROJ). Sur
+Windows en particulier, privilégiez des roues précompilées (wheels) ou un
+gestionnaire comme `conda`/`uv` plutôt qu'une compilation depuis les sources.
+:::
+
+## Dépendances optionnelles (dégradation silencieuse)
+
+Certaines fonctionnalités vérifient la présence d'un paquet à l'exécution plutôt que
+de l'exiger au chargement du module ; si le paquet manque, une erreur explicite
+n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
+
+| Paquet | Fonctionnalité concernée | Déclaré dans `pyproject.toml` ? |
+|---|---|---|
+| `contextily` | `Map.add_basemap()` (fonds de carte tuilés) | Non |
+| `matplotlib-scalebar` | Barre d'échelle alternative sur `Map`/`SituationMap` | Non |
+| `earthengine-api` (`ee`) | `Gee` (toutes les méthodes) | **Non** — écart à corriger, voir ci-dessous |
+
+::: {.callout-warning}
+Écart connu : `Gee` importe le paquet `ee` (`earthengine-api`) via
+`_require_ee()`, mais ce paquet n'apparaît nulle part dans les dépendances de
+`pyproject.toml` — seul `geemap` y est déclaré (en dépendance cœur, alors qu'il
+n'est en réalité utilisé qu'à travers ce même mécanisme optionnel). Installer
+cartograpy seul ne suffit donc pas à faire fonctionner `Gee` : il faut ajouter
+manuellement `pip install earthengine-api`.
+:::

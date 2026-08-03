@@ -9,6 +9,9 @@ from pyproj import CRS
 from pyproj.database import query_crs_info
 import rasterio
 from cartograpy.data import load as _load_data, save
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 VECTOR_EXTENSIONS = {
@@ -93,9 +96,9 @@ class Project:
         os.makedirs(self.data_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
 
-        print(f"✅ Projet initialisé dans : {self.path}")
-        print(f"   📁 {self.data_dir}")
-        print(f"   📁 {self.output_dir}")
+        logger.info(f"✅ Projet initialisé dans : {self.path}")
+        logger.info(f"   📁 {self.data_dir}")
+        logger.info(f"   📁 {self.output_dir}")
 
         return self.path
 
@@ -211,9 +214,9 @@ class Project:
 
             verb = {"copy": "copiées", "move": "déplacées", "link": "liées"}[mode]
             if copied_sidecars:
-                print(f"✅ Données {verb} : {dest} (+ {', '.join(copied_sidecars)})")
+                logger.info(f"✅ Données {verb} : {dest} (+ {', '.join(copied_sidecars)})")
             else:
-                print(f"✅ Données {verb} : {dest}")
+                logger.info(f"✅ Données {verb} : {dest}")
             return dest
 
         if file_extension is None:
@@ -233,7 +236,7 @@ class Project:
             )
 
         result = save(data, file_extension, filename=filepath, timestamp=timestamp, raster_meta=raster_meta)
-        print(f"✅ Données ajoutées : {result}")
+        logger.info(f"✅ Données ajoutées : {result}")
         return result
 
     def infos(self):
@@ -288,15 +291,15 @@ class Project:
             "output_files": output_count,
         }
 
-        print(f"📋 Projet : {self.path}")
-        print(f"   🌐 CRS : {self.crs}")
-        print(f"   📁 data/   : {'✅' if data_exists else '❌'} ({total} fichier(s))")
+        logger.info(f"📋 Projet : {self.path}")
+        logger.info(f"   🌐 CRS : {self.crs}")
+        logger.info(f"   📁 data/   : {'✅' if data_exists else '❌'} ({total} fichier(s))")
         if total > 0:
-            print(f"      ├── vectoriel : {vector_count}")
-            print(f"      ├── raster    : {raster_count}")
-            print(f"      ├── tabulaire : {tabular_count}")
-            print(f"      └── autre     : {other_count}")
-        print(f"   📁 output/ : {'✅' if output_exists else '❌'} ({output_count} fichier(s))")
+            logger.info(f"      ├── vectoriel : {vector_count}")
+            logger.info(f"      ├── raster    : {raster_count}")
+            logger.info(f"      ├── tabulaire : {tabular_count}")
+            logger.info(f"      └── autre     : {other_count}")
+        logger.info(f"   📁 output/ : {'✅' if output_exists else '❌'} ({output_count} fichier(s))")
 
         return info
 
@@ -334,10 +337,10 @@ class Project:
         self.raster_files = os.listdir(raster_dir)
         self.tabular_files = os.listdir(tabular_dir)
 
-        print(f"📂 Organisation terminée dans : {self.data_dir}")
-        print(f"   vector/  → {len(self.vector_files)} fichier(s)")
-        print(f"   raster/  → {len(self.raster_files)} fichier(s)")
-        print(f"   tabular/ → {len(self.tabular_files)} fichier(s)")
+        logger.info(f"📂 Organisation terminée dans : {self.data_dir}")
+        logger.info(f"   vector/  → {len(self.vector_files)} fichier(s)")
+        logger.info(f"   raster/  → {len(self.raster_files)} fichier(s)")
+        logger.info(f"   tabular/ → {len(self.tabular_files)} fichier(s)")
 
     def _resolve_data(self, name, base_dir=None, strict=True):
         """
@@ -547,7 +550,7 @@ class Project:
                 os.remove(sidecar_path)
                 removed.append(sidecar_path)
 
-        print(f"🗑️ {len(removed)} fichier(s) supprimé(s) : {os.path.basename(target)}"
+        logger.info(f"🗑️ {len(removed)} fichier(s) supprimé(s) : {os.path.basename(target)}"
               + (" (+ sidecars)" if len(removed) > 1 else ""))
         return removed
 
@@ -584,7 +587,7 @@ class Project:
                 os.rename(sidecar_old, sidecar_new)
                 renamed.append((sidecar_old, sidecar_new))
 
-        print(f"✏️ {len(renamed)} fichier(s) renommé(s) : {old_base} → {new}")
+        logger.info(f"✏️ {len(renamed)} fichier(s) renommé(s) : {old_base} → {new}")
         return renamed
 
     def get_path(self, name, folder="data"):
@@ -615,7 +618,7 @@ class Project:
             pyproj.CRS: Le nouveau CRS.
         """
         self.crs = CRS.from_user_input(crs)
-        print(f"🌐 CRS mis à jour : {self.crs}")
+        logger.info(f"🌐 CRS mis à jour : {self.crs}")
         return self.crs
 
     def save_output(self, data, file_extension, filename="output",
@@ -655,7 +658,7 @@ class Project:
 
         result = save(data, file_extension, filename=filepath,
                       timestamp=timestamp, raster_meta=raster_meta)
-        print(f"✅ Sortie sauvegardée : {result}")
+        logger.info(f"✅ Sortie sauvegardée : {result}")
         return result
 
     def save_manifest(self):
@@ -693,7 +696,7 @@ class Project:
         with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest, f, ensure_ascii=False, indent=2)
 
-        print(f"📄 Manifeste sauvegardé : {manifest_path}")
+        logger.info(f"📄 Manifeste sauvegardé : {manifest_path}")
         return manifest_path
 
     def load_manifest(self):
@@ -724,7 +727,7 @@ class Project:
             int: Nombre de fichiers supprimés.
         """
         if not os.path.isdir(self.output_dir):
-            print("📁 Le dossier output n'existe pas.")
+            logger.info("📁 Le dossier output n'existe pas.")
             return 0
 
         count = 0
@@ -735,7 +738,7 @@ class Project:
             for d in dirs:
                 os.rmdir(os.path.join(root, d))
 
-        print(f"🧹 {count} fichier(s) supprimé(s) du dossier output.")
+        logger.info(f"🧹 {count} fichier(s) supprimé(s) du dossier output.")
         return count
 
     def validate(self, deep=False):
@@ -852,13 +855,13 @@ class Project:
                                 )
 
         status = "✅ valide" if report["valid"] else "❌ invalide"
-        print(f"🔍 Validation du projet : {status}")
+        logger.info(f"🔍 Validation du projet : {status}")
         for w in report["warnings"]:
-            print(f"   ⚠️ {w}")
+            logger.info(f"   ⚠️ {w}")
         for e in report["errors"]:
-            print(f"   ❌ {e}")
+            logger.info(f"   ❌ {e}")
         if not report["warnings"] and not report["errors"]:
-            print("   Aucun problème détecté.")
+            logger.info("   Aucun problème détecté.")
 
         return report
 

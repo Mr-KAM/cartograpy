@@ -64,7 +64,6 @@ dev = [
     "black>=23.0.0",
     "flake8>=6.0.0",
     "mypy>=1.0.0",
-    "jupyter>=1.0.0",
     "jupyterlab>=4.0.0",
 ]
 
@@ -93,7 +92,7 @@ exclude = [
 [tool.black]
 line-length = 88
 target-version = [
-    "py37",
+    "py311",
 ]
 extend-ignore = [
     "E203",
@@ -115,7 +114,7 @@ python_functions = [
 ]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

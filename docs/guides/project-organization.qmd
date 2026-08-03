@@ -1,0 +1,183 @@
+---
+title: "Organisation de projet"
+description: "Structurer un répertoire de travail avec Project, add_data et organize_project."
+---
+
+La classe `Project` sert à standardiser un répertoire de travail cartographique avec
+une structure simple et prévisible.
+
+## Quand utiliser Project
+
+Utilisez `Project` si vous voulez :
+
+- centraliser les données d'entrée et les sorties
+- enregistrer rapidement des couches dans `data/`
+- garder une structure cohérente entre plusieurs notebooks ou scripts
+- classer automatiquement les fichiers par type
+- vérifier l'intégrité d'un jeu de données avant de le partager (sidecars
+  manquants, fichiers illisibles)
+
+## Structure créée
+
+Au minimum, `Project.init()` crée deux dossiers :
+
+- `data/`
+- `output/`
+
+Après `organize_project()`, le contenu de `data/` peut être réparti dans :
+
+- `data/vector/`
+- `data/raster/`
+- `data/tabular/`
+
+## Exemple de départ
+
+```python
+from cartograpy.project import Project
+
+project = Project(
+    path="./mon_projet",
+    data_dir="data",
+    output_dir="output",
+    crs="EPSG:4326",
+)
+
+project.init()
+```
+
+## Ajouter des données au projet
+
+::: {.panel-tabset}
+## Depuis un objet en mémoire
+
+```python
+from cartograpy.data import load
+
+regions = load("../data/vector/gadm41_CIV.gpkg")
+project.add_data(regions, "geojson", filename="regions_civ")
+```
+S'appuie sur `cartograpy.data.save` en interne.
+
+## Depuis un fichier existant
+
+```python
+# Copie le fichier + ses sidecars (shapefile : .shx, .dbf, .prj...)
+project.add_data("../source/gadm41_CIV.shp")
+
+# Rangé directement dans data/vector/
+project.add_data("../source/regions.geojson", category="vector")
+
+# Déplacer au lieu de copier
+project.add_data("../source/carte.shp", mode="move")
+```
+:::
+
+## Explorer ce que contient le projet
+
+```python
+project.list_data()                     # tous les fichiers, un par ligne
+project.list_data(type_filter="vector")  # seulement les fichiers vectoriels
+
+project.list_datasets()                  # un shapefile + ses sidecars = 1 entrée
+
+project.infos()
+# 📋 Projet : /chemin/absolu/mon_projet
+#    🌐 CRS : EPSG:4326
+#    📁 data/   : ✅ (12 fichier(s))
+#       ├── vectoriel : 8
+#       ├── raster    : 2
+#       ├── tabulaire : 2
+#       └── autre     : 0
+#    📁 output/ : ✅ (3 fichier(s))
+```
+
+## Charger, renommer, supprimer un jeu de données
+
+`Project` résout un nom par correspondance exacte ou par nom de base (sans
+extension), en ignorant les sidecars pour éviter les ambiguïtés :
+
+```python
+gdf = project.load_data("regions_civ")            # ou "regions_civ.geojson"
+
+project.rename_data("regions_civ", "civ_admin")   # renomme aussi les sidecars
+project.remove_data("civ_admin.geojson")          # supprime le fichier + sidecars
+
+path = project.get_path("carte_finale.png", folder="output")
+```
+
+## Organiser automatiquement les fichiers
+
+```python
+project.organize_project()
+```
+
+Inspecte les extensions de `data/` et répartit les fichiers entre `vector/`,
+`raster/` et `tabular/` — met aussi à jour `project.vector_files`,
+`project.raster_files`, `project.tabular_files`.
+
+## Valider l'intégrité du projet
+
+```python
+report = project.validate(deep=True)
+# report["valid"], report["warnings"], report["errors"]
+```
+
+Avec `deep=True` : détecte les sidecars orphelins, les noms de base ambigus, et
+tente d'ouvrir réellement chaque fichier géospatial pour vérifier sa lisibilité.
+
+## Manifeste de projet
+
+```python
+project.save_manifest()             # écrit project.json (CRS, dates, inventaire)
+manifest = project.load_manifest()
+manifest["datasets"]
+```
+
+## Choisir un CRS de projet
+
+```python
+crs_list = Project.available_crs(name_contains="WGS")
+crs_list[:3]
+
+project.set_crs("EPSG:32630")  # change la référence, ne reprojette aucun fichier
+```
+
+Le CRS choisi est stocké comme objet `pyproj.CRS` dans `project.crs`.
+
+## Workflow recommandé
+
+1. **Créer le répertoire de projet**
+
+   `Project(...).init()`
+1. **Charger ou télécharger les données**
+
+   via `cartograpy.data` ou les
+       classes de `cartograpy.data` (`Bound`, `OSM`, `DEM`...)
+1. **Enregistrer les jeux de données utiles**
+
+   `project.add_data(...)`
+1. **Ranger le dossier data**
+
+   `project.organize_project()`
+1. **Valider avant de partager**
+
+   `project.validate(deep=True)`
+1. **Produire les cartes et exporter**
+
+   `project.save_output(...)`, puis
+       `project.save_manifest()`
+
+## Limites actuelles
+
+- le classement automatique (`organize_project`, `list_data`) repose uniquement sur
+  les extensions de fichiers, pas sur une inspection du contenu
+- les sous-dossiers ne sont personnalisables qu'au niveau de `data_dir` et
+  `output_dir` — pas de sous-catégories au-delà de `vector/raster/tabular`
+- `set_crs()` change la métadonnée de référence du projet, elle ne reprojette
+  aucun fichier déjà présent dans `data/`
+
+## Pages liées
+
+- [Premier projet](/getting-started/first-project.qmd)
+- [Reference project](/reference/project.qmd)
+- [Charger et enregistrer des données](/guides/load-and-save-data.qmd)

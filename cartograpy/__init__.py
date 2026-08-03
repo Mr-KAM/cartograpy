@@ -1,6 +1,20 @@
 # cartograpy – Python cartography toolkit
 # Public API
 
+import logging
+import sys
+
+# Messages visibles par défaut (comme print()), sans configuration requise.
+# `logging.getLogger("cartograpy").setLevel(logging.WARNING)` (ou plus haut)
+# pour les couper ; retirer le handler pour les rediriger ailleurs.
+_logger = logging.getLogger(__name__)
+if not _logger.handlers:
+    _handler = logging.StreamHandler(stream=sys.stdout)
+    _handler.setFormatter(logging.Formatter("%(message)s"))
+    _logger.addHandler(_handler)
+    _logger.setLevel(logging.INFO)
+    _logger.propagate = False
+
 from .iso_code import countries_iso3 as COUNTRY_ISO3
 
 from .data import load, save, list_geofiles, GeoBoundaries, Bound, WorldBank, OSM, Hydro, DEM

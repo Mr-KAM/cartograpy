@@ -1,0 +1,420 @@
+---
+title: "Reference mapper"
+description: "Référence des cartes statiques et interactives."
+---
+
+## Fonctions
+
+- `read_image`
+- `plot_choropleth`
+
+## Classes
+
+- `Map`
+- `Map2D`
+- `WebMap`
+- `SituationMap`
+
+## Organisation
+
+`cartograpy.mapper` est un sous-package, un fichier par classe :
+
+| Fichier | Contenu |
+|---|---|
+| `helpers.py` | `read_image`, `plot_choropleth` |
+| `map.py` | `Map` — la classe principale, cartes statiques matplotlib/cartopy |
+| `map2d.py` | `Map2D` (hérite de `Map`) — cartes sans projection cartographique |
+| `webmap.py` | `WebMap` — cartes interactives Folium/Leaflet |
+| `situation.py` | `SituationMap` — carte + mini-carte de localisation |
+
+Tout reste importable depuis `cartograpy.mapper` directement (`from cartograpy.mapper import Map`).
+
+`Map` concentre encore la majorité de la logique (création, couches, légende,
+échelle, flèche du nord, export...) dans une seule classe volumineuse — un
+découpage interne en mixins thématiques n'a pas encore été fait.
+
+## Méthodes de Map
+
+58 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
+défaut) et description en une ligne — pour les paramètres en détail, se référer
+au docstring de la méthode dans `cartograpy/mapper/map.py`.
+
+::: {.callout-note collapse="true"}
+## Configuration générale
+
+```python
+set_paper(paper_format, orientation='landscape')
+```
+Définit le format de papier et l'orientation de la carte.
+
+```python
+list_paper_formats()
+```
+Affiche tous les formats de papier disponibles avec leurs dimensions.
+
+```python
+set_background_color(color='white')
+```
+Définit la couleur de fond de la carte.
+
+```python
+set_extent(bounds, crs=None)
+```
+Définit les limites de la carte.
+
+```python
+set_projection(projection)
+```
+Change la projection de la carte (nécessite de recréer l'axe).
+
+```python
+center_on_bounds(bounds, margin='auto')
+```
+Centre la carte sur des limites spécifiques avec marges adaptées.
+
+```python
+get_optimal_margins()
+```
+Retourne les marges optimales pour le format de papier actuel.
+
+```python
+zoom_to_layer(index=None, label=None, margin=0.05)
+```
+Zoome sur l'étendue d'une couche spécifique.
+
+```python
+hide_gridline()
+```
+Masque toutes les bordures, ticks et labels de l'axe.
+:::
+
+::: {.callout-note collapse="true"}
+## Ajout de couches (vecteur, raster, choroplèthe)
+
+```python
+add_layer(data=None, layer_type='auto', label=None, name=None, style=None, **style_kwargs)
+```
+Ajoute une couche générique à la carte (vecteur ou raster).
+
+```python
+add_points(gdf, label=None, color='red', size=50, marker='o', alpha=1.0, edge_color='black', linewidth=0.5, column=None, scheme=None, cmap='viridis', **kwargs)
+```
+Ajoute des points à partir d'un GeoDataFrame.
+
+```python
+add_lines(gdf, label=None, color='blue', linewidth=2, linestyle='-', alpha=1.0, column=None, scheme=None, cmap='viridis', **kwargs)
+```
+Ajoute des lignes à partir d'un GeoDataFrame.
+
+```python
+add_polygons(gdf, label=None, facecolor='green', alpha=0.5, edge_color='black', linewidth=1, column=None, scheme=None, cmap='viridis', **kwargs)
+```
+Ajoute des polygones à partir d'un GeoDataFrame.
+
+```python
+add_point(coordinates, label=None, color='red', size=50, marker='o', alpha=1.0, edge_color='black', linewidth=0.5, transform=None)
+```
+Ajoute un ou plusieurs points à la carte (coordonnées brutes, pas de GeoDataFrame).
+
+```python
+add_line(coordinates, label=None, color='blue', linewidth=2, linestyle='-', alpha=1.0, transform=None)
+```
+Ajoute une ou plusieurs lignes à la carte (coordonnées brutes).
+
+```python
+add_polygon(coordinates, label=None, color='green', alpha=0.5, edge_color='black', linewidth=1, fill=True, transform=None)
+```
+Ajoute un ou plusieurs polygones à la carte (coordonnées brutes).
+
+```python
+add_raster(raster_path=None, raster_array=None, extent=None, cmap='viridis', alpha=0.7, vmin=None, vmax=None, transform=None, title=None, show_colorbar=True)
+```
+Ajoute une couche raster à la carte.
+
+```python
+add_natural_features(features=['coastline', 'borders'], coastline_color='black', coastline_width=0.5, border_color='gray', border_width=0.5, land_color=None, ocean_color=None, lakes=False, rivers=False)
+```
+Ajoute des caractéristiques naturelles (côtes, frontières, lacs, rivières) via cartopy.
+
+```python
+add_basemap(source=None, zoom='auto', alpha=1.0, attribution=True, attribution_size=8, crs=None)
+```
+Ajoute un fond de carte (tuiles web) via contextily.
+
+```python
+add_polygons_choropleth(gdf, column_to_plot, label_column=None, cmap='viridis', alpha=0.7, edge_color='black', linewidth=0.5, show_labels=True, label_size=10, text_outline_color='white', text_outline_width=2, show_colorbar=True, title=None, default_crs='EPSG:4326')
+```
+Ajoute une couche vectorielle choroplèthe (polygones colorés selon une colonne).
+
+```python
+add_points_choropleth(gdf, column_to_plot, label_column=None, point_size_column=None, cmap='viridis', alpha=0.7, min_point_size=40, max_point_size=200, edge_color='black', linewidth=0.5, show_labels=True, label_size=10, text_outline_color='white', text_outline_width=2, show_colorbar=True, show_size_legend=True, title=None, default_crs='EPSG:4326')
+```
+Ajoute une couche de points vectoriels, taille et/ou couleur proportionnelles à une colonne.
+
+```python
+add_polygons_cloropleth(*args, **kwargs)
+add_points_cloropleth(*args, **kwargs)
+```
+Alias dépréciés (faute de frappe historique) — utiliser `add_polygons_choropleth` / `add_points_choropleth`.
+
+```python
+add_colorbar(cmap='viridis', vmin=0, vmax=1, label=None, orientation='vertical', shrink=0.6, pad=0.05, aspect=20, ticks=None, tick_labels=None)
+```
+Ajoute une barre de couleurs autonome à la carte (indépendante d'une couche choroplèthe).
+:::
+
+::: {.callout-note collapse="true"}
+## Grille, titres, annotations et étiquettes
+
+```python
+add_gridlines(draw_labels=True, top_right=True, dms=False, x_inline=False, y_inline=False, xlocs=None, ylocs=None, color='gray', linestyle='--', linewidth=0.5, alpha=0.7, fontsize=10)
+```
+Ajoute une grille de coordonnées avec cartopy.
+
+```python
+add_labels(gdf, label_column=None, custom_label=None, filter_column=None, filter_values=None, fontsize=10, color='#0f172a', outline_width=2, outline_color='white', format_str=None, **text_kwargs)
+```
+Ajoute des étiquettes de texte au centroïde des polygones ou à la position des points d'un GeoDataFrame.
+
+```python
+add_title(title, fontsize=16, pad=20)
+set_title(title, fontsize=14, fontweight='bold', color='black', pad=20)
+```
+Ajoute / définit le titre de la carte (`set_title` expose plus d'options de mise en forme).
+
+```python
+add_annotation(text, xy, xytext=None, arrow=True, arrow_kwargs=None, text_kwargs=None)
+```
+Ajoute une annotation avec ou sans flèche sur un axe matplotlib.
+
+```python
+add_text(text, xy, fontsize=12, color='black', outline_width=0, outline_color='white', **kwargs)
+```
+Ajoute du texte personnalisé à la carte.
+:::
+
+::: {.callout-note collapse="true"}
+## Flèche du Nord, échelle et mini-carte de situation
+
+```python
+get_north_arrows(arrows_subdir='arrows')
+```
+Liste les fichiers SVG de flèches du Nord disponibles dans le package.
+
+```python
+add_north_arrow(arrow=1, position=(0.95, 0.95), zoom=1, color='black', style='auto', location='upper right', scale=None, rotation='auto', label='N', fancy=True, shadow=True, size=None, base=None, pack=None, aob=None, zorder=99, **kwargs)
+set_north_arrow(**kwargs)
+```
+Ajoute une flèche du Nord sur la carte / modifie celle déjà créée.
+
+```python
+add_scale_bar(length=None, location='lower left', linewidth=2, units='km', color='black', fontsize=11, pad=0.1, alpha=1, label=None, style='auto', box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', add_as_layer=True, bar_style='boxes', major_div=4, minor_div=2, size=None, bar=None, labels=None, text=None, **kwargs)
+set_scale_bar(**kwargs)
+```
+Ajoute une barre d'échelle sur la carte / modifie celle déjà créée.
+
+```python
+add_inset_map(bounds=None, position=(0.65, 0.02, 0.33, 0.33), facecolor='white', edgecolor='black', linewidth=1.5, alpha=0.9, box_color='red', box_linewidth=2, land_color='lightgray', ocean_color='lightblue', projection=None, style='auto', location='lower right', size=None, pad=None, coords=None, transform=None, global_view=True, extent=None, indicator='extent', indicator_facecolor='red', indicator_linecolor='red', indicator_alpha=0.5, indicator_linewidth=1, indicator_straighten=True, indicator_pad=0.05, connector_color='black', connector_width=1, data=None, inset_size=None, zorder=99, show_borders=True, show_coastlines=True, **kwargs)
+set_inset(**kwargs)
+```
+Ajoute une mini-carte de situation (inset map) montrant la zone étudiée dans son contexte / modifie celle déjà créée.
+:::
+
+::: {.callout-note collapse="true"}
+## Palettes et polices
+
+```python
+create_custom_palette(name, colors, save_palette=True)
+```
+Crée une palette de couleurs personnalisée.
+
+```python
+get_available_palettes(include_custom=True, include_seaborn=True, include_matplotlib=True)
+print_available_palettes(category='all', limit=None)
+```
+Récupère / affiche (formaté) les palettes de couleurs disponibles.
+
+```python
+preview_palette(palette_name, n_colors=8)
+```
+Prévisualise une palette de couleurs sous forme de barre colorée.
+
+```python
+generate_gradient_palette(name, start_color, end_color, n_colors=10, save_palette=True)
+```
+Génère une palette en dégradé entre deux couleurs.
+
+```python
+get_available_fonts(pattern=None, sort=True)
+print_available_fonts(pattern=None, limit=None)
+```
+Récupère / affiche (formaté) les polices disponibles sur le système.
+
+```python
+set_font(family='sans-serif', size=10, weight='normal')
+```
+Définit les propriétés globales de la police.
+:::
+
+::: {.callout-note collapse="true"}
+## Légende
+
+```python
+custom_legend(elements=None, title=None, loc='best', bbox_to_anchor=None, ncol=1, fontsize=10, title_fontsize=12, frameon=True, fancybox=True, shadow=True, framealpha=0.9, facecolor='white', edgecolor='black', linewidth=1, columnspacing=2, handlelength=2, handletextpad=0.8, borderpad=1, markerscale=1, markerfirst=True, numpoints=1, scatterpoints=1, replace=True, **kwargs)
+```
+Crée une légende personnalisée avec contrôle total sur l'apparence.
+
+```python
+add_legend_element(element_type, label, color='black', marker='o', linestyle='-', linewidth=2, markersize=8, alpha=1.0, **kwargs)
+```
+Ajoute un élément personnalisé à la légende.
+
+```python
+create_legend_from_column(gdf, column, element_type='patch', cmap=None, color_scheme='viridis', title=None, max_items=25, sort_by='value', **legend_kwargs)
+```
+Crée automatiquement une légende basée sur une colonne d'un GeoDataFrame.
+
+```python
+legend_presets(preset='default', **override_kwargs)
+```
+Applique des préréglages de légende.
+
+```python
+remove_legend()
+clear_legend_elements()
+```
+Supprime la légende actuelle / vide la liste des éléments de légende accumulés.
+:::
+
+::: {.callout-note collapse="true"}
+## Gestion des couches
+
+```python
+list_layers()
+```
+Liste toutes les couches ajoutées à la carte.
+
+```python
+remove_layer(index=None, label=None)
+```
+Supprime une couche par son index ou son label.
+
+```python
+clear_layers()
+```
+Supprime toutes les couches de la carte.
+:::
+
+::: {.callout-note collapse="true"}
+## Rendu et export
+
+```python
+show(legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs)
+```
+Affiche la carte avec tous les layers ajoutés.
+
+```python
+save(filename, dpi=300, bbox_inches='tight', legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs)
+```
+Sauvegarde la carte dans un fichier.
+
+```python
+to_image(format='png', dpi=300, legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs)
+```
+Exporte la carte en objet `PIL.Image` (en mémoire, sans fichier).
+
+```python
+to_bytes(format='png', dpi=300, bbox_inches='tight', legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs)
+```
+Exporte la carte en `BytesIO` (en mémoire, sans fichier).
+:::
+
+## Méthodes de Map2D
+
+`Map2D` hérite de `Map` (toutes les méthodes ci-dessus restent disponibles) et ajoute/adapte 3 méthodes pour un rendu sans projection cartographique :
+
+```python
+add_layer(gdf, column=None, cmap='viridis', label=None, edgecolor='black', linewidth=0.5, alpha=0.8, **kwargs)
+```
+Ajoute un GeoDataFrame comme couche (version simplifiée, sans axe cartopy).
+
+```python
+add_labels(gdf, label_column, fontsize=9, color='black', outline_width=2, outline_color='white', **text_kwargs)
+```
+Ajoute des étiquettes au centroïde / à la position des géométries.
+
+```python
+hide_axes()
+```
+Masque les axes matplotlib.
+
+## Méthodes de WebMap
+
+6 méthodes publiques — carte interactive Folium/Leaflet, indépendante de `Map`.
+
+```python
+add_layer(gdf, column=None, cmap='YlOrRd', style_function=None, tooltip_columns=None, popup_columns=None, name=None, **kwargs)
+```
+Ajoute un GeoDataFrame comme couche GeoJson ou Choropleth.
+
+```python
+add_marker(location, popup=None, tooltip=None, icon=None)
+```
+Ajoute un marqueur.
+
+```python
+add_layer_control()
+```
+Ajoute un contrôle de couches (`folium.LayerControl`).
+
+```python
+fit_bounds(gdf)
+```
+Adapte le zoom aux limites d'un GeoDataFrame.
+
+```python
+show()
+```
+Renvoie la carte Folium (affichage automatique dans un notebook).
+
+```python
+save(filename='map.html')
+```
+Sauvegarde la carte en HTML.
+
+## Méthodes de SituationMap
+
+9 méthodes publiques — carte principale + mini-carte de localisation, indépendante de `Map`.
+
+```python
+add_main_layer(gdf, facecolor='green', edgecolor='black', linewidth=0.5, alpha=0.7, column=None, cmap='viridis', **kwargs)
+```
+Ajoute un GeoDataFrame à la carte principale.
+
+```python
+set_inset_box(bounds, box_color='red', box_linewidth=2, indicator='extent', indicator_facecolor='red', indicator_linecolor='red', indicator_alpha=0.5, indicator_linewidth=1)
+set_inset_box_from_gdf(gdf, **kwargs)
+```
+Dessine sur la mini-carte le rectangle délimitant la zone d'étude, à partir de limites brutes ou de l'étendue d'un GeoDataFrame.
+
+```python
+add_north_arrow(style='auto', location='upper right', **kwargs)
+```
+Ajoute une flèche du Nord à la carte principale.
+
+```python
+add_scale_bar(length=None, location='lower left', units='km', color='black', fontsize=11, linewidth=2, style='auto', bar_style='boxes', major_div=4, minor_div=2, box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', **kwargs)
+```
+Ajoute une barre d'échelle à la carte principale.
+
+```python
+add_gridlines(**kwargs)
+```
+Ajoute des lignes de grille à la carte principale.
+
+```python
+show()
+save(filename, dpi=300, bbox_inches='tight')
+to_bytes(format='png', dpi=300)
+```
+Affiche / sauvegarde dans un fichier / exporte en mémoire.

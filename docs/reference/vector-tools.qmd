@@ -1,0 +1,245 @@
+---
+title: "Reference VectorTools"
+description: "Référence structurée de la classe VectorTools."
+---
+
+`VectorTools` encapsule un `GeoDataFrame` et expose ses opérations sous forme de méthodes chaînables. Elle vit dans `cartograpy/processing/vector.py` et s'instancie ainsi :
+
+```python
+from cartograpy.processing import VectorTools
+
+vt = VectorTools(gdf)  # lève TypeError si gdf n'est pas un GeoDataFrame
+```
+
+::: {.callout-note}
+Chaque méthode retourne une **nouvelle** instance de `VectorTools` (le
+`GeoDataFrame` interne n'est jamais modifié sur place) — elles sont donc
+chaînables. Récupérez le résultat final avec `.gdf` :
+
+```python
+result = (
+  vt.fix_invalid()
+    .remove_empty()
+    .reproject_layer("EPSG:32630")
+    .buffer(500)
+    .gdf
+)
+```
+
+Exceptions à cette règle, qui retournent directement une valeur et non un
+`VectorTools` : les méthodes de contrôle (`validity`, `duplicates`,
+`check_adjacency`, `find_touching_features`, `build_contiguity_matrix`), les
+méthodes d'analyse qui renvoient un `dict`/`DataFrame`/objet externe
+(`nearest_neighbor_analysis`, `distance_matrix`, `morans_i`, `gearys_c`,
+`spatial_autocorrelation_report`, `landscape_metrics`, `fragmentation_index`,
+`edge_density`, `patch_connectivity`, `coverage_analysis`, `gravity_model`,
+`idw_interpolation`, `kriging`, `tin_surface`, `spatial_diff`,
+`evolution_stats`, `spatial_weights`, `build_network`, `shortest_path`,
+`service_area`, `network_distance`, `isochrone`), et les méthodes d'export
+(`to_gpkg`, `to_shp`, `to_geojson`, `to_csv`) qui renvoient le chemin écrit.
+:::
+
+Certaines méthodes chargent une dépendance optionnelle à l'appel et lèvent une
+erreur explicite si elle manque : `networkx` (réseau/accessibilité),
+`scikit-learn` (`spatial_clustering`), `libpysal`/`esda` (statistiques
+spatiales), `pykrige` (`kriging`).
+
+::: {.callout-note collapse="true"}
+## Qualité et validation géométrique
+
+| Méthode | Description |
+|---|---|
+| `validity()` | Series booléenne : validité de chaque géométrie. |
+| `fix_invalid()` | Corrige les géométries invalides (`shapely.make_valid`). |
+| `remove_empty()` | Supprime les géométries vides ou nulles. |
+| `duplicates()` | Retourne les entités dupliquées (toutes occurrences). |
+| `drop_duplicates(subset=None)` | Supprime les doublons. |
+| `snap_geometries(tolerance)` | Accroche les géométries entre elles selon une tolérance. |
+| `remove_slivers(min_area)` | Supprime les polygones sous `min_area`. |
+| `eliminate_small_polygons(min_area)` | Fusionne les polygones sous `min_area` avec leur plus grand voisin (au lieu de les supprimer). |
+| `close_gaps(min_area)` | Fusionne les petits trous (< `min_area`) au polygone voisin le plus proche. |
+| `resolve_overlaps()` | Résout les chevauchements en soustrayant du plus petit polygone des deux. |
+| `enforce_topology_rules()` | Raccourci : `fix_invalid()` puis `remove_empty()`. |
+:::
+
+::: {.callout-note collapse="true"}
+## Projection et schéma attributaire
+
+| Méthode | Description |
+|---|---|
+| `get_crs()` | Retourne le CRS courant. |
+| `set_crs(crs, allow_override=False)` | Attribue un CRS sans reprojeter. |
+| `reproject_layer(target_crs)` | Reprojette la couche (`to_crs`). |
+| `rename_fields(mapping)` | Renomme des colonnes (`{ancien: nouveau}`). |
+| `select_fields(columns)` | Ne garde que les colonnes listées (+ géométrie). |
+| `drop_fields(columns)` | Supprime les colonnes listées. |
+| `cast_field_types(type_mapping)` | Convertit les types (`{"col": float, ...}`). |
+| `fill_missing_values(value=None, method=None, columns=None)` | Remplit les valeurs manquantes (`value`, `"ffill"` ou `"bfill"`). |
+| `normalize_text_fields(columns=None)` | Normalise les champs texte (`strip` + Title Case). |
+:::
+
+::: {.callout-note collapse="true"}
+## Sélection, filtrage et découpage
+
+| Méthode | Description |
+|---|---|
+| `filter_by_attribute(column, values)` | Filtre par valeurs d'attribut (scalaire ou liste). |
+| `filter_by_expression(expression)` | Filtre via une expression pandas (`df.query`). |
+| `filter_by_location(mask_gdf, predicate="intersects")` | Conserve les entités qui satisfont un prédicat spatial avec un masque. |
+| `select_by_bbox(bbox)` | Sélectionne dans une bbox `(xmin, ymin, xmax, ymax)`. |
+| `clip(mask)` | Découpe par un masque (`GeoDataFrame`, `VectorTools` ou géométrie). |
+| `extract_by_mask(mask)` | Alias de `clip()`. |
+| `crop_to_extent(bbox)` | Découpe selon une bbox. |
+:::
+
+::: {.callout-note collapse="true"}
+## Transformations géométriques
+
+| Méthode | Description |
+|---|---|
+| `multipart_to_singlepart()` | Éclate les multi-géométries (`explode`). |
+| `singlepart_to_multipart(by)` | Regroupe par champ en multi-géométries (`dissolve`). |
+| `explode_geometries()` | Alias de `multipart_to_singlepart()`. |
+| `convert_geometry_type(target_type)` | Convertit vers `"point"`, `"line"` ou `"polygon"`. |
+| `line_to_polygon()` | Convertit des lignes fermées en polygones (`polygonize`). |
+| `polygon_to_line()` | Convertit des polygones en lignes de contour (`boundary`). |
+| `buffer(distance)` | Zone tampon autour de chaque géométrie. |
+| `centroid()` | Remplace les géométries par leur centroïde. |
+| `convex_hull()` | Remplace les géométries par leur enveloppe convexe. |
+| `minimum_bounding_box()` | Remplace les géométries par leur rectangle englobant (`envelope`). |
+| `simplify_geometry(tolerance, preserve_topology=True)` | Simplifie les géométries. |
+| `densify_geometry(max_segment_length)` | Densifie les géométries (`segmentize`). |
+| `smooth_geometry(iterations=3)` | Lisse les géométries (algorithme de Chaikin). |
+:::
+
+::: {.callout-note collapse="true"}
+## Mesures et indicateurs
+
+| Méthode | Description |
+|---|---|
+| `area(column_name="area")` | Ajoute une colonne de surface. |
+| `perimeter(column_name="perimeter")` | Ajoute une colonne de périmètre. |
+| `length(column_name="length")` | Ajoute une colonne de longueur (alias surface pour les lignes). |
+| `compactness(column_name="compactness")` | Indice de compacité `4πA / P²`. |
+| `shape_index(column_name="shape_index")` | Indice de forme `P / √A`. |
+:::
+
+::: {.callout-note collapse="true"}
+## Analyse topologique
+
+| Méthode | Description |
+|---|---|
+| `check_adjacency()` | Matrice d'adjacence binaire (`touches`). |
+| `find_touching_features()` | Liste de paires `(i, j)` d'entités qui se touchent. |
+| `detect_overlaps()` | GeoDataFrame des chevauchements entre entités (aire, géométrie). |
+| `detect_gaps()` | GeoDataFrame des trous entre polygones. |
+| `build_contiguity_matrix(method="queen")` | Matrice de contiguïté (`"queen"` ou `"rook"`). |
+:::
+
+::: {.callout-note collapse="true"}
+## Overlay, jointures et agrégation spatiale
+
+| Méthode | Description |
+|---|---|
+| `intersection(other)` | Overlay `intersection` avec une autre couche. |
+| `union(other)` | Overlay `union`. |
+| `difference(other)` | Overlay `difference`. |
+| `symmetric_difference(other)` | Overlay `symmetric_difference`. |
+| `identity(other)` | Overlay `identity` (garde tout de `self` + attributs de `other`). |
+| `spatial_join(other, how="inner", predicate="intersects")` | Jointure spatiale (`sjoin`). |
+| `join_by_nearest(other, max_distance=None)` | Jointure au plus proche voisin (`sjoin_nearest`). |
+| `point_in_polygon_join(polygons)` | Jointure points-dans-polygones (`predicate="within"`). |
+| `dissolve(by, aggfunc="first")` | Fusionne les géométries par champ. |
+| `aggregate_by_field(by, aggfunc)` | Équivalent de `dissolve()` avec fonction d'agrégation explicite. |
+| `group_and_summarize(by, summary)` | Regroupe + résume (`summary = {"col": "sum", ...}`), fusionne aussi les géométries. |
+:::
+
+::: {.callout-note collapse="true"}
+## Proximité, réseau et densité
+
+Certaines méthodes nécessitent `networkx` ou `scikit-learn` (import différé, erreur explicite si absent).
+
+| Méthode | Description |
+|---|---|
+| `distance_to_nearest(other, column_name="dist_nearest")` | Distance de chaque entité au plus proche élément d'une autre couche. |
+| `nearest_neighbor_analysis()` | Indice R de Clark-Evans (dict : distances observée/attendue, indice R). |
+| `within_distance(other, distance)` | Conserve les entités à moins de `distance` d'une autre couche. |
+| `distance_matrix(other=None, label_field=None, method="centroid")` | Matrice de distance (`"centroid"` ou `"boundary"`). |
+| `build_network()` | Construit un graphe `networkx` à partir de lignes. |
+| `shortest_path(source, target)` | Plus court chemin entre deux points, snappés aux nœuds du réseau. Requiert `networkx`. |
+| `service_area(source, max_cost)` | Zone de desserte (enveloppe convexe des nœuds atteignables). Requiert `networkx`. |
+| `network_distance(source, target)` | Coût du plus court chemin entre deux points. |
+| `point_density(radius, column_name="density")` | Densité de points dans un rayon donné. |
+| `kernel_density_from_points(bandwidth, resolution=100)` | Estimation de densité par noyau (dict : grille numpy). |
+| `spatial_clustering(eps, min_samples=5, column_name="cluster")` | Clustering DBSCAN. Requiert `scikit-learn`. |
+| `hotspot_analysis(column=None, k=8)` | Z-scores locaux sur voisinage k-NN, colonnes `z_score`/`hotspot`. |
+:::
+
+::: {.callout-note collapse="true"}
+## Statistiques spatiales et autocorrélation
+
+Nécessitent `libpysal` (`spatial_weights`) et `esda` (les indices eux-mêmes).
+
+| Méthode | Description |
+|---|---|
+| `spatial_weights(method="queen", k=4, distance=None)` | Matrice de poids spatiaux (`"queen"`, `"rook"`, `"knn"`, `"distance"`). |
+| `morans_i(column, method="queen", **kwargs)` | Autocorrélation spatiale globale (I de Moran). |
+| `local_morans(column, method="queen", significance=0.05, **kwargs)` | LISA — indicateurs locaux (`lisa_I`, `lisa_p`, `lisa_q`, `lisa_cluster`). |
+| `gearys_c(column, method="queen", **kwargs)` | Indice C de Geary. |
+| `spatial_autocorrelation_report(column, method="queen", **kwargs)` | Rapport combiné Moran + Geary + LISA. |
+:::
+
+::: {.callout-note collapse="true"}
+## Changement, fragmentation et paysage
+
+| Méthode | Description |
+|---|---|
+| `spatial_diff(other, key_column)` | Compare deux états d'une couche : entités ajoutées/supprimées/modifiées. |
+| `track_changes(other, key_column, geom_tolerance=0.0)` | GeoDataFrame de suivi géométrique (`change_type`, variations de surface, distance de Hausdorff). |
+| `temporal_filter(date_column, start=None, end=None)` | Filtre par plage temporelle. |
+| `evolution_stats(other, key_column, measure_cols)` | Variation absolue et en % de colonnes numériques entre deux états. |
+| `landscape_metrics(class_column)` | Métriques paysagères par classe (nb patches, surfaces, diversité de Shannon). |
+| `fragmentation_index(class_column)` | Indice de fragmentation par classe (`1 − plus grand patch / surface totale`). |
+| `patch_connectivity(max_distance, class_column=None)` | Graphe de connectivité entre patches à portée de `max_distance`. Requiert `networkx`. |
+| `edge_density(class_column)` | Densité de lisières (périmètre total / surface totale) par classe. |
+| `isolation_index(class_column=None)` | Distance au plus proche patch de même classe. |
+:::
+
+::: {.callout-note collapse="true"}
+## Accessibilité et modèles spatiaux
+
+| Méthode | Description |
+|---|---|
+| `isochrone(source, time_breaks, speed)` | Zones isochrones sur le réseau autour d'un point source. Requiert `networkx`. |
+| `coverage_analysis(facilities, population_col, radius)` | Taux de couverture de population par des équipements dans un rayon. |
+| `voronoi_allocation(facilities=None)` | Polygones de Voronoï/Thiessen pour l'allocation spatiale. |
+| `gravity_model(destinations, weight_col, beta=1.0)` | Modèle gravitaire d'interaction spatiale. |
+| `market_area(centers, demand_col, friction=2.0)` | Zones de chalandise (modèle de Huff). |
+:::
+
+::: {.callout-note collapse="true"}
+## Interpolation et surfaces
+
+| Méthode | Description |
+|---|---|
+| `idw_interpolation(value_col, resolution=100, power=2)` | Interpolation par pondération inverse de la distance. |
+| `thiessen_polygons()` | Alias de `voronoi_allocation(facilities=None)`. |
+| `kriging(value_col, variogram_model="linear", resolution=100)` | Krigeage ordinaire. Requiert `pykrige`. |
+| `tin_surface(value_col)` | Triangulation de Delaunay → surface TIN. |
+| `contour_lines(value_col, levels=10, resolution=100)` | Lignes d'isovaleurs à partir de points interpolés. |
+:::
+
+::: {.callout-note collapse="true"}
+## Reclassement, scoring et export
+
+| Méthode | Description |
+|---|---|
+| `reclassify_attributes(column, mapping)` | Reclasse les valeurs d'une colonne selon un dictionnaire. |
+| `create_indicator_fields(rules)` | Crée des colonnes indicatrices (`{"nom": expression_ou_callable}`). |
+| `calculate_scores(weights, score_column="score")` | Score pondéré normalisé (min-max) sur plusieurs colonnes. |
+| `rank_features(column, ascending=True, rank_column="rank")` | Classe les entités par rang sur une colonne. |
+| `to_gpkg(path, layer=None)` | Exporte en GeoPackage, retourne le chemin. |
+| `to_shp(path)` | Exporte en Shapefile, retourne le chemin. |
+| `to_geojson(path)` | Exporte en GeoJSON, retourne le chemin. |
+| `to_csv(path, include_geometry=True)` | Exporte en CSV (géométrie en WKT si demandé), retourne le chemin. |
+:::

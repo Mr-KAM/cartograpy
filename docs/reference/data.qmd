@@ -1,0 +1,39 @@
+---
+title: "Reference data"
+description: "Référence des fonctions et classes du module data."
+---
+
+## Fonctions
+
+- `load`
+- `describe`
+- `save`
+- `list_geofiles`
+
+## Classes
+
+- `GeoBoundaries`
+- `Bound`
+- `Geocoder`
+- `OSM`
+- `Hydro`
+- `DEM` (et `DEMDownloadError`)
+- `WorldBank`
+- `Gee` — accessible via `cartograpy.data.Gee`, non réexporté à la racine du package
+
+## Organisation
+
+`cartograpy.data` est un sous-package, un fichier par responsabilité :
+
+| Fichier | Contenu |
+|---|---|
+| `io.py` | `load`, `save`, `describe`, `list_geofiles` |
+| `boundaries.py` | `GeoBoundaries`, `Bound` |
+| `geocoding.py` | `Geocoder` |
+| `osm.py` | `OSM` |
+| `hydro.py` | `Hydro` |
+| `dem.py` | `DEM`, `DEMDownloadError` |
+| `worldbank.py` | `WorldBank` |
+| `gee.py` | `Gee` |
+
+Tout reste importable depuis `cartograpy.data` directement (`from cartograpy.data import GeoBoundaries`) : l'organisation en fichiers est un détail d'implémentation, pas une API à connaître.

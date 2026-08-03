@@ -1,0 +1,91 @@
+---
+title: "Cartes web"
+description: "Créer une carte interactive avec WebMap."
+---
+
+`WebMap` (dans `cartograpy.mapper`) couvre les usages interactifs légers à partir
+d'un `GeoDataFrame`, par-dessus Folium/Leaflet.
+
+## Créer une carte
+
+```python
+from cartograpy.mapper import WebMap
+
+wm = WebMap(location=(5.35, -4.0), zoom_start=7, tiles="OpenStreetMap")
+```
+
+- **`tiles`** (`str`, défaut `OpenStreetMap`) : Fond de carte : `"OpenStreetMap"`, `"CartoDB positron"`, `"Stamen Terrain"`, etc. (tout fond supporté par Folium).
+
+::: {.callout-warning}
+`WebMap` nécessite `folium`, qui n'est pas dans les dépendances cœur de
+cartograpy — `pip install folium` si l'import échoue.
+:::
+
+## Ajouter une couche vectorielle
+
+```python
+wm.add_layer(regions_gdf, column="densite", cmap="YlOrRd",
+             tooltip_columns=["nom", "densite"], name="Densité")
+```
+
+Sans `column`, la couche est affichée avec un style uni plutôt qu'une choroplèthe :
+
+```python
+wm.add_layer(routes_gdf, name="Routes")
+```
+
+::: {.callout-note}
+`add_layer` reprojette automatiquement en `EPSG:4326` si la couche est dans un
+autre CRS — Folium/Leaflet n'acceptent que WGS 84.
+:::
+
+## Marqueurs
+
+```python
+wm.add_marker((5.35, -4.0), popup="Abidjan", tooltip="Cliquez pour plus d'infos")
+```
+
+## Contrôles et cadrage
+
+```python
+wm.add_layer_control()      # bouton d'activation/désactivation des couches
+wm.fit_bounds(regions_gdf)  # zoome automatiquement sur l'emprise d'une couche
+```
+
+## Toutes les méthodes se chaînent
+
+```python
+wm = (
+    WebMap(location=(5.35, -4.0), zoom_start=7)
+    .add_layer(regions_gdf, column="densite", name="Densité")
+    .add_marker((5.35, -4.0), popup="Abidjan")
+    .add_layer_control()
+)
+```
+
+## Afficher et exporter
+
+```python
+wm.show()              # affichage automatique dans un notebook Jupyter/Marimo
+wm.save("carte.html")  # export HTML autonome
+```
+
+## Limites face à `Map`
+
+| | `Map` | `WebMap` |
+|---|---|---|
+| Rendu | statique (PNG, PDF, export papier) | interactif (HTML, zoom/pan navigateur) |
+| Légende, échelle, flèche du Nord | oui, gérées en détail | non — habillage Leaflet standard uniquement |
+| Volumes de données | adapté aux gros jeux de données | à limiter — de gros GeoJSON ralentissent le navigateur |
+| Distribution | image/PDF à insérer dans un document | fichier HTML autonome, partageable tel quel |
+
+::: {.callout-tip}
+Pour de gros volumes (plusieurs dizaines de milliers d'entités), simplifiez la
+géométrie avant `add_layer` (`VectorTools(gdf).simplify_geometry(tolerance=...)`)
+— un GeoJSON trop détaillé ralentit sensiblement l'affichage Leaflet.
+:::
+
+## Aller plus loin
+
+- [Cartes statiques](/guides/static-maps.qmd) — l'équivalent pour l'export image/PDF
+- [Reference mapper](/reference/mapper.qmd) — signatures complètes

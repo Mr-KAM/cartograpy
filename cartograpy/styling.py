@@ -6,6 +6,9 @@ import matplotlib.colors as mcolors
 import seaborn as sns
 from typing import Optional, Union, List, Tuple, Dict, Any
 import matplotlib.font_manager as fm
+import logging
+
+logger = logging.getLogger(__name__)
 # ----------------------------------------------------------------------
 # ================gestion des styles de polices ========================
 # ----------------------------------------------------------------------
@@ -220,12 +223,12 @@ def show_palette_details(nom_palette):
     """Affiche les informations d'une palette spécifique"""
     if nom_palette in color_palettes:
         palette = color_palettes[nom_palette]
-        print(f"Palette: {palette['nom']}")
-        print(f"Likes: {palette['likes']}")
-        print(f"Couleurs: {palette['couleurs']}")
-        print("-" * 40)
+        logger.info(f"Palette: {palette['nom']}")
+        logger.info(f"Likes: {palette['likes']}")
+        logger.info(f"Couleurs: {palette['couleurs']}")
+        logger.info("-" * 40)
     else:
-        print(f"Palette '{nom_palette}' non trouvée")
+        logger.info(f"Palette '{nom_palette}' non trouvée")
 
 # Fonction pour rechercher par nombre de likes
 def palettes_by_popularity(min_likes=0):
@@ -524,10 +527,10 @@ def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=No
                     show_cmap(palette)
                     return
                 except Exception:
-                    print(f"Palette '{palette}' introuvable")
+                    logger.info(f"Palette '{palette}' introuvable")
                     return None
     else:
-        print("Format de palette non reconnu. Fournir un nom, une liste de couleurs ou un colormap.")
+        logger.info("Format de palette non reconnu. Fournir un nom, une liste de couleurs ou un colormap.")
         return None
 
     # Création de l'aperçu des couleurs
@@ -579,9 +582,9 @@ def set_style(style_name, source="matplotlib"):
     if source.lower() == "matplotlib":
         if style_name in plt.style.available:
             plt.style.use(style_name)
-            print(f"✅ Style Matplotlib appliqué : {style_name}")
+            logger.info(f"✅ Style Matplotlib appliqué : {style_name}")
         else:
-            print(f"❌ Style '{style_name}' non trouvé dans Matplotlib.")
+            logger.info(f"❌ Style '{style_name}' non trouvé dans Matplotlib.")
     
     elif source.lower() == "seaborn":
         try:
@@ -589,22 +592,22 @@ def set_style(style_name, source="matplotlib"):
             seaborn_styles = ["darkgrid", "whitegrid", "dark", "white", "ticks"]
             if style_name in seaborn_styles:
                 sns.set_style(style_name)
-                print(f"✅ Style Seaborn appliqué : {style_name}")
+                logger.info(f"✅ Style Seaborn appliqué : {style_name}")
             else:
-                print(f"❌ Style '{style_name}' non trouvé dans Seaborn.")
+                logger.info(f"❌ Style '{style_name}' non trouvé dans Seaborn.")
         except ImportError:
-            print("❌ Seaborn n'est pas installé.")
+            logger.info("❌ Seaborn n'est pas installé.")
     
     elif source.lower() == "mplcyberpunk":
         try:
             import mplcyberpunk  # just to ensure it is installed
             if style_name == "cyberpunk":
                 plt.style.use("cyberpunk")
-                print("✅ Style mplcyberpunk appliqué : cyberpunk")
+                logger.info("✅ Style mplcyberpunk appliqué : cyberpunk")
             else:
-                print("❌ Seul le style 'cyberpunk' est disponible pour mplcyberpunk.")
+                logger.info("❌ Seul le style 'cyberpunk' est disponible pour mplcyberpunk.")
         except ImportError:
-            print("❌ mplcyberpunk n'est pas installé.")
+            logger.info("❌ mplcyberpunk n'est pas installé.")
     
     elif source.lower() == "scienceplots":
         import scienceplots
@@ -612,11 +615,11 @@ def set_style(style_name, source="matplotlib"):
         if style_name in plt.style.available:
             # plt.style.use(style_name)
             plt.style.use([style_name,'no-latex'])
-            print(f"✅ Style SciencePlots appliqué : {style_name}")
+            logger.info(f"✅ Style SciencePlots appliqué : {style_name}")
         else:
-            print(f"❌ Style '{style_name}' non trouvé dans SciencePlots.")
+            logger.info(f"❌ Style '{style_name}' non trouvé dans SciencePlots.")
     else:
-        print("❌ Source inconnue. Choisis parmi : matplotlib, seaborn, mplcyberpunk, SciencePlots.")
+        logger.info("❌ Source inconnue. Choisis parmi : matplotlib, seaborn, mplcyberpunk, SciencePlots.")
 
 
 def list_all_styles():

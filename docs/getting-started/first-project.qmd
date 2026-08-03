@@ -1,0 +1,96 @@
+---
+title: "Premier projet"
+description: "Initialiser une arborescence de travail avec Project."
+---
+
+La classe `Project` sert à créer une structure simple pour stocker les données et les
+sorties cartographiques d'un projet, plutôt que de gérer des chemins de fichiers en
+dur dans vos scripts.
+
+## Initialiser un projet
+
+```python
+from cartograpy.project import Project
+
+project = Project(
+    path="./mon_projet",
+    data_dir="data",
+    output_dir="output",
+    crs="EPSG:4326",
+)
+project.init()
+```
+
+```
+✅ Projet initialisé dans : /chemin/absolu/mon_projet
+   📁 /chemin/absolu/mon_projet/data
+   📁 /chemin/absolu/mon_projet/output
+```
+
+::: {.callout-tip}
+Raccourci équivalent pour un projet avec la configuration par défaut :
+`from cartograpy.project import init_project; init_project("./mon_projet")`.
+:::
+
+## Ajouter des données
+
+::: {.panel-tabset}
+## Depuis un fichier existant
+
+```python
+# Copie le fichier (et ses sidecars .shx/.dbf/.prj pour un shapefile)
+# dans data/, extension déduite automatiquement
+project.add_data("../source/gadm41_CIV.shp")
+
+# Rangé directement dans data/vector/
+project.add_data("../source/regions.geojson", category="vector")
+```
+
+## Depuis un objet en mémoire
+
+```python
+project.add_data(gdf, "geojson", filename="limites")
+```
+:::
+
+## Explorer le contenu du projet
+
+```python
+project.list_data()                        # tous les fichiers, un par ligne
+project.list_datasets()                    # un shapefile + ses sidecars = 1 entrée
+project.infos()                            # résumé : CRS, nombre de fichiers par type
+```
+
+## Charger et sauvegarder
+
+```python
+# Recherche par nom exact ou par nom de base (sans extension)
+gdf = project.load_data("gadm41_CIV")
+
+# ... traitement ...
+
+project.save_output(gdf, "geojson", filename="carte_finale")
+```
+
+## Organiser et valider
+
+```python
+project.organize_project()   # range data/ en vector/, raster/, tabular/
+project.validate(deep=True)  # sidecars manquants/orphelins, lisibilité réelle
+project.save_manifest()      # écrit project.json (CRS, inventaire, dates)
+```
+
+## Capacités principales
+
+- créer les dossiers du projet (`init()`)
+- lister les CRS disponibles (`Project.available_crs()`)
+- enregistrer des données dans `data/` ou `output/` (`add_data()`, `save_output()`)
+- charger, renommer, supprimer un jeu de données par son nom (`load_data()`,
+  `rename_data()`, `remove_data()`)
+- réorganiser les fichiers par famille (`organize_project()`)
+- valider l'intégrité du projet (`validate()`)
+
+## Pages liées
+
+- [Reference project](/reference/project.qmd) — référence complète de la classe
+- [Organisation de projet](/guides/project-organization.qmd) — guide détaillé
