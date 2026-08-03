@@ -1,0 +1,72 @@
+---
+title: "cartograpy"
+description: "Package Python pour charger, traiter et cartographier des données géographiques."
+---
+
+cartograpy est une boîte à outils Python orientée cartographie, traitement géospatial
+et production de cartes statiques ou web — de la récupération des données jusqu'au
+rendu final, sans limite géographique : n'importe quel pays, continent ou zone
+d'étude, partout dans le monde.
+
+## Ce que vous pouvez faire
+
+#### [Charger et récupérer des données](/reference/data.qmd)
+
+Fichiers locaux (shp, geojson, gpkg, kml, gpx, csv, parquet, tif) et sources en
+ligne : frontières administratives, OpenStreetMap, hydrographie, altitude
+(SRTM), World Bank, Google Earth Engine.
+
+#### [Transformer vos couches](/reference/vector-tools.qmd)
+
+`VectorTools` et `RasterTools` pour la géométrie, les projections, le clipping,
+les statistiques, le raster processing et bien plus.
+
+#### [Produire des cartes](/reference/mapper.qmd)
+
+Cartes statiques (`Map`, `Map2D`), mini-cartes de situation
+(`SituationMap`) et cartes interactives (`WebMap`).
+
+#### [Organiser un projet](/reference/project.qmd)
+
+`Project` structure vos données et sorties, garde une trace du CRS, valide
+l'intégrité des jeux de données (shapefiles + sidecars).
+
+## Parcours recommandé
+
+1. **Installation**
+
+   Voir [Installation](/getting-started/installation.qmd) — Python 3.11+ et les
+   dépendances système de la stack géospatiale.
+1. **Quickstart**
+
+   Voir [Quickstart](/getting-started/quickstart.qmd) — une première carte en moins de
+   10 lignes.
+1. **Premier projet**
+
+   Voir [Premier projet](/getting-started/first-project.qmd) — structurer un dossier
+   de travail avec `Project`.
+1. **Guides par tâche**
+
+   Explorer les [Guides](/guides/load-and-save-data.qmd) selon votre besoin : charger
+   des données, récupérer des frontières administratives, traiter du vecteur ou du
+   raster, produire des cartes statiques ou web.
+
+## Architecture en un coup d'œil
+
+Cinq blocs pivots, chacun un sous-package organisé par responsabilité — voir
+[Architecture du package](/explanations/package-architecture.qmd) pour le détail.
+
+| Bloc | Rôle |
+|---|---|
+| `cartograpy.data` | chargement, sauvegarde, sources en ligne |
+| `cartograpy.processing` | traitement vectoriel et raster |
+| `cartograpy.mapper` | rendu cartographique statique et web |
+| `cartograpy.styling` | polices, palettes, styles graphiques |
+| `cartograpy.project` | organisation de projet |
+
+::: {.callout-note}
+Tout reste importable directement depuis `cartograpy` (`from cartograpy import
+Map, Bound, Project`) ou depuis chaque sous-module (`from cartograpy.data import
+Bound`) — l'organisation interne en fichiers est un détail d'implémentation, pas
+une contrainte d'usage.
+:::

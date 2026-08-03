@@ -1,0 +1,136 @@
+---
+title: "OSM et sources en ligne"
+description: "Télécharger des données OSM, hydrographiques, DEM et World Bank."
+---
+
+Cartograpy embarque plusieurs clients orientés téléchargement de données, tous dans
+`cartograpy.data`. Chacun nécessite une connexion réseau au premier appel — voir
+[Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd)
+pour le détail par source.
+
+## OpenStreetMap (`OSM`)
+
+```python
+from cartograpy.data import OSM
+
+osm = OSM()
+
+# Par nom de lieu
+ecoles = osm.get_data("Abidjan, Côte d'Ivoire", tags={"amenity": "school"})
+
+# Par bounding box
+routes = osm.get_data((-4.1, 5.2, -3.9, 5.4), tags={"highway": True}, data_type="lines")
+
+# Par emprise d'un GeoDataFrame existant
+poi = osm.get_data(commune_gdf, tags={"shop": True}, data_type="points")
+```
+
+- **`data_type`** (`str`, défaut `all`) : `"points"`, `"polygons"`, `"lines"` ou `"all"` — filtre le résultat par type de géométrie après récupération.
+
+### Découvrir les tags OSM disponibles
+
+```python
+osm.list_tags()                       # toutes les catégories (building, highway, amenity...)
+osm.list_tags("amenity")              # tags d'une catégorie précise
+osm.search_tags("hospital")           # recherche par mot-clé dans tous les tags
+osm.get_common_tag()["restaurants"]   # combinaisons courantes prêtes à l'emploi
+# {"amenity": "restaurant"}
+```
+
+::: {.callout-tip}
+`get_common_tag()` couvre une vingtaine de requêtes usuelles (écoles, hôpitaux,
+pharmacies, routes principales, rivières, gares...) — pratique pour éviter de
+chercher le bon tag OSM à chaque fois.
+:::
+
+## Hydrographie (`Hydro`)
+
+```python
+from cartograpy.data import Hydro
+
+hydro = Hydro()
+rivieres = hydro.download(region="af")   # codes : af, as, au, eu, na, sa
+print(hydro.describe_variables())        # explication des colonnes HydroRIVERS
+```
+
+Télécharge et extrait les données HydroRIVERS pour une région continentale, met en
+cache localement le zip extrait pour ne pas re-télécharger à chaque appel.
+
+## Altitude — modèle numérique de terrain (`DEM`)
+
+```python
+from cartograpy.data import DEM
+
+dem = DEM()
+mnt = dem.download(bbox=(-8.6, 4.3, -2.5, 10.7))   # (west, south, east, north)
+```
+
+Télécharge les tuiles SRTM (~30m) couvrant l'emprise depuis un miroir AWS, les
+mosaïque et les découpe à l'emprise demandée — pas de clé API nécessaire. Lève
+`DEMDownloadError` en cas d'échec de téléchargement ou de traitement.
+
+## Indicateurs World Bank (`WorldBank`)
+
+```python
+from cartograpy.data import WorldBank
+
+wb = WorldBank()
+wb.get_sources()                                    # sources de données disponibles
+wb.get_indicators(source=2, query="population")     # indicateurs correspondants
+wb.get_countries(query="Africa")                    # pays disponibles
+wb.get_data(["SP.POP.TOTL"], country=["CIV", "SEN"])  # DataFrame résultat
+```
+
+## Google Earth Engine (`Gee`)
+
+```python
+from cartograpy.data import Gee
+
+gee = Gee()  # nécessite ee + geemap installés, et une authentification GEE préalable
+
+col = gee.get_sentinel2(bbox=(-8.6, 4.3, -2.5, 10.7), start_date="2024-01-01", end_date="2024-03-01")
+ndvi = gee.compute_ndvi(gee.collection(col).median())
+gee.zonal_stats(ndvi, regions_gdf)
+```
+
+::: {.callout-warning}
+`Gee` nécessite en plus `earthengine-api` (`ee`), qui n'est **pas** déclaré dans
+les dépendances de `pyproject.toml` — installez-le manuellement
+(`pip install earthengine-api`) et authentifiez-vous
+(`ee.Authenticate()` puis `ee.Initialize()`) avant d'utiliser cette classe. Voir
+[Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd).
+:::
+
+## Géocodage (`Geocoder`)
+
+```python
+from cartograpy.data import Geocoder
+
+geocoder = Geocoder()
+
+gdf, non_trouves = geocoder.geocode("Tour Eiffel, Paris")
+gdf, non_trouves = geocoder.geocode(["Abidjan", "Dakar", "Bamako"])
+
+adresses, _ = geocoder.reverse_geocode((48.8566, 2.3522))
+
+candidats = geocoder.search("Boulangerie", limit=5, country_codes="fr")
+
+bbox = geocoder.bbox("Abidjan, Côte d'Ivoire")
+```
+
+Renvoie un `GeoDataFrame` (colonnes `query`, `address`, `latitude`, `longitude`,
+`geometry`...) et la liste de ce qui n'a pas été trouvé, plutôt que de lever une
+erreur — pratique pour géocoder un lot d'adresses en continuant malgré les échecs
+individuels.
+
+::: {.callout-note}
+Un délai (`delay=1.0` par défaut) est appliqué entre chaque requête pour respecter
+les limites d'usage de Nominatim. Augmentez `delay` si vous géocodez de gros
+volumes.
+:::
+
+## Aller plus loin
+
+- [Frontières et données administratives](/guides/boundaries-and-admin-data.qmd) —
+  `GeoBoundaries`/`Bound`, une source spécialisée dans les limites administratives
+- [Reference data](/reference/data.qmd) — signatures complètes de toutes ces classes

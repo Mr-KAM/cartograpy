@@ -1,0 +1,29 @@
+---
+title: "Vue d'ensemble de l'API"
+description: "Résumé des objets et fonctions exportés par cartograpy."
+---
+
+Les exports publics sont centralisés dans `cartograpy.__init__`.
+
+## Modules publics
+
+- `data`
+- `processing`
+- `mapper`
+- `styling`
+- `project`
+- `iso_code`
+
+## Objets majeurs
+
+- `Map`, `Map2D`, `WebMap`, `SituationMap`
+- `GeoBoundaries`, `Bound`, `OSM`, `Hydro`, `DEM`, `WorldBank`
+- `VectorTools`, `RasterTools`
+- `Project`
+
+Accessibles via `cartograpy.data` mais non réexportés à la racine du package :
+`Geocoder`, `DEMDownloadError`, `Gee`, `describe`.
+
+## Recommandation
+
+Chaque page de référence doit lister les signatures, paramètres, retours, erreurs courantes et exemples courts.

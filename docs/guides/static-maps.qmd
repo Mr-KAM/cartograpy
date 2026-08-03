@@ -1,0 +1,147 @@
+---
+title: "Cartes statiques"
+description: "Composer une carte 2D avec Map, couches, légende et mise en page."
+---
+
+`Map` (dans `cartograpy.mapper`) centralise la production de cartes statiques avec
+Matplotlib et Cartopy — couches vectorielles/raster, choroplèthes, légende, échelle,
+flèche du Nord, grille, export. C'est la classe la plus riche du package (58
+méthodes publiques).
+
+## Créer une carte
+
+```python
+from cartograpy.mapper import Map
+
+m = Map(title="Côte d'Ivoire")
+```
+
+```python
+m.set_paper("A4", orientation="landscape")   # format papier prédéfini
+m.list_paper_formats()                       # formats disponibles avec dimensions
+m.set_background_color("white")
+```
+
+## Ajouter des couches
+
+::: {.panel-tabset}
+## Depuis un GeoDataFrame
+
+```python
+m.add_polygons(regions_gdf, facecolor="lightyellow", edgecolor="black")
+m.add_lines(routes_gdf, color="blue", linewidth=1.5)
+m.add_points(villes_gdf, color="red", size=40, column="population", cmap="viridis")
+```
+
+## Depuis des coordonnées brutes
+
+```python
+m.add_point((5.35, -4.0), label="Abidjan", color="red")
+m.add_line([(5.3, -4.0), (5.4, -3.9)], color="blue")
+m.add_polygon([(5.3, -4.0), (5.4, -4.0), (5.4, -3.9)], color="green")
+```
+
+## Raster
+
+```python
+m.add_raster(raster_path="data/elevation.tif", cmap="terrain", alpha=0.8)
+```
+
+## Fond de carte web
+
+```python
+m.add_basemap(source="OpenStreetMap")   # nécessite contextily
+```
+:::
+
+### Choroplèthes
+
+```python
+m.add_polygons_choropleth(regions_gdf, column_to_plot="densite", cmap="YlOrRd", show_labels=True)
+m.add_points_choropleth(villes_gdf, column_to_plot="population", point_size_column="population")
+```
+
+::: {.callout-note}
+`add_polygons_cloropleth`/`add_points_cloropleth` (avec la faute de frappe
+historique) existent encore comme alias dépréciés — préférez
+`add_polygons_choropleth`/`add_points_choropleth`.
+:::
+
+### Frontières, côtes et fonds naturels (cartopy)
+
+```python
+m.add_natural_features(features=["coastline", "borders"], border_color="gray")
+```
+
+## Habiller la carte
+
+```python
+m.add_title("Densité de population par région")
+m.add_gridlines(draw_labels=True)
+m.add_labels(regions_gdf, label_column="nom", fontsize=9)
+m.add_annotation("Zone d'étude", xy=(5.35, -4.0), arrow=True)
+```
+
+### Flèche du Nord et échelle
+
+```python
+m.get_north_arrows()          # liste les SVG de flèches disponibles dans le package
+m.add_north_arrow(arrow=1, location="upper right")
+m.add_scale_bar()
+```
+
+### Légende et barre de couleurs
+
+```python
+m.add_colorbar(cmap="viridis", vmin=0, vmax=1000, label="Population")
+```
+
+## Cadrage
+
+```python
+m.set_extent((-8.6, 4.3, -2.5, 10.7))    # (west, south, east, north)
+m.zoom_to_layer(label="Régions")
+m.center_on_bounds(regions_gdf.total_bounds)
+```
+
+## Rendu et export
+
+```python
+m.show()
+m.save("carte_finale.png", dpi=300)
+```
+
+Référence complète des 58 méthodes de `Map`, groupées par thème :
+[Reference mapper](/reference/mapper.qmd).
+
+## Variantes
+
+#### [Map2D](/reference/mapper.qmd)
+
+Hérite de `Map`, sans projection cartographique (axes matplotlib classiques) —
+pour des schémas ou plans où la projection géographique n'est pas nécessaire.
+
+#### [SituationMap](/reference/mapper.qmd)
+
+Carte principale + mini-carte de localisation (inset) montrant où se situe la
+zone d'étude dans un contexte plus large.
+
+#### [plot_choropleth()](/reference/mapper.qmd)
+
+Fonction autonome pour une choroplèthe rapide, sans passer par une instance
+`Map`.
+
+```python
+from cartograpy.mapper import SituationMap
+
+sm = SituationMap(title="Côte d'Ivoire")
+sm.add_main_layer(regions_gdf, facecolor="khaki")
+sm.set_inset_box_from_gdf(regions_gdf)
+sm.show()
+```
+
+## Aller plus loin
+
+- [Styles, palettes et polices](/guides/styling-and-palettes.qmd) — personnaliser les
+  couleurs et polices utilisées par `Map`
+- [Cartes web](/guides/web-maps.qmd) — l'équivalent interactif avec `WebMap`

@@ -1,0 +1,83 @@
+---
+title: "Quickstart"
+description: "Créer une première carte avec les objets principaux du package."
+---
+
+Cartograpy s'organise autour de quelques blocs simples :
+
+- [`data`](/reference/data.qmd) pour charger ou télécharger des données
+- [`processing`](/reference/vector-tools.qmd) pour transformer les couches
+- [`mapper`](/reference/mapper.qmd) pour créer des cartes statiques ou web
+- [`styling`](/reference/styling.qmd) pour les palettes et les polices
+- [`project`](/reference/project.qmd) pour organiser un projet cartographique
+
+## Exemple minimal
+
+Une carte statique d'un pays, sans télécharger aucun fichier vous-même :
+
+```python
+from cartograpy.data import Bound
+from cartograpy.mapper import Map
+
+bound = Bound()
+civ = bound.get_admin("CIV", adm=0)  # frontières nationales, via GeoBoundaries
+
+m = Map(title="Côte d'Ivoire")
+m.add_polygons(civ, facecolor="lightyellow", edgecolor="black")
+m.add_north_arrow()
+m.add_scale_bar()
+m.show()
+```
+
+::: {.callout-note}
+`"CIV"` est un code ISO3 — n'importe quel pays fonctionne de la même façon
+(`bound.get_admin("SEN", adm=0)`, `bound.get_admin("France", adm=1)`...). Voir
+[Frontières et données administratives](/guides/boundaries-and-admin-data.qmd).
+:::
+
+## Un exemple un peu plus complet
+
+Charger des données locales, filtrer, coloriser par une colonne, exporter :
+
+```python
+from cartograpy.data import load
+from cartograpy.processing import clip_gdf_by_mask
+from cartograpy.mapper import Map
+from cartograpy.data import Bound
+
+# 1. Charger une couche locale
+regions = load("data/regions.geojson")
+
+# 2. La découper selon une emprise
+civ = Bound().get_admin("CIV", adm=0)
+regions_civ = clip_gdf_by_mask(regions, civ)
+
+# 3. Cartographier avec une choroplèthe
+m = Map(title="Densité de population")
+m.add_polygons_choropleth(regions_civ, column_to_plot="densite", cmap="viridis")
+m.add_north_arrow()
+m.add_scale_bar()
+
+# 4. Exporter
+m.save("carte_densite.png", dpi=300)
+```
+
+## Suite recommandée
+
+1. **Initialiser un projet**
+
+   [Premier projet](/getting-started/first-project.qmd) — structurer `data/` et
+   `output/` avec `Project` plutôt que des chemins en dur.
+1. **Charger ses propres données**
+
+   [Charger et enregistrer des données](/guides/load-and-save-data.qmd) — tous les
+   formats supportés (`shp`, `geojson`, `gpkg`, `kml`, `gpx`, `csv`, `parquet`,
+   `tif`).
+1. **Produire une première carte statique**
+
+   [Cartes statiques](/guides/static-maps.qmd) — couches, légende, échelle, flèche du
+   Nord, export.
+1. **Explorer les outils vectoriels et raster**
+
+   [Traitement vectoriel](/guides/vector-processing.qmd) et
+   [Traitement raster](/guides/raster-processing.qmd).

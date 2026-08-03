@@ -1,0 +1,120 @@
+---
+title: "CRS et projections"
+description: "Bonnes pratiques pour gérer les systèmes de coordonnées dans cartograpy."
+---
+
+La majorité des erreurs cartographiques (surfaces fausses, décalages entre couches,
+distances incohérentes) viennent d'un mauvais alignement de CRS. Cette page explique
+comment cartograpy gère les CRS et quand intervenir manuellement.
+
+## Géographique vs projeté
+
+#### CRS géographique
+
+Coordonnées en degrés (latitude/longitude), ex. `EPSG:4326` (WGS 84). C'est le
+CRS par défaut de `Project` et de la plupart des sources en ligne
+(GeoBoundaries, OpenStreetMap, Natural Earth). Pratique pour l'échange de
+données, **impropre au calcul de surface ou de distance**.
+
+#### CRS projeté
+
+Coordonnées en unités linéaires (mètres en général), ex. `EPSG:32630` (UTM zone
+30N) ou `ESRI:54009` (Mollweide, équivalent-surface mondial). Nécessaire dès
+qu'on calcule une aire, une longueur ou qu'on applique un buffer avec une
+distance réelle.
+
+## Pourquoi ça casse silencieusement
+
+Un `GeoDataFrame` en `EPSG:4326` a des géométries en degrés. Appeler `.area` ou
+`.length` dessus renvoie un nombre — geopandas ne lève pas d'erreur — mais ce nombre
+est en degrés carrés ou en degrés, pas en m² ou en mètres. C'est le piège le plus
+courant.
+
+::: {.callout-warning}
+`cartograpy.processing.centroids()` émet un avertissement geopandas
+(`UserWarning: Geometry is in a geographic CRS...`) si vous calculez un centroïde
+sans reprojection préalable — le résultat reste utilisable pour un usage visuel,
+mais peut être imprécis pour de grands polygones (le vrai centre de masse dévie
+du calcul planaire near les pôles ou sur de grandes étendues est-ouest).
+:::
+
+## Comment cartograpy gère ça en interne
+
+`Bound.get_area()` (dans `cartograpy.data`) reprojette automatiquement en
+`ESRI:54009` (Mollweide, une projection équivalente-surface mondiale) avant de
+calculer l'aire, précisément pour éviter ce piège :
+
+```python
+from cartograpy.data import Bound
+
+b = Bound()
+b.get_area("CIV")            # km² par défaut, calculé en Mollweide en interne
+b.get_area("CIV", unit="ha")
+```
+
+`clip_gdf_by_mask` et `clip_gdf_by_bbox` (dans `cartograpy.processing`) reprojettent
+automatiquement l'emprise de découpe dans le CRS de la couche source si les deux
+diffèrent — vous n'avez pas à harmoniser les CRS vous-même avant un découpage :
+
+```python
+from cartograpy.processing import clip_gdf_by_mask
+
+# routes_gdf en EPSG:32630, frontiere_civ en EPSG:4326 : ça fonctionne quand même
+routes_civ = clip_gdf_by_mask(routes_gdf, frontiere_civ)
+```
+
+## Quand reprojeter vous-même
+
+1. **Calcul de surface ou de distance**
+
+   Reprojetez en CRS métrique adapté à votre zone d'étude avant `.area`, `.length`
+   ou un `buffer()` avec une distance réelle.
+
+   ```python
+   gdf_proj = gdf.to_crs("EPSG:32630")  # UTM zone 30N, adapté à l'Afrique de l'Ouest
+   surface_m2 = gdf_proj.geometry.area
+   ```
+1. **Superposition de couches vecteur/raster**
+
+   Les opérations d'intersection, de clip ou de zonal stats supposent des
+   géométries dans le même CRS que le raster — reprojetez la couche vecteur (ou le
+   raster, via `RasterTools`) avant toute analyse combinée.
+1. **Affichage**
+
+   Pour l'affichage seul (`Map`, `WebMap`), le CRS géographique convient : `Map`
+   gère la projection cartographique (`ccrs.PlateCarree()`, etc.) indépendamment du
+   CRS de stockage des données.
+
+## Choisir un CRS projeté
+
+::: {.callout-tip}
+Pas de CRS universel : une UTM correcte pour la Côte d'Ivoire (`EPSG:32630`) fausse
+les calculs pour l'Europe du Nord. Pour des comparaisons de surface à l'échelle
+mondiale ou multi-pays (comme le fait `Bound.get_area`), préférez une projection
+équivalente-surface globale telle que Mollweide (`ESRI:54009`) plutôt qu'une UTM
+locale.
+:::
+
+`Project.available_crs(name_contains="UTM")` (voir
+[Reference project](/reference/project.qmd)) permet de retrouver le code EPSG d'une zone
+UTM sans le chercher manuellement :
+
+```python
+from cartograpy.project import Project
+
+Project.available_crs(name_contains="UTM zone 30N")
+```
+
+## `Project` et le CRS
+
+`Project` porte un CRS de référence (`EPSG:4326` par défaut), stocké comme objet
+`pyproj.CRS` sur `project.crs` — mais il ne reprojette pas automatiquement les
+données que vous chargez ou sauvegardez : c'est une métadonnée de projet, pas une
+transformation appliquée en cascade.
+
+```python
+from cartograpy.project import Project
+
+project = Project(crs="EPSG:32630")
+project.set_crs("EPSG:4326")  # change la référence, ne modifie aucun fichier existant
+```

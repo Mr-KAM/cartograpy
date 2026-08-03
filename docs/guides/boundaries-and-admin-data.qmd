@@ -1,0 +1,131 @@
+---
+title: "Frontières et données administratives"
+description: "Télécharger des limites de pays, continents et niveaux administratifs."
+---
+
+`GeoBoundaries` et `Bound` (qui hérite de `GeoBoundaries` et ajoute des raccourcis)
+donnent accès aux frontières administratives de n'importe quel pays du monde, via
+l'API [geoboundaries.org](https://www.geoboundaries.org), plus les continents et
+pays au niveau mondial via Natural Earth. Aucune limite géographique : `"France"`,
+`"SEN"`, `"เซเนกัล"` ou `"Côte d'Ivoire"` fonctionnent de la même façon.
+
+::: {.callout-note}
+Utilisez `Bound` plutôt que `GeoBoundaries` directement — elle expose les mêmes
+fonctionnalités avec des méthodes plus explicites (`get_country`, `get_continent`,
+`get_neighbors`...).
+:::
+
+## Récupérer un pays
+
+```python
+from cartograpy.data import Bound
+
+b = Bound()
+
+france = b.get_country("France")
+plusieurs = b.get_country(["France", "SEN", "Mali"])
+```
+
+Accepte un nom de pays, un code ISO2 ou ISO3, dans plusieurs langues.
+
+## Niveaux administratifs (ADM0–ADM5)
+
+```python
+b.get_admin("CIV", adm=0)   # frontière nationale
+b.get_admin("CIV", adm=2)   # départements/districts
+b.get_admin("CIV", adm=-1)  # le plus petit niveau disponible pour ce pays
+```
+
+| Niveau | Nom courant (FR) |
+|---|---|
+| ADM0 | Pays |
+| ADM1 | Région / État / Province |
+| ADM2 | Département / District |
+| ADM3 | Sous-préfecture / Commune |
+| ADM4 | Village / Localité |
+| ADM5 | Quartier / Secteur |
+
+::: {.callout-warning}
+Tous les pays n'ont pas tous les niveaux disponibles dans geoBoundaries — `adm=-1`
+évite de deviner, ou testez avec `b.is_valid_adm("CIV", "ADM3")` avant d'appeler
+`get_admin`.
+:::
+
+## Continents et le monde entier
+
+```python
+b.get_continent("Afrique")                       # un continent
+b.get_continent(["Afrique", "Europe", "Asia"])   # plusieurs, FR ou EN mélangés
+
+b.get_world("continent")   # tous les continents (Natural Earth)
+b.get_world("country")     # tous les pays (Natural Earth, résolution 110m)
+```
+
+::: {.callout-tip}
+`get_world()` vient de Natural Earth (faible résolution, rapide) — pour des
+frontières nationales précises, préférez `get_admin(pays, adm=0)` (geoBoundaries)
+pays par pays.
+:::
+
+## Pays voisins et pays par continent
+
+```python
+b.get_neighbors("CIV")                    # pays limitrophes (Natural Earth)
+b.get_countries_by_continent("Afrique")   # tous les pays d'un continent (geoBoundaries)
+```
+
+## Géométrie utilitaire
+
+```python
+b.get_bbox("CIV")           # (west, south, east, north) en WGS-84
+b.get_centroid("CIV")       # GeoDataFrame avec géométrie Point
+b.get_area("CIV")           # km², calculé en projection équivalente-surface
+b.get_area(["SEN", "Mali"], unit="ha")
+
+b.clip(routes_gdf, "CIV")                  # découpe un GeoDataFrame par frontière
+b.contains("CIV", (6.85, -5.28))           # True — point (lat, lon) dans le pays ?
+```
+
+::: {.callout-note}
+`get_area()` reprojette automatiquement en Mollweide (`ESRI:54009`) avant le
+calcul — voir [CRS et projections](/explanations/crs-and-projections.qmd). Le calcul
+d'aire est donc fiable sans manipulation manuelle de CRS.
+:::
+
+## Rechercher un pays par nom approximatif
+
+```python
+b.search_country("ivo")
+# [("Côte d'Ivoire", 'CIV')]
+
+b.list_countries()          # tous les codes ISO3 connus
+b.list_continents_names()   # mapping FR/EN -> nom Natural Earth
+```
+
+## Cache et performance
+
+`Bound`/`GeoBoundaries` mettent en cache les réponses HTTP (`requests_cache`, 7
+jours par défaut) — un deuxième appel identique ne repasse pas par le réseau :
+
+```python
+b = Bound(cache_expire_seconds=3600)   # 1h au lieu de 7 jours
+b.set_cache_expire_time(86400)         # ajuste sans vider le cache existant
+b.clear_cache()                        # vide le cache
+b.disable_cache()                      # désactive complètement
+```
+
+## Métadonnées brutes
+
+```python
+b.metadata("CIV", "ADM1")   # JSON brut renvoyé par l'API geoBoundaries
+b.adminLevels()             # tableau explicatif des niveaux ADM
+```
+
+## Aller plus loin
+
+- [CRS et projections](/explanations/crs-and-projections.qmd) — pourquoi `get_area()`
+  reprojette automatiquement
+- [Traitement vectoriel](/guides/vector-processing.qmd) — `clip_gdf_by_mask` pour
+  découper avec plus d'options qu'un simple `Bound.clip`
+- [Reference data](/reference/data.qmd) — signatures complètes de `GeoBoundaries` et
+  `Bound`

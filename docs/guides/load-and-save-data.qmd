@@ -1,0 +1,140 @@
+---
+title: "Charger et enregistrer des données"
+description: "Utiliser load, save et list_geofiles pour gérer les formats courants."
+---
+
+Ce guide couvre les opérations de base de `cartograpy.data` : lire, décrire, écrire
+et découvrir des fichiers géospatiaux, sans passer par `Project`.
+
+## Charger un fichier
+
+`load()` déduit automatiquement le type de retour depuis l'extension :
+
+```python
+from cartograpy.data import load
+
+gdf = load("data/regions.geojson")       # GeoDataFrame
+gdf = load("data/limites.gpkg")          # GeoDataFrame
+df  = load("data/population.csv")        # DataFrame pandas
+raster = load("data/elevation.tif")      # rasterio.io.DatasetReader
+```
+
+::: {.callout-note}
+Formats vectoriels supportés : `shp`, `geojson`, `gpkg`, `kml`, `gpx`, `csv`,
+`parquet`. Formats raster : `tif`, `tiff`.
+:::
+
+### Cas particulier : GPX
+
+Les fichiers GPX ont plusieurs couches (`tracks`, `waypoints`, `routes`) —
+précisez celle qui vous intéresse :
+
+```python
+waypoints = load("data/randonnee.gpx", layer="waypoints")
+tracks = load("data/randonnee.gpx", layer="tracks")  # couche par défaut
+```
+
+### Cas particulier : raster
+
+`load()` renvoie un objet `rasterio.io.DatasetReader` **ouvert** — fermez-le
+explicitement ou utilisez un context manager :
+
+```python
+with load("data/elevation.tif") as src:
+    array = src.read(1)
+    print(src.crs, src.bounds)
+```
+
+## Inspecter un fichier sans le charger entièrement
+
+`describe()` affiche un résumé (couches, colonnes, CRS, emprise) et renvoie les
+mêmes informations en dictionnaire :
+
+```python
+from cartograpy.data import describe
+
+info = describe("data/gadm41_CIV.gpkg")
+```
+
+```
+============================================================
+  Fichier : data/gadm41_CIV.gpkg
+  Type    : vector
+  Format  : gpkg
+  Couches  : 2
+  ------------------------------------------------------
+  Couche : ADM0
+    Entites   : 1
+    Geometrie : MultiPolygon
+    Colonnes  : 3 -> ['shapeName', 'shapeISO', 'shapeGroup']
+    CRS       : EPSG:4326
+    Emprise   : [-8.6001, 4.3436, -2.4934, 10.7404]
+============================================================
+```
+
+## Enregistrer des données
+
+`save()` gère aussi bien les données vectorielles/tabulaires que raster.
+
+::: {.panel-tabset}
+## Vecteur / tabulaire
+
+```python
+from cartograpy.data import save
+
+save(gdf, "geojson", filename="regions_civ")
+save(gdf, "shp", filename="regions_civ")
+save(df, "csv", filename="population")            # geometry retirée si présente
+save(gdf, "geoparquet", filename="regions_civ")    # geoparquet conserve la géométrie
+```
+
+## Raster (DatasetReader)
+
+```python
+with load("data/elevation.tif") as src:
+    save(src, "tif", filename="elevation_copie")
+```
+
+## Raster (ndarray + métadonnées)
+
+```python
+save(
+    array,             # ndarray 2D ou 3D
+    "tif",
+    filename="resultat",
+    raster_meta={
+        "crs": src.crs, "transform": src.transform,
+        "width": src.width, "height": src.height,
+        "dtype": array.dtype, "count": 1,
+    },
+)
+```
+:::
+
+::: {.callout-warning}
+`save()` refuse d'écraser un fichier existant que si vous ne passez pas
+`timestamp=True` — mais elle ne vérifie pas non plus l'existence préalable :
+contrairement à `Project.add_data()` (qui lève `FileExistsError` sans
+`overwrite=True`), un appel direct à `save()` écrase silencieusement. Passez par
+`Project` si vous voulez cette protection.
+:::
+
+## Découvrir des fichiers géospatiaux dans un dossier
+
+```python
+from cartograpy.data import list_geofiles
+
+list_geofiles("data/")
+# ['data/vector/regions.geojson', 'data/raster/dem.tif', ...]
+```
+
+Parcourt récursivement le dossier et retient tout fichier avec une extension
+géospatiale reconnue (`.shp`, `.geojson`, `.gpkg`, `.kml`, `.csv`, `.parquet`,
+`.gpx`, `.tif`, `.tiff`).
+
+## Aller plus loin
+
+- [Premier projet](/getting-started/first-project.qmd) — passer par `Project` pour que
+  chargement/sauvegarde restent relatifs à un dossier de travail plutôt qu'à des
+  chemins en dur
+- [Reference data](/reference/data.qmd) — signatures complètes

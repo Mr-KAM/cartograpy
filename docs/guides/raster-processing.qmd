@@ -1,0 +1,136 @@
+---
+title: "Traitements raster"
+description: "Prendre en main RasterTools pour la validation, l'analyse et l'export."
+---
+
+`RasterTools` (dans `cartograpy.processing`) encapsule un raster et expose 82
+méthodes chaînables : validation, harmonisation spatiale, calcul d'indices,
+terrain/hydrologie, classification, détection de changement et export.
+
+## Créer une instance
+
+```python
+from cartograpy.processing import RasterTools
+
+rt = RasterTools("data/elevation.tif")        # depuis un fichier
+rt = RasterTools((array, profile))            # depuis un ndarray + profile rasterio
+```
+
+::: {.callout-note}
+Comme `VectorTools`, chaque méthode de transformation renvoie une **nouvelle**
+instance — le raster d'origine n'est jamais modifié, on chaîne les appels.
+:::
+
+## Par tâche
+
+::: {.callout-note collapse="true"}
+## Inspecter et valider avant traitement
+
+```python
+rt.get_raster_info()          # driver, dtype, dimensions, CRS, résolution, emprise
+rt.validate_raster()          # True/False
+rt.check_nodata()             # % de pixels NoData
+rt.check_alignment(autre_rt)  # compatible avec un autre raster ?
+```
+:::
+::: {.callout-note collapse="true"}
+## Harmoniser CRS, résolution et grille
+
+```python
+resultat = (
+    rt.reproject_raster("EPSG:32630")
+      .resample_raster(10)          # 10m
+      .align_rasters(raster_reference)
+)
+resultat.export_geotiff("harmonise.tif")
+```
+:::
+::: {.callout-note collapse="true"}
+## Découper selon une zone d'étude
+
+```python
+from cartograpy.data import Bound
+
+civ = Bound().get_admin("CIV", adm=0)
+rt_civ = rt.clip_raster(civ, crop=True)
+```
+:::
+::: {.callout-note collapse="true"}
+## Calculer un indice spectral
+
+```python
+ndvi = rt.ndvi(red_band=2, nir_band=3)
+ndvi.export_geotiff("ndvi.tif")
+
+# ou une expression libre
+indice = rt.raster_calculator("(B4 - B3) / (B4 + B3)")
+```
+:::
+::: {.callout-note collapse="true"}
+## Statistiques zonales par région
+
+```python
+stats = rt.zonal_statistics(regions_gdf, stats=["mean", "min", "max"])
+```
+:::
+::: {.callout-note collapse="true"}
+## Analyse de terrain à partir d'un MNT
+
+```python
+pente = rt.compute_slope(degrees=True)
+ombrage = rt.compute_hillshade(azimuth=315, altitude=45)
+tri = rt.compute_tri()   # rugosité du terrain
+```
+:::
+::: {.callout-note collapse="true"}
+## Classification
+
+```python
+# non supervisée (nécessite scikit-learn)
+classes = rt.unsupervised_classification(n_classes=5, method="kmeans")
+
+# supervisée
+clf = rt.train_classifier(echantillons_gdf, label_column="classe", method="random_forest")
+carte_classes = rt.predict_raster_classes(clf)
+rt.accuracy_assessment(carte_classes, echantillons_test, label_column="classe")
+```
+:::
+::: {.callout-note collapse="true"}
+## Détection de changement
+
+```python
+diff = rt_2024.change_detection(rt_2020)
+tendance = rt.time_series_analysis([rt_2021, rt_2022, rt_2023], stat="trend")
+```
+:::
+::: {.callout-note collapse="true"}
+## Vectoriser et exporter
+
+```python
+polygones = carte_classes.polygonize_raster()
+rt.export_cog("resultat_cog.tif")           # Cloud Optimized GeoTIFF
+rt.export_png_map("apercu.png", colormap="viridis")
+```
+:::
+
+## Toutes les familles de méthodes
+
+Initialisation et introspection · Validation et contrôle qualité · Harmonisation
+spatiale · Clipping, crop et mask · Nettoyage et normalisation · Calcul raster et
+indices spectraux · Statistiques et focales · Terrain, hydrologie et classification
+· Détection de changement · Analyses multicritères · Vectorisation et exports.
+
+Liste complète des méthodes par famille : [Reference RasterTools](/reference/raster-tools.qmd).
+
+::: {.callout-warning}
+`unsupervised_classification`, `supervised_classification`, `train_classifier` et
+`predict_raster_classes` nécessitent `scikit-learn`, non inclus dans les
+dépendances cœur de cartograpy.
+:::
+
+## Aller plus loin
+
+- [CRS et projections](/explanations/crs-and-projections.qmd) — pourquoi harmoniser
+  CRS/résolution avant toute analyse combinée
+- [Reference RasterTools](/reference/raster-tools.qmd) — référence complète des 82
+  méthodes

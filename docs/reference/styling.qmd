@@ -1,0 +1,203 @@
+---
+title: "Reference styling"
+description: "Référence des palettes, polices et styles."
+---
+
+`cartograpy.styling` regroupe trois familles d'outils indépendantes : chargement de
+polices, gestion de palettes de couleurs / colormaps, et application de styles
+graphiques globaux (matplotlib, seaborn, mplcyberpunk, SciencePlots).
+
+::: {.callout-note}
+Toutes ces fonctions sont des utilitaires purs — elles ne dépendent d'aucun objet
+`Map`, mais leurs résultats (`FontProperties`, colormap) sont conçus pour être passés
+directement aux méthodes de `Map` (paramètre `font=...`, `cmap=...`).
+:::
+
+## Polices
+
+### `google_font(family, weight=None, italic=None)`
+
+Charge une police depuis Google Fonts (via `pyfonts`).
+
+- **`family`** (`str`, requis) : Nom de la famille de police, ex. `"Roboto"`, `"Open Sans"`, `"Cascadia Mono"`.
+- **`weight`** (`int | str`) : Poids de la police, ex. `400`, `700`, `"bold"`, `"light"`, `"regular"`.
+- **`italic`** (`bool`) : Utiliser la variante italique.
+
+- **`retour`** (`matplotlib.font_manager.FontProperties`) : Objet utilisable avec le paramètre `font=` de matplotlib ou de `Map`.
+
+```python
+from cartograpy.styling import google_font
+
+font = google_font("Roboto", weight="bold")
+ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
+```
+
+### `path_font(font_url)`
+
+Charge une police depuis une URL (fichier `.ttf`/`.otf`, par exemple sur GitHub —
+ajouter `?raw=true` à l'URL).
+
+```python
+font = path_font(
+    "https://github.com/google/fonts/blob/main/ofl/amaranth/Amaranth-Bold.ttf?raw=true"
+)
+```
+
+### `local_font(font_path)`
+
+Charge une police depuis un fichier local.
+
+```python
+font = local_font("C:/Fonts/MaPolice.ttf")
+```
+
+### `get_fonts(pattern=None, sort=True)`
+
+Liste les polices installées sur le système (via `matplotlib.font_manager`).
+
+- **`pattern`** (`str`) : Filtre les noms de police contenant ce motif (insensible à la casse).
+- **`sort`** (`bool`, défaut `True`) : Trier les résultats par ordre alphabétique.
+
+```python
+get_fonts(pattern="Arial")
+# ['Arial', 'Arial Black', 'Arial Narrow', ...]
+```
+
+## Palettes et colormaps
+
+`cartograpy` embarque 16 palettes personnalisées (`p1` à `p16`, dans le dictionnaire
+`color_palettes`) en plus des palettes seaborn/matplotlib standard.
+
+::: {.callout-note collapse="true"}
+## Palettes personnalisées embarquées (p1–p16)
+
+Chaque entrée a un nom (`nom`), un nombre de likes indicatif (`likes`) et une liste
+de couleurs hexadécimales (`couleurs`) : `Dégradé Pastel`, `Océan et Chaleur`,
+`Tons Terreux`, `Coucher de Soleil Marine`, `Sauge et Crème`, `Vert Forêt`,
+`Marine et Or`, `Dégradé Bleu`, `Mélange Vibrant`, `Sombre Minimaliste`,
+`Bordeaux et Marine`, `Corail et Sarcelle`, `Bleu Océan`, `Contraste Moderne`,
+`Sauge Chaleureux`, `Beige Neutre`.
+:::
+
+### `get_available_palettes(include_custom=True, include_seaborn=True, include_matplotlib=True)`
+
+Récupère toutes les palettes disponibles, groupées par catégorie.
+
+- **`retour`** (`Dict[str, List[str]]`) : Clés : `custom`, `seaborn_qualitative`, `seaborn_sequential`, `seaborn_diverging`, `matplotlib_sequential`, `matplotlib_diverging`, `matplotlib_cyclic`, `matplotlib_qualitative`.
+
+```python
+palettes = get_available_palettes()
+palettes["custom"]              # ['p1', 'p2', ..., 'p16']
+palettes["seaborn_sequential"]  # ['Blues', 'BuGn', ..., 'rocket', 'mako']
+```
+
+### `custom_palettes()`
+
+Retourne les 16 palettes personnalisées converties en colormaps matplotlib
+(`{nom: colormap}`).
+
+### `to_cmap(colors, cmap_type="continuous")`
+
+Convertit une liste de couleurs en colormap matplotlib via `pypalettes`.
+
+- **`colors`** (`list`, requis) : Liste de couleurs (hex ou noms).
+- **`cmap_type`** (`str`, défaut `continuous`) : `"continuous"` ou `"discrete"`.
+
+```python
+cmap = to_cmap(["#4A90E2", "#17A2B8", "#1E3A8A"], cmap_type="continuous")
+```
+
+### `load_cmap(cmap)`
+
+Charge un colormap par son nom via `pypalettes.load_cmap`.
+
+### `create_palette(colors, mode="continuous")` / `palette(name, mode="continuous")`
+
+Alias de confort autour de `to_cmap`/`load_cmap` — `create_palette` construit un
+colormap à partir d'une liste de couleurs, `palette` en charge un par son nom.
+
+### `show_palette(palette, n_colors=8, custom_palettes=None, ax=None)`
+
+Affiche un aperçu d'une palette sous forme de barre de couleurs.
+
+- **`palette`** (`str | list | Colormap`, requis) : Nom de palette (personnalisée, seaborn ou matplotlib), liste de couleurs, ou objet colormap.
+- **`n_colors`** (`int`, défaut `8`) : Nombre de couleurs à afficher.
+- **`ax`** (`matplotlib.axes.Axes`) : Axes existant à réutiliser ; un nouveau est créé si `None`.
+
+```python
+show_palette("p9")          # palette personnalisée
+show_palette("viridis")     # colormap matplotlib
+show_palette(["#FF0000", "#00FF00", "#0000FF"])  # liste directe
+```
+
+### `preview_multiple_palettes(palette_names, n_colors=8, custom_palettes=...)`
+
+Affiche plusieurs palettes empilées verticalement (une grille de `show_palette`).
+
+```python
+preview_multiple_palettes(["p1", "p2", "p3"])
+```
+
+### `show_palette_details(nom_palette)` / `palettes_by_popularity(min_likes=0)` / `palettes_with_color(couleur_recherchee)`
+
+Utilitaires d'introspection sur les palettes personnalisées : afficher le détail
+d'une palette, trier les palettes par popularité (`likes`), ou chercher les
+palettes contenant une couleur donnée.
+
+```python
+palettes_by_popularity(min_likes=50_000)   # palettes les plus "populaires" d'abord
+palettes_with_color("#FFD700")             # palettes contenant ce jaune doré
+```
+
+## Styles
+
+### `set_style(style_name, source="matplotlib")`
+
+Applique un style graphique global.
+
+- **`style_name`** (`str`, requis) : Nom du style à appliquer.
+- **`source`** (`str`, défaut `matplotlib`) : `"matplotlib"`, `"seaborn"`, `"mplcyberpunk"` ou `"SciencePlots"`.
+
+::: {.panel-tabset}
+## matplotlib
+
+```python
+set_style("ggplot")
+```
+
+## seaborn
+
+```python
+set_style("whitegrid", source="seaborn")
+```
+
+## mplcyberpunk
+
+```python
+set_style("cyberpunk", source="mplcyberpunk")
+```
+
+## SciencePlots
+
+```python
+set_style("ieee", source="scienceplots")
+```
+:::
+
+::: {.callout-warning}
+`source="seaborn"`, `"mplcyberpunk"` et `"scienceplots"` nécessitent les paquets
+correspondants installés séparément (seaborn est une dépendance cœur de
+cartograpy, mais `mplcyberpunk` et `SciencePlots` sont optionnels et ne font pas
+partie des dépendances de `pyproject.toml`).
+:::
+
+### `list_all_styles()`
+
+Liste tous les styles disponibles, groupés par source (`matplotlib`, `seaborn`,
+`mplcyberpunk`, `SciencePlots` — chaque source renvoie une liste vide si le paquet
+correspondant n'est pas installé plutôt que de lever une erreur).
+
+```python
+styles = list_all_styles()
+styles["matplotlib"]  # tous les styles matplotlib installés
+```

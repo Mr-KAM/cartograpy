@@ -1,8 +1,8 @@
 # Base de données cache
 http_cache.sqlite
 *.sqlite
-data/
-data/QGIS-Training-Data/
+/data/
+/data/QGIS-Training-Data/
 dist/
 dist_old/
 hydrorivers_data/

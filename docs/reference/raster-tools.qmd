@@ -1,0 +1,480 @@
+---
+title: "Reference RasterTools"
+description: "Référence structurée de la classe RasterTools."
+---
+
+`RasterTools` encapsule un raster (via rasterio) et fournit des méthodes chaînables de prétraitement, d'analyse et d'export. Chaque méthode qui transforme les données renvoie une **nouvelle** instance de `RasterTools` (le raster d'origine n'est pas modifié), ce qui permet de chaîner les appels.
+
+```python
+from cartograpy.processing import RasterTools
+
+# Depuis un fichier
+rt = RasterTools("chemin/vers/raster.tif")
+
+# Depuis un tuple (ndarray, profile rasterio)
+rt = RasterTools((data, profile))
+
+rt2 = (rt
+    .reproject_raster("EPSG:32630")
+    .resample_raster(10)
+    .clip_raster(geodf))
+rt2.export_geotiff("resultat.tif")
+```
+
+::: {.callout-note}
+82 méthodes publiques, groupées ci-dessous par famille. Chaque entrée montre la signature et un résumé d'une ligne — voir le docstring de la méthode dans `cartograpy/processing/raster.py` pour le détail des paramètres.
+:::
+
+::: {.callout-note collapse="true"}
+## Initialisation et introspection
+
+```python
+get_raster_info()
+```
+Retourne les métadonnées essentielles du raster (driver, dtype, dimensions, CRS, transform, nodata, résolution, emprise).
+:::
+
+::: {.callout-note collapse="true"}
+## Validation et contrôle qualité
+
+```python
+check_raster_metadata()
+```
+Vérifie les métadonnées critiques et signale les anomalies (CRS manquant, nodata non défini, pixels non carrés, raster vide).
+
+```python
+validate_raster()
+```
+Retourne `True` si le raster n'a aucun problème critique (basé sur `check_raster_metadata`).
+
+```python
+check_nodata()
+```
+Analyse les valeurs NoData du raster (nombre de pixels concernés, pourcentage).
+
+```python
+check_band_count()
+```
+Retourne le nombre de bandes.
+
+```python
+check_resolution()
+```
+Retourne la résolution `(pixel_x, pixel_y)`.
+
+```python
+check_alignment(other)
+```
+Vérifie la compatibilité (CRS, résolution, alignement de grille) avec un autre raster.
+:::
+
+::: {.callout-note collapse="true"}
+## Harmonisation spatiale
+
+```python
+set_crs(crs)
+```
+Attribue un CRS au raster sans reprojeter les données.
+
+```python
+reproject_raster(target_crs, resampling="nearest")
+```
+Reprojette le raster vers un autre CRS.
+
+```python
+resample_raster(target_resolution, resampling="nearest")
+```
+Rééchantillonne le raster à une résolution cible (dans les unités du CRS).
+
+```python
+align_rasters(reference)
+```
+Aligne ce raster sur la grille (CRS, résolution, origine) d'un raster de référence.
+
+```python
+snap_raster_grid(reference)
+```
+Alias de `align_rasters`.
+
+```python
+band_stacking(others)
+```
+Empile les bandes de plusieurs rasters (même grille) en un seul raster multibande.
+
+```python
+mosaic_rasters(others, method="first")
+```
+Mosaïque plusieurs rasters (`method` : `'first'`, `'last'`, `'min'`, `'max'`, `'mean'`).
+:::
+
+::: {.callout-note collapse="true"}
+## Clipping, crop et mask
+
+```python
+clip_raster(geodf, crop=True, all_touched=False)
+```
+Découpe le raster selon un `GeoDataFrame` ou une géométrie shapely.
+
+```python
+crop_raster(bbox)
+```
+Découpe le raster par une emprise `(xmin, ymin, xmax, ymax)`.
+
+```python
+mask_raster(geodf, invert=False)
+```
+Masque (passe en NoData) les pixels hors du `GeoDataFrame`, sans recadrer l'emprise.
+
+```python
+extract_by_extent(bbox)
+```
+Alias de `crop_raster`.
+:::
+
+::: {.callout-note collapse="true"}
+## Nettoyage et normalisation
+
+```python
+replace_nodata(old_nodata, new_nodata)
+```
+Remplace une valeur NoData par une autre.
+
+```python
+fill_nodata(max_search_distance=100, smoothing_iterations=0)
+```
+Interpole les pixels NoData à partir des pixels valides voisins.
+
+```python
+scale_raster_values(factor=1.0, offset=0.0)
+```
+Applique une transformation linéaire `pixel = pixel * factor + offset`.
+
+```python
+convert_dtype(target_dtype)
+```
+Convertit le type de données du raster.
+
+```python
+normalize_raster(band_index=None, vmin=0.0, vmax=1.0)
+```
+Normalise les valeurs d'une ou toutes les bandes entre `vmin` et `vmax` (min-max scaling).
+
+```python
+cloud_masking(cloud_band_index, cloud_values, replace_with=None)
+```
+Masque les pixels nuageux à partir d'une bande de masque qualité (QA).
+
+```python
+shadow_masking(nir_band, threshold=0.1, replace_with=None)
+```
+Masque les ombres via un seuil sur la bande proche infrarouge.
+
+```python
+band_selection(band_indices)
+```
+Sélectionne un sous-ensemble de bandes.
+
+```python
+remove_small_patches(min_size, band_index=0, connectivity=1)
+```
+Supprime les taches connexes plus petites que `min_size` pixels.
+
+```python
+majority_filter(size=3, band_index=0)
+```
+Filtre majoritaire — remplace chaque pixel par la valeur la plus fréquente dans son voisinage.
+
+```python
+sieve_raster(threshold, band_index=0, connectivity=4)
+```
+Filtre de tamisage (`rasterio.features.sieve`) — supprime les groupes de pixels sous `threshold`.
+
+```python
+smooth_classes(size=3, band_index=0)
+```
+Alias de `majority_filter`, pour lisser une classification.
+:::
+
+::: {.callout-note collapse="true"}
+## Calcul raster et indices spectraux
+
+```python
+raster_calculator(expression, band_vars=None)
+```
+Applique une expression NumPy libre sur les bandes (ex. `"(B4 - B3) / (B4 + B3)"`).
+
+```python
+apply_formula(expression, band_vars=None)
+```
+Alias de `raster_calculator`.
+
+```python
+band_math(expression, band_vars=None)
+```
+Alias de `raster_calculator`.
+
+```python
+ndvi(red_band=0, nir_band=1)
+```
+Calcule le NDVI `(NIR - Red) / (NIR + Red)`.
+
+```python
+ndwi(green_band=0, nir_band=1)
+```
+Calcule le NDWI `(Green - NIR) / (Green + NIR)`.
+
+```python
+ndbi(swir_band=0, nir_band=1)
+```
+Calcule le NDBI `(SWIR - NIR) / (SWIR + NIR)`.
+
+```python
+spectral_index(band_a, band_b)
+```
+Indice spectral normalisé générique `(A - B) / (A + B)`.
+
+```python
+reclassify_raster(rules, band_index=0)
+```
+Reclasse une bande selon des règles (liste de `(min, max, nouvelle_valeur)` ou dict `{ancien: nouveau}`).
+
+```python
+remap_values(mapping, band_index=0)
+```
+Remappe les valeurs via un dictionnaire `{ancien: nouveau}` (délègue à `reclassify_raster`).
+
+```python
+threshold_raster(threshold, band_index=0, above=1, below=0)
+```
+Binarise une bande autour d'un seuil.
+:::
+
+::: {.callout-note collapse="true"}
+## Statistiques et focales
+
+```python
+raster_statistics(band_index=0)
+```
+Statistiques descriptives d'une bande (min, max, mean, std, median, pixels valides).
+
+```python
+band_statistics()
+```
+`raster_statistics` appliqué à chaque bande du raster.
+
+```python
+histogram_raster(band_index=0, bins=256)
+```
+Histogramme d'une bande.
+
+```python
+zonal_statistics(geodf, stats=None, band_index=0)
+```
+Statistiques zonales par polygone (`'min'`, `'max'`, `'mean'`, `'std'`, `'median'`, `'sum'`, `'count'`).
+
+```python
+focal_mean(size=3, band_index=0)
+```
+Filtre focal moyen (moyenne mobile).
+
+```python
+focal_median(size=3, band_index=0)
+```
+Filtre focal médian.
+
+```python
+focal_max(size=3, band_index=0)
+```
+Filtre focal maximum.
+
+```python
+focal_min(size=3, band_index=0)
+```
+Filtre focal minimum.
+
+```python
+moving_window_analysis(func, size=3, band_index=0)
+```
+Applique une fonction personnalisée par fenêtre glissante.
+:::
+
+::: {.callout-note collapse="true"}
+## Terrain, hydrologie et classification
+
+```python
+compute_slope(band_index=0, degrees=True)
+```
+Calcule la pente à partir d'un MNT.
+
+```python
+compute_aspect(band_index=0, degrees=True)
+```
+Calcule l'exposition (aspect) à partir d'un MNT.
+
+```python
+compute_hillshade(band_index=0, azimuth=315, altitude=45)
+```
+Calcule l'ombrage du relief (hillshade).
+
+```python
+compute_curvature(band_index=0)
+```
+Calcule la courbure du terrain.
+
+```python
+compute_tpi(size=3, band_index=0)
+```
+Topographic Position Index (élévation moins moyenne locale).
+
+```python
+compute_tri(size=3, band_index=0)
+```
+Terrain Ruggedness Index (moyenne des écarts absolus avec les voisins).
+
+```python
+flow_direction(band_index=0)
+```
+Direction d'écoulement D8 à partir d'un MNT.
+
+```python
+flow_accumulation(band_index=0)
+```
+Accumulation de flux, dérivée de `flow_direction`.
+
+```python
+watershed_analysis(band_index=0, threshold=100)
+```
+Délimitation simplifiée des bassins versants à partir de l'accumulation de flux.
+
+```python
+unsupervised_classification(n_classes=5, band_indices=None, method="kmeans")
+```
+Classification non supervisée (KMeans / MiniBatchKMeans, nécessite `scikit-learn`).
+
+```python
+supervised_classification(training_data, label_column, band_indices=None, method="random_forest", **kwargs)
+```
+Classification supervisée à partir d'échantillons d'entraînement (`'random_forest'`, `'svm'`, `'gradient_boosting'`, nécessite `scikit-learn`).
+
+```python
+train_classifier(training_data, label_column, band_indices=None, method="random_forest", **kwargs)
+```
+Entraîne un classificateur et le retourne, sans l'appliquer au raster.
+
+```python
+predict_raster_classes(classifier, band_indices=None)
+```
+Applique un classificateur déjà entraîné à l'ensemble du raster.
+
+```python
+accuracy_assessment(classified, reference_data, label_column, band_index=0)
+```
+Évalue la précision d'une classification (accuracy globale, kappa, matrice de confusion, précision par classe).
+:::
+
+::: {.callout-note collapse="true"}
+## Détection de changement
+
+```python
+change_detection(other, band_index=0)
+```
+Différence entre ce raster et un autre.
+
+```python
+raster_difference(other, band_index=0)
+```
+Alias de `change_detection`.
+
+```python
+post_classification_comparison(other, band_index=0)
+```
+Compare deux rasters classifiés (code de transition `classe_t1 * 100 + classe_t2`).
+
+```python
+time_series_analysis(others, band_index=0, stat="mean")
+```
+Analyse temporelle sur une pile de rasters (`'mean'`, `'std'`, `'min'`, `'max'`, `'trend'`).
+:::
+
+::: {.callout-note collapse="true"}
+## Analyses multicritères
+
+```python
+weighted_overlay(others, weights)
+```
+Superposition pondérée de plusieurs rasters critères.
+
+```python
+suitability_analysis(criteria_rasters, weights, thresholds=None)
+```
+Analyse d'aptitude multicritère avec normalisation et filtrage optionnel par seuils.
+
+```python
+normalize_criteria(band_index=0, method="minmax")
+```
+Normalise un critère (`'minmax'` ou `'zscore'`) avant analyse multicritère.
+
+```python
+combine_weighted_layers(others, weights)
+```
+Alias de `weighted_overlay`.
+:::
+
+::: {.callout-note collapse="true"}
+## Vectorisation et exports
+
+```python
+polygonize_raster(band_index=0)
+```
+Convertit une bande classifiée en `GeoDataFrame` de polygones.
+
+```python
+raster_to_points(band_index=0, skip_nodata=True)
+```
+Convertit chaque pixel en point (`GeoDataFrame`).
+
+```python
+contours_from_raster(band_index=0, levels=10)
+```
+Extrait des courbes de niveau (`GeoDataFrame` de lignes).
+
+```python
+apply_colormap(colormap="viridis", band_index=0)
+```
+Applique une colormap matplotlib et renvoie un raster RGB (3 bandes, `uint8`).
+
+```python
+stretch_contrast(band_index=0, percentile_low=2, percentile_high=98)
+```
+Étirement de contraste par percentiles.
+
+```python
+build_pyramids(factors=None)
+```
+Construit des pyramides (overviews) sur le fichier disque pour un affichage rapide. Défaut : `[2, 4, 8, 16]`.
+
+```python
+create_overview(factor=4)
+```
+Crée un raster à résolution réduite (aperçu, rééchantillonnage par moyenne).
+
+```python
+export_geotiff(path, compress="lzw")
+```
+Exporte en GeoTIFF.
+
+```python
+export_cog(path)
+```
+Exporte en Cloud Optimized GeoTIFF (tuilé + overviews).
+
+```python
+export_ascii_grid(path, band_index=0)
+```
+Exporte en ASCII Grid (`.asc`).
+
+```python
+export_png_map(path, colormap="viridis", band_index=0, dpi=150)
+```
+Exporte une image PNG colorisée avec barre de couleur.
+:::
