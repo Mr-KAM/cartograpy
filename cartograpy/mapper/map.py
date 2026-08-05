@@ -504,7 +504,10 @@ class Map:
             use_column = True
 
         # Ajout du layer
-        layer_info = {"type": layer_type, "gdf": gdf, "style": plot_kwargs, "label": label}
+        layer_info = {
+            "type": layer_type, "name": label, "gdf": gdf, "data": gdf,
+            "style": plot_kwargs, "label": label, "src": None,
+        }
         self.layers.append(layer_info)
 
         # Ajout à la légende
@@ -531,7 +534,10 @@ class Map:
         legend_factory : callable() -> artist, optional
             Fonction créant l'élément de légende
         """
-        layer_info = {"type": layer_type, "gdf": gdf, "style": style_kwargs, "label": label}
+        layer_info = {
+            "type": layer_type, "name": label, "gdf": gdf, "data": gdf,
+            "style": style_kwargs, "label": label, "src": None,
+        }
         self.layers.append(layer_info)
 
         if label and legend_factory:
@@ -600,6 +606,10 @@ class Map:
         # name est prioritaire sur label
         legend_label = name if name is not None else label
 
+        # Source d'origine (chemin fichier), capturée avant que data ne
+        # soit remplacé par le GeoDataFrame chargé (branche vecteur ci-dessous)
+        src = data if isinstance(data, str) else None
+
         # --- Extensions raster et vecteur connues ---
         _RASTER_EXTENSIONS = (".tif", ".tiff", ".img", ".nc", ".hdf", ".vrt", ".jp2")
         _VECTOR_EXTENSIONS = (
@@ -663,30 +673,54 @@ class Map:
 
         gdf = self._validate_geodataframe(data)
 
-        # Détection automatique du type de géométrie
+        # Détection automatique du/des type(s) de géométrie
+        _TYPE_BUCKETS = {
+            "point": ("Point", "MultiPoint"),
+            "line": ("LineString", "MultiLineString"),
+            "polygon": ("Polygon", "MultiPolygon"),
+        }
+        _mixed_buckets = None
+
         if layer_type == "auto":
-            geom_types = gdf.geometry.geom_type.unique()
+            geom_types = set(gdf.geometry.geom_type.unique())
             if len(geom_types) == 1:
-                geom_type = geom_types[0]
-                if geom_type in ["Point", "MultiPoint"]:
+                geom_type = next(iter(geom_types))
+                if geom_type in ("Point", "MultiPoint"):
                     layer_type = "point"
-                elif geom_type in ["LineString", "MultiLineString"]:
+                elif geom_type in ("LineString", "MultiLineString"):
                     layer_type = "line"
-                elif geom_type in ["Polygon", "MultiPolygon"]:
+                elif geom_type in ("Polygon", "MultiPolygon"):
                     layer_type = "polygon"
                 else:
                     raise ValueError(f"Type de géométrie non supporté: {geom_type}")
             elif len(geom_types) > 1:
-                if "Polygon" in geom_types or "MultiPolygon" in geom_types:
-                    layer_type = "polygon"
-                elif "LineString" in geom_types or "MultiLineString" in geom_types:
-                    layer_type = "line"
-                elif "Point" in geom_types or "MultiPoint" in geom_types:
-                    layer_type = "point"
+                unrecognized = geom_types - {
+                    t for types in _TYPE_BUCKETS.values() for t in types
+                }
+                if unrecognized:
+                    raise ValueError(
+                        f"Géométries mixtes détectées: {sorted(geom_types)}. "
+                        f"Spécifiez explicitement le layer_type."
+                    )
+                buckets_present = [
+                    bucket for bucket, types in _TYPE_BUCKETS.items()
+                    if geom_types & set(types)
+                ]
+                if len(buckets_present) == 1:
+                    layer_type = buckets_present[0]
+                else:
+                    # Géométries réellement mixtes (ex. points + polygones) :
+                    # une sous-couche par type, chacune avec son propre style
+                    # et sa propre entrée de légende. Sans ça, tout partait
+                    # vers un seul add_*() et la légende ne représentait plus
+                    # que le type dominant (les autres géométries se
+                    # retrouvaient tracées mais absentes de la légende).
+                    _mixed_buckets = buckets_present
             else:
                 raise ValueError(
-                    f"Géométries mixtes détectées: {geom_types}. "
-                    f"Spécifiez explicitement le layer_type."
+                    "Aucune géométrie exploitable : le GeoDataFrame ne "
+                    "contient que des géométries nulles ou vides (elles ont "
+                    "été retirées lors de la validation)."
                 )
 
         # --- Préparation des kwargs selon le type de couche ---
@@ -715,6 +749,35 @@ class Map:
 
             return kw, effective_label, font
 
+        # Géométries réellement mixtes : une sous-couche par type détecté,
+        # chacune avec son propre style et sa propre entrée de légende.
+        if _mixed_buckets is not None:
+            _SUFFIXES = {"point": "points", "line": "lignes", "polygon": "polygones"}
+            _ADD_METHODS = {
+                "point": self.add_points,
+                "line": self.add_lines,
+                "polygon": self.add_polygons,
+            }
+            result = self
+            for bucket in _mixed_buckets:
+                sub_gdf = gdf[gdf.geometry.geom_type.isin(_TYPE_BUCKETS[bucket])]
+                if sub_gdf.empty:
+                    continue
+                kw, effective_label, font = _prepare_kwargs(bucket)
+                if effective_label is not None:
+                    effective_label = f"{effective_label} ({_SUFFIXES[bucket]})"
+                sub_name = (
+                    f"{legend_label} ({_SUFFIXES[bucket]})"
+                    if legend_label is not None else None
+                )
+                result = _ADD_METHODS[bucket](sub_gdf, label=effective_label, **kw)
+                if self.layers:
+                    self.layers[-1]["name"] = sub_name
+                    self.layers[-1]["src"] = src
+                    if font is not None:
+                        self.layers[-1]["font"] = font
+            return result
+
         # Ajout de la couche selon le type
         if layer_type == "point":
             kw, effective_label, font = _prepare_kwargs("point")
@@ -728,9 +791,12 @@ class Map:
         else:
             raise ValueError(f"Type de couche non supporté: {layer_type}")
 
-        # Stockage de la font dans le dernier layer ajouté
-        if font is not None and self.layers:
-            self.layers[-1]["font"] = font
+        # name doit survivre même si legend=False a mis label à None
+        if self.layers:
+            self.layers[-1]["name"] = legend_label
+            self.layers[-1]["src"] = src
+            if font is not None:
+                self.layers[-1]["font"] = font
 
         return result
 
@@ -1764,8 +1830,11 @@ class Map:
         # Stockage des informations de la couche (déjà rendu directement)
         layer_info = {
             "type": "raster",
+            "name": title,
             "data": raster_data,
             "rendered": True,
+            "label": None,
+            "src": raster_path,
             "style": {
                 "extent": extent,
                 "transform": data_transform,
@@ -1910,8 +1979,12 @@ class Map:
         # Stockage des informations (déjà rendu directement)
         layer_info = {
             "type": "polygon",
+            "name": title,
             "gdf": geodf,
+            "data": geodf,
             "rendered": True,
+            "label": None,
+            "src": None,
             "column_to_plot": column_to_plot,
             "style": {
                 "cmap": cmap,
@@ -2117,6 +2190,28 @@ class Map:
                 frameon=True,
                 framealpha=0.9,
             )
+
+        # Stockage des informations de la couche (déjà rendu directement) —
+        # sans ça, cette couche était invisible pour list_layers()/
+        # remove_layer() et ne survivait pas à un clear_layers() ailleurs
+        # (ax.clear() l'efface, contrairement à add_polygons_choropleth qui
+        # s'enregistre correctement).
+        layer_info = {
+            "type": "point",
+            "name": title,
+            "gdf": geodf,
+            "data": geodf,
+            "rendered": True,
+            "label": None,
+            "src": None,
+            "column_to_plot": column_to_plot,
+            "style": {
+                "cmap": cmap,
+                "alpha": alpha,
+            },
+        }
+        self.layers.append(layer_info)
+
         self._update_bounds(geodf)
         self._apply_smart_centering()
 
@@ -4250,7 +4345,15 @@ class Map:
             "kwargs": kwargs,
         }
         if add_as_layer:
-            self.layers.append({"type": "scalebar", "params": scale_bar_info})
+            self.layers.append({
+                "type": "scalebar",
+                "name": scale_bar_info.get("label"),
+                "data": None,
+                "style": scale_bar_info,
+                "label": scale_bar_info.get("label"),
+                "src": None,
+                "params": scale_bar_info,
+            })
         else:
             self._draw_scale_bar(**scale_bar_info)
         return self
