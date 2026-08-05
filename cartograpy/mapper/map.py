@@ -87,6 +87,7 @@ class Map:
         data_crs="EPSG:4326",
         dpi=300,
         verbose=True,
+        basemap=True,
     ):
         """
         Initialise une nouvelle carte avec cartopy.
@@ -105,8 +106,14 @@ class Map:
             Système de coordonnées des données (par défaut WGS84)
         verbose : bool
             Afficher les messages d'information (par défaut True)
+        basemap : bool
+            Ajouter automatiquement côtes et frontières (par défaut True).
+            Mettre à False pour une carte vierge (garde la projection cartopy,
+            utile si vous avez besoin de add_north_arrow/add_scale_bar/add_inset_map
+            sans le fond côtes+frontières).
         """
         self.verbose = verbose
+        self.basemap = basemap
         self.figsize = self._process_figsize(figsize)
         self.paper_info = self._get_paper_info(figsize)
         self.dpi = dpi
@@ -131,8 +138,9 @@ class Map:
         self.bounds = [-180, -90, 180, 90]  # [minx, miny, maxx, maxy]
 
         # Ajout des caractéristiques par défaut
-        self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
-        self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+        if self.basemap:
+            self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
+            self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 
         # Affichage des informations sur le format de papier
         if self.paper_info:
@@ -159,8 +167,9 @@ class Map:
             fontweight="bold",
         )
         if self.projection is not None:
-            self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
-            self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+            if self.basemap:
+                self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
+                self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
         else:
             self.ax.set_aspect("equal")
         for layer in self.layers:
