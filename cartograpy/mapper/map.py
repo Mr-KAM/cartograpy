@@ -129,6 +129,8 @@ class Map:
         self.custom_palettes = {}
         self._north_arrow_artist = None
         self._scale_bar_artist = None
+        self._north_arrow_kwargs = None
+        self._gridline_kwargs = None
         self._first_layer = False
 
         # Configuration de base
@@ -166,14 +168,28 @@ class Map:
             fontsize=16 if self.projection else 14,
             fontweight="bold",
         )
+        # ax.clear() détruit tous les artistes (dont grille et flèche du
+        # Nord) : les références existantes sont désormais obsolètes.
+        self.gridlines = None
+        self._north_arrow_artist = None
         if self.projection is not None:
             if self.basemap:
                 self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
                 self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
         else:
             self.ax.set_aspect("equal")
+        self._reapply_persistent_artists()
         for layer in self.layers:
             layer["rendered"] = False
+
+    def _reapply_persistent_artists(self):
+        """Recrée la grille et la flèche du Nord après un ax.clear()/
+        fig.clear() : contrairement aux layers et à la scale bar, elles ne
+        sont pas re-dessinées automatiquement par _render()."""
+        if self._gridline_kwargs is not None:
+            self.add_gridlines(**self._gridline_kwargs)
+        if self._north_arrow_kwargs is not None:
+            self.add_north_arrow(**self._north_arrow_kwargs)
 
     def __enter__(self):
         """Support du context manager (with Map(...) as m:)."""
@@ -239,12 +255,17 @@ class Map:
             return None
 
         if paper in self.PAPER_SIZES:
-            dimensions = self.PAPER_SIZES[paper]
+            width_mm, height_mm = self.PAPER_SIZES[paper]
+            # PAPER_SIZES stocke les dimensions en référence portrait
+            # (largeur < hauteur) ; les échanger en paysage pour rester
+            # cohérent avec self.figsize (voir _paper_to_inches).
+            if orientation.lower() == "landscape":
+                width_mm, height_mm = height_mm, width_mm
             return {
                 "format": paper,
                 "orientation": orientation,
-                "dimensions_mm": f"{dimensions[0]} x {dimensions[1]}",
-                "dimensions_inches": f"{dimensions[0]/25.4:.1f} x {dimensions[1]/25.4:.1f}",
+                "dimensions_mm": f"{width_mm} x {height_mm}",
+                "dimensions_inches": f"{width_mm/25.4:.1f} x {height_mm/25.4:.1f}",
             }
         return None
 
@@ -305,12 +326,19 @@ class Map:
         # Calcul des nouvelles dimensions
         new_figsize = self._paper_to_inches(paper_format, orientation)
 
+        # dimensions_mm doit suivre la même convention que new_figsize
+        # (largeur/hauteur échangées en paysage), sinon les mm affichés
+        # contredisent les pouces de la même chaîne d'info.
+        width_mm, height_mm = self.PAPER_SIZES[paper_format.upper()]
+        if orientation.lower() == "landscape":
+            width_mm, height_mm = height_mm, width_mm
+
         # Mise à jour des informations
         self.figsize = new_figsize
         self.paper_info = {
             "format": paper_format.upper(),
             "orientation": orientation,
-            "dimensions_mm": f"{self.PAPER_SIZES[paper_format.upper()][0]} x {self.PAPER_SIZES[paper_format.upper()][1]}",
+            "dimensions_mm": f"{width_mm} x {height_mm}",
             "dimensions_inches": f"{new_figsize[0]:.1f} x {new_figsize[1]:.1f}",
         }
 
@@ -1060,7 +1088,7 @@ class Map:
 
     def add_natural_features(
         self,
-        features=["coastline", "borders"],
+        features=None,
         coastline_color="black",
         coastline_width=0.5,
         border_color="gray",
@@ -1075,8 +1103,9 @@ class Map:
 
         Paramètres:
         -----------
-        features : list
-            Liste des caractéristiques à ajouter ('coastline', 'borders', 'land', 'ocean')
+        features : list, optional
+            Liste des caractéristiques à ajouter ('coastline', 'borders', 'land', 'ocean').
+            Par défaut ``['coastline', 'borders']``.
         coastline_color : str
             Couleur des côtes
         coastline_width : float
@@ -1094,6 +1123,9 @@ class Map:
         rivers : bool
             Ajouter les rivières
         """
+        if features is None:
+            features = ["coastline", "borders"]
+
         if "coastline" in features:
             self.ax.coastlines(
                 resolution="50m", color=coastline_color, linewidth=coastline_width
@@ -1172,7 +1204,13 @@ class Map:
             )
             self._log("\U0001f5fa\ufe0f  Fond de carte ajouté")
         except Exception as e:
-            self._log(f"\u26a0\ufe0f  Erreur lors de l'ajout du fond de carte : {e}")
+            # warnings.warn (pas self._log) : un \u00e9chec silencieux avec
+            # verbose=False laisserait croire que le fond de carte a \u00e9t\u00e9
+            # ajout\u00e9 alors qu'il ne l'a pas \u00e9t\u00e9.
+            warnings.warn(
+                f"\u00c9chec de l'ajout du fond de carte (contextily) : {e}",
+                RuntimeWarning, stacklevel=2,
+            )
 
         return self
 
@@ -2152,6 +2190,15 @@ class Map:
         fontsize : int
             Taille de police des étiquettes
         """
+        # Mémorisation des paramètres pour pouvoir recréer la grille après
+        # un ax.clear() (remove_layer/clear_layers/set_projection).
+        self._gridline_kwargs = dict(
+            draw_labels=draw_labels, top_right=top_right, dms=dms,
+            x_inline=x_inline, y_inline=y_inline, xlocs=xlocs, ylocs=ylocs,
+            color=color, linestyle=linestyle, linewidth=linewidth,
+            alpha=alpha, fontsize=fontsize,
+        )
+
         # Suppression de la grille existante si présente
         if self.gridlines:
             self.gridlines.remove()
@@ -2238,13 +2285,24 @@ class Map:
         self.ax.set_title(title, fontsize=16, fontweight="bold")
 
         # Remise en place des caractéristiques par défaut
-        self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
-        self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
+        if self.basemap:
+            self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
+            self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 
-        # Réinitialisation de la grille
+        # fig.clear() détruit tous les artistes de la figure (grille,
+        # flèche du Nord, scale bar, inset, colorbar) : les références
+        # existantes sont désormais obsolètes.
         self.gridlines = None
+        self._north_arrow_artist = None
+        self._scale_bar_artist = None
+        self._inset_ax = None
+        self._colorbar = None
 
-        # Marquer les couches pour re-rendu
+        # Recrée grille et flèche du Nord pour la nouvelle projection
+        self._reapply_persistent_artists()
+
+        # Marquer les couches pour re-rendu (dont la scale bar, qui est
+        # gérée comme un layer et sera redessinée par _render())
         for layer in self.layers:
             layer["rendered"] = False
 
@@ -2629,6 +2687,15 @@ class Map:
         -------
         Map : Instance de la carte pour chaînage.
         """
+        # Mémorisation des paramètres pour pouvoir recréer la flèche après
+        # un ax.clear() (remove_layer/clear_layers/set_projection).
+        self._north_arrow_kwargs = dict(
+            arrow=arrow, position=position, zoom=zoom, color=color,
+            style=style, location=location, scale=scale, rotation=rotation,
+            label=label, fancy=fancy, shadow=shadow, size=size, base=base,
+            pack=pack, aob=aob, zorder=zorder, **kwargs,
+        )
+
         if style == "auto":
             style = "map-utils" if HAS_MAP_UTILS else "svg"
 
@@ -3305,6 +3372,19 @@ class Map:
         data_height = self.bounds[3] - self.bounds[1]
         data_center_x = (self.bounds[0] + self.bounds[2]) / 2
         data_center_y = (self.bounds[1] + self.bounds[3]) / 2
+
+        # Cas dégénéré : un point unique (ou des entités parfaitement
+        # alignées horizontalement/verticalement) donne une largeur et/ou
+        # une hauteur nulles. Sans ce garde-fou, set_extent() reçoit un
+        # extent de taille nulle sur cet axe ; cartopy élargit alors tout
+        # seul avec un UserWarning, mais le centrage "intelligent" ne fait
+        # plus rien d'intelligent. Vue de repli arbitraire d'1° autour du
+        # centre — l'utilisateur peut toujours affiner via set_extent().
+        _fallback_span = 1.0  # degrés
+        if data_width == 0:
+            data_width = _fallback_span
+        if data_height == 0:
+            data_height = _fallback_span
 
         # Récupération des dimensions de la figure
         fig_width_inches, fig_height_inches = self.figsize
