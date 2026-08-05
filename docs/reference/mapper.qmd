@@ -33,6 +33,29 @@ Tout reste importable depuis `cartograpy.mapper` directement (`from cartograpy.m
 échelle, flèche du nord, export...) dans une seule classe volumineuse — un
 découpage interne en mixins thématiques n'a pas encore été fait.
 
+## Constructeur de Map
+
+```python
+Map(figsize=(12, 8), title="Carte", projection=ccrs.PlateCarree(),
+    data_crs="EPSG:4326", dpi=300, verbose=True, basemap=True)
+```
+
+- **`figsize`** (`tuple`, `str` ou `dict`, défaut `(12, 8)`) : taille en pouces, format papier (`"A4"`, `"A3"`...) ou `{"paper": ..., "orientation": ...}`.
+- **`title`** (`str`, défaut `"Carte"`) : titre de la carte.
+- **`projection`** (`cartopy.crs`, défaut `ccrs.PlateCarree()`) : projection cartographique de l'axe.
+- **`data_crs`** (`str`, défaut `"EPSG:4326"`) : CRS supposé des données ajoutées.
+- **`dpi`** (`int`, défaut `300`) : résolution de la figure.
+- **`verbose`** (`bool`, défaut `True`) : afficher les messages d'information.
+- **`basemap`** (`bool`, défaut `True`) : ajouter automatiquement côtes et frontières (`cfeature.BORDERS`, `coastlines`). Mettre `False` pour une carte vierge — garde la projection cartopy (donc `add_north_arrow`/`add_scale_bar`/`add_inset_map` restent utilisables), contrairement à `Map2D` qui abandonne la projection cartopy entièrement.
+
+```python
+# Carte sans côtes ni frontières automatiques, mais avec projection cartopy
+m = Map(title="Carte vierge", basemap=False)
+m.add_polygons(mon_gdf, facecolor="lightyellow")
+m.add_north_arrow()
+m.show()
+```
+
 ## Méthodes de Map
 
 58 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
