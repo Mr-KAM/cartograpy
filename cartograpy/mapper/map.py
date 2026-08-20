@@ -17,6 +17,7 @@ import warnings
 from typing import Optional, Union, List, Tuple, Dict, Any
 import matplotlib.font_manager as fm
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.transforms import Bbox
 from io import BytesIO
 from PIL import Image
 from pyproj import Geod
@@ -158,7 +159,7 @@ class Map:
     def _log(self, *args, **kwargs):
         """Affiche un message seulement si verbose est activé."""
         if self.verbose:
-            logger.info(*args, **kwargs)
+            logger.info(" ".join(str(a) for a in args), **kwargs)
 
     def _invalidate_render(self):
         """Réinitialise le canvas et marque les couches pour re-rendu."""
@@ -1855,7 +1856,7 @@ class Map:
         column_to_plot,
         label_column=None,
         cmap="viridis",
-        alpha=0.7,
+        alpha=1,
         edge_color="black",
         linewidth=0.5,
         show_labels=True,
@@ -2656,7 +2657,220 @@ class Map:
         
         # Ajout du texte à la carte
         self.ax.text(xy[0], xy[1], text, **text_params)
-        
+
+        return self
+
+    def add_highlight_text(
+        self,
+        text: str,
+        xy: tuple,
+        fontsize: int = 12,
+        color: str = "black",
+        highlight_textprops: list = None,
+        **kwargs
+    ):
+        """
+        Ajoute du texte avec des segments <mis en évidence> (police/couleur
+        différente, ex. gras) via la librairie `highlight_text`.
+
+        Paramètres:
+        -----------
+        text : str
+            Texte à afficher. Les segments à mettre en évidence sont
+            entourés de `<...>` (ex: "<Paris>: 48.85").
+        xy : tuple
+            Position du texte (x, y) en coordonnées géographiques.
+        fontsize : int
+            Taille de police par défaut (défaut: 12).
+        color : str
+            Couleur par défaut (défaut: "black").
+        highlight_textprops : list of dict, optional
+            Un dict de propriétés matplotlib.text par segment `<...>`,
+            dans l'ordre d'apparition (ex: [{"font": bold_font}]).
+        **kwargs : dict
+            Autres paramètres pour highlight_text.ax_text()
+            (ha, va, font, transform, etc.)
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> map_obj.add_highlight_text(
+        ...     "<Paris>: 48.85", (2.3522, 48.8566),
+        ...     highlight_textprops=[{"color": "red"}],
+        ...     ha="center", va="center",
+        ... )
+        """
+        from highlight_text import ax_text
+
+        text_params = {
+            "fontsize": fontsize,
+            "color": color,
+            "ha": "left",
+            "va": "bottom",
+            "transform": ccrs.PlateCarree(),
+        }
+        text_params.update(kwargs)
+
+        ax_text(
+            x=xy[0], y=xy[1], s=text,
+            ax=self.ax,
+            highlight_textprops=highlight_textprops or [],
+            **text_params,
+        )
+
+        return self
+
+    def add_highlight_fig_text(
+        self,
+        text: str,
+        x: float,
+        y: float,
+        fontsize: int = 12,
+        color: str = "black",
+        highlight_textprops: list = None,
+        **kwargs
+    ):
+        """
+        Ajoute du texte hors-carte (titre, sous-titre) avec des segments
+        <mis en évidence>, positionné en coordonnées figure (0-1), via la
+        librairie `highlight_text`.
+
+        Paramètres:
+        -----------
+        text : str
+            Texte à afficher. Les segments à mettre en évidence sont
+            entourés de `<...>` (ex: "<Unit>: metric tons").
+        x, y : float
+            Position en coordonnées figure (0-1, comme fig.text()).
+        fontsize : int
+            Taille de police par défaut (défaut: 12).
+        color : str
+            Couleur par défaut (défaut: "black").
+        highlight_textprops : list of dict, optional
+            Un dict de propriétés matplotlib.text par segment `<...>`,
+            dans l'ordre d'apparition (ex: [{"font": bold_font}]).
+        **kwargs : dict
+            Autres paramètres pour highlight_text.fig_text()
+            (ha, va, font, etc.)
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> map_obj.add_highlight_fig_text(
+        ...     "<Unit>: metric tons", x=0.5, y=0.87,
+        ...     highlight_textprops=[{"color": "red"}],
+        ...     ha="center", va="top",
+        ... )
+        """
+        from highlight_text import fig_text
+
+        text_params = {
+            "fontsize": fontsize,
+            "color": color,
+            "ha": "center",
+            "va": "top",
+        }
+        text_params.update(kwargs)
+
+        fig_text(
+            x=x, y=y, s=text,
+            fig=self.fig,
+            highlight_textprops=highlight_textprops or [],
+            **text_params,
+        )
+
+        return self
+
+    def add_custom_text(self, text: str, xy: tuple, to: str = "ax", **kwargs):
+        """
+        Ajoute du texte avec segments <mis en évidence>, sur la carte
+        (``to="ax"``, coordonnées géographiques) ou hors-carte
+        (``to="fig"``, coordonnées figure 0-1). Dispatch vers
+        `add_highlight_text()` / `add_highlight_fig_text()` — voir leur
+        docstring pour le détail des paramètres.
+
+        Paramètres:
+        -----------
+        text : str
+            Texte à afficher, segments `<...>` mis en évidence.
+        xy : tuple
+            Position (x, y).
+        to : str
+            ``"ax"`` (défaut, coordonnées carte) ou ``"fig"`` (coordonnées
+            figure 0-1, pour titre/sous-titre).
+        **kwargs : dict
+            Transmis à la méthode ciblée (fontsize, color,
+            highlight_textprops, ha, va, font, etc.)
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+        """
+        if to == "ax":
+            return self.add_highlight_text(text, xy, **kwargs)
+        elif to == "fig":
+            return self.add_highlight_fig_text(text, xy[0], xy[1], **kwargs)
+        raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
+
+    def add_fig_arrow(
+        self,
+        tail_position: tuple,
+        head_position: tuple,
+        radius: float = 0,
+        color: str = "black",
+        width: float = 1,
+        head_width: float = 4,
+        head_length: float = 8,
+        **kwargs
+    ):
+        """
+        Ajoute une flèche hors-carte en coordonnées figure (0-1), via la
+        librairie `drawarrow`. Utile pour pointer une entité trop petite
+        pour être annotée directement dessus (ex: micro-état).
+
+        Paramètres:
+        -----------
+        tail_position, head_position : tuple
+            Positions (x, y) en coordonnées figure (0-1) du départ et de
+            la pointe de la flèche.
+        radius : float
+            Courbure de la flèche (0 = droite).
+        color : str
+            Couleur de la flèche (défaut: "black").
+        width, head_width, head_length : float
+            Épaisseur du trait / largeur et longueur de la pointe.
+        **kwargs : dict
+            Autres paramètres pour drawarrow.fig_arrow()
+            (double_headed, fill_head, invert, shadow_style, etc.)
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> map_obj.add_fig_arrow((0.32, 0.70), (0.375, 0.45), radius=0.3)
+        """
+        from drawarrow import fig_arrow
+
+        fig_arrow(
+            tail_position=tail_position,
+            head_position=head_position,
+            radius=radius,
+            color=color,
+            width=width,
+            head_width=head_width,
+            head_length=head_length,
+            fig=self.fig,
+            **kwargs,
+        )
+
         return self
 
     def set_title(
@@ -2704,6 +2918,190 @@ class Map:
                 self._log(f"❌ Impossible de retrouver le dossier : {e}")
         return files
 
+    def add_image(
+        self,
+        image,
+        xy: tuple,
+        to: str = "fig",
+        zoom: float = 1,
+        alpha: float = 1.0,
+        zorder: int = 100,
+        frameon: bool = False,
+        color: str = None,
+        **kwargs,
+    ):
+        """
+        Ajoute une image (logo, photo, illustration) à un endroit précis de
+        la carte, via `OffsetImage` + `AnnotationBbox`.
+
+        Paramètres:
+        -----------
+        image : str, array-like ou PIL.Image
+            Chemin vers un fichier image (png, jpg, svg...) ou image déjà
+            chargée (tableau numpy / `PIL.Image`).
+        xy : tuple
+            Position (x, y).
+        to : str
+            ``"fig"`` (défaut, coordonnées figure 0-1 — pour un logo/watermark
+            hors-carte) ou ``"ax"`` (coordonnées géographiques de la carte).
+            Même convention que `add_custom_text`.
+        zoom : float
+            Facteur d'échelle de l'image (défaut 1).
+        alpha : float
+            Transparence (0-1).
+        zorder : int
+            Ordre d'empilement (défaut 100, au-dessus des couches).
+        frameon : bool
+            Afficher un cadre autour de l'image.
+        color : str, optional
+            Recolore les SVG (voir `read_image`), ignoré pour les autres
+            formats.
+        **kwargs : dict
+            Autres paramètres pour `AnnotationBbox` (pad, box_alignment,
+            bboxprops, etc.)
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> map_obj.add_image("logo.png", (0.92, 0.08), zoom=0.15)
+        >>> map_obj.add_image("photo.jpg", (2.35, 48.85), to="ax", zoom=0.3)
+        """
+        if to not in ("ax", "fig"):
+            raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
+
+        img = read_image(image, color) if isinstance(image, str) else image
+        imagebox = OffsetImage(np.asarray(img), zoom=zoom, alpha=alpha)
+
+        if to == "ax":
+            xycoords = ccrs.PlateCarree()._as_mpl_transform(self.ax)
+        else:
+            xycoords = "figure fraction"
+
+        ab = AnnotationBbox(
+            imagebox, xy, frameon=frameon, xycoords=xycoords,
+            zorder=zorder, **kwargs,
+        )
+        self.ax.add_artist(ab)
+        self._log("🖼️ Image ajoutée")
+        return self
+
+    def add_background_image(
+        self,
+        image,
+        extent: tuple = None,
+        zoom: float = 1,
+        aspect: str = "equal",
+        alpha: float = 1.0,
+        zorder: int = -100,
+        color: str = None,
+        **kwargs,
+    ):
+        """
+        Ajoute une image de fond (texture, fond de carte statique, etc.)
+        derrière toutes les couches, sur l'étendue de la carte.
+
+        Paramètres:
+        -----------
+        image : str, array-like ou PIL.Image
+            Chemin vers un fichier image ou image déjà chargée.
+        extent : tuple, optional
+            ``(minx, miny, maxx, maxy)`` couverts par l'image (coordonnées
+            géographiques). Par défaut, utilise l'étendue actuelle de la
+            carte (`self.bounds`, mis à jour par les couches déjà ajoutées
+            ou par `set_extent()`).
+        zoom : float
+            Facteur de zoom (> 0) appliqué à `extent`, autour de son centre
+            (défaut 1 = pas de changement). > 1 recadre sur une zone plus
+            petite (image agrandie) ; < 1 couvre une zone plus grande
+            (image réduite).
+        aspect : str
+            ``"equal"`` (défaut) : les unités géographiques x/y restent à
+            échelle égale, cohérent avec le reste de la carte — l'image
+            n'est pas déformée par un axe étiré. ``"auto"`` : étire l'image
+            pour remplir tout `extent` (peut la déformer).
+        alpha : float
+            Transparence (0-1).
+        zorder : int
+            Ordre d'empilement (défaut -100, sous toutes les autres
+            couches).
+        color : str, optional
+            Recolore les SVG (voir `read_image`), ignoré pour les autres
+            formats.
+        **kwargs : dict
+            Autres paramètres pour `Axes.imshow()`.
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> map_obj.set_extent([-11, 32, 41, 73])
+        >>> map_obj.add_background_image("texture.jpg")
+        """
+        img = read_image(image, color) if isinstance(image, str) else image
+        img_arr = np.asarray(img)
+
+        if extent is None:
+            if not getattr(self, "bounds", None):
+                raise ValueError(
+                    "Aucune étendue disponible : passez extent=... ou "
+                    "appelez set_extent() / ajoutez une couche d'abord."
+                )
+            minx, miny, maxx, maxy = self.bounds
+            extent = (minx, maxx, miny, maxy)
+        else:
+            minx, miny, maxx, maxy = extent
+            extent = (minx, maxx, miny, maxy)
+
+        if zoom <= 0:
+            raise ValueError(f"zoom doit être > 0, reçu: {zoom!r}")
+
+        if zoom != 1:
+            cx, cy = (extent[0] + extent[1]) / 2, (extent[2] + extent[3]) / 2
+            half_w = (extent[1] - extent[0]) / 2 / zoom
+            half_h = (extent[3] - extent[2]) / 2 / zoom
+            extent = (cx - half_w, cx + half_w, cy - half_h, cy + half_h)
+
+        # `aspect="equal"` seul ne suffit pas : imshow() étire toujours le
+        # contenu de l'image pour remplir exactement `extent`, quel que
+        # soit `aspect`. Pour ne pas déformer l'image, on réduit `extent`
+        # (centré) à son propre ratio largeur/hauteur en pixels — le reste
+        # de la boîte reste vide plutôt que d'étirer l'image.
+        img_h, img_w = img_arr.shape[0], img_arr.shape[1]
+        img_ratio = img_w / img_h
+        x0, x1, y0, y1 = extent
+        box_w, box_h = abs(x1 - x0), abs(y1 - y0)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        if box_h > 0 and img_ratio > box_w / box_h:
+            new_h = box_w / img_ratio
+            extent = (x0, x1, cy - new_h / 2, cy + new_h / 2)
+        elif box_w > 0:
+            new_w = box_h * img_ratio
+            extent = (cx - new_w / 2, cx + new_w / 2, y0, y1)
+
+        # imshow() peut ré-ajuster automatiquement la vue de l'axe à son
+        # propre extent : on restaure explicitement l'étendue courante
+        # pour que l'appelant ne la voie pas changer.
+        try:
+            current_view = self.ax.get_extent(crs=ccrs.PlateCarree())
+        except Exception:
+            current_view = None
+
+        self.ax.imshow(
+            img_arr, extent=extent, transform=ccrs.PlateCarree(),
+            aspect=aspect, alpha=alpha, zorder=zorder, **kwargs,
+        )
+
+        if current_view is not None:
+            self.ax.set_extent(current_view, crs=ccrs.PlateCarree())
+
+        self._log("🖼️ Image de fond ajoutée")
+        return self
+
     def add_north_arrow(
         self,
         arrow=1,
@@ -2716,12 +3114,13 @@ class Map:
         rotation: Union[float, dict, str] = "auto",
         label: str = "N",
         fancy: bool = True,
-        shadow: bool = True,
+        shadow: bool = False,
         size: str = None,
         base: dict = None,
         pack: dict = None,
         aob: dict = None,
         zorder: int = 99,
+        to: str = "ax",
         **kwargs,
     ):
         """
@@ -2775,6 +3174,11 @@ class Map:
             Configuration de l'AnnotationBbox (mode map-utils).
         zorder : int
             Z-order de l'artiste (défaut 99).
+        to : str
+            ``"ax"`` (défaut, ``location``/``position`` relatifs à l'axe
+            carte) ou ``"fig"`` (relatifs à la figure entière — utilise
+            alors ``position`` comme point d'ancrage, dans les deux modes
+            de rendu). Même convention que `add_custom_text`.
         **kwargs
             Paramètres supplémentaires pour ``NorthArrow``.
 
@@ -2782,13 +3186,16 @@ class Map:
         -------
         Map : Instance de la carte pour chaînage.
         """
+        if to not in ("ax", "fig"):
+            raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
+
         # Mémorisation des paramètres pour pouvoir recréer la flèche après
         # un ax.clear() (remove_layer/clear_layers/set_projection).
         self._north_arrow_kwargs = dict(
             arrow=arrow, position=position, zoom=zoom, color=color,
             style=style, location=location, scale=scale, rotation=rotation,
             label=label, fancy=fancy, shadow=shadow, size=size, base=base,
-            pack=pack, aob=aob, zorder=zorder, **kwargs,
+            pack=pack, aob=aob, zorder=zorder, to=to, **kwargs,
         )
 
         if style == "auto":
@@ -2833,12 +3240,27 @@ class Map:
                 elif label:
                     na_kwargs["label"] = {"text": label}
 
+                # `color` pilote le remplissage/contour de la flèche (mode
+                # map-utils) via `base` — sans ça le paramètre `color` était
+                # ignoré, la flèche restait toujours noire.
+                base_style = {"facecolor": color, "edgecolor": color}
                 if base is not None:
-                    na_kwargs["base"] = base
+                    base_style.update(base)
+                na_kwargs["base"] = base_style
                 if pack is not None:
                     na_kwargs["pack"] = pack
+                # to="fig" : ancre la flèche sur la figure entière plutôt
+                # que sur l'axe carte, via bbox_to_anchor/bbox_transform.
+                aob_style = {}
+                if to == "fig":
+                    aob_style = {
+                        "bbox_to_anchor": position,
+                        "bbox_transform": self.fig.transFigure,
+                    }
                 if aob is not None:
-                    na_kwargs["aob"] = aob
+                    aob_style.update(aob)
+                if aob_style:
+                    na_kwargs["aob"] = aob_style
                 na_kwargs.update(kwargs)
 
                 na = MmuNorthArrow(**na_kwargs)
@@ -2851,8 +3273,9 @@ class Map:
         arrow_path = self.get_north_arrows()[arrow - 1]
         img = read_image(arrow_path, color)
         imagebox = OffsetImage(img, zoom=zoom)
+        xycoords = "figure fraction" if to == "fig" else "axes fraction"
         ab = AnnotationBbox(
-            imagebox, position, frameon=False, xycoords="axes fraction"
+            imagebox, position, frameon=False, xycoords=xycoords
         )
         self.ax.add_artist(ab)
         self._north_arrow_artist = ab
@@ -4016,6 +4439,94 @@ class Map:
 
         return self
 
+    def add_swatch_legend(
+        self,
+        items,
+        xy,
+        rect_width=2,
+        rect_height=1.5,
+        y_step=1.5,
+        label_dx=2.5,
+        label_dy=0.7,
+        fontsize=12,
+        color="black",
+        edge_color="black",
+        linewidth=0.6,
+        font=None,
+        ha="left",
+        va="center",
+        to="ax",
+    ):
+        """
+        Ajoute une légende "faite main" : rectangles de couleur empilés
+        verticalement à une position donnée (comme sur une carte
+        imprimée), au lieu d'un coin d'axe via `custom_legend()`.
+
+        Paramètres:
+        -----------
+        items : list of (label, color)
+            Paires (texte, couleur) à afficher, du haut vers le bas.
+        xy : tuple
+            Position (x, y) du coin supérieur gauche du premier rectangle.
+        rect_width, rect_height : float
+            Dimensions des rectangles (mêmes unités que xy).
+        y_step : float
+            Espacement vertical entre rectangles successifs.
+        label_dx, label_dy : float
+            Décalage du texte par rapport au coin du rectangle.
+        fontsize : int
+            Taille du texte.
+        color : str
+            Couleur du texte.
+        edge_color, linewidth :
+            Contour des rectangles.
+        font : FontProperties, optional
+            Police du texte (via google_font/local_font/path_font).
+        ha, va : str
+            Alignement du texte.
+        to : str
+            ``"ax"`` (défaut, coordonnées géographiques) ou ``"fig"``
+            (coordonnées figure 0-1, comme avec `add_custom_text`).
+
+        Returns:
+        --------
+        Map : self pour le chaînage de méthodes
+
+        Example:
+        --------
+        >>> items = [(lab, cmap(v)) for lab, v in zip(labels, values)]
+        >>> map_obj.add_swatch_legend(items, xy=(35, 65), font=my_font)
+        >>> map_obj.add_swatch_legend(items, xy=(0.05, 0.4), to="fig")
+        """
+        if to == "ax":
+            add_patch, add_text = self.ax.add_patch, self.ax.text
+            rect_transform = ccrs.PlateCarree()
+            text_kwargs = {"transform": ccrs.PlateCarree()}
+        elif to == "fig":
+            add_patch, add_text = self.fig.add_artist, self.fig.text
+            rect_transform = self.fig.transFigure
+            text_kwargs = {}
+        else:
+            raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
+
+        text_kwargs.update({"fontsize": fontsize, "color": color, "ha": ha, "va": va})
+        if font is not None:
+            text_kwargs["fontproperties"] = font
+
+        x0, y0 = xy
+        for i, (label, swatch_color) in enumerate(items):
+            y = y0 - i * y_step
+            add_patch(
+                plt.Rectangle(
+                    (x0, y), rect_width, rect_height,
+                    color=swatch_color, ec=edge_color, lw=linewidth,
+                    transform=rect_transform,
+                )
+            )
+            add_text(x0 + label_dx, y + label_dy, label, **text_kwargs)
+
+        return self
+
     def legend_presets(self, preset="default", **override_kwargs):
         """
         Applique des préréglages de légende.
@@ -4655,6 +5166,31 @@ class Map:
         if tight_layout:
             plt.tight_layout()
 
+    def _resolve_bbox_inches(self, bbox_inches):
+        """
+        Corrige `bbox_inches="tight"` quand une flèche du Nord ancrée à la
+        figure (`add_north_arrow(..., to="fig")`) est présente : l'artiste
+        `NorthArrow` de `matplotlib-map-utils` ne rapporte pas correctement
+        son étendue via `get_window_extent()` (bbox toujours nul), donc le
+        calcul "tight" standard peut la rogner si elle sort de l'axe carte
+        (ex: position dans la marge de la figure). On étend manuellement le
+        bbox calculé pour couvrir sa position connue.
+        """
+        na_kwargs = self._north_arrow_kwargs
+        if bbox_inches != "tight" or not na_kwargs or na_kwargs.get("to") != "fig":
+            return bbox_inches
+
+        renderer = self.fig.canvas.get_renderer()
+        tight_bbox = self.fig.get_tightbbox(renderer)
+        x, y = na_kwargs["position"]
+        fig_w, fig_h = self.fig.get_size_inches()
+        pad = 0.6  # pouces, marge généreuse pour couvrir flèche + label "N"
+        arrow_bbox = Bbox.from_extents(
+            x * fig_w - pad, y * fig_h - pad,
+            x * fig_w + pad, y * fig_h + pad,
+        )
+        return Bbox.union([tight_bbox, arrow_bbox])
+
     def save(self, filename, dpi=300, bbox_inches="tight", legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs):
         """
         Sauvegarde la carte dans un fichier.
@@ -4679,7 +5215,7 @@ class Map:
             Titre de la carte
         """
         self._render(legend=legend, auto_extent=auto_extent, tight_layout=tight_layout, smart_centering=smart_centering, title=title, **kwargs)
-        plt.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
+        plt.savefig(filename, dpi=dpi, bbox_inches=self._resolve_bbox_inches(bbox_inches))
         self._log(f"Carte sauvegardée: {filename}")
 
         return self
@@ -4756,6 +5292,6 @@ class Map:
             title=title, **kwargs,
         )
         buf = BytesIO()
-        self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches=bbox_inches)
+        self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches=self._resolve_bbox_inches(bbox_inches))
         buf.seek(0)
         return buf

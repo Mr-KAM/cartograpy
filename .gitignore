@@ -18,6 +18,19 @@ __pycache__/
 country-flag-icons/
 cartograpy/__pycache__/
 
+# === Quarto : caches (docs/site/docs/ EST le site déployé, ne pas ignorer) ===
+_site/
+.quarto/
+**/*_files/
+
+# === Notebooks ===
+.ipynb_checkpoints/
+notebooks/__marimo__/
+notebooks/web-map-with-custom-legend.png
+
+# === Cache d'outils dev ===
+.mypy_cache/
+
 # === Build / packaging / configuration ===
 *.egg-info/
 build/
@@ -58,4 +71,4 @@ Thumbs.db
 .pypirc
 
 # === SVG files ===
-cartograpy/svg/
+#cartograpy/svg/

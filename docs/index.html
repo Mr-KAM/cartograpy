@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cartograpy — Cartographie Python, simplement</title>
+<meta name="description" content="Package Python pour charger, traiter et cartographier des données géographiques en quelques lignes de code.">
+<link rel="icon" href="assets/logo-small.png">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-2: #0d1424;
+    --panel: #10182c;
+    --border: #1e2a45;
+    --text: #eef1f8;
+    --text-dim: #93a0bd;
+    --accent: #4f8dfd;
+    --accent-2: #8b5cf6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  .glow {
+    position: absolute;
+    top: -220px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1100px;
+    height: 650px;
+    background: radial-gradient(ellipse at center, rgba(79,141,253,0.35) 0%, rgba(139,92,246,0.18) 40%, transparent 72%);
+    filter: blur(10px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(10,14,26,0.72);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .brand img { width: 28px; height: 28px; border-radius: 6px; }
+  nav.links { display: flex; align-items: center; gap: 28px; }
+  nav.links a { color: var(--text-dim); font-size: 0.92rem; transition: color 0.15s ease; }
+  nav.links a:hover { color: var(--text); }
+  .btn-github {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: var(--text);
+    background: var(--panel);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .btn-github:hover { border-color: #33456d; background: #131d34; }
+  .btn-github svg { width: 16px; height: 16px; }
+
+  main { position: relative; z-index: 1; }
+
+  .hero {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 96px 24px 24px;
+    text-align: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: rgba(79,141,253,0.06);
+    margin-bottom: 28px;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  h1 {
+    font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    margin: 0 0 24px;
+  }
+  h1 .accent {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 620px;
+    margin: 0 auto 36px;
+  }
+  .subtitle code {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.92em;
+    color: #c9d4ee;
+  }
+
+  .cta-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .btn {
+    padding: 13px 26px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #3d6fe0);
+    color: white;
+    box-shadow: 0 8px 24px rgba(79,141,253,0.28);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(79,141,253,0.4); }
+  .btn-secondary {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-secondary:hover { border-color: #33456d; background: #131d34; transform: translateY(-1px); }
+
+  .trust { font-size: 0.85rem; color: var(--text-dim); }
+  .trust strong { color: var(--text); }
+
+  .showcase {
+    max-width: 1040px;
+    margin: 56px auto 0;
+    padding: 0 24px 100px;
+  }
+  .window {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--panel);
+    overflow: hidden;
+    box-shadow: 0 40px 100px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.02);
+  }
+  .window-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #0c1322;
+  }
+  .window-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .window-bar .dot:nth-child(1) { background: #ff5f57; }
+  .window-bar .dot:nth-child(2) { background: #febc2e; }
+  .window-bar .dot:nth-child(3) { background: #28c840; }
+  .window-bar .url {
+    margin: 0 auto;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    background: #10182c;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 14px;
+  }
+  .window img { display: block; width: 100%; height: auto; background: #fff; }
+
+  .caption {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    margin-top: 18px;
+  }
+  .caption a { color: var(--accent); }
+  .caption a:hover { text-decoration: underline; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    nav.links { display: none; }
+    header { padding: 14px 18px; }
+    .hero { padding: 64px 20px 12px; }
+  }
+
+  /* Light theme (host-driven) */
+  :root[data-theme="light"] {
+    --bg: #f6f8fc;
+    --bg-2: #ffffff;
+    --panel: #ffffff;
+    --border: #dde3ef;
+    --text: #10162a;
+    --text-dim: #5b6785;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f6f8fc;
+      --bg-2: #ffffff;
+      --panel: #ffffff;
+      --border: #dde3ef;
+      --text: #10162a;
+      --text-dim: #5b6785;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+
+<header>
+  <a class="brand" href="index.html">
+    <img src="assets/logo-small.png" alt="cartograpy">
+    cartograpy
+  </a>
+  <nav class="links">
+    <a href="site/docs/index.html">Documentation</a>
+    <a href="site/docs/gallery/index.html">Galerie</a>
+    <a href="site/docs/getting-started/quickstart.html">Démarrage rapide</a>
+  </nav>
+  <a class="btn-github" href="https://github.com/mr-kam/cartograpy" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="badge"><span class="dot"></span>Package Python — open source, licence MIT</span>
+    <h1>Créer des cartes en Python,<br>sans se <span class="accent">battre</span> avec Matplotlib.</h1>
+    <p class="subtitle">
+      <code>cartograpy</code> réunit téléchargement de données géographiques, traitement
+      vecteur/raster et cartographie statique &amp; interactive dans une seule API cohérente —
+      des cartes soignées en quelques lignes de code.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="site/docs/index.html">Voir la documentation →</a>
+      <a class="btn btn-secondary" href="https://github.com/mr-kam/cartograpy" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        Voir le dépôt
+      </a>
+    </div>
+    <p class="trust"><strong>65 méthodes</strong> sur <code style="background:none;border:none;padding:0">Map</code> · cartes statiques &amp; interactives · <strong>pip install cartograpy</strong></p>
+  </section>
+
+  <section class="showcase">
+    <div class="window">
+      <div class="window-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="url">cartograpy — m.save("carte.png")</span>
+      </div>
+      <img src="assets/co2-europe-example.png" alt="Exemple de carte réalisée avec cartograpy : émissions de CO2 par habitant en Europe">
+    </div>
+    <p class="caption">
+      Choroplèthe, annotations, flèche du Nord, légende personnalisée — voir le code complet dans la
+      <a href="site/docs/gallery/index.html">galerie d'exemples</a>.
+    </p>
+  </section>
+</main>
+
+<footer>
+  <a href="https://github.com/mr-kam/cartograpy" target="_blank" rel="noopener">GitHub</a>
+  &nbsp;·&nbsp;
+  <a href="site/docs/index.html">Documentation</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/mr-kam/cartograpy/issues" target="_blank" rel="noopener">Signaler un problème</a>
+  <br><br>
+  cartograpy — Package Python pour créer des cartes facilement
+</footer>
+
+</body>
+</html>

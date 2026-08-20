@@ -1,0 +1,16 @@
+---
+title: "Galerie"
+description: "Exemples de cartes réalisées avec cartograpy, code source et explications à l'appui."
+listing:
+  contents: .
+  type: grid
+  grid-columns: 2
+  image-height: "240px"
+  fields: [image, title, description]
+  sort: "title"
+page-layout: full
+---
+
+Une sélection de cartes réalisées avec `cartograpy`. Chaque carte ci-dessous
+mène vers une page dédiée avec le code complet et les explications pour la
+reproduire.
