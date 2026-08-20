@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class WorldBank:
     def __init__(self):
-        self.api_key = "_si_necessite_se_presente"
+        self.api_key = ""
         self._wbdata = _require_wbdata()
     
     def get_sources(self):

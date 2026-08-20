@@ -1,0 +1,54 @@
+---
+title: "Densité de population — Côte d'Ivoire"
+description: "Choroplèthe simple avec flèche du Nord, logo en filigrane et légende par classes hors-carte."
+image: /assets/cote-divoire-densite-example.png
+---
+
+![](/assets/cote-divoire-densite-example.png)
+
+Carte minimaliste sur les 14 régions administratives de Côte d'Ivoire
+(données `data/vector/gadm41_CIV.gpkg`, valeurs de démonstration), pensée
+comme point de départ pour une carte de rapport ou de présentation :
+choroplèthe, flèche du Nord, logo et légende, sans texte enrichi ni annotation
+par entité.
+
+Techniques utilisées :
+
+- `add_polygons_choropleth()` pour la coloration continue
+- `add_north_arrow()` avec `scale` pour une flèche compacte
+- `add_image()` pour incruster un logo en filigrane (coordonnées figure)
+- `add_swatch_legend(..., to="fig")` pour une légende à classes hors-carte
+- `add_custom_text(..., to="fig")` pour la légende de la carte
+
+```python
+import geopandas as gpd
+import numpy as np
+import cartograpy as cp
+
+regions = gpd.read_file("data/vector/gadm41_CIV.gpkg", layer="ADM_ADM_1")
+regions["densite"] = np.random.default_rng(42).integers(20, 300, size=len(regions))
+
+m = cp.Map(figsize=(8, 8), dpi=150, basemap=False, title="")
+m.set_background_color("white")
+m.add_polygons_choropleth(
+    regions, column_to_plot="densite", cmap="YlOrRd",
+    edge_color="black", linewidth=0.5,
+    show_labels=False, show_colorbar=False,
+)
+m.hide_gridline()
+m.add_north_arrow(location="upper right", scale=0.35)
+m.add_image("assets/img/logo.png", (0.10, 0.10), zoom=0.05)
+m.add_custom_text(
+    "Densité de population (exemple) — Côte d'Ivoire",
+    (0.5, 0.06), to="fig", fontsize=13, ha="center", va="center",
+)
+
+cmap_obj = cp.load_cmap("YlOrRd")
+items = [(lab, cmap_obj(v)) for lab, v in
+         [("20-100", 0.15), ("100-180", 0.5), ("180-300", 0.85)]]
+m.add_swatch_legend(items, xy=(0.80, 0.32), to="fig",
+                     rect_width=0.03, rect_height=0.03, y_step=0.045,
+                     label_dx=0.045, label_dy=0.012, fontsize=9)
+
+m.save("densite-civ.png", dpi=150)
+```

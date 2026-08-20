@@ -1,0 +1,407 @@
+---
+title: "Cartes statiques"
+description: "Composer une carte 2D avec Map, couches, légende et mise en page."
+---
+
+`Map` (dans `cartograpy.mapper`) centralise la production de cartes statiques avec
+Matplotlib et Cartopy — couches vectorielles/raster, choroplèthes, légende, échelle,
+flèche du Nord, grille, export. C'est la classe la plus riche du package (65
+méthodes publiques).
+
+```{mermaid}
+graph LR
+    A[Créer un objet Map]
+    B[Ajouter des couches<br><i>vecteur, raster, choroplèthe</i>]
+    C[Habiller<br><i>texte, flèche du Nord, légende, logo</i>]
+    D[Cadrer<br><i>set_extent, zoom_to_layer</i>]
+    E[Afficher / exporter<br><i>show, save</i>]
+
+    A --> B --> C --> D --> E
+```
+
+## Créer une carte
+
+```python
+from cartograpy.mapper import Map
+
+m = Map(title="Côte d'Ivoire")
+```
+
+```python
+m.set_paper("A4", orientation="landscape")   # format papier prédéfini
+m.list_paper_formats()                       # formats disponibles avec dimensions
+m.set_background_color("white")
+```
+
+## Ajouter des couches
+
+::: {.panel-tabset}
+## Depuis un GeoDataFrame
+
+```python
+m.add_polygons(regions_gdf, facecolor="lightyellow", edgecolor="black")
+m.add_lines(routes_gdf, color="blue", linewidth=1.5)
+m.add_points(villes_gdf, color="red", size=40, column="population", cmap="viridis")
+```
+
+## Depuis des coordonnées brutes
+
+```python
+m.add_point((5.35, -4.0), label="Abidjan", color="red")
+m.add_line([(5.3, -4.0), (5.4, -3.9)], color="blue")
+m.add_polygon([(5.3, -4.0), (5.4, -4.0), (5.4, -3.9)], color="green")
+```
+
+## Raster
+
+```python
+m.add_raster(raster_path="data/elevation.tif", cmap="terrain", alpha=0.8)
+```
+
+## Fond de carte web
+
+```python
+m.add_basemap(source="OpenStreetMap")   # nécessite contextily
+```
+:::
+
+### Choroplèthes
+
+```python
+m.add_polygons_choropleth(regions_gdf, column_to_plot="densite", cmap="YlOrRd", show_labels=True)
+m.add_points_choropleth(villes_gdf, column_to_plot="population", point_size_column="population")
+```
+
+::: {.callout-note}
+`add_polygons_cloropleth`/`add_points_cloropleth` (avec la faute de frappe
+historique) existent encore comme alias dépréciés — préférez
+`add_polygons_choropleth`/`add_points_choropleth`.
+:::
+
+### Frontières, côtes et fonds naturels (cartopy)
+
+```python
+m.add_natural_features(features=["coastline", "borders"], border_color="gray")
+```
+
+## Habiller la carte
+
+```python
+m.add_title("Densité de population par région")
+m.add_gridlines(draw_labels=True)
+m.add_labels(regions_gdf, label_column="nom", fontsize=9)
+m.add_annotation("Zone d'étude", xy=(5.35, -4.0), arrow=True)
+```
+
+### Texte enrichi et flèche hors-carte
+
+```python
+# segments <mis en évidence> (police différente), via highlight_text
+m.add_custom_text("<Abidjan>: 5.4M hab.", (5.35, -4.0), to="ax",
+                   highlight_textprops=[{"color": "red"}])
+
+# titre/sous-titre hors-carte, coordonnées figure (0-1)
+m.add_custom_text("Densité de population", (0.5, 0.92), to="fig", fontsize=20)
+
+# flèche hors-carte (drawarrow), pour pointer une entité trop petite pour l'annoter dessus
+m.add_fig_arrow(tail_position=(0.3, 0.7), head_position=(0.4, 0.5), radius=0.3)
+```
+
+### Logo et image de fond
+
+```python
+# logo en bas à gauche, coordonnées figure (0-1) par défaut
+m.add_image("logo.png", (0.10, 0.10), zoom=0.05)
+
+# photo/illustration positionnée sur la carte (coordonnées géographiques)
+m.add_image("photo.jpg", (5.35, -4.0), to="ax", zoom=0.3)
+
+# image de fond sur l'étendue de la carte, sans déformation (zoom > 0)
+m.add_background_image("texture.jpg", alpha=0.6, zoom=1)
+```
+
+### Flèche du Nord et échelle
+
+```python
+m.get_north_arrows()          # liste les SVG de flèches disponibles dans le package
+m.add_north_arrow(arrow=1, location="upper right")
+m.add_scale_bar()
+```
+
+### Légende et barre de couleurs
+
+```python
+m.add_colorbar(cmap="viridis", vmin=0, vmax=1000, label="Population")
+
+# légende par classes positionnée en coordonnées géographiques,
+# plutôt que dans un coin d'axe via custom_legend()
+items = [("0-10", "yellow"), ("10-50", "orange"), ("50+", "red")]
+m.add_swatch_legend(items, xy=(-5, 5))
+```
+
+## Cadrage
+
+```python
+m.set_extent((-8.6, 4.3, -2.5, 10.7))    # (west, south, east, north)
+m.zoom_to_layer(label="Régions")
+m.center_on_bounds(regions_gdf.total_bounds)
+```
+
+## Rendu et export
+
+```python
+m.show()
+m.save("carte_finale.png", dpi=300)
+```
+
+Référence complète des 65 méthodes de `Map`, groupées par thème :
+[Reference mapper](/reference/mapper.qmd).
+
+## Exemple complet
+
+Reprise d'une carte éditoriale classique (émissions de CO₂ par habitant en
+Europe, inspirée d'un exemple de [The Python Graph
+Gallery](https://python-graph-gallery.com/)) entièrement construite avec
+`Map`, sans dépendance graphique externe. Chaque section ci-dessous correspond
+à un bloc du script et au besoin cartographique qu'il couvre.
+
+```{mermaid}
+graph TD
+    A[1. Données<br><i>cp.load, merge, query, centroïdes</i>]
+    A --> B[2. Polices & carte de base<br><i>google_font, add_polygons_choropleth</i>]
+    B --> C[3. Annotations par pays<br><i>add_custom_text to='ax'</i>]
+    B --> D[4. Cas du Luxembourg<br><i>add_fig_arrow + add_custom_text to='fig'</i>]
+    B --> E[5. Légende par classes<br><i>add_swatch_legend</i>]
+    B --> F[6. Titre, sous-titre, logo<br><i>add_custom_text to='fig' + add_image</i>]
+    C --> G[Export<br><i>m.save</i>]
+    D --> G
+    E --> G
+    F --> G
+```
+
+### 1. Données
+
+Rien de spécifique à `cartograpy` ici : `cp.load()` détecte l'extension et
+route vers `gpd.read_file`/`pd.read_csv` en interne, donc il fonctionne aussi
+bien sur un chemin local que sur une URL directe. Le reste (fusion,
+`.query()`, calcul des centroïdes en CRS projeté) reste du pandas/geopandas
+standard.
+
+```python
+import pandas as pd
+import cartograpy as cp
+
+world = cp.load(
+    "https://raw.githubusercontent.com/holtzy/the-python-graph-gallery/"
+    "master/static/data/europe.geojson"
+)
+df = cp.load(
+    "https://raw.githubusercontent.com/holtzy/the-python-graph-gallery/"
+    "master/static/data/co2PerCapita.csv"
+)
+
+df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+df["Total"] = pd.to_numeric(df["Total"], errors="coerce")
+
+data = world.merge(df, how="left", left_on="name", right_on="Country")
+data = data.query(
+    'continent == "Europe" and name not in ["Russia", "Iceland"] and Year == 2021'
+)
+data = data[["name", "Total", "geometry"]].dropna(subset=["Total", "geometry"]).copy()
+
+# Centroïdes calculés en CRS métrique (EPSG:3035) puis reprojetés en 4326 :
+# cp.centroids() ne reprojette pas, donc calcul manuel ici pour des
+# positions d'étiquette correctes malgré la distorsion de PlateCarree.
+proj = data.to_crs(epsg=3035)
+data["centroid"] = proj.geometry.centroid.to_crs(data.crs)
+```
+
+### 2. Polices et carte de base
+
+`google_font()` télécharge/charge une police Google Fonts et renvoie un
+`FontProperties` réutilisable partout où `Map` accepte un paramètre `font`.
+`basemap=False` désactive les côtes/frontières automatiques puisque le
+GeoDataFrame `data` fournit déjà tous les contours nécessaires.
+
+```python
+font_title = cp.google_font("Bebas Neue")
+font_text = cp.google_font("Fira Sans", weight="light")
+font_bold = cp.google_font("Fira Sans", weight="medium")
+
+text_color = "black"
+background_color = "white"
+
+m = cp.Map(figsize=(10, 10), dpi=400, basemap=False, title="")
+m.set_background_color(background_color)
+m.add_polygons_choropleth(
+    data,
+    column_to_plot="Total",
+    cmap="Apricot",
+    edge_color="black",
+    linewidth=0.5,
+    show_labels=True,
+    show_colorbar=False,
+)
+m.set_extent([-11, 32, 41, 73])
+m.hide_gridline()
+```
+
+### 3. Annotations par pays
+
+`add_custom_text(..., to="ax")` positionne du texte en coordonnées
+géographiques, avec segments `<mis en évidence>` (ici : le nom du pays en
+gras via `highlight_textprops`). `adjustments` décale chaque étiquette pour
+éviter les chevauchements sur les petits pays ; la couleur du texte bascule
+en blanc au-delà de 7 t pour rester lisible sur les teintes foncées de la
+palette.
+
+```python
+adjustments = {
+    "France": (10, 3), "Italy": (-2.4, 2.5), "Finland": (0, -2),
+    "Belarus": (0, -0.4), "Ireland": (0, -1), "Germany": (-0.2, 0),
+    "Poland": (0, 0.2), "Sweden": (-1.2, -2.8),
+    "United Kingdom": (1, -1.5), "Norway": (-4, -5.5),
+}
+countries_to_annotate = [
+    "France", "Italy", "Romania", "Poland", "Finland", "Ukraine",
+    "Spain", "Germany", "Sweden", "United Kingdom", "Belarus", "Norway",
+]
+
+data_by_country = data.set_index("name")
+
+for country in countries_to_annotate:
+    if country not in data_by_country.index:
+        continue
+    row = data_by_country.loc[country]
+    dx, dy = adjustments.get(country, (0, 0))
+    x, y = row["centroid"].x + dx, row["centroid"].y + dy
+    rate = row["Total"]
+    label = "UK" if country == "United Kingdom" else country
+
+    m.add_custom_text(
+        f"<{label.upper()}>: {rate:.2f}", (x, y), to="ax",
+        fontsize=9, color="white" if rate > 7 else text_color,
+        ha="center", va="center",
+        highlight_textprops=[{"font": font_bold}],
+    )
+```
+
+### 4. Cas particulier : le Luxembourg
+
+Trop petit pour recevoir une étiquette directement sur son polygone : la
+combinaison `add_fig_arrow()` (flèche en coordonnées figure 0-1, indépendante
+du zoom de la carte) + `add_custom_text(..., to="fig")` place le label à côté
+de la carte, avec une flèche qui pointe vers le pays.
+
+```python
+lux = data[data["name"] == "Luxembourg"]
+if not lux.empty:
+    lux_value = lux.iloc[0]["Total"]
+
+    m.add_fig_arrow(
+        tail_position=(0.32, 0.70),
+        head_position=(0.375, 0.45),
+        radius=0.3,
+        width=0.5, head_width=4, head_length=8, color="black",
+    )
+    m.add_custom_text(
+        f"<LUXEMBOURG>: {lux_value:.2f}", (0.32, 0.71), to="fig",
+        highlight_textprops=[{"font": font_bold}],
+        color=text_color, fontsize=9, font=font_text,
+        ha="center", va="center",
+    )
+```
+
+### 5. Légende par classes
+
+Une légende à bins manuels (plutôt qu'une barre de couleur continue) :
+`add_swatch_legend()` dessine un rectangle de couleur par classe à une
+position géographique donnée, avec le label exact voulu (`"0-2 t"`, etc.) —
+plus de contrôle qu'un `scheme` mapclassify auto-généré, sans dépendance
+supplémentaire.
+
+```python
+value_ranges = [0, 2, 4, 6, 8, 10, 12, 15]
+labels = ["0-2 t", "2-4 t", "4-6 t", "6-8 t", "8-10 t", "10-12 t", "12+ t"]
+cmap_obj = cp.load_cmap("Apricot")
+
+items = [
+    (lab, cmap_obj((value_ranges[i] + value_ranges[i + 1]) / 2 / value_ranges[-1]))
+    for i, lab in enumerate(labels)
+]
+m.add_swatch_legend(
+    items, xy=(35, 70),
+    rect_width=2, rect_height=1.5, y_step=1.5,
+    fontsize=9, color=text_color,
+    edge_color="black", linewidth=0.6,
+    font=font_text,
+)
+```
+
+### 6. Titre, sous-titre et logo
+
+Trois blocs de texte figure-relatifs pour le titre, la source et la
+signature, plus le logo du package en filigrane via `add_image()`
+(`to="fig"` par défaut) — chaque élément hors-carte est positionné
+indépendamment du zoom/étendue de la carte elle-même.
+
+```python
+m.add_custom_text(
+    "Émissions de CO₂ par habitant en Europe (2021)", (0.5, 0.24), to="fig",
+    color=text_color, fontsize=25, font=font_title,
+    ha="center", va="top",
+)
+m.add_custom_text(
+    "<Unité> : tonnes | <Source>: zenodo.org", (0.5, 0.2), to="fig",
+    color=text_color, fontsize=12, font=font_text,
+    ha="center", va="top",
+    highlight_textprops=[{"font": font_bold}, {"font": font_bold}],
+)
+m.add_custom_text(
+    "<By> : Anicet Cyrille KAMBOU", (0.48, 0.15), to="fig",
+    color=text_color, fontsize=9, font=font_text,
+    ha="center", va="center",
+    highlight_textprops=[{"font": font_bold}],
+)
+
+m.add_image("logo.png", (0.44, 0.1), zoom=0.035)
+
+# 8. EXPORT
+m.save("web-map-with-custom-legend.png", dpi=600)
+```
+
+### Résultat
+
+![](/assets/co2-europe-example.png)
+
+## Variantes
+
+#### [Map2D](/reference/mapper.qmd)
+
+Hérite de `Map`, sans projection cartographique (axes matplotlib classiques) —
+pour des schémas ou plans où la projection géographique n'est pas nécessaire.
+
+#### [SituationMap](/reference/mapper.qmd)
+
+Carte principale + mini-carte de localisation (inset) montrant où se situe la
+zone d'étude dans un contexte plus large.
+
+#### [plot_choropleth()](/reference/mapper.qmd)
+
+Fonction autonome pour une choroplèthe rapide, sans passer par une instance
+`Map`.
+
+```python
+from cartograpy.mapper import SituationMap
+
+sm = SituationMap(title="Côte d'Ivoire")
+sm.add_main_layer(regions_gdf, facecolor="khaki")
+sm.set_inset_box_from_gdf(regions_gdf)
+sm.show()
+```
+
+## Aller plus loin
+
+- [Styles, palettes et polices](/guides/styling-and-palettes.qmd) — personnaliser les
+  couleurs et polices utilisées par `Map`
+- [Cartes web](/guides/web-maps.qmd) — l'équivalent interactif avec `WebMap`

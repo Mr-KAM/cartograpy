@@ -296,12 +296,14 @@ source = { editable = "." }
 dependencies = [
     { name = "cartopy" },
     { name = "click" },
+    { name = "drawarrow" },
     { name = "fiona" },
     { name = "geemap" },
     { name = "geojson" },
     { name = "geopandas" },
     { name = "geopy" },
     { name = "gpxpy" },
+    { name = "highlight-text" },
     { name = "jupyter" },
     { name = "marimo", extra = ["recommended"] },
     { name = "matplotlib" },
@@ -330,7 +332,6 @@ dependencies = [
 dev = [
     { name = "black" },
     { name = "flake8" },
-    { name = "jupyter" },
     { name = "jupyterlab" },
     { name = "mypy" },
     { name = "pytest" },
@@ -341,6 +342,7 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "cartopy", specifier = ">=0.23" },
     { name = "click", specifier = ">=8.0" },
+    { name = "drawarrow", specifier = ">=0.1" },
     { name = "fiona", specifier = ">=1.10.1" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "geemap", specifier = ">=0.37.2" },
@@ -348,8 +350,8 @@ requires-dist = [
     { name = "geopandas", specifier = ">=0.14" },
     { name = "geopy", specifier = ">=2.4" },
     { name = "gpxpy", specifier = ">=1.6" },
+    { name = "highlight-text", specifier = ">=0.2" },
     { name = "jupyter", specifier = ">=1.1.1" },
-    { name = "jupyter", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "jupyterlab", marker = "extra == 'dev'", specifier = ">=4.0.0" },
     { name = "marimo", extras = ["recommended"], specifier = ">=0.23.0" },
     { name = "matplotlib", specifier = ">=3.8" },
@@ -864,6 +866,18 @@ wheels = [
 ]
 
 [[package]]
+name = "drawarrow"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/30/0a9b0cb8cc08c8a70406ddb0b6c6704b8281f12c13334b76ec195994f764/drawarrow-0.1.0.tar.gz", hash = "sha256:e7be36bac90f13054e58b3ea8ffaa52f9c13a6189c25d86d2a930a00c26875ad", size = 10383, upload-time = "2025-03-18T20:53:29.092Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/dd/7a9d9846a46670b4012fac9afa52aa922f27bf412b437eee8d76de90f6aa/drawarrow-0.1.0-py3-none-any.whl", hash = "sha256:aafd22658a05d31562c18089b3c7b5769e9af3182e6b29a26a1475920017f619", size = 8208, upload-time = "2025-03-18T20:53:26.819Z" },
+]
+
+[[package]]
 name = "duckdb"
 version = "1.5.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1365,6 +1379,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1", size = 101250, upload-time = "2025-04-24T03:35:25.427Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86", size = 37515, upload-time = "2025-04-24T03:35:24.344Z" },
+]
+
+[[package]]
+name = "highlight-text"
+version = "0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9a/67/819151e5e9a4580b26620f86d95f0f11f46bdd792feffa16d3819a2cb4d4/highlight_text-0.2.tar.gz", hash = "sha256:062d8f648fd474157367e435e37ef5c68cc58b1c8d0b006baab2e7c1c60bdc37", size = 13273, upload-time = "2021-04-07T14:58:52.251Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b2/ca/acb9567cf3cde352a08e2b6bb6e0b0e278061d07b2e0bf9bdd7cfaa9bded/highlight_text-0.2-py3-none-any.whl", hash = "sha256:fb1333628f500a0ff2c25af757511eb39034c1d19571994821b2e0f76d040f75", size = 11973, upload-time = "2021-04-07T14:58:48.962Z" },
 ]
 
 [[package]]
