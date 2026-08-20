@@ -24,6 +24,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -47,9 +82,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-ff38ca5759cea8d2b4e40dc1c167d4da.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-b82a8e178c632e86601320a4062c3b24.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-ff38ca5759cea8d2b4e40dc1c167d4da.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -250,6 +285,10 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/logo-small.png" alt="" class="navbar-logo light-content">
+    <img src="../assets/logo-small.png" alt="" class="navbar-logo dark-content">
+    </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">cartograpy</span>
     </a>
@@ -544,8 +583,43 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Sur cette page</h2>
    
   <ul>
-  <li><a href="#fonctions" id="toc-fonctions" class="nav-link active" data-scroll-target="#fonctions">Fonctions</a></li>
-  <li><a href="#classes" id="toc-classes" class="nav-link" data-scroll-target="#classes">Classes</a></li>
+  <li><a href="#io-chargement-sauvegarde-et-inspection-de-fichiers" id="toc-io-chargement-sauvegarde-et-inspection-de-fichiers" class="nav-link active" data-scroll-target="#io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> — chargement, sauvegarde et inspection de fichiers</a>
+  <ul class="collapse">
+  <li><a href="#loadfilepath-layernone" id="toc-loadfilepath-layernone" class="nav-link" data-scroll-target="#loadfilepath-layernone"><code>load(filepath, layer=None)</code></a></li>
+  <li><a href="#describefilepath" id="toc-describefilepath" class="nav-link" data-scroll-target="#describefilepath"><code>describe(filepath)</code></a></li>
+  <li><a href="#savedata-file_extension-filenameoutput-timestampfalse-raster_metanone" id="toc-savedata-file_extension-filenameoutput-timestampfalse-raster_metanone" class="nav-link" data-scroll-target="#savedata-file_extension-filenameoutput-timestampfalse-raster_metanone"><code>save(data, file_extension, filename="output", timestamp=False, raster_meta=None)</code></a></li>
+  <li><a href="#list_geofilesfolder_path" id="toc-list_geofilesfolder_path" class="nav-link" data-scroll-target="#list_geofilesfolder_path"><code>list_geofiles(folder_path)</code></a></li>
+  </ul></li>
+  <li><a href="#geoboundaries-et-bound" id="toc-geoboundaries-et-bound" class="nav-link" data-scroll-target="#geoboundaries-et-bound"><code>GeoBoundaries</code> et <code>Bound</code></a>
+  <ul class="collapse">
+  <li><a href="#get_countryname" id="toc-get_countryname" class="nav-link" data-scroll-target="#get_countryname"><code>get_country(name)</code></a></li>
+  <li><a href="#get_adminterritories-adm-simplifiedtrue" id="toc-get_adminterritories-adm-simplifiedtrue" class="nav-link" data-scroll-target="#get_adminterritories-adm-simplifiedtrue"><code>get_admin(territories, adm, simplified=True)</code></a></li>
+  </ul></li>
+  <li><a href="#geocoder" id="toc-geocoder" class="nav-link" data-scroll-target="#geocoder"><code>Geocoder</code></a>
+  <ul class="collapse">
+  <li><a href="#geocodeplaces" id="toc-geocodeplaces" class="nav-link" data-scroll-target="#geocodeplaces"><code>geocode(places)</code></a></li>
+  </ul></li>
+  <li><a href="#osm" id="toc-osm" class="nav-link" data-scroll-target="#osm"><code>OSM</code></a>
+  <ul class="collapse">
+  <li><a href="#get_dataplace-tags-data_typeall" id="toc-get_dataplace-tags-data_typeall" class="nav-link" data-scroll-target="#get_dataplace-tags-data_typeall"><code>get_data(place, tags, data_type="all")</code></a></li>
+  </ul></li>
+  <li><a href="#hydro" id="toc-hydro" class="nav-link" data-scroll-target="#hydro"><code>Hydro</code></a>
+  <ul class="collapse">
+  <li><a href="#downloadregion-output_dirhydrorivers_data" id="toc-downloadregion-output_dirhydrorivers_data" class="nav-link" data-scroll-target="#downloadregion-output_dirhydrorivers_data"><code>download(region, output_dir="hydrorivers_data")</code></a></li>
+  </ul></li>
+  <li><a href="#dem" id="toc-dem" class="nav-link" data-scroll-target="#dem"><code>DEM</code></a>
+  <ul class="collapse">
+  <li><a href="#downloadbbox-out_tif-verbosetrue-max_workers4" id="toc-downloadbbox-out_tif-verbosetrue-max_workers4" class="nav-link" data-scroll-target="#downloadbbox-out_tif-verbosetrue-max_workers4"><code>download(bbox, out_tif, verbose=True, max_workers=4)</code></a></li>
+  </ul></li>
+  <li><a href="#worldbank" id="toc-worldbank" class="nav-link" data-scroll-target="#worldbank"><code>WorldBank</code></a>
+  <ul class="collapse">
+  <li><a href="#get_dataindicators-countryall-kwargs" id="toc-get_dataindicators-countryall-kwargs" class="nav-link" data-scroll-target="#get_dataindicators-countryall-kwargs"><code>get_data(indicators, country='all', **kwargs)</code></a></li>
+  </ul></li>
+  <li><a href="#gee" id="toc-gee" class="nav-link" data-scroll-target="#gee"><code>Gee</code></a>
+  <ul class="collapse">
+  <li><a href="#get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" id="toc-get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="nav-link" data-scroll-target="#get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone"><code>get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></a></li>
+  <li><a href="#downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" id="toc-downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" class="nav-link" data-scroll-target="#downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue"><code>download(data, bbox=None, filename="image.tif", scale=10, crs="EPSG:4326", bands=None, output_dir=".", mosaic_col=True)</code></a></li>
+  </ul></li>
   <li><a href="#organisation" id="toc-organisation" class="nav-link" data-scroll-target="#organisation">Organisation</a></li>
   </ul>
 </nav>
@@ -578,27 +652,865 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="fonctions" class="level2">
-<h2 class="anchored" data-anchor-id="fonctions">Fonctions</h2>
+<p><code>cartograpy.data</code> regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale et Google Earth Engine. La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément — chaque section ci-dessous précise les erreurs et pièges réels du code source.</p>
+<section id="io-chargement-sauvegarde-et-inspection-de-fichiers" class="level2">
+<h2 class="anchored" data-anchor-id="io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> — chargement, sauvegarde et inspection de fichiers</h2>
+<p>Quatre fonctions autonomes définies dans <code>cartograpy/data/io.py</code>. Ce sont elles que <code>Project.add_data</code>, <code>Project.load_data</code> et <code>Project.save_output</code> utilisent en interne.</p>
+<section id="loadfilepath-layernone" class="level3">
+<h3 class="anchored" data-anchor-id="loadfilepath-layernone"><code>load(filepath, layer=None)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>load(filepath, layer<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li><code>load</code></li>
-<li><code>describe</code></li>
-<li><code>save</code></li>
-<li><code>list_geofiles</code></li>
+<li><strong><code>filepath</code></strong> (<code>str</code> ou <code>Path</code>, requis) : chemin du fichier à charger. L’extension détermine le type de retour.</li>
+<li><strong><code>layer</code></strong> (<code>str</code>, optionnel) : pour les fichiers multi-couches (GPX), nom de la couche à charger (<code>"tracks"</code> par défaut).</li>
+<li><strong>Retour</strong> : <code>geopandas.GeoDataFrame</code> pour les vecteurs (<code>shp</code>, <code>geojson</code>, <code>gpkg</code>, <code>kml</code>, <code>gpx</code>, <code>csv</code>, <code>parquet</code>) ; <code>rasterio.io.DatasetReader</code> pour les rasters (<code>tif</code>, <code>tiff</code>).</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si l’extension n’est pas supportée ; <code>RuntimeError</code> en cas d’échec de lecture (KML, GPX, raster).</li>
 </ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> load</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>regions <span class="op">=</span> load(<span class="st">"data/regions_civ.geojson"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mnt <span class="op">=</span> load(<span class="st">"data/elevation.tif"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Pour un raster, <code>load()</code> renvoie un <code>DatasetReader</code> <strong>ouvert</strong> : pensez à le fermer (<code>.close()</code>) ou à utiliser un context manager (<code>with load(...) as src:</code>), sinon le fichier reste verrouillé.</p>
+</div>
+</div>
 </section>
-<section id="classes" class="level2">
-<h2 class="anchored" data-anchor-id="classes">Classes</h2>
+<section id="describefilepath" class="level3">
+<h3 class="anchored" data-anchor-id="describefilepath"><code>describe(filepath)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>describe(filepath) <span class="op">-&gt;</span> <span class="bu">dict</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li><code>GeoBoundaries</code></li>
-<li><code>Bound</code></li>
-<li><code>Geocoder</code></li>
-<li><code>OSM</code></li>
-<li><code>Hydro</code></li>
-<li><code>DEM</code> (et <code>DEMDownloadError</code>)</li>
-<li><code>WorldBank</code></li>
-<li><code>Gee</code> — accessible via <code>cartograpy.data.Gee</code>, non réexporté à la racine du package</li>
+<li><strong><code>filepath</code></strong> (<code>str</code> ou <code>Path</code>, requis) : fichier à décrire (vecteur, raster ou tabulaire).</li>
+<li><strong>Retour</strong> (<code>dict</code>) : <code>type</code> (<code>"vector"</code>, <code>"raster"</code> ou <code>"tabular"</code>), <code>format</code>, <code>nb_layers</code>, <code>layers</code> (détail par couche/bande/table). Le résumé est aussi affiché via <code>logging</code>.</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si le format n’est pas reconnu.</li>
 </ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> describe</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>info <span class="op">=</span> describe(<span class="st">"data/gadm41_CIV.gpkg"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(info[<span class="st">"nb_layers"</span>], info[<span class="st">"layers"</span>][<span class="dv">0</span>][<span class="st">"geometry_types"</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="savedata-file_extension-filenameoutput-timestampfalse-raster_metanone" class="level3">
+<h3 class="anchored" data-anchor-id="savedata-file_extension-filenameoutput-timestampfalse-raster_metanone"><code>save(data, file_extension, filename="output", timestamp=False, raster_meta=None)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>save(data, file_extension, filename<span class="op">=</span><span class="st">"output"</span>, timestamp<span class="op">=</span><span class="va">False</span>, raster_meta<span class="op">=</span><span class="va">None</span>) <span class="op">-&gt;</span> <span class="bu">str</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>data</code></strong> (requis) : <code>GeoDataFrame</code>/<code>DataFrame</code> pour du vectoriel/tabulaire, <code>DatasetReader</code> rasterio ou <code>numpy.ndarray</code> pour du raster.</li>
+<li><strong><code>file_extension</code></strong> (<code>str</code>, requis) : <code>geojson</code>, <code>shp</code>, <code>gpkg</code>, <code>kml</code> (vecteur), <code>csv</code>, <code>parquet</code>, <code>geoparquet</code>, <code>xlsx</code>, <code>feather</code> (tabulaire), ou <code>tif</code>/<code>tiff</code> (raster).</li>
+<li><strong><code>filename</code></strong> (<code>str</code>, défaut <code>"output"</code>) : nom de base, sans extension.</li>
+<li><strong><code>timestamp</code></strong> (<code>bool</code>, défaut <code>False</code>) : ajoute un horodatage <code>_AAAAMMJJ_HHMMSS</code> au nom.</li>
+<li><strong><code>raster_meta</code></strong> (<code>dict</code>, optionnel) : requis si <code>data</code> est un <code>ndarray</code> — doit contenir <code>crs</code>, <code>transform</code>, <code>width</code>, <code>height</code>, <code>dtype</code>, <code>count</code>.</li>
+<li><strong>Retour</strong> (<code>str</code>) : chemin absolu du fichier écrit. Le dossier parent est créé automatiquement si besoin.</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si le format est inconnu, si <code>filename</code> contient <code>".."</code> (anti path-traversal), ou si <code>raster_meta</code> est manquant/incomplet ; <code>TypeError</code> si le type de <code>data</code> ne correspond pas au format demandé (ex. <code>DataFrame</code> sans géométrie vers un format vectoriel, <code>ndarray</code>/<code>DatasetReader</code> vers autre chose que <code>tif</code>/<code>tiff</code>).</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> save</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>save(regions, <span class="st">"geojson"</span>, filename<span class="op">=</span><span class="st">"regions_civ"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>save(regions, <span class="st">"gpkg"</span>, filename<span class="op">=</span><span class="st">"regions_civ"</span>, timestamp<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un <code>ndarray</code> 2D (une seule bande) est automatiquement promu en 3D avant écriture — inutile de le remodeler à la main.</p>
+</div>
+</div>
+</section>
+<section id="list_geofilesfolder_path" class="level3">
+<h3 class="anchored" data-anchor-id="list_geofilesfolder_path"><code>list_geofiles(folder_path)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>list_geofiles(folder_path) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>folder_path</code></strong> (<code>str</code>, requis) : dossier à parcourir (récursivement).</li>
+<li><strong>Retour</strong> (<code>list[str]</code>) : chemins de tous les fichiers dont l’extension est géospatiale (<code>.shp</code>, <code>.geojson</code>, <code>.gpkg</code>, <code>.kml</code>, <code>.csv</code>, <code>.parquet</code>, <code>.gpx</code>, <code>.tif</code>, <code>.tiff</code>).</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> list_geofiles</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fichiers <span class="op">=</span> list_geofiles(<span class="st">"data/"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="geoboundaries-et-bound" class="level2">
+<h2 class="anchored" data-anchor-id="geoboundaries-et-bound"><code>GeoBoundaries</code> et <code>Bound</code></h2>
+<p><code>GeoBoundaries</code> est le client bas niveau pour l’API <a href="https://www.geoboundaries.org">geoboundaries.org</a> (frontières administratives ADM0–ADM5) et pour les continents Natural Earth. <code>Bound</code> en hérite et ajoute les méthodes utilitaires de haut niveau (<code>get_country</code>, <code>get_admin</code>, <code>get_neighbors</code>, <code>get_area</code>…) — c’est la classe à utiliser en pratique.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> Bound(cache_expire_seconds<span class="op">=</span><span class="dv">604800</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>cache_expire_seconds</code></strong> (<code>int</code>, défaut <code>604800</code> = 1 semaine) : durée de mise en cache des requêtes HTTP (<code>requests_cache.CachedSession</code>).</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les réponses de l’API sont mises en cache automatiquement. Utilisez <code>b.clear_cache()</code>, <code>b.set_cache_expire_time(seconds)</code> ou <code>b.disable_cache()</code> pour contrôler ce comportement pendant le développement.</p>
+</div>
+</div>
+<section id="get_countryname" class="level3">
+<h3 class="anchored" data-anchor-id="get_countryname"><code>get_country(name)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>get_country(name: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>name</code></strong> (<code>str</code> ou <code>list[str]</code>, requis) : nom de pays, code ISO2/ISO3, ou liste. Exemples : <code>"Côte d'Ivoire"</code>, <code>"CIV"</code>, <code>["SEN", "Mali"]</code>.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : frontières ADM0 (nationales) simplifiées — une ligne par pays si liste.</li>
+<li><strong>Erreurs</strong> : <code>KeyError</code> si un pays n’est pas trouvé.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> Bound()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>civ <span class="op">=</span> b.get_country(<span class="st">"CIV"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>pays <span class="op">=</span> b.get_country([<span class="st">"Côte d'Ivoire"</span>, <span class="st">"SEN"</span>, <span class="st">"Mali"</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La résolution du nom passe par <code>get_iso3()</code>, qui recherche aussi par sous-chaîne dans les noms de pays multilingues. Si le mot-clé correspond à plusieurs pays avec des codes ISO3 <strong>différents</strong>, <code>get_iso3()</code> renvoie une <strong>liste de tuples</strong> <code>(nom, iso3)</code> au lieu d’une chaîne unique, ce qui fait échouer la résolution en <code>KeyError</code> côté <code>get_country</code>/<code>get_admin</code>. Préférez un code ISO2/ISO3 non ambigu pour les recherches par nom partiel.</p>
+</div>
+</div>
+</section>
+<section id="get_adminterritories-adm-simplifiedtrue" class="level3">
+<h3 class="anchored" data-anchor-id="get_adminterritories-adm-simplifiedtrue"><code>get_admin(territories, adm, simplified=True)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>get_admin(territories: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>], adm: <span class="bu">str</span> <span class="op">|</span> <span class="bu">int</span>, simplified: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>territories</code></strong> : territoire(s), mêmes valeurs acceptées que <code>get_country</code>.</li>
+<li><strong><code>adm</code></strong> (<code>str</code> ou <code>int</code>, requis) : niveau administratif — <code>"ADM0"</code> à <code>"ADM5"</code>, un entier <code>0</code>–<code>5</code>, ou <code>-1</code> pour le plus petit niveau disponible pour le pays.</li>
+<li><strong><code>simplified</code></strong> (<code>bool</code>, défaut <code>True</code>) : géométrie simplifiée (plus légère) ou complète.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : géométries du niveau demandé (délègue à <code>adm()</code> de <code>GeoBoundaries</code>).</li>
+<li><strong>Erreurs</strong> : <code>KeyError</code> si le territoire n’est pas trouvé, ou si le niveau ADM demandé n’existe pas pour ce pays.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>regions_civ <span class="op">=</span> b.get_admin(<span class="st">"CIV"</span>, adm<span class="op">=</span><span class="dv">1</span>)     <span class="co"># régions</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>communes_sen <span class="op">=</span> b.get_admin(<span class="st">"SEN"</span>, adm<span class="op">=-</span><span class="dv">1</span>)   <span class="co"># plus petit niveau disponible</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Astuce
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>b.adminLevels()</code> retourne une table Markdown de correspondance ADM0–ADM5 → nom usuel (pays, région, département, commune…) en cas de doute sur le niveau à demander.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Autres méthodes de <code>GeoBoundaries</code> et <code>Bound</code>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>is_valid_adm(iso3, adm)</code></td>
+<td><code>bool</code> — le niveau ADM existe-t-il pour ce pays.</td>
+</tr>
+<tr class="even">
+<td><code>get_iso3(territory)</code></td>
+<td>Code ISO3 ; <code>list[tuple]</code> si plusieurs pays correspondent (voir avertissement ci-dessus), <code>None</code> si aucun.</td>
+</tr>
+<tr class="odd">
+<td><code>list_countries()</code></td>
+<td>Liste de tous les codes ISO3 reconnus.</td>
+</tr>
+<tr class="even">
+<td><code>adminLevels()</code></td>
+<td>Table Markdown des niveaux ADM0–ADM5.</td>
+</tr>
+<tr class="odd">
+<td><code>metadata(territory, adm)</code></td>
+<td><code>dict</code> des métadonnées brutes renvoyées par l’API pour un territoire/niveau.</td>
+</tr>
+<tr class="even">
+<td><code>adm(territories, adm, simplified=True)</code></td>
+<td>Méthode sous-jacente de <code>get_admin</code> (identique).</td>
+</tr>
+<tr class="odd">
+<td><code>continents(continents=None)</code></td>
+<td>Géométries de continents (Natural Earth). <code>None</code> = tous. Lève <code>ValueError</code> si un continent est introuvable, <code>TypeError</code> si le type de <code>continents</code> est invalide.</td>
+</tr>
+<tr class="even">
+<td><code>list_continents_names()</code></td>
+<td>Alias FR/EN de continents reconnus (<code>dict</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>get_continent(name)</code></td>
+<td>Alias <code>Bound</code> de <code>continents()</code>.</td>
+</tr>
+<tr class="even">
+<td><code>get_world(level="continent")</code></td>
+<td>Monde entier par <code>"continent"</code> ou <code>"country"</code> (Natural Earth). Lève <code>ValueError</code> si <code>level</code> n’est ni l’un ni l’autre.</td>
+</tr>
+<tr class="odd">
+<td><code>get_neighbors(territory)</code></td>
+<td>Pays voisins (frontière commune), territoire(s) cible exclu(s).</td>
+</tr>
+<tr class="even">
+<td><code>get_countries_by_continent(continent, adm=0, simplified=True)</code></td>
+<td>Tous les pays d’un continent via GeoBoundaries. Lève <code>ValueError</code> si le continent est introuvable.</td>
+</tr>
+<tr class="odd">
+<td><code>get_bbox(territory)</code></td>
+<td>Tuple <code>(west, south, east, north)</code> en WGS-84.</td>
+</tr>
+<tr class="even">
+<td><code>get_centroid(territory)</code></td>
+<td><code>GeoDataFrame</code> des centroïdes (géométrie <code>Point</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>clip(gdf, territory, adm=0)</code></td>
+<td>Découpe un <code>GeoDataFrame</code> selon les frontières d’un territoire.</td>
+</tr>
+<tr class="even">
+<td><code>contains(territory, point)</code></td>
+<td><code>bool</code> — le point <code>(lat, lon)</code> est-il dans le territoire.</td>
+</tr>
+<tr class="odd">
+<td><code>search_country(keyword)</code></td>
+<td>Recherche floue : liste de <code>(nom, iso3)</code> contenant le mot-clé.</td>
+</tr>
+<tr class="even">
+<td><code>get_area(territory, unit="km2")</code></td>
+<td>Superficie (<code>"km2"</code>, <code>"m2"</code> ou <code>"ha"</code>). <code>float</code> pour un seul territoire, <code>GeoDataFrame</code> avec colonne <code>area</code> pour une liste. Lève <code>ValueError</code> si l’unité est invalide.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>continents()</code>, <code>get_world("country")</code> et <code>get_neighbors()</code> téléchargent le jeu Natural Earth 110m (<code>ne_110m_admin_0_countries</code>) depuis un bucket S3 public au premier appel, puis le mettent en cache en mémoire pour la durée de vie de l’instance. Une connexion internet est nécessaire au premier appel de chacune de ces méthodes.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="geocoder" class="level2">
+<h2 class="anchored" data-anchor-id="geocoder"><code>Geocoder</code></h2>
+<p>Géocode et géocode inversement des lieux via geopy/Nominatim (OpenStreetMap), avec quelques méthodes qui s’appuient sur <code>osmnx</code> pour des contours polygonaux plutôt que des points.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Geocoder</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>geocoder <span class="op">=</span> Geocoder(user_agent<span class="op">=</span><span class="st">"mon_app_cartograpy"</span>, delay<span class="op">=</span><span class="fl">1.0</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>user_agent</code></strong> (<code>str</code>, défaut <code>"mon_geocoder_geopandas_cartograpy"</code>) : identifiant d’application requis par la politique d’usage de Nominatim.</li>
+<li><strong><code>delay</code></strong> (<code>float</code>, défaut <code>1.0</code>) : délai en secondes entre deux requêtes.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le service Nominatim public est limité en débit — gardez <code>delay &gt;= 1</code> seconde et fournissez un <code>user_agent</code> explicite et unique à votre application, sous peine de blocage temporaire par le service. Les méthodes <code>bbox()</code>, <code>boundary()</code> et <code>within()</code> nécessitent en plus le paquet optionnel <code>osmnx</code> (<code>ImportError</code> explicite s’il est absent).</p>
+</div>
+</div>
+<section id="geocodeplaces" class="level3">
+<h3 class="anchored" data-anchor-id="geocodeplaces"><code>geocode(places)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>geocode(places: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">tuple</span>[gpd.GeoDataFrame, <span class="bu">list</span>[<span class="bu">str</span>]]</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>places</code></strong> (<code>str</code> ou <code>list[str]</code>, requis) : localité(s) à géocoder.</li>
+<li><strong>Retour</strong> : tuple <code>(GeoDataFrame, list)</code> — <code>GeoDataFrame</code> des résultats trouvés (colonnes <code>query</code>, <code>address</code>, <code>latitude</code>, <code>longitude</code>, <code>altitude</code>, <code>raw</code>, <code>geometry</code> en <code>EPSG:4326</code>), et liste des localités non trouvées.</li>
+<li><strong>Erreurs</strong> : n’en lève pas — timeout, service indisponible ou lieu introuvable sont capturés et renvoient la localité dans la liste des non-trouvées (le détail est journalisé via <code>logging</code>).</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gdf, introuvables <span class="op">=</span> geocoder.geocode([<span class="st">"Abidjan"</span>, <span class="st">"Dakar"</span>, <span class="st">"Bamako"</span>])</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(introuvables)  <span class="co"># ex. ["Bamak"] si mal orthographié</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Autres méthodes de <code>Geocoder</code>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>reverse_geocode(coordinates)</code></td>
+<td>Géocodage inverse : <code>(lat, lon)</code> ou liste → adresses. Retourne <code>(GeoDataFrame, non_trouvés)</code>.</td>
+</tr>
+<tr class="even">
+<td><code>search(place, limit=5, country_codes=None, viewbox=None, bounded=False)</code></td>
+<td>Plusieurs candidats pour un lieu (désambiguïsation).</td>
+</tr>
+<tr class="odd">
+<td><code>geocode_in_country(places, country_codes)</code></td>
+<td>Géocodage contraint à un ou plusieurs pays (codes ISO alpha-2, ex. <code>"ci"</code>).</td>
+</tr>
+<tr class="even">
+<td><code>geocode_in_bbox(places, bbox, bounded=True)</code></td>
+<td>Géocodage contraint à une bounding box <code>(west, south, east, north)</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>boundary(place)</code></td>
+<td>Contour polygonal d’un lieu via <code>osmnx</code>. Requiert <code>osmnx</code>.</td>
+</tr>
+<tr class="even">
+<td><code>geocode_dataframe(df, column)</code></td>
+<td>Enrichit un <code>DataFrame</code> pandas avec lat/lon/geometry depuis une colonne de noms de lieux. Lève <code>ValueError</code> si la colonne n’existe pas.</td>
+</tr>
+<tr class="odd">
+<td><code>components(place)</code></td>
+<td>Composants d’adresse (pays, région, ville, code postal…) sous forme de <code>dict</code>. Dict vide si le lieu est introuvable.</td>
+</tr>
+<tr class="even">
+<td><code>distance(place_a, place_b, unit="km")</code></td>
+<td>Distance géodésique entre deux lieux géocodés (<code>"km"</code>, <code>"m"</code>, <code>"mi"</code>). Lève <code>ValueError</code> si un lieu est introuvable ou l’unité invalide.</td>
+</tr>
+<tr class="odd">
+<td><code>within(place, point)</code></td>
+<td><code>bool</code> — le point <code>(lat, lon)</code> est-il dans le polygone du lieu. Requiert <code>osmnx</code>.</td>
+</tr>
+<tr class="even">
+<td><code>bbox(place)</code></td>
+<td>Bounding box <code>(west, south, east, north)</code> du lieu via <code>osmnx</code>. Requiert <code>osmnx</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="osm" class="level2">
+<h2 class="anchored" data-anchor-id="osm"><code>OSM</code></h2>
+<p>Récupère des entités OpenStreetMap (bâtiments, routes, POI…) via <code>osmnx</code>, filtrées par tags.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> OSM</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>osm <span class="op">=</span> OSM()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>OSM()</code> nécessite le paquet optionnel <code>osmnx</code> — son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install osmnx</code>).</p>
+</div>
+</div>
+<section id="get_dataplace-tags-data_typeall" class="level3">
+<h3 class="anchored" data-anchor-id="get_dataplace-tags-data_typeall"><code>get_data(place, tags, data_type="all")</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>get_data(place: <span class="bu">str</span> <span class="op">|</span> <span class="bu">tuple</span> <span class="op">|</span> <span class="bu">list</span> <span class="op">|</span> gpd.GeoDataFrame, tags: <span class="bu">dict</span>, data_type: <span class="bu">str</span> <span class="op">=</span> <span class="st">"all"</span>) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>place</code></strong> (<code>str</code>, <code>tuple</code>/<code>list</code> de 4 valeurs, ou <code>GeoDataFrame</code>, requis) : nom de zone (ex. <code>"Abidjan, Côte d'Ivoire"</code>), bbox <code>(minx, miny, maxx, maxy)</code>, ou emprise polygonale (l’union des géométries est utilisée).</li>
+<li><strong><code>tags</code></strong> (<code>dict</code>, requis) : tags OSM à filtrer, ex. <code>{"amenity": "school"}</code>.</li>
+<li><strong><code>data_type</code></strong> (<code>str</code>, défaut <code>"all"</code>) : <code>"points"</code>, <code>"polygons"</code>, <code>"lines"</code> ou <code>"all"</code>.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : entités OSM correspondantes ; <code>GeoDataFrame()</code> vide si rien n’est trouvé <strong>ou</strong> en cas d’erreur lors de la requête.</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si <code>place</code> n’est aucun des trois types acceptés, ou si <code>data_type</code> n’est pas une des quatre valeurs listées.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ecoles <span class="op">=</span> osm.get_data(<span class="st">"Abidjan, Côte d'Ivoire"</span>, {<span class="st">"amenity"</span>: <span class="st">"school"</span>}, data_type<span class="op">=</span><span class="st">"points"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>routes <span class="op">=</span> osm.get_data((<span class="op">-</span><span class="fl">4.05</span>, <span class="fl">5.25</span>, <span class="op">-</span><span class="fl">3.95</span>, <span class="fl">5.35</span>), {<span class="st">"highway"</span>: <span class="va">True</span>}, data_type<span class="op">=</span><span class="st">"lines"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les erreurs réseau ou de requête Overpass ne sont <strong>pas</strong> propagées : elles sont interceptées, journalisées via <code>logging</code>, et la méthode renvoie un <code>GeoDataFrame</code> vide plutôt que de lever une exception. Vérifiez <code>.empty</code> sur le résultat plutôt que d’entourer l’appel d’un <code>try/except</code>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aide au choix des tags
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>list_tags(category=None, show_examples=False)</code></td>
+<td>Tags OSM courants par catégorie (<code>building</code>, <code>highway</code>, <code>amenity</code>, <code>water</code>, <code>landuse</code>, <code>natural</code>, <code>leisure</code>, <code>shop</code>, <code>tourism</code>, <code>transport</code>, <code>barrier</code>). Lève <code>ValueError</code> si <code>category</code> est inconnue.</td>
+</tr>
+<tr class="even">
+<td><code>search_tags(keyword)</code></td>
+<td>Recherche un mot-clé dans les catégories/tags/valeurs, retourne un <code>dict</code> filtré.</td>
+</tr>
+<tr class="odd">
+<td><code>get_common_tag()</code></td>
+<td>Combinaisons de tags prêtes à l’emploi (<code>"restaurants"</code>, <code>"schools"</code>, <code>"rivers"</code>, <code>"parking"</code>…).</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="hydro" class="level2">
+<h2 class="anchored" data-anchor-id="hydro"><code>Hydro</code></h2>
+<p>Télécharge le réseau hydrographique <a href="https://www.hydrosheds.org/products/hydrorivers">HydroRIVERS</a> par grande région continentale.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Hydro</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>hydro <span class="op">=</span> Hydro(output_dir<span class="op">=</span><span class="st">"data/hydro"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"data/hydro"</code>) : dossier de destination par défaut (peut être redéfini à l’appel de <code>download</code>).</li>
+</ul>
+<section id="downloadregion-output_dirhydrorivers_data" class="level3">
+<h3 class="anchored" data-anchor-id="downloadregion-output_dirhydrorivers_data"><code>download(region, output_dir="hydrorivers_data")</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>download(region: <span class="bu">str</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"hydrorivers_data"</span>) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>region</code></strong> (<code>str</code>, requis) : code de région HydroRIVERS parmi <code>"af"</code>, <code>"as"</code>, <code>"au"</code>, <code>"eu"</code>, <code>"na"</code>, <code>"sa"</code>.</li>
+<li><strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"hydrorivers_data"</code>) : dossier local d’extraction du zip téléchargé.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : réseau hydrographique HydroRIVERS de la région.</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si <code>region</code> n’est pas un des codes valides ; <code>RuntimeError</code> si le téléchargement échoue ; <code>FileNotFoundError</code> si le shapefile attendu est absent après extraction.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>hydro <span class="op">=</span> Hydro()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>rivieres_afrique <span class="op">=</span> hydro.download(<span class="st">"af"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si <code>output_dir/region</code> existe déjà, le téléchargement est sauté — pas de re-téléchargement automatique même si les données ont changé côté source. Supprimez le dossier pour forcer une mise à jour.</p>
+</div>
+</div>
+<p><code>hydro.describe_variables()</code> retourne une description texte (table Markdown) des colonnes du jeu de données (<code>HYRIV_ID</code>, <code>LENGTH_KM</code>, <code>DIS_AV_CMS</code>, <code>ORD_STRA</code>…), pratique pour l’affichage dans un notebook.</p>
+</section>
+</section>
+<section id="dem" class="level2">
+<h2 class="anchored" data-anchor-id="dem"><code>DEM</code></h2>
+<p>Télécharge un modèle numérique de terrain SRTM (~30 m) sans clé API via les tuiles Skadi hébergées sur AWS, puis mosaïque et découpe selon une emprise.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> DEM</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> DEM(work_dir<span class="op">=</span><span class="st">"_dem_tiles"</span>, timeout<span class="op">=</span><span class="dv">180</span>, keep_intermediate<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>work_dir</code></strong> (<code>str</code>/<code>Path</code>, défaut <code>"_dem_tiles"</code>) : dossier de travail pour les tuiles intermédiaires.</li>
+<li><strong><code>timeout</code></strong> (<code>int</code>, défaut <code>180</code>) : délai HTTP maximal par requête, en secondes.</li>
+<li><strong><code>keep_intermediate</code></strong> (<code>bool</code>, défaut <code>False</code>) : conserve les tuiles <code>.hgt.gz</code>/<code>.tif</code> après assemblage si <code>True</code>.</li>
+<li><strong><code>output_dir</code></strong> (optionnel) : alias déprécié de <code>work_dir</code> — émet un <code>UserWarning</code> si les deux sont fournis (et <code>output_dir</code> l’emporte).</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>DEMDownloadError</code> (sous-classe de <code>RuntimeError</code>, importable via <code>from cartograpy.data import DEMDownloadError</code>) est l’erreur dédiée du module : échec de téléchargement après 3 tentatives, tuile corrompue (taille décompressée inattendue après <code>gzip</code>), ou fenêtre de découpe invalide pour la bbox demandée.</p>
+</div>
+</div>
+<section id="downloadbbox-out_tif-verbosetrue-max_workers4" class="level3">
+<h3 class="anchored" data-anchor-id="downloadbbox-out_tif-verbosetrue-max_workers4"><code>download(bbox, out_tif, verbose=True, max_workers=4)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>download(bbox: <span class="bu">tuple</span> <span class="op">|</span> gpd.GeoDataFrame, out_tif: <span class="bu">str</span> <span class="op">|</span> Path, verbose: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, max_workers: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>bbox</code></strong> (<code>tuple</code> <code>(west, south, east, north)</code> ou <code>GeoDataFrame</code>, requis) : emprise en EPSG:4326.</li>
+<li><strong><code>out_tif</code></strong> (<code>str</code>/<code>Path</code>, requis) : chemin du GeoTIFF final (mosaïque + découpe).</li>
+<li><strong><code>verbose</code></strong> (<code>bool</code>, défaut <code>True</code>) : affiche une barre de progression <code>tqdm</code>.</li>
+<li><strong><code>max_workers</code></strong> (<code>int</code>, défaut <code>4</code>) : threads de téléchargement parallèle (<code>1</code> = séquentiel).</li>
+<li><strong>Retour</strong> (<code>Path</code>) : chemin du GeoTIFF SRTM final.</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si la bbox est hors limites (longitude hors <code>[-180, 180]</code>, latitude hors <code>[-90, 90]</code>, ou <code>south &gt;= north</code>) ; <code>DEMDownloadError</code> en cas d’échec de téléchargement, de tuile corrompue, ou de fenêtre de découpe invalide.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> DEM(work_dir<span class="op">=</span><span class="st">"_dem_tiles"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>chemin <span class="op">=</span> dem.download(bbox<span class="op">=</span>(<span class="op">-</span><span class="fl">8.6</span>, <span class="fl">4.3</span>, <span class="op">-</span><span class="fl">2.5</span>, <span class="fl">10.8</span>), out_tif<span class="op">=</span><span class="st">"srtm_civ.tif"</span>)  <span class="co"># emprise CIV</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Astuce
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Une bbox traversant l’antiméridien (<code>west &gt; east</code>) est automatiquement découpée en deux et fusionnée — inutile de la gérer manuellement. Les tuiles océaniques manquantes côté serveur (HTTP 403/404) sont remplacées par des tuiles nodata plutôt que de faire échouer le téléchargement.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analyse et visualisation (méthodes statiques)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>DEM.info(tif_path)</code></td>
+<td>Métadonnées et statistiques (min/max/moyenne/écart-type) d’un GeoTIFF MNT.</td>
+</tr>
+<tr class="even">
+<td><code>DEM.hillshade(tif_path, out_path=None, azimuth=315.0, altitude=45.0)</code></td>
+<td>Ombrage (hillshade), <code>ndarray</code> 0–255. Sauvegarde en GeoTIFF si <code>out_path</code> fourni.</td>
+</tr>
+<tr class="odd">
+<td><code>DEM.slope(tif_path, out_path=None, degrees=True)</code></td>
+<td>Pente, en degrés (ou radians si <code>degrees=False</code>).</td>
+</tr>
+<tr class="even">
+<td><code>DEM.aspect(tif_path, out_path=None)</code></td>
+<td>Orientation en degrés (0–360, 0 = nord, sens horaire).</td>
+</tr>
+<tr class="odd">
+<td><code>DEM.plot(tif_path, cmap="terrain", title=None, figsize=(10, 8), hillshade_alpha=0.35, colorbar=True)</code></td>
+<td>Aperçu rapide (altitude + ombrage superposé). Nécessite <code>matplotlib</code>.</td>
+</tr>
+<tr class="even">
+<td><code>DEM.reproject(tif_path, out_path, dst_crs="EPSG:3857", resampling="bilinear")</code></td>
+<td>Reprojette le GeoTIFF. Lève <code>ValueError</code> si <code>resampling</code> n’est pas <code>"nearest"</code>, <code>"bilinear"</code>, <code>"cubic"</code> ou <code>"lanczos"</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Toutes ces méthodes sont statiques : <code>DEM.info(...)</code>, <code>DEM.hillshade(...)</code>, etc. fonctionnent sans instancier <code>DEM</code>.</p>
+</section>
+</section>
+<section id="worldbank" class="level2">
+<h2 class="anchored" data-anchor-id="worldbank"><code>WorldBank</code></h2>
+<p>Interroge l’API Banque mondiale (indicateurs de développement) via le paquet <code>wbdata</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> WorldBank</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> WorldBank()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>WorldBank()</code> nécessite le paquet optionnel <code>wbdata</code> — son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install wbdata</code>).</p>
+</div>
+</div>
+<section id="get_dataindicators-countryall-kwargs" class="level3">
+<h3 class="anchored" data-anchor-id="get_dataindicators-countryall-kwargs"><code>get_data(indicators, country='all', **kwargs)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>get_data(indicators, country<span class="op">=</span><span class="st">"all"</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> pandas.DataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>indicators</code></strong> (requis) : indicateur(s) Banque mondiale, tel qu’attendu par <code>wbdata.get_dataframe</code> — typiquement un <code>dict</code> <code>{code: alias}</code>, ex. <code>{"SP.POP.TOTL": "population"}</code>.</li>
+<li><strong><code>country</code></strong> (<code>str</code> ou liste, défaut <code>"all"</code>) : code(s) pays ISO2/ISO3, ou <code>"all"</code>.</li>
+<li><strong><code>**kwargs</code></strong> : transmis tels quels à <code>wbdata.get_dataframe</code> (ex. <code>date</code>, <code>freq</code>, <code>source</code>).</li>
+<li><strong>Retour</strong> (<code>DataFrame</code>) : indexé par pays/date, une colonne par indicateur.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> WorldBank()</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>pop <span class="op">=</span> wb.get_data({<span class="st">"SP.POP.TOTL"</span>: <span class="st">"population"</span>}, country<span class="op">=</span>[<span class="st">"CIV"</span>, <span class="st">"SEN"</span>, <span class="st">"MLI"</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Autres méthodes de <code>WorldBank</code>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>get_sources()</code></td>
+<td>Liste des sources de données disponibles sur l’API Banque mondiale.</td>
+</tr>
+<tr class="even">
+<td><code>get_indicators(source=1, query=None)</code></td>
+<td>Indicateurs disponibles pour une source (<code>1</code> = World Development Indicators par défaut).</td>
+</tr>
+<tr class="odd">
+<td><code>get_countries(query)</code></td>
+<td>Recherche de pays reconnus par l’API Banque mondiale.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Le paramètre <code>query</code> de <code>get_indicators()</code> est accepté mais <strong>n’est pas transmis</strong> à <code>wbdata</code> — seul <code>source</code> est utilisé en interne (<code>self._wbdata.get_indicators(source=source)</code>). Filtrez le résultat côté Python si vous cherchez un indicateur précis.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="gee" class="level2">
+<h2 class="anchored" data-anchor-id="gee"><code>Gee</code></h2>
+<p>Interface haut niveau pour Google Earth Engine : Sentinel-2, Landsat-9, Sentinel-1, NDVI, export local ou vers Google Drive, carte interactive <code>geemap</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>Gee</code> est accessible via <code>cartograpy.data.Gee</code> (ou <code>from cartograpy.data import Gee</code>), mais <strong>n’est pas réexportée à la racine du package</strong> — contrairement à la plupart des autres classes de <code>data</code>, il n’existe pas de <code>cartograpy.Gee</code>.</p>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Gee</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>project</code></strong> (<code>str</code>, optionnel) : ID du projet GCP Earth Engine ; sinon lu depuis la variable d’environnement <code>GEE_PROJECT</code>.</li>
+<li><strong><code>service_account</code></strong> / <strong><code>key_file</code></strong> (<code>str</code>, optionnels) : authentification non interactive par compte de service (les deux doivent être fournis ensemble).</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>Gee()</code> nécessite les paquets optionnels <code>earthengine-api</code> (module <code>ee</code>) et <code>geemap</code> — <code>ImportError</code> explicite dès l’instanciation s’ils sont absents. Sans authentification déjà en cache localement, l’initialisation peut déclencher <code>ee.Authenticate()</code>, un flux <strong>interactif</strong> (ouverture de navigateur) — à éviter dans un script non interactif ou un pipeline CI.</p>
+</div>
+</div>
+<section id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="level3">
+<h3 class="anchored" data-anchor-id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone"><code>get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>get_sentinel2(bbox, start: <span class="bu">str</span>, end: <span class="bu">str</span>, mosaic: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, clip: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, cloud: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.2</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> ee.Image <span class="op">|</span> ee.ImageCollection</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>bbox</code></strong> (<code>[xmin, ymin, xmax, ymax]</code>, requis) : emprise en WGS-84.</li>
+<li><strong><code>start</code></strong>, <strong><code>end</code></strong> (<code>str</code>, requis) : dates au format <code>"YYYY-MM-DD"</code>.</li>
+<li><strong><code>mosaic</code></strong> (<code>bool</code>, défaut <code>True</code>) : renvoie une mosaïque médiane (<code>ee.Image</code>) plutôt qu’une <code>ee.ImageCollection</code>.</li>
+<li><strong><code>clip</code></strong> (<code>bool</code>, défaut <code>True</code>) : découpe le résultat sur la bbox.</li>
+<li><strong><code>cloud</code></strong> (<code>float</code>, défaut <code>0.2</code>) : seuil <code>CLOUDY_PIXEL_PERCENTAGE</code> (fraction, <code>0.2</code> = 20 %).</li>
+<li><strong><code>bands</code></strong> (<code>list[str]</code>, optionnel) : bandes à sélectionner (défaut : Blue/Green/Red/NIR — <code>B2</code>, <code>B3</code>, <code>B4</code>, <code>B8</code>).</li>
+<li><strong>Retour</strong> : <code>ee.Image</code> si <code>mosaic=True</code>, sinon <code>ee.ImageCollection</code>. Un masque de nuages (bande <code>QA60</code>) est appliqué automatiquement à chaque image.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>bbox_abidjan <span class="op">=</span> [<span class="op">-</span><span class="fl">4.10</span>, <span class="fl">5.25</span>, <span class="op">-</span><span class="fl">3.85</span>, <span class="fl">5.40</span>]</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> gee.get_sentinel2(bbox_abidjan, <span class="st">"2024-01-01"</span>, <span class="st">"2024-03-01"</span>, cloud<span class="op">=</span><span class="fl">0.15</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" class="level3">
+<h3 class="anchored" data-anchor-id="downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue"><code>download(data, bbox=None, filename="image.tif", scale=10, crs="EPSG:4326", bands=None, output_dir=".", mosaic_col=True)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>download(data, bbox<span class="op">=</span><span class="va">None</span>, filename: <span class="bu">str</span> <span class="op">=</span> <span class="st">"image.tif"</span>, scale: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, crs: <span class="bu">str</span> <span class="op">=</span> <span class="st">"EPSG:4326"</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"."</span>, mosaic_col: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>data</code></strong> (<code>ee.Image</code> ou <code>ee.ImageCollection</code>, requis) : à exporter — une collection est réduite en médiane (ou mosaïquée si <code>mosaic_col=False</code>) avant export.</li>
+<li><strong><code>bbox</code></strong> (optionnel) : région d’export — nécessaire si <code>data</code> n’est pas déjà découpée sur une zone.</li>
+<li><strong><code>filename</code></strong> (<code>str</code>, défaut <code>"image.tif"</code>) : nom du fichier de sortie.</li>
+<li><strong><code>scale</code></strong> (<code>int</code>, défaut <code>10</code>) : résolution en mètres (10 pour S2, 30 pour L9/SRTM).</li>
+<li><strong><code>crs</code></strong> (<code>str</code>, défaut <code>"EPSG:4326"</code>), <strong><code>bands</code></strong> (optionnel), <strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"."</code>).</li>
+<li><strong>Retour</strong> (<code>Path</code>) : chemin du fichier téléchargé localement (via <code>geemap.ee_export_image</code>).</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>gee.download(s2, bbox<span class="op">=</span>bbox_abidjan, filename<span class="op">=</span><span class="st">"abidjan_s2.tif"</span>, scale<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>download()</code> télécharge en local via <code>geemap</code> — synchrone, limité par les quotas d’export direct d’Earth Engine. Pour de plus gros volumes, utilisez <code>export_to_drive()</code>, qui lance une tâche <strong>asynchrone</strong> vers Google Drive (à suivre avec <code>ee.batch.Task.list()</code>).</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Autres méthodes de <code>Gee</code>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-23" class="callout-23-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>get_landsat9(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></td>
+<td>Identique à <code>get_sentinel2</code>, pour Landsat-9 Collection 2 Tier 1 L2 (filtre <code>CLOUD_COVER</code>).</td>
+</tr>
+<tr class="even">
+<td><code>get_sentinel1(bbox, start, end, mosaic=True, clip=True, polarization="VV", pass_direction="DESCENDING")</code></td>
+<td>Images radar Sentinel-1 GRD (pas de masque nuage).</td>
+</tr>
+<tr class="odd">
+<td><code>compute_ndvi(image, nir_band="B8", red_band="B4", name="NDVI")</code></td>
+<td>Ajoute une bande NDVI à une image (bandes Sentinel-2 par défaut).</td>
+</tr>
+<tr class="even">
+<td><code>compute_ndvi_l9(image, name="NDVI")</code></td>
+<td>NDVI pour Landsat-9 (<code>SR_B5</code>/<code>SR_B4</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>collection(collection_id, bbox=None, start=None, end=None, properties=None)</code></td>
+<td>Accède à n’importe quelle collection GEE par son identifiant, avec filtres optionnels.</td>
+</tr>
+<tr class="even">
+<td><code>info(data)</code></td>
+<td>Métadonnées (<code>dict</code>) d’une image ou collection (<code>getInfo()</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>count(col=None)</code></td>
+<td>Nombre d’images d’une collection (la dernière utilisée par défaut). Lève <code>ValueError</code> si aucune collection n’est disponible.</td>
+</tr>
+<tr class="even">
+<td><code>dates(col=None)</code></td>
+<td>Dates d’acquisition (<code>list[str]</code>) d’une collection. Lève <code>ValueError</code> si aucune collection n’est disponible.</td>
+</tr>
+<tr class="odd">
+<td><code>export_to_drive(data, bbox=None, description="gee_export", folder="GEE_exports", scale=10, crs="EPSG:4326", max_pixels=1e13)</code></td>
+<td>Lance une tâche d’export asynchrone vers Google Drive.</td>
+</tr>
+<tr class="even">
+<td><code>map(center=None, zoom=8)</code></td>
+<td>Retourne (ou crée) une carte interactive <code>geemap.Map</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>add_layer(data, vis_params=None, name="Layer", bbox=None)</code></td>
+<td>Ajoute une image/collection à la carte interactive.</td>
+</tr>
+<tr class="even">
+<td><code>show_map(data, bbox=None, vis_params=None, name="Layer")</code></td>
+<td>Raccourci : crée la carte, ajoute la couche, la retourne.</td>
+</tr>
+<tr class="odd">
+<td><code>zonal_stats(image, bbox, scale=30, reducer="mean")</code></td>
+<td>Statistiques zonales (<code>"mean"</code>, <code>"median"</code>, <code>"min"</code>, <code>"max"</code>, <code>"sum"</code>) sur une bbox.</td>
+</tr>
+<tr class="even">
+<td><code>bbox_to_geometry(bbox)</code></td>
+<td>Convertit <code>[xmin, ymin, xmax, ymax]</code> en <code>ee.Geometry.Rectangle</code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="organisation" class="level2">
 <h2 class="anchored" data-anchor-id="organisation">Organisation</h2>

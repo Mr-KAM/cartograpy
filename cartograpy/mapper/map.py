@@ -9,6 +9,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.ticker as mticker
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
+import matplotlib.path as mpath
 import matplotlib.colors as mcolors
 import matplotlib.patheffects as patheffects
 import importlib.resources
@@ -83,7 +84,7 @@ class Map:
     def __init__(
         self,
         figsize=(12, 8),
-        title="Carte",
+        title="",
         projection=ccrs.PlateCarree(),
         data_crs="EPSG:4326",
         dpi=300,
@@ -1281,10 +1282,78 @@ class Map:
 
         return self
 
+    def _draw_inset_data_indicator(
+        self, inset_ax, bounds, data_gdf, mode,
+        facecolor, edgecolor, alpha, linewidth, zorder,
+    ):
+        """Dessine sur `inset_ax` la zone `data` de add_inset_map : sa
+        géométrie réelle (mode="geometry") ou le rectangle de son étendue
+        (mode="bbox", ou tout `data` fourni sous forme de bbox)."""
+        if mode == "geometry" and data_gdf is not None:
+            inset_ax.add_geometries(
+                data_gdf.geometry, crs=ccrs.PlateCarree(),
+                facecolor=facecolor, edgecolor=edgecolor,
+                alpha=alpha, linewidth=linewidth, zorder=zorder,
+            )
+        else:
+            minx, miny, maxx, maxy = bounds
+            rect = mpatches.Rectangle(
+                (minx, miny), maxx - minx, maxy - miny,
+                linewidth=linewidth, edgecolor=edgecolor,
+                facecolor=facecolor, alpha=alpha,
+                transform=ccrs.PlateCarree(), zorder=zorder,
+            )
+            inset_ax.add_patch(rect)
+
+    @staticmethod
+    def _resolve_on_bounds(on):
+        """Étendue totale [minx, miny, maxx, maxy] de tout ce qui est passé
+        au paramètre `on` de add_inset_map (GeoDataFrame unique ou liste de
+        `{"data": gdf, ...}`)."""
+        items = on if isinstance(on, list) else [on]
+        all_bounds = np.array([
+            (item["data"] if isinstance(item, dict) else item).total_bounds
+            for item in items
+        ])
+        return [
+            all_bounds[:, 0].min(), all_bounds[:, 1].min(),
+            all_bounds[:, 2].max(), all_bounds[:, 3].max(),
+        ]
+
+    def _make_inset_circular(self, inset_ax):
+        """Découpe `inset_ax` (GeoAxes) en cercle au lieu du rectangle par
+        défaut, via `set_boundary`. Corrige l'aspect physique de l'axe (qui
+        n'est pas toujours carré, ex. `size=(4, 3)` ou `position` non carré)
+        pour obtenir un vrai cercle à l'écran plutôt qu'une ellipse.
+
+        L'ajustement d'aspect d'une GeoAxes (`set_global`/`set_extent`) est
+        paresseux — sa position finale (`get_position()`) n'est correcte
+        qu'après un rendu. On force donc un `draw()` avant de mesurer.
+        """
+        self.fig.canvas.draw()
+        pos = inset_ax.get_position()
+        fig_w, fig_h = self.fig.get_size_inches()
+        box_w, box_h = pos.width * fig_w, pos.height * fig_h
+        if box_w >= box_h:
+            rx, ry = 0.5 * (box_h / box_w), 0.5
+        else:
+            rx, ry = 0.5, 0.5 * (box_w / box_h)
+        theta = np.linspace(0, 2 * np.pi, 100)
+        verts = np.column_stack([
+            0.5 + rx * np.cos(theta),
+            0.5 + ry * np.sin(theta),
+        ])
+        inset_ax.set_boundary(mpath.Path(verts), transform=inset_ax.transAxes)
+
     def add_inset_map(
         self,
-        bounds=None,
+        data=None,
+        on=None,
+        mode: str = "bbox",
+        zoom_to_on: bool = False,
         position: Tuple[float, float, float, float] = (0.65, 0.02, 0.33, 0.33),
+        to: str = "ax",
+        circular: bool = False,
         facecolor="white",
         edgecolor="black",
         linewidth=1.5,
@@ -1311,7 +1380,6 @@ class Map:
         indicator_pad: float = 0.05,
         connector_color: str = "black",
         connector_width: float = 1,
-        data=None,
         inset_size: str = None,
         zorder: int = 99,
         show_borders: bool = True,
@@ -1323,17 +1391,46 @@ class Map:
         dans un contexte géographique plus large.
 
         Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
-        positionnement intelligent et des indicateurs d'étendue, sinon revient
-        au placement manuel.
+        positionnement intelligent, sinon revient au placement manuel.
 
         Paramètres:
         -----------
-        bounds : list, optional
-            [minx, miny, maxx, maxy] de la zone à encadrer.
-            Par défaut utilise self.bounds.
+        data : list[float] or GeoDataFrame, optional
+            La zone à surligner sur l'inset : soit une bbox
+            ``[minx, miny, maxx, maxy]``, soit un GeoDataFrame (sa
+            géométrie ou son étendue est utilisée selon ``mode``).
+            Par défaut (``None``), utilise ``self.bounds``.
+        on : GeoDataFrame or list, optional
+            Couche(s) de contexte à dessiner sur l'inset (ex. tous les pays
+            d'un continent, pour situer ``data`` dedans). Un GeoDataFrame
+            unique ou une liste de dicts ``[{"data": gdf, "kwargs": {...}}, ...]``.
+        mode : str
+            Comment dessiner ``data`` quand c'est un GeoDataFrame :
+            - ``"bbox"`` (défaut) : rectangle correspondant à son étendue
+              (``total_bounds``).
+            - ``"geometry"`` : sa géométrie réelle (contour du/des polygones).
+            Sans effet si ``data`` est déjà une bbox (toujours dessinée comme
+            rectangle).
+        zoom_to_on : bool
+            Si True, zoome l'inset sur l'étendue totale de ``on`` (au lieu
+            de la vue globale) et l'encadre d'un rectangle (couleur
+            ``box_color``/``box_linewidth``). Sans effet si ``on`` n'est pas
+            fourni. Prioritaire sur ``global_view``/``extent``.
         position : tuple (x, y, w, h)
-            Position et taille de la mini-carte en coordonnées relatives
-            de la figure (0–1). (x, y) = coin inférieur gauche (mode classique).
+            Position et taille de la mini-carte, en coordonnées relatives
+            (0–1) de l'ancre choisie via ``to`` (mode classique uniquement —
+            sans effet en mode map-utils, qui utilise ``location``/``coords``).
+            (x, y) = coin inférieur gauche.
+        to : str
+            Ancre du positionnement : ``"ax"`` (défaut) — ``position``
+            (mode classique) ou ``location``/``coords`` (mode map-utils)
+            relatifs à l'axe de la carte principale ; ``"fig"`` — relatifs à
+            la figure entière. Même convention que ``add_north_arrow``.
+        circular : bool
+            Si True, découpe l'inset en cercle plutôt qu'en rectangle
+            (``Axes.set_boundary``), quelle que soit la forme réelle de
+            l'axe (l'aspect est corrigé pour obtenir un vrai cercle, pas
+            une ellipse).
         facecolor : str
             Couleur de fond de la mini-carte.
         edgecolor : str
@@ -1343,9 +1440,10 @@ class Map:
         alpha : float
             Transparence.
         box_color : str
-            Couleur du rectangle montrant la zone étudiée (mode classique).
+            Couleur du rectangle montrant la zone étudiée (mode classique,
+            ``data`` non fourni).
         box_linewidth : float
-            Épaisseur du rectangle (mode classique).
+            Épaisseur du rectangle (mode classique, ``data`` non fourni).
         land_color : str
             Couleur des terres sur la mini-carte.
         ocean_color : str
@@ -1377,7 +1475,10 @@ class Map:
             [x0, x1, y0, y1] pour restreindre l'étendue de l'inset.
             Utile quand ``global_view=False``.
         indicator : str
-            Type d'indicateur : "extent", "detail", ou "none".
+            Type d'indicateur quand ``data`` n'est pas fourni (comportement
+            hérité, basé sur l'étendue actuelle de l'axe principal) :
+            "extent", "detail", ou "none". Sans effet si ``data`` est fourni
+            — l'indicateur est alors toujours dessiné d'après ``data``/``mode``.
         indicator_facecolor : str
             Couleur de remplissage de l'indicateur.
         indicator_linecolor : str
@@ -1387,17 +1488,15 @@ class Map:
         indicator_linewidth : float
             Épaisseur de trait de l'indicateur.
         indicator_straighten : bool
-            Si True (défaut), aligne le rectangle indicateur sur les axes.
+            Si True (défaut), aligne le rectangle indicateur sur les axes
+            (``data`` non fourni uniquement).
         indicator_pad : float
-            Espacement du rectangle indicateur (défaut 0.05).
+            Espacement du rectangle indicateur (défaut 0.05, ``data`` non
+            fourni uniquement).
         connector_color : str
-            Couleur des lignes de connexion (mode "detail").
+            Couleur des lignes de connexion (mode "detail", ``data`` non fourni).
         connector_width : float
-            Épaisseur des lignes de connexion (mode "detail").
-        data : GeoDataFrame or list, optional
-            Données à afficher sur l'inset map.
-            Peut être un GeoDataFrame unique ou une liste de dicts
-            ``[{"data": gdf, "kwargs": {...}}, ...]``.
+            Épaisseur des lignes de connexion (mode "detail", ``data`` non fourni).
         inset_size : str, optional
             Taille prédéfinie ("xs", "sm", "md", "lg", "xl") — mode map-utils.
             Appelle ``InsetMap.set_size()`` pour ajuster les défauts globaux.
@@ -1414,12 +1513,55 @@ class Map:
         Retourne:
         ---------
         Map: Instance de la carte pour chaînage.
+
+        Example:
+        --------
+        >>> m.add_inset_map(
+        ...     data=bound.get_country("Côte d'Ivoire"), mode="geometry",
+        ...     on=bound.get_continent("Africa"),
+        ... )
         """
         if projection is None:
             projection = ccrs.PlateCarree()
 
-        if bounds is None:
+        if mode not in ("bbox", "geometry"):
+            raise ValueError(f"mode doit être 'bbox' ou 'geometry', reçu: {mode!r}")
+        if to not in ("ax", "fig"):
+            raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
+
+        # Résolution de `data` en (bbox, géométrie éventuelle) -------------
+        data_gdf = None
+        if data is None:
             bounds = self.bounds  # [minx, miny, maxx, maxy]
+        elif isinstance(data, (gpd.GeoDataFrame, gpd.GeoSeries)):
+            data_gdf = data
+            bounds = list(data.total_bounds)
+            if mode == "geometry" and len(data_gdf) == 0:
+                raise ValueError("`data` est un GeoDataFrame vide.")
+        elif isinstance(data, (list, tuple)) and len(data) == 4:
+            bounds = list(data)
+            if mode == "geometry":
+                warnings.warn(
+                    "mode='geometry' nécessite un GeoDataFrame pour `data` ; "
+                    "une bbox a été fournie, utilisation de mode='bbox'.",
+                    RuntimeWarning, stacklevel=2,
+                )
+                mode = "bbox"
+        else:
+            raise TypeError(
+                "`data` doit être un GeoDataFrame/GeoSeries ou une bbox "
+                f"[minx, miny, maxx, maxy], reçu: {type(data).__name__}"
+            )
+
+        on_bounds = None
+        if zoom_to_on:
+            if on is None:
+                warnings.warn(
+                    "zoom_to_on=True nécessite `on`, ignoré (on=None).",
+                    RuntimeWarning, stacklevel=2,
+                )
+            else:
+                on_bounds = self._resolve_on_bounds(on)
 
         if style == "auto":
             style = "map-utils" if HAS_MAP_UTILS else "classic"
@@ -1438,13 +1580,10 @@ class Map:
                 if inset_size is not None:
                     MmuInsetMap.set_size(inset_size)
 
-                # Préparer to_plot
+                # Préparer to_plot (couche(s) de contexte)
                 to_plot = None
-                if data is not None:
-                    if isinstance(data, list):
-                        to_plot = data
-                    else:
-                        to_plot = [{"data": data}]
+                if on is not None:
+                    to_plot = on if isinstance(on, list) else [{"data": on}]
 
                 im_kwargs = dict(location=location, zorder=zorder)
                 if size is not None:
@@ -1460,14 +1599,29 @@ class Map:
                 im_kwargs.update(kwargs)
 
                 # Créer l'axe inset via map-utils
+                # to="fig" : InsetMap ancre toujours via `pax.inset_axes()`,
+                # donc relatif à l'axe passé — on lui passe un axe fantôme
+                # couvrant toute la figure (au lieu de self.ax) pour que
+                # location/coords deviennent relatifs à la figure entière.
                 im = MmuInsetMap(**im_kwargs)
-                inset_ax = im.create(self.ax, projection=projection)
+                if to == "fig":
+                    host_ax = self.fig.add_axes([0, 0, 1, 1], frameon=False)
+                    host_ax.set_axis_off()
+                else:
+                    host_ax = self.ax
+                inset_ax = im.create(host_ax, projection=projection)
 
-                # Vue globale ou restreinte
-                if global_view:
+                # Vue globale, restreinte, ou zoomée sur `on`
+                if on_bounds is not None:
+                    minx, miny, maxx, maxy = on_bounds
+                    inset_ax.set_extent((minx, maxx, miny, maxy), crs=ccrs.PlateCarree())
+                elif global_view:
                     inset_ax.set_global()
                 elif extent is not None:
                     inset_ax.set_extent(extent, crs=ccrs.PlateCarree())
+
+                if circular:
+                    self._make_inset_circular(inset_ax)
 
                 # Ajouter les features cartographiques
                 inset_ax.add_feature(cfeature.LAND, facecolor=land_color)
@@ -1479,6 +1633,13 @@ class Map:
                 if show_coastlines:
                     inset_ax.coastlines(resolution="110m", linewidth=0.4)
 
+                # Cadre autour de l'étendue de `on` (zoom_to_on=True)
+                if on_bounds is not None:
+                    self._draw_inset_data_indicator(
+                        inset_ax, on_bounds, None, "bbox",
+                        "none", box_color, 1.0, box_linewidth, zorder,
+                    )
+
                 # Appliquer le style visuel
                 for spine in inset_ax.spines.values():
                     spine.set_edgecolor(edgecolor)
@@ -1486,58 +1647,66 @@ class Map:
                 inset_ax.patch.set_alpha(alpha)
                 inset_ax.patch.set_facecolor(facecolor)
 
-                # Indicateur d'étendue ou de détail
-                pcrs = self.projection
-                bcrs = projection
-                _indicator_ok = False
-                if indicator == "extent":
-                    try:
-                        mmu_indicate_extent(
-                            pax=inset_ax, bax=self.ax,
-                            pcrs=bcrs, bcrs=pcrs,
-                            facecolor=indicator_facecolor,
-                            linecolor=indicator_linecolor,
-                            alpha=indicator_alpha,
-                            linewidth=indicator_linewidth,
-                            straighten=indicator_straighten,
-                            pad=indicator_pad,
-                            zorder=zorder,
-                        )
-                        _indicator_ok = True
-                    except (ValueError, TypeError) as e:
-                        self._log(f"⚠️  Indicateur extent échoué : {e}")
-                        _indicator_ok = False
-                elif indicator == "detail":
-                    try:
-                        mmu_indicate_detail(
-                            pax=self.ax, iax=inset_ax,
-                            pcrs=pcrs, icrs=bcrs,
-                            facecolor=indicator_facecolor,
-                            linecolor=indicator_linecolor,
-                            alpha=indicator_alpha,
-                            linewidth=indicator_linewidth,
-                            straighten=indicator_straighten,
-                            pad=indicator_pad,
-                            connector_color=connector_color,
-                            connector_width=connector_width,
-                            zorder=zorder,
-                        )
-                        _indicator_ok = True
-                    except (ValueError, TypeError) as e:
-                        self._log(f"⚠️  Indicateur detail échoué : {e}")
-                        _indicator_ok = False
-
-                # Fallback : dessiner manuellement le rectangle d'étendue
-                if not _indicator_ok and indicator in ("extent", "detail"):
-                    minx, miny, maxx, maxy = bounds
-                    rect = mpatches.Rectangle(
-                        (minx, miny), maxx - minx, maxy - miny,
-                        linewidth=box_linewidth, edgecolor=box_color,
-                        facecolor=indicator_facecolor,
-                        alpha=indicator_alpha,
-                        transform=ccrs.PlateCarree(), zorder=10,
+                if data is not None:
+                    # `data` fourni explicitement : on dessine exactement ce
+                    # qui a été demandé (bbox ou géométrie), plutôt que de
+                    # déduire l'indicateur de l'étendue actuelle de l'axe
+                    # principal (comportement hérité ci-dessous).
+                    self._draw_inset_data_indicator(
+                        inset_ax, bounds, data_gdf, mode,
+                        indicator_facecolor, indicator_linecolor,
+                        indicator_alpha, indicator_linewidth, zorder,
                     )
-                    inset_ax.add_patch(rect)
+                else:
+                    # Indicateur d'étendue ou de détail (comportement hérité,
+                    # basé sur l'étendue actuelle de self.ax)
+                    pcrs = self.projection
+                    bcrs = projection
+                    _indicator_ok = False
+                    if indicator == "extent":
+                        try:
+                            mmu_indicate_extent(
+                                pax=inset_ax, bax=self.ax,
+                                pcrs=bcrs, bcrs=pcrs,
+                                facecolor=indicator_facecolor,
+                                linecolor=indicator_linecolor,
+                                alpha=indicator_alpha,
+                                linewidth=indicator_linewidth,
+                                straighten=indicator_straighten,
+                                pad=indicator_pad,
+                                zorder=zorder,
+                            )
+                            _indicator_ok = True
+                        except (ValueError, TypeError) as e:
+                            self._log(f"⚠️  Indicateur extent échoué : {e}")
+                            _indicator_ok = False
+                    elif indicator == "detail":
+                        try:
+                            mmu_indicate_detail(
+                                pax=self.ax, iax=inset_ax,
+                                pcrs=pcrs, icrs=bcrs,
+                                facecolor=indicator_facecolor,
+                                linecolor=indicator_linecolor,
+                                alpha=indicator_alpha,
+                                linewidth=indicator_linewidth,
+                                straighten=indicator_straighten,
+                                pad=indicator_pad,
+                                connector_color=connector_color,
+                                connector_width=connector_width,
+                                zorder=zorder,
+                            )
+                            _indicator_ok = True
+                        except (ValueError, TypeError) as e:
+                            self._log(f"⚠️  Indicateur detail échoué : {e}")
+                            _indicator_ok = False
+
+                    # Fallback : dessiner manuellement le rectangle d'étendue
+                    if not _indicator_ok and indicator in ("extent", "detail"):
+                        self._draw_inset_data_indicator(
+                            inset_ax, bounds, None, "bbox",
+                            indicator_facecolor, box_color,
+                            indicator_alpha, box_linewidth, 10,
+                        )
 
                 self._inset_ax = inset_ax
                 self._inset_map_obj = im
@@ -1545,15 +1714,36 @@ class Map:
                 return self
 
         # ------- mode classique (fallback) -------
+        # to="ax" : `position` est une fraction (0-1) de l'axe principal,
+        # convertie ici en coordonnées figure absolues (fig.add_axes() ne
+        # comprend que des coordonnées figure). to="fig" (comportement
+        # historique) : `position` est déjà en coordonnées figure.
+        if to == "ax":
+            ax_bbox = self.ax.get_position()
+            px, py, pw, ph = position
+            resolved_position = (
+                ax_bbox.x0 + px * ax_bbox.width,
+                ax_bbox.y0 + py * ax_bbox.height,
+                pw * ax_bbox.width,
+                ph * ax_bbox.height,
+            )
+        else:
+            resolved_position = position
         inset_ax = self.fig.add_axes(
-            position, projection=projection, frameon=True
+            resolved_position, projection=projection, frameon=True
         )
-        if global_view:
+        if on_bounds is not None:
+            minx, miny, maxx, maxy = on_bounds
+            inset_ax.set_extent((minx, maxx, miny, maxy), crs=ccrs.PlateCarree())
+        elif global_view:
             inset_ax.set_global()
         elif extent is not None:
             inset_ax.set_extent(extent, crs=ccrs.PlateCarree())
         else:
             inset_ax.set_global()
+
+        if circular:
+            self._make_inset_circular(inset_ax)
 
         inset_ax.add_feature(cfeature.LAND, facecolor=land_color)
         inset_ax.add_feature(cfeature.OCEAN, facecolor=ocean_color)
@@ -1562,14 +1752,19 @@ class Map:
         if show_coastlines:
             inset_ax.coastlines(resolution="110m", linewidth=0.4)
 
-        # Rectangle de la zone étudiée
-        minx, miny, maxx, maxy = bounds[0], bounds[1], bounds[2], bounds[3]
-        rect = mpatches.Rectangle(
-            (minx, miny), maxx - minx, maxy - miny,
-            linewidth=box_linewidth, edgecolor=box_color,
-            facecolor="none", transform=ccrs.PlateCarree(), zorder=10,
+        # Zone étudiée (rectangle bbox ou géométrie réelle selon `mode`)
+        self._draw_inset_data_indicator(
+            inset_ax, bounds, data_gdf, mode,
+            "none" if data is None else indicator_facecolor, box_color,
+            indicator_alpha, box_linewidth, 10,
         )
-        inset_ax.add_patch(rect)
+
+        # Cadre autour de l'étendue de `on` (zoom_to_on=True)
+        if on_bounds is not None:
+            self._draw_inset_data_indicator(
+                inset_ax, on_bounds, None, "bbox",
+                "none", box_color, 1.0, box_linewidth, 10,
+            )
 
         # Bordure de la mini-carte
         for spine in inset_ax.spines.values():
@@ -1579,9 +1774,9 @@ class Map:
         inset_ax.patch.set_alpha(alpha)
         inset_ax.patch.set_facecolor(facecolor)
 
-        # Dessiner les données optionnelles sur l'inset classique
-        if data is not None:
-            items = data if isinstance(data, list) else [{"data": data}]
+        # Dessiner les couches de contexte optionnelles sur l'inset classique
+        if on is not None:
+            items = on if isinstance(on, list) else [{"data": on}]
             for item in items:
                 gdf = item["data"] if isinstance(item, dict) else item
                 plot_kw = item.get("kwargs", {}) if isinstance(item, dict) else {}
@@ -3136,7 +3331,11 @@ class Map:
         position : tuple (x, y)
             Position en coordonnées axes fraction 0-1 (mode svg).
         zoom : float
-            Facteur de zoom (mode svg).
+            Facteur de zoom (mode svg), appliqué après une normalisation
+            automatique qui ramène chaque icône à une taille de référence
+            commune — les 17 SVG embarquées ont des résolutions natives
+            très différentes (de 5x16 à 580x580 px), sans quoi `zoom=1`
+            produirait des tailles incohérentes d'une flèche à l'autre.
         color : str
             Couleur de la flèche.
         style : str
@@ -3272,7 +3471,16 @@ class Map:
         # Mode SVG (ancien comportement)
         arrow_path = self.get_north_arrows()[arrow - 1]
         img = read_image(arrow_path, color)
-        imagebox = OffsetImage(img, zoom=zoom)
+        # Les SVG embarquées ont des dimensions natives très hétérogènes une
+        # fois rastérisées (de 5x16 à 580x580 px selon l'icône) : sans
+        # normalisation, un même zoom=1 produit des flèches de tailles
+        # radicalement différentes selon l'icône choisie. On ramène le plus
+        # grand côté de chaque image à une taille de référence commune avant
+        # d'appliquer le zoom demandé par l'utilisateur.
+        _REFERENCE_ARROW_PX = 120
+        largest_side = max(img.size)
+        auto_scale = _REFERENCE_ARROW_PX / largest_side if largest_side else 1
+        imagebox = OffsetImage(img, zoom=zoom * auto_scale)
         xycoords = "figure fraction" if to == "fig" else "axes fraction"
         ab = AnnotationBbox(
             imagebox, position, frameon=False, xycoords=xycoords
@@ -4763,7 +4971,7 @@ class Map:
                       style="auto", box_color="white", box_alpha=0.8,
                       scale_loc="bottom", label_loc="top",
                       add_as_layer=True,
-                      bar_style="boxes", major_div=4, minor_div=2,
+                      bar_style="boxes", major_div=None, minor_div=None,
                       size=None, bar=None, labels=None, text=None,
                       **kwargs):
         """
@@ -4814,10 +5022,12 @@ class Map:
             Si True, rendu différé lors de show()/save().
         bar_style : str
             Style de barre pour map-utils : "boxes" ou "ticks".
-        major_div : int
-            Nombre de divisions majeures (mode map-utils).
-        minor_div : int
-            Nombre de divisions mineures (mode map-utils).
+        major_div : int, optional
+            Nombre de divisions majeures (mode map-utils). Auto-calculé si
+            None (comportement par défaut de matplotlib-map-utils).
+        minor_div : int, optional
+            Nombre de divisions mineures (mode map-utils). Auto-calculé si
+            None (comportement par défaut de matplotlib-map-utils).
         size : str, optional
             Taille prédéfinie ("sm", "md", "lg", "xl") — mode map-utils.
         bar : dict, optional
@@ -4889,7 +5099,7 @@ class Map:
                         pad=0.05, alpha=1, label=None,
                         style="auto", box_color="white", box_alpha=0.8,
                         scale_loc="bottom", label_loc="top",
-                        bar_style="boxes", major_div=4, minor_div=2,
+                        bar_style="boxes", major_div=None, minor_div=None,
                         size=None, bar=None, labels=None, text=None,
                         kwargs=None):
         """Trace la barre d'échelle sur self.ax."""
@@ -4926,11 +5136,25 @@ class Map:
                     MmuScaleBar.set_size(size)
 
                 loc = location if isinstance(location, str) else "lower left"
-                bar_dict = dict(
-                    projection=self.projection,
-                    major_div=major_div,
-                    minor_div=minor_div,
+                # matplotlib-map-utils résout les unités d'axe via
+                # pyproj.CRS(projection).axis_info[...].unit_name ; les CRS
+                # géographiques de cartopy (PlateCarree, Geodetic) ne portent
+                # pas les métadonnées pyproj reconnaît comme "degree" (elles
+                # ressortent "unknown"), ce qui fait planter le calcul auto
+                # de la barre. On substitue EPSG:4326, équivalent en degrés.
+                bar_projection = (
+                    "EPSG:4326"
+                    if isinstance(self.projection, (ccrs.PlateCarree, ccrs.Geodetic))
+                    else self.projection
                 )
+                bar_dict = dict(projection=bar_projection)
+                # major_div nécessite major_mult pour être valide côté
+                # matplotlib-map-utils ; sans major_mult (non exposé ici),
+                # le passer seul fait échouer le calcul auto de la barre.
+                if major_div is not None:
+                    bar_dict["major_div"] = major_div
+                if minor_div is not None:
+                    bar_dict["minor_div"] = minor_div
                 if length is not None:
                     bar_dict["length"] = length
                     bar_dict["unit"] = units
@@ -5128,12 +5352,12 @@ class Map:
                 if column_to_plot:
                     style["column"] = column_to_plot
                 gdf.plot(ax=self.ax, transform=ccrs.PlateCarree(), **style)
+                layer["rendered"] = True
             elif layer_type == "raster":
                 rstyle = layer["style"].copy()
                 data_transform = rstyle.pop("transform", ccrs.PlateCarree())
                 self.ax.imshow(layer["data"], transform=data_transform, **rstyle)
-
-            layer["rendered"] = True
+                layer["rendered"] = True
 
         if title is not None:
             self.ax.set_title(title)
@@ -5164,7 +5388,7 @@ class Map:
                 layer["rendered"] = True
 
         if tight_layout:
-            plt.tight_layout()
+            self.fig.tight_layout()
 
     def _resolve_bbox_inches(self, bbox_inches):
         """
@@ -5215,7 +5439,7 @@ class Map:
             Titre de la carte
         """
         self._render(legend=legend, auto_extent=auto_extent, tight_layout=tight_layout, smart_centering=smart_centering, title=title, **kwargs)
-        plt.savefig(filename, dpi=dpi, bbox_inches=self._resolve_bbox_inches(bbox_inches))
+        self.fig.savefig(filename, dpi=dpi, bbox_inches=self._resolve_bbox_inches(bbox_inches))
         self._log(f"Carte sauvegardée: {filename}")
 
         return self

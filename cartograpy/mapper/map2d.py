@@ -77,6 +77,7 @@ class Map2D(Map):
                 style.pop("ax", None)
                 style.pop("transform", None)
                 gdf.plot(ax=self.ax, **style)
+                layer["rendered"] = True
 
         if title is not None:
             self.ax.set_title(title)
@@ -86,7 +87,7 @@ class Map2D(Map):
             self.custom_legend(**legend_params, **kwargs)
 
         if tight_layout:
-            plt.tight_layout()
+            self.fig.tight_layout()
 
     # -- couche vectorielle (sans transform cartopy) -----------------------
 

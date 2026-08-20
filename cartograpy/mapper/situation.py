@@ -312,7 +312,7 @@ class SituationMap:
     def add_scale_bar(self, length=None, location="lower left", units="km",
                       color="black", fontsize=11, linewidth=2,
                       style="auto", bar_style="boxes",
-                      major_div=4, minor_div=2,
+                      major_div=None, minor_div=None,
                       box_color="white", box_alpha=0.8,
                       scale_loc="bottom", label_loc="top", **kwargs):
         """
@@ -333,11 +333,20 @@ class SituationMap:
             if resolved in ("ticks", "boxes"):
                 bar_style = resolved
             loc = location if isinstance(location, str) else "lower left"
-            bar_dict = dict(
-                projection=self.projection,
-                major_div=major_div,
-                minor_div=minor_div,
+            # Voir Map._draw_scale_bar pour le détail de ces deux points :
+            # major_div nécessite major_mult (non exposé ici) pour être
+            # valide côté matplotlib-map-utils, et PlateCarree/Geodetic ne
+            # sont pas résolues en unités "degree" par pyproj.
+            bar_projection = (
+                "EPSG:4326"
+                if isinstance(self.projection, (ccrs.PlateCarree, ccrs.Geodetic))
+                else self.projection
             )
+            bar_dict = dict(projection=bar_projection)
+            if major_div is not None:
+                bar_dict["major_div"] = major_div
+            if minor_div is not None:
+                bar_dict["minor_div"] = minor_div
             if length is not None:
                 bar_dict["length"] = length
                 bar_dict["unit"] = units
@@ -449,18 +458,18 @@ class SituationMap:
     # -- sortie ------------------------------------------------------------
 
     def show(self):
-        plt.tight_layout()
+        self.fig.tight_layout()
         plt.show()
         return self
 
     def save(self, filename, dpi=300, bbox_inches="tight"):
-        plt.tight_layout()
-        plt.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
+        self.fig.tight_layout()
+        self.fig.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
         self._log(f"Carte sauvegardée : {filename}")
         return self
 
     def to_bytes(self, format="png", dpi=300) -> BytesIO:
-        plt.tight_layout()
+        self.fig.tight_layout()
         buf = BytesIO()
         self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches="tight")
         buf.seek(0)

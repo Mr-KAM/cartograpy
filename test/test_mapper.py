@@ -75,6 +75,277 @@ class TestMapClass:
         import matplotlib.pyplot as plt
         plt.close(m.fig)
 
+    def test_add_scale_bar_renders_on_show(self, sample_gdf):
+        # Régression : le layer scalebar était marqué "rendered" par le
+        # rendu générique des layers point/line/polygon avant d'être
+        # effectivement dessiné, donc jamais affiché.
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_scale_bar(style="manual")
+        n_artists_before = len(m.ax.texts) + len(m.ax.lines) + len(m.ax.patches)
+        m._render(legend=False)
+        n_artists_after = len(m.ax.texts) + len(m.ax.lines) + len(m.ax.patches)
+        assert n_artists_after > n_artists_before
+        assert m.layers[-1]["type"] == "scalebar"
+        assert m.layers[-1]["rendered"] is True
+        import matplotlib.pyplot as plt
+        plt.close(m.fig)
+
+    def test_save_uses_own_figure_not_current_pyplot_figure(self, sample_gdf, tmp_path):
+        # Régression : save() appelait plt.savefig() (figure "courante" de
+        # pyplot) au lieu de self.fig.savefig() — si une autre Map est créée
+        # entre-temps (cas courant en notebook), save() sauvegardait la
+        # mauvaise figure alors que show() affichait la bonne.
+        import matplotlib.pyplot as plt
+        from PIL import Image
+
+        m1 = Map(figsize=(4, 3), dpi=100, verbose=False)
+        m1.add_polygons(sample_gdf)
+
+        # Une deuxième Map devient la figure "courante" de pyplot.
+        m2 = Map(figsize=(9, 7), dpi=100, verbose=False)
+        m2.add_polygons(sample_gdf)
+        assert plt.gcf() is m2.fig
+
+        out = tmp_path / "m1.png"
+        m1.save(str(out), dpi=100, bbox_inches=None, auto_extent=False)
+
+        with Image.open(out) as img:
+            width, height = img.size
+
+        assert (width, height) == (400, 300)
+        plt.close(m1.fig)
+        plt.close(m2.fig)
+
+    def test_add_scale_bar_default_map_utils_style_does_not_crash(self, sample_gdf):
+        # Régression : major_div était forcé à 4 par défaut et transmis à
+        # matplotlib-map-utils sans major_mult correspondant, ce qui fait
+        # échouer son calcul auto de longueur de barre (_config_bar_length
+        # retourne None -> "TypeError: cannot unpack non-iterable NoneType
+        # object" au moment du dessin/affichage de la figure).
+        from cartograpy.mapper._optional_deps import HAS_MAP_UTILS
+        if not HAS_MAP_UTILS:
+            pytest.skip("matplotlib-map-utils non installé")
+
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_scale_bar()  # défauts : style="auto" -> matplotlib-map-utils
+        m._render(legend=False)
+        # Force le rendu complet (comme l'affichage IPython d'une figure).
+        m.fig.canvas.draw()
+        assert m._scale_bar_artist is not None
+        plt.close(m.fig)
+
+    def test_north_arrow_svg_size_normalized_across_icons(self):
+        # Régression : les 17 SVG embarquées se rastérisent à des tailles
+        # natives très différentes (de 5x16 à 580x580 px selon l'icône).
+        # Sans normalisation, un même zoom=1 rendait certaines flèches
+        # énormes (icônes 580x580) et d'autres minuscules. La taille
+        # affichée (pixels natifs x zoom effectif) doit maintenant être la
+        # même quelle que soit l'icône choisie.
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        arrow_files = m.get_north_arrows()
+        assert len(arrow_files) >= 2
+
+        displayed_sizes = []
+        for i in range(1, len(arrow_files) + 1):
+            m.add_north_arrow(arrow=i, style="svg")
+            img = m._north_arrow_artist.offsetbox.get_data()
+            zoom = m._north_arrow_artist.offsetbox.get_zoom()
+            displayed_sizes.append(max(img.shape[:2]) * zoom)
+
+        assert max(displayed_sizes) - min(displayed_sizes) < 1.0
+        plt.close(m.fig)
+
+    def test_add_inset_data_bbox(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_inset(data=[-8, 4, -2, 10])
+        assert m._inset_ax is not None
+        assert len(m._inset_ax.patches) == 1
+        plt.close(m.fig)
+
+    def test_add_inset_data_geodataframe_mode_geometry_vs_bbox(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m_bbox = Map(verbose=False)
+        m_bbox.add_polygons(sample_gdf)
+        m_bbox.add_inset(data=sample_gdf, mode="bbox")
+        assert len(m_bbox._inset_ax.patches) == 1
+
+        m_geom = Map(verbose=False)
+        m_geom.add_polygons(sample_gdf)
+        m_geom.add_inset(data=sample_gdf, mode="geometry")
+        # add_geometries() n'ajoute pas de Patch mais une Collection
+        assert len(m_geom._inset_ax.patches) == 0
+
+        plt.close(m_bbox.fig)
+        plt.close(m_geom.fig)
+
+    def test_add_inset_on_draws_context_layer(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        n_before = len(m.ax.collections)
+        m.add_inset(data=sample_gdf, on=sample_gdf, style="classic")
+        # `on` est dessiné via GeoDataFrame.plot() sur l'axe de l'inset,
+        # pas sur l'axe principal - on vérifie juste que l'inset a du contenu.
+        assert m._inset_ax is not None
+        plt.close(m.fig)
+
+    def test_add_inset_rejects_bad_data_type(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        with pytest.raises(TypeError):
+            m.add_inset(data="not-a-bbox-or-gdf")
+        plt.close(m.fig)
+
+    def test_add_inset_geometry_mode_with_bbox_data_warns_and_falls_back(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        with pytest.warns(RuntimeWarning):
+            m.add_inset(data=[-8, 4, -2, 10], mode="geometry")
+        assert len(m._inset_ax.patches) == 1
+        plt.close(m.fig)
+
+    def test_add_inset_default_unchanged(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_inset()  # data=None -> comportement hérité (self.bounds)
+        assert m._inset_ax is not None
+        plt.close(m.fig)
+
+    def test_add_inset_zoom_to_on(self):
+        # Régression : set_extent() attend (minx, maxx, miny, maxy), alors
+        # que total_bounds/bounds internes sont en (minx, miny, maxx, maxy)
+        # - un mélange des deux ordres donne une étendue transposée/fausse.
+        import matplotlib.pyplot as plt
+
+        africa = gpd.GeoDataFrame(
+            {"name": ["africa"]},
+            geometry=[Polygon([(-20, -35), (50, -35), (50, 37), (-20, 37)])],
+            crs="EPSG:4326",
+        )
+        civ = gpd.GeoDataFrame(
+            {"name": ["civ"]},
+            geometry=[Polygon([(-8, 4), (-2, 4), (-2, 10), (-8, 10)])],
+            crs="EPSG:4326",
+        )
+
+        m = Map(verbose=False)
+        m.add_polygons(civ)
+        m.add_inset(on=africa, zoom_to_on=True)
+        x0, x1, y0, y1 = m._inset_ax.get_extent()
+        assert (x0, x1, y0, y1) == pytest.approx((-20.0, 50.0, -35.0, 37.0))
+        # Le cadre autour de l'étendue de `on` doit être dessiné.
+        assert len(m._inset_ax.patches) >= 1
+        plt.close(m.fig)
+
+    def test_add_inset_zoom_to_on_without_on_warns(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        with pytest.warns(RuntimeWarning):
+            m.add_inset(zoom_to_on=True)
+        assert m._inset_ax is not None
+        plt.close(m.fig)
+
+    def test_add_inset_to_ax_vs_fig_differ(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m_ax = Map(verbose=False)
+        m_ax.add_polygons(sample_gdf)
+        m_ax.add_inset(location="lower right", to="ax")
+        pos_ax = m_ax._inset_ax.get_position()
+
+        m_fig = Map(verbose=False)
+        m_fig.add_polygons(sample_gdf)
+        m_fig.add_inset(location="lower right", to="fig")
+        pos_fig = m_fig._inset_ax.get_position()
+
+        assert (pos_ax.x0, pos_ax.y0) != (pos_fig.x0, pos_fig.y0)
+        plt.close(m_ax.fig)
+        plt.close(m_fig.fig)
+
+    def test_add_inset_to_classic_style(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m_ax = Map(verbose=False)
+        m_ax.add_polygons(sample_gdf)
+        m_ax.add_inset(style="classic", position=(0.65, 0.02, 0.33, 0.33), to="ax")
+        pos_ax = m_ax._inset_ax.get_position()
+
+        m_fig = Map(verbose=False)
+        m_fig.add_polygons(sample_gdf)
+        m_fig.add_inset(style="classic", position=(0.65, 0.02, 0.33, 0.33), to="fig")
+        pos_fig = m_fig._inset_ax.get_position()
+
+        assert (pos_ax.x0, pos_ax.y0) != (pos_fig.x0, pos_fig.y0)
+        plt.close(m_ax.fig)
+        plt.close(m_fig.fig)
+
+    def test_add_inset_rejects_bad_to(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        with pytest.raises(ValueError):
+            m.add_inset(to="bad")
+        plt.close(m.fig)
+
+    def test_add_inset_circular_true_produces_round_boundary(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_inset(circular=True)
+        # `set_boundary` remplace le patch rectangulaire (4-5 sommets) par
+        # un polygone à haute résolution (100 points) approximant un cercle.
+        assert m._inset_ax.patch.get_path().vertices.shape[0] > 50
+        plt.close(m.fig)
+
+    def test_add_inset_circular_false_keeps_rectangular_boundary(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_inset(circular=False)
+        assert m._inset_ax.patch.get_path().vertices.shape[0] <= 10
+        plt.close(m.fig)
+
+    def test_add_inset_circular_is_actually_round_not_elliptical(self, sample_gdf):
+        # Régression : l'ajustement d'aspect d'une GeoAxes est paresseux
+        # (n'est correct qu'après un draw()) — sans forcer un draw avant de
+        # mesurer get_position(), le cercle calculé serait légèrement
+        # elliptique une fois rendu pour de vrai.
+        import matplotlib.pyplot as plt
+
+        m = Map(figsize=(12, 6), verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_inset(circular=True, size=(3, 2))
+        m.fig.canvas.draw()
+
+        patch = m._inset_ax.patch
+        verts = patch.get_path().transformed(patch.get_transform()).vertices
+        w = verts[:, 0].max() - verts[:, 0].min()
+        h = verts[:, 1].max() - verts[:, 1].min()
+        assert w / h == pytest.approx(1.0, abs=0.01)
+        plt.close(m.fig)
+
 
 class TestMap2D:
     """Tests de la classe Map2D."""
@@ -118,6 +389,20 @@ class TestSituationMap:
         import matplotlib.pyplot as plt
         plt.close(sm.fig)
 
+    def test_add_scale_bar_default_does_not_crash(self):
+        # Même régression que Map._draw_scale_bar : major_div forcé sans
+        # major_mult, et PlateCarree non résolue en "degree" par pyproj.
+        from cartograpy.mapper._optional_deps import HAS_MAP_UTILS
+        if not HAS_MAP_UTILS:
+            pytest.skip("matplotlib-map-utils non installé")
+
+        import matplotlib.pyplot as plt
+
+        sm = SituationMap(verbose=False)
+        sm.add_scale_bar()
+        sm.fig.canvas.draw()
+        plt.close(sm.fig)
+
 
 class TestPlotChoropleth:
     """Tests de la fonction plot_choropleth."""
@@ -151,3 +436,24 @@ class TestReadImage:
         result = read_image(str(path))
         assert result is not None
         assert result.size == (10, 10)
+
+    def test_read_svg_preserves_transparency(self):
+        # Régression : le fond des SVG rastérisées (flèches du Nord, logos)
+        # était blanc opaque au lieu de transparent, ce qui masquait la
+        # carte sous un carré blanc plein une fois l'icône ajoutée.
+        import numpy as np
+        from cartograpy.mapper.map import Map
+
+        m = Map(verbose=False)
+        arrow_path = m.get_north_arrows()[0]
+        img = read_image(arrow_path, color="black")
+        assert img.mode == "RGBA"
+
+        arr = np.asarray(img)
+        alpha = arr[:, :, 3]
+        # Le fond (hors glyphe) doit être transparent, pas seulement le
+        # glyphe opaque : les deux catégories doivent être présentes.
+        assert (alpha == 0).any()
+        assert (alpha == 255).any()
+        import matplotlib.pyplot as plt
+        plt.close(m.fig)

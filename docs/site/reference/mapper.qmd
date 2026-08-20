@@ -260,17 +260,55 @@ set_north_arrow(**kwargs)
 ```
 Ajoute une flèche du Nord sur la carte / modifie celle déjà créée. `to="ax"` (défaut) l'ancre à l'axe carte, `to="fig"` à la figure entière (ex. position dans la marge, hors de l'axe).
 
-```python
-add_scale_bar(length=None, location='lower left', linewidth=2, units='km', color='black', fontsize=11, pad=0.1, alpha=1, label=None, style='auto', box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', add_as_layer=True, bar_style='boxes', major_div=4, minor_div=2, size=None, bar=None, labels=None, text=None, **kwargs)
-set_scale_bar(**kwargs)
-```
-Ajoute une barre d'échelle sur la carte / modifie celle déjà créée.
+::: {.callout-note}
+Mode `style="svg"` : les 17 icônes embarquées ont des résolutions natives très
+différentes une fois rastérisées (de 5x16 à 580x580 px selon l'icône). Elles
+sont automatiquement ramenées à une taille de référence commune avant
+d'appliquer `zoom` — `zoom=1` donne donc une taille cohérente quelle que soit
+l'icône choisie, plutôt que de dépendre de la résolution brute du fichier SVG.
+Le fond des icônes est rendu transparent (pas de carré blanc opaque derrière
+la flèche).
+:::
 
 ```python
-add_inset_map(bounds=None, position=(0.65, 0.02, 0.33, 0.33), facecolor='white', edgecolor='black', linewidth=1.5, alpha=0.9, box_color='red', box_linewidth=2, land_color='lightgray', ocean_color='lightblue', projection=None, style='auto', location='lower right', size=None, pad=None, coords=None, transform=None, global_view=True, extent=None, indicator='extent', indicator_facecolor='red', indicator_linecolor='red', indicator_alpha=0.5, indicator_linewidth=1, indicator_straighten=True, indicator_pad=0.05, connector_color='black', connector_width=1, data=None, inset_size=None, zorder=99, show_borders=True, show_coastlines=True, **kwargs)
+add_scale_bar(length=None, location='lower left', linewidth=2, units='km', color='black', fontsize=11, pad=0.1, alpha=1, label=None, style='auto', box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', add_as_layer=True, bar_style='boxes', major_div=None, minor_div=None, size=None, bar=None, labels=None, text=None, **kwargs)
+set_scale_bar(**kwargs)
+```
+Ajoute une barre d'échelle sur la carte / modifie celle déjà créée. `major_div`/`minor_div` : `None` par défaut (calcul automatique par `matplotlib-map-utils`) — ne les fixer qu'ensemble avec un `major_mult` (via le dict `bar=...`), sinon le calcul de la barre échoue.
+
+```python
+add_inset_map(data=None, on=None, mode='bbox', zoom_to_on=False, position=(0.65, 0.02, 0.33, 0.33), to='ax', circular=False, facecolor='white', edgecolor='black', linewidth=1.5, alpha=0.9, box_color='red', box_linewidth=2, land_color='lightgray', ocean_color='lightblue', projection=None, style='auto', location='lower right', size=None, pad=None, coords=None, transform=None, global_view=True, extent=None, indicator='extent', indicator_facecolor='red', indicator_linecolor='red', indicator_alpha=0.5, indicator_linewidth=1, indicator_straighten=True, indicator_pad=0.05, connector_color='black', connector_width=1, inset_size=None, zorder=99, show_borders=True, show_coastlines=True, **kwargs)
 set_inset(**kwargs)
 ```
 Ajoute une mini-carte de situation (inset map) montrant la zone étudiée dans son contexte / modifie celle déjà créée.
+
+- **`data`** (`list[float] | GeoDataFrame`, optionnel) : zone à surligner sur l'inset — bbox `[minx, miny, maxx, maxy]` ou GeoDataFrame. `None` (défaut) : reprend `self.bounds`, indicateur calculé depuis l'étendue actuelle de la carte principale (comportement hérité).
+- **`on`** (`GeoDataFrame | list`, optionnel) : couche(s) de contexte dessinée(s) sur l'inset (ex. tous les pays d'un continent, pour situer `data` dedans). GeoDataFrame unique ou liste de `{"data": gdf, "kwargs": {...}}`.
+- **`mode`** (`str`, défaut `"bbox"`) : comment dessiner `data` quand c'est un GeoDataFrame — `"bbox"` (rectangle de son étendue) ou `"geometry"` (sa géométrie réelle). Sans effet si `data` est déjà une bbox.
+- **`zoom_to_on`** (`bool`, défaut `False`) : si `True`, zoome l'inset sur l'étendue totale de `on` (au lieu de la vue globale) et l'encadre d'un rectangle (`box_color`/`box_linewidth`). Sans effet si `on` n'est pas fourni (avertissement). Prioritaire sur `global_view`/`extent`.
+- **`to`** (`str`, défaut `"ax"`) : ancre du positionnement — `"ax"` : `position` (mode classique) ou `location`/`coords` (mode map-utils) relatifs à l'axe de la carte principale. `"fig"` : relatifs à la figure entière. Même convention que `add_north_arrow(..., to=...)`.
+- **`circular`** (`bool`, défaut `False`) : si `True`, découpe l'inset en cercle plutôt qu'en rectangle (`Axes.set_boundary`), avec correction d'aspect pour un vrai cercle même si l'inset n'est pas physiquement carré (`size` ou `position` non carrés).
+
+```python
+m.add_inset_map(on=bound.get_continent("Africa"), zoom_to_on=True, circular=True)
+```
+
+```python
+from cartograpy.data import Bound
+
+bound = Bound()
+m.add_inset_map(
+    data=bound.get_country("Côte d'Ivoire"), mode="geometry",
+    on=bound.get_continent("Africa"), zoom_to_on=True,
+)
+```
+
+::: {.callout-warning}
+`data` valide un GeoDataFrame/GeoSeries ou une bbox de 4 éléments — tout autre
+type (ex. passer par erreur un GeoDataFrame là où l'ancienne API attendait une
+bbox `bounds=`) lève un `TypeError` explicite plutôt que d'être ignoré
+silencieusement ou de planter plus loin avec une erreur confuse.
+:::
 :::
 
 ::: {.callout-note collapse="true"}
@@ -461,9 +499,9 @@ add_north_arrow(style='auto', location='upper right', **kwargs)
 Ajoute une flèche du Nord à la carte principale.
 
 ```python
-add_scale_bar(length=None, location='lower left', units='km', color='black', fontsize=11, linewidth=2, style='auto', bar_style='boxes', major_div=4, minor_div=2, box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', **kwargs)
+add_scale_bar(length=None, location='lower left', units='km', color='black', fontsize=11, linewidth=2, style='auto', bar_style='boxes', major_div=None, minor_div=None, box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', **kwargs)
 ```
-Ajoute une barre d'échelle à la carte principale.
+Ajoute une barre d'échelle à la carte principale. Mêmes défauts `major_div`/`minor_div=None` que `Map.add_scale_bar()`.
 
 ```python
 add_gridlines(**kwargs)

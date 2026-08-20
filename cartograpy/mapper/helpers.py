@@ -4,6 +4,7 @@ import matplotlib.patheffects as patheffects
 import os
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
+from reportlab.lib import colors as _rl_colors
 from io import BytesIO
 from PIL import Image
 from cartograpy.styling import load_cmap, get_available_palettes
@@ -38,7 +39,14 @@ def read_image(path, color=None):
         try:
             drawing = svg2rlg(tmp_svg_path)
             buf = BytesIO()
-            renderPM.drawToFile(drawing, buf, fmt="PNG")
+            # Fond transparent (au lieu du blanc opaque par défaut) : sans
+            # bg=transparent + backendFmt="RGBA", le rendu produit un carré
+            # blanc plein derrière l'icône (flèche du Nord, logo...) une
+            # fois posée sur la carte.
+            renderPM.drawToFile(
+                drawing, buf, fmt="PNG",
+                bg=_rl_colors.transparent, backendFmt="RGBA",
+            )
             buf.seek(0)
             img = Image.open(buf)
         finally:
