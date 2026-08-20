@@ -12,6 +12,7 @@ website:
     center: "cartograpy — Package Python pour créer des cartes facilement"
   navbar:
     background: primary
+    logo: assets/logo-small.png
     search: true
     left:
       - text: Accueil
@@ -75,7 +76,7 @@ website:
 format:
   html:
     theme:
-      light: cosmo
-      dark: darkly
+      light: [cosmo, style.scss]
+      dark: [darkly, style.scss]
     toc: true
     number-sections: false

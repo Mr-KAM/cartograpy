@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ff38ca5759cea8d2b4e40dc1c167d4da.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-b82a8e178c632e86601320a4062c3b24.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-ff38ca5759cea8d2b4e40dc1c167d4da.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -76,6 +76,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Recherche"
   }
 }</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 </head>
@@ -249,6 +252,10 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <img src="./assets/logo-small.png" alt="" class="navbar-logo light-content">
+    <img src="./assets/logo-small.png" alt="" class="navbar-logo dark-content">
+    </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">cartograpy</span>
     </a>
@@ -544,6 +551,10 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#ce-que-vous-pouvez-faire" id="toc-ce-que-vous-pouvez-faire" class="nav-link active" data-scroll-target="#ce-que-vous-pouvez-faire">Ce que vous pouvez faire</a></li>
+  <li><a href="#utilisation" id="toc-utilisation" class="nav-link" data-scroll-target="#utilisation">Utilisation</a>
+  <ul class="collapse">
+  <li><a href="#obtention-de-données-géographiques" id="toc-obtention-de-données-géographiques" class="nav-link" data-scroll-target="#obtention-de-données-géographiques">Obtention de données géographiques</a></li>
+  </ul></li>
   <li><a href="#parcours-recommandé" id="toc-parcours-recommandé" class="nav-link" data-scroll-target="#parcours-recommandé">Parcours recommandé</a></li>
   <li><a href="#architecture-en-un-coup-dœil" id="toc-architecture-en-un-coup-dœil" class="nav-link" data-scroll-target="#architecture-en-un-coup-dœil">Architecture en un coup d’œil</a></li>
   </ul>
@@ -578,6 +589,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>cartograpy est une boîte à outils Python orientée cartographie, traitement géospatial et production de cartes statiques ou web — de la récupération des données jusqu’au rendu final, sans limite géographique : n’importe quel pays, continent ou zone d’étude, partout dans le monde.</p>
+<p><img src=".\assets/create_python_maps.py.png" class="img-fluid"></p>
 <section id="ce-que-vous-pouvez-faire" class="level2">
 <h2 class="anchored" data-anchor-id="ce-que-vous-pouvez-faire">Ce que vous pouvez faire</h2>
 <section id="charger-et-récupérer-des-données" class="level4">
@@ -595,6 +607,80 @@ ul.task-list li input[type="checkbox"] {
 <section id="organiser-un-projet" class="level4">
 <h4 class="anchored" data-anchor-id="organiser-un-projet"><a href="./reference/project.html">Organiser un projet</a></h4>
 <p><code>Project</code> structure vos données et sorties, garde une trace du CRS, valide l’intégrité des jeux de données (shapefiles + sidecars).</p>
+</section>
+</section>
+<section id="utilisation" class="level2">
+<h2 class="anchored" data-anchor-id="utilisation">Utilisation</h2>
+<p>cartograpy est composé de 5 modules principaux :</p>
+<ul>
+<li><strong>data</strong> : pour l’obtention des données</li>
+<li><strong>processing</strong> : pour le traitement des données</li>
+<li><strong>mapper</strong> : pour la visualisation des données sur une carte</li>
+<li><strong>styling</strong> : pour la mise en forme de la carte</li>
+<li><strong>project</strong> : pour organiser un projet cartographique (dossiers, CRS, manifeste)</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TD
+    A[cartograpy] --&gt; B[data&lt;br&gt;&lt;i&gt;Obtention des données&lt;/i&gt;]
+    A --&gt; C[processing&lt;br&gt;&lt;i&gt;Traitement des données&lt;/i&gt;]
+    A --&gt; D[mapper&lt;br&gt;&lt;i&gt;Visualisation sur carte&lt;/i&gt;]
+    A --&gt; E[styling&lt;br&gt;&lt;i&gt;Mise en forme de la carte&lt;/i&gt;]
+    A --&gt; F[project&lt;br&gt;&lt;i&gt;Organisation de projet&lt;/i&gt;]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<section id="obtention-de-données-géographiques" class="level3">
+<h3 class="anchored" data-anchor-id="obtention-de-données-géographiques">Obtention de données géographiques</h3>
+<p>Pour télécharger simplement des données dans cartograpy, vous devez utiliser le module <code>data</code>. Il existe présentement six (6) types de données que vous pouvez télécharger avec cartograpy :</p>
+<ul>
+<li>les limites des continents et le découpage administratif des pays (<code>GeoBoundaries</code>, <code>Bound</code>)</li>
+<li>des données par géocodage (<code>Geocoder</code>)</li>
+<li>des données libres d’OSM : écoles, bâtiments, routes, hôpitaux… (<code>OSM</code>)</li>
+<li>des données hydrographiques (<code>Hydro</code>)</li>
+<li>des données de la World Bank, différents indicateurs de différentes sources (<code>WorldBank</code>)</li>
+<li>un modèle numérique de terrain SRTM à 30 m de résolution (<code>DEM</code>)</li>
+</ul>
+<p>Ces ressources permettent un gain considérable de temps et facilitent la création de vos cartes.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph TD
+    A[cartograpy.data&lt;br&gt;&lt;i&gt;Téléchargement de données&lt;/i&gt;]
+    A --&gt; B[GeoBoundaries&lt;br&gt;&lt;i&gt;Limites des continents&lt;br&gt;Découpage administratif&lt;/i&gt;]
+    A --&gt; C[Geocoder&lt;br&gt;&lt;i&gt;Données par géocodage&lt;/i&gt;]
+    A --&gt; D[OSM&lt;br&gt;&lt;i&gt;Données OSM : écoles,&lt;br&gt;bâtiments, routes, hôpitaux&lt;/i&gt;]
+    A --&gt; E[Hydro&lt;br&gt;&lt;i&gt;Données hydrographiques&lt;/i&gt;]
+    A --&gt; F[WorldBank&lt;br&gt;&lt;i&gt;Indicateurs de la Banque&lt;br&gt;Mondiale et autres sources&lt;/i&gt;]
+    A --&gt; G[DEM&lt;br&gt;&lt;i&gt;SRTM à 30 m de résolution&lt;/i&gt;]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un septième connecteur, <code>Gee</code> (Google Earth Engine), est disponible via <code>cartograpy.data.Gee</code> mais n’est pas réexporté à la racine du package — il nécessite le paquet <code>earthengine-api</code> et une authentification interactive (<code>ee.Authenticate()</code>).</p>
+</div>
+</div>
+<p>Toutes les données sont formatées pour être retournées sous forme de <code>GeoDataFrame</code> ou de <code>DataFrame</code>, afin d’en faciliter la manipulation.</p>
 </section>
 </section>
 <section id="parcours-recommandé" class="level2">

@@ -8,6 +8,8 @@ et production de cartes statiques ou web — de la récupération des données j
 rendu final, sans limite géographique : n'importe quel pays, continent ou zone
 d'étude, partout dans le monde.
 
+![](/assets/create_python_maps.py.png)
+
 ## Ce que vous pouvez faire
 
 #### [Charger et récupérer des données](/reference/data.qmd)
@@ -30,6 +32,55 @@ Cartes statiques (`Map`, `Map2D`), mini-cartes de situation
 
 `Project` structure vos données et sorties, garde une trace du CRS, valide
 l'intégrité des jeux de données (shapefiles + sidecars).
+
+## Utilisation
+
+cartograpy est composé de 5 modules principaux :
+
+- **data** : pour l'obtention des données
+- **processing** : pour le traitement des données
+- **mapper** : pour la visualisation des données sur une carte
+- **styling** : pour la mise en forme de la carte
+- **project** : pour organiser un projet cartographique (dossiers, CRS, manifeste)
+
+```{mermaid}
+graph TD
+    A[cartograpy] --> B[data<br><i>Obtention des données</i>]
+    A --> C[processing<br><i>Traitement des données</i>]
+    A --> D[mapper<br><i>Visualisation sur carte</i>]
+    A --> E[styling<br><i>Mise en forme de la carte</i>]
+    A --> F[project<br><i>Organisation de projet</i>]
+```
+
+### Obtention de données géographiques
+
+Pour télécharger simplement des données dans cartograpy, vous devez utiliser le module `data`. Il existe présentement six (6) types de données que vous pouvez télécharger avec cartograpy :
+
+- les limites des continents et le découpage administratif des pays (`GeoBoundaries`, `Bound`)
+- des données par géocodage (`Geocoder`)
+- des données libres d'OSM : écoles, bâtiments, routes, hôpitaux... (`OSM`)
+- des données hydrographiques (`Hydro`)
+- des données de la World Bank, différents indicateurs de différentes sources (`WorldBank`)
+- un modèle numérique de terrain SRTM à 30 m de résolution (`DEM`)
+
+Ces ressources permettent un gain considérable de temps et facilitent la création de vos cartes.
+
+```{mermaid}
+graph TD
+    A[cartograpy.data<br><i>Téléchargement de données</i>]
+    A --> B[GeoBoundaries<br><i>Limites des continents<br>Découpage administratif</i>]
+    A --> C[Geocoder<br><i>Données par géocodage</i>]
+    A --> D[OSM<br><i>Données OSM : écoles,<br>bâtiments, routes, hôpitaux</i>]
+    A --> E[Hydro<br><i>Données hydrographiques</i>]
+    A --> F[WorldBank<br><i>Indicateurs de la Banque<br>Mondiale et autres sources</i>]
+    A --> G[DEM<br><i>SRTM à 30 m de résolution</i>]
+```
+
+::: {.callout-note}
+Un septième connecteur, `Gee` (Google Earth Engine), est disponible via `cartograpy.data.Gee` mais n'est pas réexporté à la racine du package — il nécessite le paquet `earthengine-api` et une authentification interactive (`ee.Authenticate()`).
+:::
+
+Toutes les données sont formatées pour être retournées sous forme de `GeoDataFrame` ou de `DataFrame`, afin d'en faciliter la manipulation.
 
 ## Parcours recommandé
 

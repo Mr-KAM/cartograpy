@@ -15,9 +15,44 @@ en local.
 
 ## Installation rapide
 
+cartograpy est publié sur PyPI — il n'existe pas de paquet conda-forge, donc `conda`/`uv`
+servent ici à créer l'environnement, `pip` reste l'outil qui installe cartograpy lui-même.
+
+::: {.panel-tabset}
+## pip
+
 ```bash
 pip install cartograpy
 ```
+
+## Anaconda / conda
+
+```bash
+conda create -n cartograpy python=3.11
+conda activate cartograpy
+pip install cartograpy
+```
+
+::: {.callout-tip}
+Sur Windows, si `pip install cartograpy` échoue à cause de GDAL/GEOS/PROJ, installez
+d'abord ces dépendances binaires via le canal `conda-forge` (voir la section
+[Dépendances par plateforme](#dépendances-par-plateforme) ci-dessous) avant de relancer
+`pip install cartograpy` dans l'environnement conda.
+:::
+
+## uv
+
+```bash
+uv venv --python 3.11
+uv pip install cartograpy
+```
+
+Dans un projet géré par `uv` (avec `pyproject.toml`) :
+
+```bash
+uv add cartograpy
+```
+:::
 
 ## Installation pour le développement
 

@@ -3,23 +3,489 @@ title: "Reference data"
 description: "Référence des fonctions et classes du module data."
 ---
 
-## Fonctions
+`cartograpy.data` regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale et Google Earth Engine. La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément — chaque section ci-dessous précise les erreurs et pièges réels du code source.
 
-- `load`
-- `describe`
-- `save`
-- `list_geofiles`
+## `io` — chargement, sauvegarde et inspection de fichiers
 
-## Classes
+Quatre fonctions autonomes définies dans `cartograpy/data/io.py`. Ce sont elles que `Project.add_data`, `Project.load_data` et `Project.save_output` utilisent en interne.
 
-- `GeoBoundaries`
-- `Bound`
-- `Geocoder`
-- `OSM`
-- `Hydro`
-- `DEM` (et `DEMDownloadError`)
-- `WorldBank`
-- `Gee` — accessible via `cartograpy.data.Gee`, non réexporté à la racine du package
+### `load(filepath, layer=None)`
+
+```python
+load(filepath, layer=None)
+```
+
+- **`filepath`** (`str` ou `Path`, requis) : chemin du fichier à charger. L'extension détermine le type de retour.
+- **`layer`** (`str`, optionnel) : pour les fichiers multi-couches (GPX), nom de la couche à charger (`"tracks"` par défaut).
+- **Retour** : `geopandas.GeoDataFrame` pour les vecteurs (`shp`, `geojson`, `gpkg`, `kml`, `gpx`, `csv`, `parquet`) ; `rasterio.io.DatasetReader` pour les rasters (`tif`, `tiff`).
+- **Erreurs** : `ValueError` si l'extension n'est pas supportée ; `RuntimeError` en cas d'échec de lecture (KML, GPX, raster).
+
+```python
+from cartograpy.data import load
+
+regions = load("data/regions_civ.geojson")
+mnt = load("data/elevation.tif")
+```
+
+::: {.callout-warning}
+Pour un raster, `load()` renvoie un `DatasetReader` **ouvert** : pensez à le fermer (`.close()`) ou à utiliser un context manager (`with load(...) as src:`), sinon le fichier reste verrouillé.
+:::
+
+### `describe(filepath)`
+
+```python
+describe(filepath) -> dict
+```
+
+- **`filepath`** (`str` ou `Path`, requis) : fichier à décrire (vecteur, raster ou tabulaire).
+- **Retour** (`dict`) : `type` (`"vector"`, `"raster"` ou `"tabular"`), `format`, `nb_layers`, `layers` (détail par couche/bande/table). Le résumé est aussi affiché via `logging`.
+- **Erreurs** : `ValueError` si le format n'est pas reconnu.
+
+```python
+from cartograpy.data import describe
+
+info = describe("data/gadm41_CIV.gpkg")
+print(info["nb_layers"], info["layers"][0]["geometry_types"])
+```
+
+### `save(data, file_extension, filename="output", timestamp=False, raster_meta=None)`
+
+```python
+save(data, file_extension, filename="output", timestamp=False, raster_meta=None) -> str
+```
+
+- **`data`** (requis) : `GeoDataFrame`/`DataFrame` pour du vectoriel/tabulaire, `DatasetReader` rasterio ou `numpy.ndarray` pour du raster.
+- **`file_extension`** (`str`, requis) : `geojson`, `shp`, `gpkg`, `kml` (vecteur), `csv`, `parquet`, `geoparquet`, `xlsx`, `feather` (tabulaire), ou `tif`/`tiff` (raster).
+- **`filename`** (`str`, défaut `"output"`) : nom de base, sans extension.
+- **`timestamp`** (`bool`, défaut `False`) : ajoute un horodatage `_AAAAMMJJ_HHMMSS` au nom.
+- **`raster_meta`** (`dict`, optionnel) : requis si `data` est un `ndarray` — doit contenir `crs`, `transform`, `width`, `height`, `dtype`, `count`.
+- **Retour** (`str`) : chemin absolu du fichier écrit. Le dossier parent est créé automatiquement si besoin.
+- **Erreurs** : `ValueError` si le format est inconnu, si `filename` contient `".."` (anti path-traversal), ou si `raster_meta` est manquant/incomplet ; `TypeError` si le type de `data` ne correspond pas au format demandé (ex. `DataFrame` sans géométrie vers un format vectoriel, `ndarray`/`DatasetReader` vers autre chose que `tif`/`tiff`).
+
+```python
+from cartograpy.data import save
+
+save(regions, "geojson", filename="regions_civ")
+save(regions, "gpkg", filename="regions_civ", timestamp=True)
+```
+
+::: {.callout-note}
+Un `ndarray` 2D (une seule bande) est automatiquement promu en 3D avant écriture — inutile de le remodeler à la main.
+:::
+
+### `list_geofiles(folder_path)`
+
+```python
+list_geofiles(folder_path) -> list[str]
+```
+
+- **`folder_path`** (`str`, requis) : dossier à parcourir (récursivement).
+- **Retour** (`list[str]`) : chemins de tous les fichiers dont l'extension est géospatiale (`.shp`, `.geojson`, `.gpkg`, `.kml`, `.csv`, `.parquet`, `.gpx`, `.tif`, `.tiff`).
+
+```python
+from cartograpy.data import list_geofiles
+
+fichiers = list_geofiles("data/")
+```
+
+## `GeoBoundaries` et `Bound`
+
+`GeoBoundaries` est le client bas niveau pour l'API [geoboundaries.org](https://www.geoboundaries.org) (frontières administratives ADM0–ADM5) et pour les continents Natural Earth. `Bound` en hérite et ajoute les méthodes utilitaires de haut niveau (`get_country`, `get_admin`, `get_neighbors`, `get_area`…) — c'est la classe à utiliser en pratique.
+
+```python
+from cartograpy.data import Bound
+
+b = Bound(cache_expire_seconds=604800)
+```
+
+- **`cache_expire_seconds`** (`int`, défaut `604800` = 1 semaine) : durée de mise en cache des requêtes HTTP (`requests_cache.CachedSession`).
+
+::: {.callout-note}
+Les réponses de l'API sont mises en cache automatiquement. Utilisez `b.clear_cache()`, `b.set_cache_expire_time(seconds)` ou `b.disable_cache()` pour contrôler ce comportement pendant le développement.
+:::
+
+### `get_country(name)`
+
+```python
+get_country(name: str | list[str]) -> gpd.GeoDataFrame
+```
+
+- **`name`** (`str` ou `list[str]`, requis) : nom de pays, code ISO2/ISO3, ou liste. Exemples : `"Côte d'Ivoire"`, `"CIV"`, `["SEN", "Mali"]`.
+- **Retour** (`GeoDataFrame`) : frontières ADM0 (nationales) simplifiées — une ligne par pays si liste.
+- **Erreurs** : `KeyError` si un pays n'est pas trouvé.
+
+```python
+from cartograpy.data import Bound
+
+b = Bound()
+civ = b.get_country("CIV")
+pays = b.get_country(["Côte d'Ivoire", "SEN", "Mali"])
+```
+
+::: {.callout-warning}
+La résolution du nom passe par `get_iso3()`, qui recherche aussi par sous-chaîne dans les noms de pays multilingues. Si le mot-clé correspond à plusieurs pays avec des codes ISO3 **différents**, `get_iso3()` renvoie une **liste de tuples** `(nom, iso3)` au lieu d'une chaîne unique, ce qui fait échouer la résolution en `KeyError` côté `get_country`/`get_admin`. Préférez un code ISO2/ISO3 non ambigu pour les recherches par nom partiel.
+:::
+
+### `get_admin(territories, adm, simplified=True)`
+
+```python
+get_admin(territories: str | list[str], adm: str | int, simplified: bool = True) -> gpd.GeoDataFrame
+```
+
+- **`territories`** : territoire(s), mêmes valeurs acceptées que `get_country`.
+- **`adm`** (`str` ou `int`, requis) : niveau administratif — `"ADM0"` à `"ADM5"`, un entier `0`–`5`, ou `-1` pour le plus petit niveau disponible pour le pays.
+- **`simplified`** (`bool`, défaut `True`) : géométrie simplifiée (plus légère) ou complète.
+- **Retour** (`GeoDataFrame`) : géométries du niveau demandé (délègue à `adm()` de `GeoBoundaries`).
+- **Erreurs** : `KeyError` si le territoire n'est pas trouvé, ou si le niveau ADM demandé n'existe pas pour ce pays.
+
+```python
+regions_civ = b.get_admin("CIV", adm=1)     # régions
+communes_sen = b.get_admin("SEN", adm=-1)   # plus petit niveau disponible
+```
+
+::: {.callout-tip}
+`b.adminLevels()` retourne une table Markdown de correspondance ADM0–ADM5 → nom usuel (pays, région, département, commune…) en cas de doute sur le niveau à demander.
+:::
+
+::: {.callout-note collapse="true"}
+## Autres méthodes de `GeoBoundaries` et `Bound`
+
+| Méthode | Description |
+|---|---|
+| `is_valid_adm(iso3, adm)` | `bool` — le niveau ADM existe-t-il pour ce pays. |
+| `get_iso3(territory)` | Code ISO3 ; `list[tuple]` si plusieurs pays correspondent (voir avertissement ci-dessus), `None` si aucun. |
+| `list_countries()` | Liste de tous les codes ISO3 reconnus. |
+| `adminLevels()` | Table Markdown des niveaux ADM0–ADM5. |
+| `metadata(territory, adm)` | `dict` des métadonnées brutes renvoyées par l'API pour un territoire/niveau. |
+| `adm(territories, adm, simplified=True)` | Méthode sous-jacente de `get_admin` (identique). |
+| `continents(continents=None)` | Géométries de continents (Natural Earth). `None` = tous. Lève `ValueError` si un continent est introuvable, `TypeError` si le type de `continents` est invalide. |
+| `list_continents_names()` | Alias FR/EN de continents reconnus (`dict`). |
+| `get_continent(name)` | Alias `Bound` de `continents()`. |
+| `get_world(level="continent")` | Monde entier par `"continent"` ou `"country"` (Natural Earth). Lève `ValueError` si `level` n'est ni l'un ni l'autre. |
+| `get_neighbors(territory)` | Pays voisins (frontière commune), territoire(s) cible exclu(s). |
+| `get_countries_by_continent(continent, adm=0, simplified=True)` | Tous les pays d'un continent via GeoBoundaries. Lève `ValueError` si le continent est introuvable. |
+| `get_bbox(territory)` | Tuple `(west, south, east, north)` en WGS-84. |
+| `get_centroid(territory)` | `GeoDataFrame` des centroïdes (géométrie `Point`). |
+| `clip(gdf, territory, adm=0)` | Découpe un `GeoDataFrame` selon les frontières d'un territoire. |
+| `contains(territory, point)` | `bool` — le point `(lat, lon)` est-il dans le territoire. |
+| `search_country(keyword)` | Recherche floue : liste de `(nom, iso3)` contenant le mot-clé. |
+| `get_area(territory, unit="km2")` | Superficie (`"km2"`, `"m2"` ou `"ha"`). `float` pour un seul territoire, `GeoDataFrame` avec colonne `area` pour une liste. Lève `ValueError` si l'unité est invalide. |
+:::
+
+::: {.callout-note}
+`continents()`, `get_world("country")` et `get_neighbors()` téléchargent le jeu Natural Earth 110m (`ne_110m_admin_0_countries`) depuis un bucket S3 public au premier appel, puis le mettent en cache en mémoire pour la durée de vie de l'instance. Une connexion internet est nécessaire au premier appel de chacune de ces méthodes.
+:::
+
+## `Geocoder`
+
+Géocode et géocode inversement des lieux via geopy/Nominatim (OpenStreetMap), avec quelques méthodes qui s'appuient sur `osmnx` pour des contours polygonaux plutôt que des points.
+
+```python
+from cartograpy.data import Geocoder
+
+geocoder = Geocoder(user_agent="mon_app_cartograpy", delay=1.0)
+```
+
+- **`user_agent`** (`str`, défaut `"mon_geocoder_geopandas_cartograpy"`) : identifiant d'application requis par la politique d'usage de Nominatim.
+- **`delay`** (`float`, défaut `1.0`) : délai en secondes entre deux requêtes.
+
+::: {.callout-warning}
+Le service Nominatim public est limité en débit — gardez `delay >= 1` seconde et fournissez un `user_agent` explicite et unique à votre application, sous peine de blocage temporaire par le service. Les méthodes `bbox()`, `boundary()` et `within()` nécessitent en plus le paquet optionnel `osmnx` (`ImportError` explicite s'il est absent).
+:::
+
+### `geocode(places)`
+
+```python
+geocode(places: str | list[str]) -> tuple[gpd.GeoDataFrame, list[str]]
+```
+
+- **`places`** (`str` ou `list[str]`, requis) : localité(s) à géocoder.
+- **Retour** : tuple `(GeoDataFrame, list)` — `GeoDataFrame` des résultats trouvés (colonnes `query`, `address`, `latitude`, `longitude`, `altitude`, `raw`, `geometry` en `EPSG:4326`), et liste des localités non trouvées.
+- **Erreurs** : n'en lève pas — timeout, service indisponible ou lieu introuvable sont capturés et renvoient la localité dans la liste des non-trouvées (le détail est journalisé via `logging`).
+
+```python
+gdf, introuvables = geocoder.geocode(["Abidjan", "Dakar", "Bamako"])
+print(introuvables)  # ex. ["Bamak"] si mal orthographié
+```
+
+::: {.callout-note collapse="true"}
+## Autres méthodes de `Geocoder`
+
+| Méthode | Description |
+|---|---|
+| `reverse_geocode(coordinates)` | Géocodage inverse : `(lat, lon)` ou liste → adresses. Retourne `(GeoDataFrame, non_trouvés)`. |
+| `search(place, limit=5, country_codes=None, viewbox=None, bounded=False)` | Plusieurs candidats pour un lieu (désambiguïsation). |
+| `geocode_in_country(places, country_codes)` | Géocodage contraint à un ou plusieurs pays (codes ISO alpha-2, ex. `"ci"`). |
+| `geocode_in_bbox(places, bbox, bounded=True)` | Géocodage contraint à une bounding box `(west, south, east, north)`. |
+| `boundary(place)` | Contour polygonal d'un lieu via `osmnx`. Requiert `osmnx`. |
+| `geocode_dataframe(df, column)` | Enrichit un `DataFrame` pandas avec lat/lon/geometry depuis une colonne de noms de lieux. Lève `ValueError` si la colonne n'existe pas. |
+| `components(place)` | Composants d'adresse (pays, région, ville, code postal…) sous forme de `dict`. Dict vide si le lieu est introuvable. |
+| `distance(place_a, place_b, unit="km")` | Distance géodésique entre deux lieux géocodés (`"km"`, `"m"`, `"mi"`). Lève `ValueError` si un lieu est introuvable ou l'unité invalide. |
+| `within(place, point)` | `bool` — le point `(lat, lon)` est-il dans le polygone du lieu. Requiert `osmnx`. |
+| `bbox(place)` | Bounding box `(west, south, east, north)` du lieu via `osmnx`. Requiert `osmnx`. |
+:::
+
+## `OSM`
+
+Récupère des entités OpenStreetMap (bâtiments, routes, POI…) via `osmnx`, filtrées par tags.
+
+```python
+from cartograpy.data import OSM
+
+osm = OSM()
+```
+
+::: {.callout-warning}
+`OSM()` nécessite le paquet optionnel `osmnx` — son absence lève `ImportError` dès l'instanciation (`pip install osmnx`).
+:::
+
+### `get_data(place, tags, data_type="all")`
+
+```python
+get_data(place: str | tuple | list | gpd.GeoDataFrame, tags: dict, data_type: str = "all") -> gpd.GeoDataFrame
+```
+
+- **`place`** (`str`, `tuple`/`list` de 4 valeurs, ou `GeoDataFrame`, requis) : nom de zone (ex. `"Abidjan, Côte d'Ivoire"`), bbox `(minx, miny, maxx, maxy)`, ou emprise polygonale (l'union des géométries est utilisée).
+- **`tags`** (`dict`, requis) : tags OSM à filtrer, ex. `{"amenity": "school"}`.
+- **`data_type`** (`str`, défaut `"all"`) : `"points"`, `"polygons"`, `"lines"` ou `"all"`.
+- **Retour** (`GeoDataFrame`) : entités OSM correspondantes ; `GeoDataFrame()` vide si rien n'est trouvé **ou** en cas d'erreur lors de la requête.
+- **Erreurs** : `ValueError` si `place` n'est aucun des trois types acceptés, ou si `data_type` n'est pas une des quatre valeurs listées.
+
+```python
+ecoles = osm.get_data("Abidjan, Côte d'Ivoire", {"amenity": "school"}, data_type="points")
+routes = osm.get_data((-4.05, 5.25, -3.95, 5.35), {"highway": True}, data_type="lines")
+```
+
+::: {.callout-note}
+Les erreurs réseau ou de requête Overpass ne sont **pas** propagées : elles sont interceptées, journalisées via `logging`, et la méthode renvoie un `GeoDataFrame` vide plutôt que de lever une exception. Vérifiez `.empty` sur le résultat plutôt que d'entourer l'appel d'un `try/except`.
+:::
+
+::: {.callout-note collapse="true"}
+## Aide au choix des tags
+
+| Méthode | Description |
+|---|---|
+| `list_tags(category=None, show_examples=False)` | Tags OSM courants par catégorie (`building`, `highway`, `amenity`, `water`, `landuse`, `natural`, `leisure`, `shop`, `tourism`, `transport`, `barrier`). Lève `ValueError` si `category` est inconnue. |
+| `search_tags(keyword)` | Recherche un mot-clé dans les catégories/tags/valeurs, retourne un `dict` filtré. |
+| `get_common_tag()` | Combinaisons de tags prêtes à l'emploi (`"restaurants"`, `"schools"`, `"rivers"`, `"parking"`…). |
+:::
+
+## `Hydro`
+
+Télécharge le réseau hydrographique [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers) par grande région continentale.
+
+```python
+from cartograpy.data import Hydro
+
+hydro = Hydro(output_dir="data/hydro")
+```
+
+- **`output_dir`** (`str`, défaut `"data/hydro"`) : dossier de destination par défaut (peut être redéfini à l'appel de `download`).
+
+### `download(region, output_dir="hydrorivers_data")`
+
+```python
+download(region: str, output_dir: str = "hydrorivers_data") -> gpd.GeoDataFrame
+```
+
+- **`region`** (`str`, requis) : code de région HydroRIVERS parmi `"af"`, `"as"`, `"au"`, `"eu"`, `"na"`, `"sa"`.
+- **`output_dir`** (`str`, défaut `"hydrorivers_data"`) : dossier local d'extraction du zip téléchargé.
+- **Retour** (`GeoDataFrame`) : réseau hydrographique HydroRIVERS de la région.
+- **Erreurs** : `ValueError` si `region` n'est pas un des codes valides ; `RuntimeError` si le téléchargement échoue ; `FileNotFoundError` si le shapefile attendu est absent après extraction.
+
+```python
+hydro = Hydro()
+rivieres_afrique = hydro.download("af")
+```
+
+::: {.callout-note}
+Si `output_dir/region` existe déjà, le téléchargement est sauté — pas de re-téléchargement automatique même si les données ont changé côté source. Supprimez le dossier pour forcer une mise à jour.
+:::
+
+`hydro.describe_variables()` retourne une description texte (table Markdown) des colonnes du jeu de données (`HYRIV_ID`, `LENGTH_KM`, `DIS_AV_CMS`, `ORD_STRA`…), pratique pour l'affichage dans un notebook.
+
+## `DEM`
+
+Télécharge un modèle numérique de terrain SRTM (~30 m) sans clé API via les tuiles Skadi hébergées sur AWS, puis mosaïque et découpe selon une emprise.
+
+```python
+from cartograpy.data import DEM
+
+dem = DEM(work_dir="_dem_tiles", timeout=180, keep_intermediate=False)
+```
+
+- **`work_dir`** (`str`/`Path`, défaut `"_dem_tiles"`) : dossier de travail pour les tuiles intermédiaires.
+- **`timeout`** (`int`, défaut `180`) : délai HTTP maximal par requête, en secondes.
+- **`keep_intermediate`** (`bool`, défaut `False`) : conserve les tuiles `.hgt.gz`/`.tif` après assemblage si `True`.
+- **`output_dir`** (optionnel) : alias déprécié de `work_dir` — émet un `UserWarning` si les deux sont fournis (et `output_dir` l'emporte).
+
+::: {.callout-note}
+`DEMDownloadError` (sous-classe de `RuntimeError`, importable via `from cartograpy.data import DEMDownloadError`) est l'erreur dédiée du module : échec de téléchargement après 3 tentatives, tuile corrompue (taille décompressée inattendue après `gzip`), ou fenêtre de découpe invalide pour la bbox demandée.
+:::
+
+### `download(bbox, out_tif, verbose=True, max_workers=4)`
+
+```python
+download(bbox: tuple | gpd.GeoDataFrame, out_tif: str | Path, verbose: bool = True, max_workers: int = 4) -> Path
+```
+
+- **`bbox`** (`tuple` `(west, south, east, north)` ou `GeoDataFrame`, requis) : emprise en EPSG:4326.
+- **`out_tif`** (`str`/`Path`, requis) : chemin du GeoTIFF final (mosaïque + découpe).
+- **`verbose`** (`bool`, défaut `True`) : affiche une barre de progression `tqdm`.
+- **`max_workers`** (`int`, défaut `4`) : threads de téléchargement parallèle (`1` = séquentiel).
+- **Retour** (`Path`) : chemin du GeoTIFF SRTM final.
+- **Erreurs** : `ValueError` si la bbox est hors limites (longitude hors `[-180, 180]`, latitude hors `[-90, 90]`, ou `south >= north`) ; `DEMDownloadError` en cas d'échec de téléchargement, de tuile corrompue, ou de fenêtre de découpe invalide.
+
+```python
+dem = DEM(work_dir="_dem_tiles")
+chemin = dem.download(bbox=(-8.6, 4.3, -2.5, 10.8), out_tif="srtm_civ.tif")  # emprise CIV
+```
+
+::: {.callout-tip}
+Une bbox traversant l'antiméridien (`west > east`) est automatiquement découpée en deux et fusionnée — inutile de la gérer manuellement. Les tuiles océaniques manquantes côté serveur (HTTP 403/404) sont remplacées par des tuiles nodata plutôt que de faire échouer le téléchargement.
+:::
+
+::: {.callout-note collapse="true"}
+## Analyse et visualisation (méthodes statiques)
+
+| Méthode | Description |
+|---|---|
+| `DEM.info(tif_path)` | Métadonnées et statistiques (min/max/moyenne/écart-type) d'un GeoTIFF MNT. |
+| `DEM.hillshade(tif_path, out_path=None, azimuth=315.0, altitude=45.0)` | Ombrage (hillshade), `ndarray` 0–255. Sauvegarde en GeoTIFF si `out_path` fourni. |
+| `DEM.slope(tif_path, out_path=None, degrees=True)` | Pente, en degrés (ou radians si `degrees=False`). |
+| `DEM.aspect(tif_path, out_path=None)` | Orientation en degrés (0–360, 0 = nord, sens horaire). |
+| `DEM.plot(tif_path, cmap="terrain", title=None, figsize=(10, 8), hillshade_alpha=0.35, colorbar=True)` | Aperçu rapide (altitude + ombrage superposé). Nécessite `matplotlib`. |
+| `DEM.reproject(tif_path, out_path, dst_crs="EPSG:3857", resampling="bilinear")` | Reprojette le GeoTIFF. Lève `ValueError` si `resampling` n'est pas `"nearest"`, `"bilinear"`, `"cubic"` ou `"lanczos"`. |
+:::
+
+Toutes ces méthodes sont statiques : `DEM.info(...)`, `DEM.hillshade(...)`, etc. fonctionnent sans instancier `DEM`.
+
+## `WorldBank`
+
+Interroge l'API Banque mondiale (indicateurs de développement) via le paquet `wbdata`.
+
+```python
+from cartograpy.data import WorldBank
+
+wb = WorldBank()
+```
+
+::: {.callout-warning}
+`WorldBank()` nécessite le paquet optionnel `wbdata` — son absence lève `ImportError` dès l'instanciation (`pip install wbdata`).
+:::
+
+### `get_data(indicators, country='all', **kwargs)`
+
+```python
+get_data(indicators, country="all", **kwargs) -> pandas.DataFrame
+```
+
+- **`indicators`** (requis) : indicateur(s) Banque mondiale, tel qu'attendu par `wbdata.get_dataframe` — typiquement un `dict` `{code: alias}`, ex. `{"SP.POP.TOTL": "population"}`.
+- **`country`** (`str` ou liste, défaut `"all"`) : code(s) pays ISO2/ISO3, ou `"all"`.
+- **`**kwargs`** : transmis tels quels à `wbdata.get_dataframe` (ex. `date`, `freq`, `source`).
+- **Retour** (`DataFrame`) : indexé par pays/date, une colonne par indicateur.
+
+```python
+wb = WorldBank()
+pop = wb.get_data({"SP.POP.TOTL": "population"}, country=["CIV", "SEN", "MLI"])
+```
+
+::: {.callout-note collapse="true"}
+## Autres méthodes de `WorldBank`
+
+| Méthode | Description |
+|---|---|
+| `get_sources()` | Liste des sources de données disponibles sur l'API Banque mondiale. |
+| `get_indicators(source=1, query=None)` | Indicateurs disponibles pour une source (`1` = World Development Indicators par défaut). |
+| `get_countries(query)` | Recherche de pays reconnus par l'API Banque mondiale. |
+:::
+
+::: {.callout-warning}
+Le paramètre `query` de `get_indicators()` est accepté mais **n'est pas transmis** à `wbdata` — seul `source` est utilisé en interne (`self._wbdata.get_indicators(source=source)`). Filtrez le résultat côté Python si vous cherchez un indicateur précis.
+:::
+
+## `Gee`
+
+Interface haut niveau pour Google Earth Engine : Sentinel-2, Landsat-9, Sentinel-1, NDVI, export local ou vers Google Drive, carte interactive `geemap`.
+
+::: {.callout-note}
+`Gee` est accessible via `cartograpy.data.Gee` (ou `from cartograpy.data import Gee`), mais **n'est pas réexportée à la racine du package** — contrairement à la plupart des autres classes de `data`, il n'existe pas de `cartograpy.Gee`.
+:::
+
+```python
+from cartograpy.data import Gee
+
+gee = Gee(project="mon-projet-gcp")
+```
+
+- **`project`** (`str`, optionnel) : ID du projet GCP Earth Engine ; sinon lu depuis la variable d'environnement `GEE_PROJECT`.
+- **`service_account`** / **`key_file`** (`str`, optionnels) : authentification non interactive par compte de service (les deux doivent être fournis ensemble).
+
+::: {.callout-warning}
+`Gee()` nécessite les paquets optionnels `earthengine-api` (module `ee`) et `geemap` — `ImportError` explicite dès l'instanciation s'ils sont absents. Sans authentification déjà en cache localement, l'initialisation peut déclencher `ee.Authenticate()`, un flux **interactif** (ouverture de navigateur) — à éviter dans un script non interactif ou un pipeline CI.
+:::
+
+### `get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)`
+
+```python
+get_sentinel2(bbox, start: str, end: str, mosaic: bool = True, clip: bool = True, cloud: float = 0.2, bands: list[str] | None = None) -> ee.Image | ee.ImageCollection
+```
+
+- **`bbox`** (`[xmin, ymin, xmax, ymax]`, requis) : emprise en WGS-84.
+- **`start`**, **`end`** (`str`, requis) : dates au format `"YYYY-MM-DD"`.
+- **`mosaic`** (`bool`, défaut `True`) : renvoie une mosaïque médiane (`ee.Image`) plutôt qu'une `ee.ImageCollection`.
+- **`clip`** (`bool`, défaut `True`) : découpe le résultat sur la bbox.
+- **`cloud`** (`float`, défaut `0.2`) : seuil `CLOUDY_PIXEL_PERCENTAGE` (fraction, `0.2` = 20 %).
+- **`bands`** (`list[str]`, optionnel) : bandes à sélectionner (défaut : Blue/Green/Red/NIR — `B2`, `B3`, `B4`, `B8`).
+- **Retour** : `ee.Image` si `mosaic=True`, sinon `ee.ImageCollection`. Un masque de nuages (bande `QA60`) est appliqué automatiquement à chaque image.
+
+```python
+gee = Gee(project="mon-projet-gcp")
+bbox_abidjan = [-4.10, 5.25, -3.85, 5.40]
+s2 = gee.get_sentinel2(bbox_abidjan, "2024-01-01", "2024-03-01", cloud=0.15)
+```
+
+### `download(data, bbox=None, filename="image.tif", scale=10, crs="EPSG:4326", bands=None, output_dir=".", mosaic_col=True)`
+
+```python
+download(data, bbox=None, filename: str = "image.tif", scale: int = 10, crs: str = "EPSG:4326", bands: list[str] | None = None, output_dir: str = ".", mosaic_col: bool = True) -> Path
+```
+
+- **`data`** (`ee.Image` ou `ee.ImageCollection`, requis) : à exporter — une collection est réduite en médiane (ou mosaïquée si `mosaic_col=False`) avant export.
+- **`bbox`** (optionnel) : région d'export — nécessaire si `data` n'est pas déjà découpée sur une zone.
+- **`filename`** (`str`, défaut `"image.tif"`) : nom du fichier de sortie.
+- **`scale`** (`int`, défaut `10`) : résolution en mètres (10 pour S2, 30 pour L9/SRTM).
+- **`crs`** (`str`, défaut `"EPSG:4326"`), **`bands`** (optionnel), **`output_dir`** (`str`, défaut `"."`).
+- **Retour** (`Path`) : chemin du fichier téléchargé localement (via `geemap.ee_export_image`).
+
+```python
+gee.download(s2, bbox=bbox_abidjan, filename="abidjan_s2.tif", scale=10)
+```
+
+::: {.callout-note}
+`download()` télécharge en local via `geemap` — synchrone, limité par les quotas d'export direct d'Earth Engine. Pour de plus gros volumes, utilisez `export_to_drive()`, qui lance une tâche **asynchrone** vers Google Drive (à suivre avec `ee.batch.Task.list()`).
+:::
+
+::: {.callout-note collapse="true"}
+## Autres méthodes de `Gee`
+
+| Méthode | Description |
+|---|---|
+| `get_landsat9(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)` | Identique à `get_sentinel2`, pour Landsat-9 Collection 2 Tier 1 L2 (filtre `CLOUD_COVER`). |
+| `get_sentinel1(bbox, start, end, mosaic=True, clip=True, polarization="VV", pass_direction="DESCENDING")` | Images radar Sentinel-1 GRD (pas de masque nuage). |
+| `compute_ndvi(image, nir_band="B8", red_band="B4", name="NDVI")` | Ajoute une bande NDVI à une image (bandes Sentinel-2 par défaut). |
+| `compute_ndvi_l9(image, name="NDVI")` | NDVI pour Landsat-9 (`SR_B5`/`SR_B4`). |
+| `collection(collection_id, bbox=None, start=None, end=None, properties=None)` | Accède à n'importe quelle collection GEE par son identifiant, avec filtres optionnels. |
+| `info(data)` | Métadonnées (`dict`) d'une image ou collection (`getInfo()`). |
+| `count(col=None)` | Nombre d'images d'une collection (la dernière utilisée par défaut). Lève `ValueError` si aucune collection n'est disponible. |
+| `dates(col=None)` | Dates d'acquisition (`list[str]`) d'une collection. Lève `ValueError` si aucune collection n'est disponible. |
+| `export_to_drive(data, bbox=None, description="gee_export", folder="GEE_exports", scale=10, crs="EPSG:4326", max_pixels=1e13)` | Lance une tâche d'export asynchrone vers Google Drive. |
+| `map(center=None, zoom=8)` | Retourne (ou crée) une carte interactive `geemap.Map`. |
+| `add_layer(data, vis_params=None, name="Layer", bbox=None)` | Ajoute une image/collection à la carte interactive. |
+| `show_map(data, bbox=None, vis_params=None, name="Layer")` | Raccourci : crée la carte, ajoute la couche, la retourne. |
+| `zonal_stats(image, bbox, scale=30, reducer="mean")` | Statistiques zonales (`"mean"`, `"median"`, `"min"`, `"max"`, `"sum"`) sur une bbox. |
+| `bbox_to_geometry(bbox)` | Convertit `[xmin, ymin, xmax, ymax]` en `ee.Geometry.Rectangle`. |
+:::
 
 ## Organisation
 
