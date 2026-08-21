@@ -7,6 +7,8 @@
 <meta name="description" content="Package Python pour charger, traiter et cartographier des données géographiques en quelques lignes de code.">
 <link rel="icon" href="assets/logo-small.png">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+
   :root {
     --bg: #0a0e1a;
     --bg-2: #0d1424;
@@ -14,19 +16,24 @@
     --border: #1e2a45;
     --text: #eef1f8;
     --text-dim: #93a0bd;
-    --accent: #4f8dfd;
-    --accent-2: #8b5cf6;
+    /* Charte graphique cartograpy (docs/site/style.scss) */
+    --accent: #10B981;
+    --accent-2: #F4650C;
+    --accent-3: #FFC700;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
   a { color: inherit; text-decoration: none; }
+  h1, .brand {
+    font-family: "Baloo 2", "Inter", sans-serif;
+  }
 
   .glow {
     position: absolute;
@@ -35,7 +42,7 @@
     transform: translateX(-50%);
     width: 1100px;
     height: 650px;
-    background: radial-gradient(ellipse at center, rgba(79,141,253,0.35) 0%, rgba(139,92,246,0.18) 40%, transparent 72%);
+    background: radial-gradient(ellipse at center, rgba(16,185,129,0.35) 0%, rgba(244,101,12,0.18) 40%, transparent 72%);
     filter: blur(10px);
     pointer-events: none;
     z-index: 0;
@@ -57,7 +64,7 @@
   .brand img { width: 28px; height: 28px; border-radius: 6px; }
   nav.links { display: flex; align-items: center; gap: 28px; }
   nav.links a { color: var(--text-dim); font-size: 0.92rem; transition: color 0.15s ease; }
-  nav.links a:hover { color: var(--text); }
+  nav.links a:hover { color: var(--accent-2); }
   .btn-github {
     display: flex; align-items: center; gap: 8px;
     padding: 8px 16px;
@@ -88,10 +95,10 @@
     border-radius: 999px;
     font-size: 0.82rem;
     color: var(--text-dim);
-    background: rgba(79,141,253,0.06);
+    background: rgba(16,185,129,0.06);
     margin-bottom: 28px;
   }
-  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 8px var(--accent-3); }
 
   h1 {
     font-size: clamp(2.4rem, 5.6vw, 4.2rem);
@@ -135,11 +142,11 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   }
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #3d6fe0);
+    background: linear-gradient(135deg, var(--accent), #0c8c67);
     color: white;
-    box-shadow: 0 8px 24px rgba(79,141,253,0.28);
+    box-shadow: 0 8px 24px rgba(16,185,129,0.28);
   }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(79,141,253,0.4); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(16,185,129,0.4); }
   .btn-secondary {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -192,7 +199,7 @@
     margin-top: 18px;
   }
   .caption a { color: var(--accent); }
-  .caption a:hover { text-decoration: underline; }
+  .caption a:hover { color: var(--accent-2); text-decoration: underline; }
 
   footer {
     border-top: 1px solid var(--border);

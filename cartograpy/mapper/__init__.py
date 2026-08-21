@@ -8,8 +8,24 @@ from .map import Map
 from .map2d import Map2D
 from .webmap import WebMap
 from .situation import SituationMap
+from .bivariate import (
+    plot_bivariate_choropleth,
+    plot_bivariate_legend,
+    assign_bivariate_classes,
+    classify_variable,
+    get_bivariate_palette,
+    generate_bivariate_palette,
+    list_bivariate_palettes,
+    preview_bivariate_palette,
+    BIVARIATE_PALETTES,
+)
 
 __all__ = [
     "Map", "Map2D", "WebMap", "SituationMap",
     "plot_choropleth", "read_image",
+    "plot_bivariate_choropleth", "plot_bivariate_legend",
+    "assign_bivariate_classes", "classify_variable",
+    "get_bivariate_palette", "generate_bivariate_palette",
+    "list_bivariate_palettes",
+    "preview_bivariate_palette", "BIVARIATE_PALETTES",
 ]

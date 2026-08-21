@@ -36,6 +36,14 @@ from .mapper import (
     SituationMap,
     plot_choropleth,
     read_image,
+    plot_bivariate_choropleth,
+    plot_bivariate_legend,
+    assign_bivariate_classes,
+    get_bivariate_palette,
+    generate_bivariate_palette,
+    list_bivariate_palettes,
+    preview_bivariate_palette,
+    BIVARIATE_PALETTES,
 )
 
 from .styling import (
@@ -68,6 +76,11 @@ __all__ = [
     # mapper
     "Map", "Map2D", "WebMap", "SituationMap",
     "plot_choropleth", "read_image",
+    "plot_bivariate_choropleth", "plot_bivariate_legend",
+    "assign_bivariate_classes", "get_bivariate_palette",
+    "generate_bivariate_palette",
+    "list_bivariate_palettes", "preview_bivariate_palette",
+    "BIVARIATE_PALETTES",
     # styling
     "get_fonts", "get_available_palettes",
     "color_palettes", "custom_palettes", "load_cmap", "to_cmap",
