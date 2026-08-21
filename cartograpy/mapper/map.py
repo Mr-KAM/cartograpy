@@ -4973,6 +4973,8 @@ class Map:
                       add_as_layer=True,
                       bar_style="boxes", major_div=None, minor_div=None,
                       size=None, bar=None, labels=None, text=None,
+                      to="ax", position=(0.05, 0.05), aob=None,
+                      font=None,
                       **kwargs):
         """
         Ajoute une barre d'échelle sur la carte.
@@ -5038,6 +5040,31 @@ class Map:
             Clés : style, loc, format, fontsize, textcolors, etc.
         text : dict, optional
             Dictionnaire de paramètres de texte (mode map-utils).
+        to : str
+            ``"ax"`` (défaut, ``location`` relatif à l'axe de la carte
+            principale) ou ``"fig"`` (relatif à la figure entière — ex.
+            placer la barre d'échelle dans la marge, hors de l'axe). Même
+            convention que ``add_north_arrow``. Modes ``"map-utils"`` et
+            ``"scalebar"`` uniquement — sans effet (avec avertissement) en
+            mode ``"manual"``, intrinsèquement ancré aux coordonnées
+            géographiques de l'axe.
+        position : tuple (x, y)
+            Point d'ancrage exact en coordonnées figure (0-1), utilisé
+            uniquement si ``to="fig"`` (ignoré sinon). ``location`` reste
+            utilisé pour déterminer quel coin de la barre touche ce point.
+        aob : dict, optional
+            Configuration de l'AnchoredOffsetBox sous-jacent (mode
+            map-utils) — fusionné avec, et prioritaire sur, celle déduite
+            de ``to``.
+        font : matplotlib.font_manager.FontProperties, optional
+            Police précise pour le texte (ex. via ``google_font()``).
+            matplotlib-map-utils ne supporte qu'une famille CSS générique
+            (``fontfamily`` dans ``labels``/``text`` : "serif",
+            "sans-serif", "cursive", "fantasy", "monospace") — si ce style
+            est actif et ``font`` est fourni, bascule automatiquement vers
+            ``style="scalebar"`` (avec avertissement) pour l'appliquer
+            réellement. Fonctionne nativement en modes ``"scalebar"`` et
+            ``"manual"``.
         **kwargs
             Paramètres supplémentaires passés à la bibliothèque.
         """
@@ -5063,6 +5090,10 @@ class Map:
             "bar": bar,
             "labels": labels,
             "text": text,
+            "to": to,
+            "position": position,
+            "aob": aob,
+            "font": font,
             "kwargs": kwargs,
         }
         if add_as_layer:
@@ -5101,6 +5132,8 @@ class Map:
                         scale_loc="bottom", label_loc="top",
                         bar_style="boxes", major_div=None, minor_div=None,
                         size=None, bar=None, labels=None, text=None,
+                        to="ax", position=(0.05, 0.05), aob=None,
+                        font=None,
                         kwargs=None):
         """Trace la barre d'échelle sur self.ax."""
         if kwargs is None:
@@ -5119,6 +5152,32 @@ class Map:
         if style in ("ticks", "boxes"):
             bar_style = style
             style = "map-utils"
+
+        # matplotlib-map-utils ne peut pas appliquer une police précise
+        # (FontProperties) : son paramètre fontfamily n'accepte que les 5
+        # familles CSS génériques ("serif", "sans-serif", "cursive",
+        # "fantasy", "monospace"), pas un nom de police ni un objet
+        # FontProperties. Si l'appelant demande explicitement `font`, on
+        # bascule vers matplotlib-scalebar (qui l'accepte nativement) plutôt
+        # que de l'ignorer silencieusement.
+        if font is not None and style == "map-utils":
+            if HAS_MPL_SCALEBAR:
+                warnings.warn(
+                    "font= n'est pas supporté en mode 'map-utils' "
+                    "(matplotlib-map-utils n'accepte qu'une famille CSS "
+                    "générique via labels={'fontfamily': ...}) ; bascule "
+                    "vers style='scalebar' pour appliquer la police demandée.",
+                    RuntimeWarning, stacklevel=2,
+                )
+                style = "scalebar"
+            else:
+                warnings.warn(
+                    "font= n'est pas supporté en mode 'map-utils' et "
+                    "matplotlib-scalebar n'est pas installé pour basculer "
+                    "dessus ; police ignorée. Installez-le avec : "
+                    "pip install matplotlib-scalebar",
+                    RuntimeWarning, stacklevel=2,
+                )
 
         # ------- matplotlib-map-utils -------
         if style == "map-utils":
@@ -5173,6 +5232,19 @@ class Map:
                 )
                 if text is not None:
                     sb_kwargs["text"] = text
+                # to="fig" : ancre la barre à un point de la figure entière
+                # plutôt qu'à l'axe carte, via bbox_to_anchor/bbox_transform
+                # — même convention que add_north_arrow(..., to="fig").
+                aob_style = {}
+                if to == "fig":
+                    aob_style = {
+                        "bbox_to_anchor": position,
+                        "bbox_transform": self.fig.transFigure,
+                    }
+                if aob is not None:
+                    aob_style.update(aob)
+                if aob_style:
+                    sb_kwargs["aob"] = aob_style
                 sb_kwargs.update(kwargs)
 
                 sb = MmuScaleBar(**sb_kwargs)
@@ -5197,6 +5269,20 @@ class Map:
                     "imperial-length" if units in ("mi", "ft", "yd")
                     else "si-length"
                 )
+                # matplotlib-scalebar valide font_properties comme un dict
+                # (kwargs de FontProperties) ou une chaîne fontconfig — pas
+                # un objet FontProperties malgré ce que suggère sa docstring
+                # (vérifié sur la version installée : lève ValueError sinon).
+                if font is not None:
+                    if font.get_file():
+                        font_properties = {"fname": font.get_file(), "size": fontsize}
+                    else:
+                        font_properties = {
+                            "family": font.get_family(), "weight": font.get_weight(),
+                            "style": font.get_style(), "size": fontsize,
+                        }
+                else:
+                    font_properties = {"size": fontsize}
                 sb_kwargs = dict(
                     location=loc,
                     color=color,
@@ -5204,7 +5290,7 @@ class Map:
                     box_alpha=box_alpha,
                     scale_loc=scale_loc,
                     label_loc=label_loc,
-                    font_properties={"size": fontsize},
+                    font_properties=font_properties,
                     length_fraction=0.2,
                 )
                 if label:
@@ -5212,6 +5298,13 @@ class Map:
                 if length is not None:
                     sb_kwargs["fixed_value"] = length
                     sb_kwargs["fixed_units"] = units
+                # to="fig" : matplotlib-scalebar accepte bbox_to_anchor/
+                # bbox_transform directement (pas de dict "aob" imbriqué).
+                if to == "fig":
+                    sb_kwargs["bbox_to_anchor"] = position
+                    sb_kwargs["bbox_transform"] = self.fig.transFigure
+                if aob is not None:
+                    sb_kwargs.update(aob)
                 sb_kwargs.update(kwargs)
                 sb = MplScaleBar(dx, units="m", dimension=dimension,
                                  **sb_kwargs)
@@ -5220,6 +5313,13 @@ class Map:
                 return
 
         # ------- mode manuel (fallback) -------
+        if to == "fig":
+            warnings.warn(
+                "to='fig' n'est pas supporté en mode 'manual' (barre "
+                "d'échelle ancrée aux coordonnées géographiques de l'axe "
+                "par nature) ; position relative à l'axe utilisée.",
+                RuntimeWarning, stacklevel=2,
+            )
         x0, x1 = self.ax.get_xlim()
         y0, y1 = self.ax.get_ylim()
         geod = Geod(ellps="WGS84")
@@ -5265,32 +5365,36 @@ class Map:
                 length * 1000 / (111320 * np.cos(np.radians(start_y)))
             )
 
-        line_kwargs = {
-            k: v for k, v in kwargs.items()
-            if k not in ("ha", "va", "fontweight")
-        }
-        text_kwargs = {
-            k: v for k, v in kwargs.items()
-            if k not in ("solid_capstyle",)
-        }
-
+        # **kwargs ne sert qu'à styler le texte du label (ex. font=,
+        # fontstyle=) — la ligne elle-même n'a pas de kwargs libres, ses
+        # seules options sont color/linewidth/alpha (déjà explicites).
         self.ax.plot(
             [start_x, start_x + bar_length_deg],
             [start_y, start_y],
             color=color, linewidth=linewidth,
             solid_capstyle="butt", alpha=alpha,
-            **line_kwargs,
         )
 
         if label is None:
             label = f"{length} {units}"
 
+        text_kwargs = {
+            k: v for k, v in kwargs.items()
+            if k not in ("solid_capstyle",)
+        }
+        # Le poids "bold" par défaut n'est appliqué que si aucune police
+        # spécifique n'est fournie (celle-ci porte son propre poids, ex.
+        # google_font("Fira Sans", weight="light")).
+        if font is not None:
+            text_kwargs["fontproperties"] = font
+        else:
+            text_kwargs.setdefault("fontweight", "bold")
         self.ax.text(
             start_x + bar_length_deg / 2,
             start_y + pad,
             label,
             ha="center", va="bottom", color=color,
-            fontsize=fontsize, alpha=alpha, fontweight="bold",
+            fontsize=fontsize, alpha=alpha,
             **text_kwargs,
         )
 

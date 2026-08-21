@@ -271,10 +271,14 @@ la flèche).
 :::
 
 ```python
-add_scale_bar(length=None, location='lower left', linewidth=2, units='km', color='black', fontsize=11, pad=0.1, alpha=1, label=None, style='auto', box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', add_as_layer=True, bar_style='boxes', major_div=None, minor_div=None, size=None, bar=None, labels=None, text=None, **kwargs)
+add_scale_bar(length=None, location='lower left', linewidth=2, units='km', color='black', fontsize=11, pad=0.1, alpha=1, label=None, style='auto', box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', add_as_layer=True, bar_style='boxes', major_div=None, minor_div=None, size=None, bar=None, labels=None, text=None, to='ax', position=(0.05, 0.05), aob=None, font=None, **kwargs)
 set_scale_bar(**kwargs)
 ```
-Ajoute une barre d'échelle sur la carte / modifie celle déjà créée. `major_div`/`minor_div` : `None` par défaut (calcul automatique par `matplotlib-map-utils`) — ne les fixer qu'ensemble avec un `major_mult` (via le dict `bar=...`), sinon le calcul de la barre échoue.
+Ajoute une barre d'échelle sur la carte / modifie celle déjà créée. `major_div`/`minor_div` : `None` par défaut (calcul automatique par `matplotlib-map-utils`) — ne les fixer qu'ensemble avec un `major_mult` (via le dict `bar=...`), sinon le calcul de la barre échoue. `to` (défaut `"ax"`) : `"fig"` ancre la barre à la figure entière plutôt qu'à l'axe carte (modes `map-utils`/`scalebar` uniquement — avertissement et retour à l'axe en mode `manual`, intrinsèquement géographique), même convention que `add_north_arrow(..., to=...)`. `position` : point d'ancrage exact en coordonnées figure (0-1), utilisé uniquement si `to="fig"` — `location` détermine toujours quel coin de la barre touche ce point.
+
+::: {.callout-note}
+`font` (FontProperties, ex. via `google_font()`) : matplotlib-map-utils ne supporte qu'une famille CSS générique (`"serif"`, `"sans-serif"`, `"cursive"`, `"fantasy"`, `"monospace"`), pas une police précise. Si le style résolu est `map-utils` (`"auto"`, `"ticks"`, `"boxes"`) et `font` est fourni, bascule automatiquement vers `style="scalebar"` (avec avertissement) pour l'appliquer réellement. Fonctionne nativement en modes `"scalebar"` et `"manual"`.
+:::
 
 ```python
 add_inset_map(data=None, on=None, mode='bbox', zoom_to_on=False, position=(0.65, 0.02, 0.33, 0.33), to='ax', circular=False, facecolor='white', edgecolor='black', linewidth=1.5, alpha=0.9, box_color='red', box_linewidth=2, land_color='lightgray', ocean_color='lightblue', projection=None, style='auto', location='lower right', size=None, pad=None, coords=None, transform=None, global_view=True, extent=None, indicator='extent', indicator_facecolor='red', indicator_linecolor='red', indicator_alpha=0.5, indicator_linewidth=1, indicator_straighten=True, indicator_pad=0.05, connector_color='black', connector_width=1, inset_size=None, zorder=99, show_borders=True, show_coastlines=True, **kwargs)

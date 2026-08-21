@@ -91,6 +91,130 @@ class TestMapClass:
         import matplotlib.pyplot as plt
         plt.close(m.fig)
 
+    def test_add_scale_bar_manual_style_accepts_text_only_kwargs(self, sample_gdf):
+        # Régression : le mode manuel filtrait les kwargs à passer à
+        # ax.plot() (la ligne) avec une liste d'exclusion codée en dur
+        # ("ha", "va", "fontweight") au lieu d'une liste d'inclusion —
+        # tout autre kwarg destiné au texte (ex. font=, fontstyle=) fuitait
+        # vers ax.plot() et plantait (Line2D n'accepte pas ces propriétés).
+        import matplotlib.pyplot as plt
+        import matplotlib.font_manager as fm
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        font = fm.FontProperties(family="monospace")
+        m.add_scale_bar(style="manual", font=font, fontstyle="italic")
+        m._render(legend=False)  # ne doit pas lever TypeError/AttributeError
+        plt.close(m.fig)
+
+    def test_add_scale_bar_to_fig_sets_figure_anchor(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_scale_bar(location="lower left", to="fig")
+        m._render(legend=False)
+        aob = m._scale_bar_artist._aob
+        assert aob["bbox_to_anchor"] == (0.05, 0.05)  # défaut de `position`
+        assert aob["bbox_transform"] is m.fig.transFigure
+        plt.close(m.fig)
+
+    def test_add_scale_bar_to_fig_custom_position(self, sample_gdf):
+        # Régression : position= n'existait pas sur add_scale_bar, un
+        # kwarg position= fuitait tel quel jusqu'à MmuScaleBar(**kwargs) et
+        # plantait avec TypeError (paramètre inconnu).
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_scale_bar(style="ticks", to="fig", position=(0.05, 0.82))
+        m._render(legend=False)  # ne doit pas lever TypeError
+        aob = m._scale_bar_artist._aob
+        assert aob["bbox_to_anchor"] == (0.05, 0.82)
+        plt.close(m.fig)
+
+    def test_add_scale_bar_to_ax_default_unchanged(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        m.add_scale_bar(location="lower left", to="ax")
+        m._render(legend=False)
+        aob = m._scale_bar_artist._aob
+        assert aob["bbox_to_anchor"] is None
+        assert aob["bbox_transform"] is None
+        plt.close(m.fig)
+
+    def test_add_scale_bar_font_map_utils_falls_back_to_scalebar(self, sample_gdf):
+        # Régression : font= n'existait pas sur add_scale_bar (crash direct
+        # avec style='ticks'/'boxes', TypeError depuis MmuScaleBar). Comme
+        # matplotlib-map-utils ne supporte pas de police précise, une police
+        # explicite doit basculer vers style='scalebar' (avec avertissement)
+        # pour être réellement appliquée plutôt qu'ignorée en silence.
+        from cartograpy.mapper._optional_deps import HAS_MAP_UTILS, HAS_MPL_SCALEBAR
+        if not (HAS_MAP_UTILS and HAS_MPL_SCALEBAR):
+            pytest.skip("matplotlib-map-utils et/ou matplotlib-scalebar non installés")
+
+        import matplotlib.pyplot as plt
+        import matplotlib.font_manager as fm
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        font = fm.FontProperties(family="monospace")
+        with pytest.warns(RuntimeWarning):
+            m.add_scale_bar(style="ticks", font=font)
+            m._render(legend=False)
+        # Doit avoir basculé sur le backend matplotlib-scalebar
+        assert type(m._scale_bar_artist).__module__.startswith("matplotlib_scalebar")
+        plt.close(m.fig)
+
+    def test_add_scale_bar_font_scalebar_style_applies_font(self, sample_gdf):
+        from cartograpy.mapper._optional_deps import HAS_MPL_SCALEBAR
+        if not HAS_MPL_SCALEBAR:
+            pytest.skip("matplotlib-scalebar non installé")
+
+        import matplotlib.pyplot as plt
+        import matplotlib.font_manager as fm
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        font = fm.FontProperties(family="monospace")
+        m.add_scale_bar(style="scalebar", font=font, fontsize=14)
+        m._render(legend=False)
+        fp = m._scale_bar_artist.font_properties
+        assert fp.get_family() == ["monospace"]
+        assert fp.get_size() == 14
+        plt.close(m.fig)
+
+    def test_add_scale_bar_font_manual_style_applies_font(self, sample_gdf):
+        import matplotlib.pyplot as plt
+        import matplotlib.font_manager as fm
+        import matplotlib.text as mtext
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        font = fm.FontProperties(family="monospace")
+        m.add_scale_bar(style="manual", font=font)
+        m._render(legend=False)
+        m.fig.canvas.draw()
+        families = [
+            t.get_fontproperties().get_family()
+            for t in m.fig.findobj(mtext.Text)
+            if t.get_text().endswith("km")
+        ]
+        assert ["monospace"] in families
+        plt.close(m.fig)
+
+    def test_add_scale_bar_manual_style_to_fig_warns(self, sample_gdf):
+        import matplotlib.pyplot as plt
+
+        m = Map(verbose=False)
+        m.add_polygons(sample_gdf)
+        with pytest.warns(RuntimeWarning):
+            m.add_scale_bar(style="manual", to="fig")
+            m._render(legend=False)
+        plt.close(m.fig)
+
     def test_save_uses_own_figure_not_current_pyplot_figure(self, sample_gdf, tmp_path):
         # Régression : save() appelait plt.savefig() (figure "courante" de
         # pyplot) au lieu de self.fig.savefig() — si une autre Map est créée
