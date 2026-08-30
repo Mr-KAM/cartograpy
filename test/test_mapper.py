@@ -471,6 +471,64 @@ class TestMapClass:
         plt.close(m.fig)
 
 
+class TestAddCustomLabels:
+    """Tests de Map.add_custom_labels()."""
+
+    @staticmethod
+    def _gdf():
+        from shapely.geometry import Point
+        return gpd.GeoDataFrame(
+            {
+                "nom": ["A", "B", "C"],
+                "val": [10.4, 20.6, 30.1],
+                "geometry": [
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    Polygon([(2, 2), (3, 2), (3, 3), (2, 3)]),
+                    Point(5, 5),
+                ],
+            },
+            crs="EPSG:4326",
+        )
+
+    @staticmethod
+    def _n_labels(ax):
+        from matplotlib.offsetbox import AnnotationBbox
+        return sum(isinstance(c, AnnotationBbox) for c in ax.get_children())
+
+    def test_labels_one_text_per_entity(self):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        n_before = self._n_labels(m.ax)
+        out = m.add_custom_labels(self._gdf(), "<{nom}>: {val:.0f}")
+        assert out is m
+        assert self._n_labels(m.ax) - n_before == 3  # une étiquette par entité
+        plt.close(m.fig)
+
+    def test_except_skips_listed_values(self):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        n_before = self._n_labels(m.ax)
+        m.add_custom_labels(
+            self._gdf(), "{nom}", except_=("nom", ["A", "C"]),
+        )
+        assert self._n_labels(m.ax) - n_before == 1  # seul "B" reste
+        plt.close(m.fig)
+
+    def test_missing_column_raises_keyerror(self):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        with pytest.raises(KeyError):
+            m.add_custom_labels(self._gdf(), "{does_not_exist}")
+        plt.close(m.fig)
+
+    def test_bad_except_shape_raises(self):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        with pytest.raises(ValueError):
+            m.add_custom_labels(self._gdf(), "{nom}", except_="nom")
+        plt.close(m.fig)
+
+
 class TestMap2D:
     """Tests de la classe Map2D."""
 

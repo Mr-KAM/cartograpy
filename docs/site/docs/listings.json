@@ -2,7 +2,11 @@
   {
     "listing": "/gallery/index.html",
     "items": [
+      "/gallery/bivariate-civ.html",
+      "/gallery/hexbin-farm-density.html",
       "/gallery/cote-divoire-densite.html",
+      "/gallery/civ-districts-reference.html",
+      "/gallery/emploi-agricole-femmes-afrique.html",
       "/gallery/co2-europe-emissions.html"
     ]
   }

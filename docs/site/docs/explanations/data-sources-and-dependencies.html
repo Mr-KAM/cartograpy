@@ -442,6 +442,30 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -708,7 +732,8 @@ Astuce
 <section id="dépendances-cœur" class="level2">
 <h2 class="anchored" data-anchor-id="dépendances-cœur">Dépendances cœur</h2>
 <p>Toutes déclarées dans <code>pyproject.toml</code>, installées automatiquement avec <code>pip install cartograpy</code> :</p>
-<p><code>cartopy</code>, <code>click</code>, <code>drawarrow</code>, <code>geopandas</code>, <code>geojson</code>, <code>geopy</code>, <code>gpxpy</code>, <code>highlight-text</code>, <code>matplotlib</code>, <code>numpy</code>, <code>osmnx</code>, <code>pandas</code>, <code>pillow</code>, <code>pykml</code>, <code>pypalettes</code>, <code>pyproj</code>, <code>rasterio</code>, <code>reportlab</code>, <code>requests</code>, <code>requests-cache</code>, <code>seaborn</code>, <code>shapely</code>, <code>svglib</code>, <code>tabulate</code>, <code>tqdm</code>, <code>wbdata</code>, <code>fiona</code>, <code>matplotlib-map-utils</code>, <code>jupyter</code>, <code>geemap</code>, <code>pyfonts</code>, <code>marimo</code>.</p>
+<p><code>cartopy</code>, <code>click</code>, <code>drawarrow</code>, <code>geopandas</code>, <code>geojson</code>, <code>geopy</code>, <code>gpxpy</code>, <code>highlight-text</code>, <code>matplotlib</code>, <code>numpy</code>, <code>osmnx</code>, <code>pandas</code>, <code>pillow</code>, <code>pykml</code>, <code>pypalettes</code>, <code>pyproj</code>, <code>rasterio</code>, <code>reportlab</code>, <code>requests</code>, <code>requests-cache</code>, <code>seaborn</code>, <code>shapely</code>, <code>svglib</code>, <code>tabulate</code>, <code>tqdm</code>, <code>wbdata</code>, <code>fiona</code>, <code>matplotlib-map-utils</code>, <code>jupyter</code>, <code>geemap</code>, <code>pyfonts</code>, <code>marimo</code>, <code>scienceplots</code>, <code>mplcyberpunk</code>, <code>geohexgrid</code>.</p>
+<p><code>scienceplots</code> et <code>mplcyberpunk</code> alimentent <code>styling.set_style()</code> / <code>list_all_styles()</code> ; <code>geohexgrid</code> alimente les grilles hexagonales de <code>cartograpy.mapper</code> (<code>make_hex_grid</code>, <code>aggregate_to_hex</code>, <code>plot_hexgrid_choropleth</code>).</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

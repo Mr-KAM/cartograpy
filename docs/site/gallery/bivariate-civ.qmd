@@ -1,0 +1,95 @@
+---
+title: "Choroplèthe bivariée — Côte d'Ivoire"
+description: "Densité de population croisée avec l'espérance de vie sur les 14 districts : palette 3×3, légende carrée, étiquettes par entité via add_custom_labels()."
+image: /assets/bivariate-civ-example.png
+---
+
+![](/assets/bivariate-civ-example.png)
+
+Les 14 districts de Côte d'Ivoire colorés selon **deux variables réelles à la
+fois** : la densité de population 2021 (axe horizontal de la légende) et
+l'espérance de vie à la naissance en 2022 (axe vertical), croisées via une
+palette 3×3 (méthode de Joshua Stevens).
+
+La légende carrée se lit en diagonale : le coin sombre en haut à droite = les
+districts où densité **et** espérance de vie sont élevées (Abidjan, Comoé,
+Yamoussoukro), le coin clair en bas à gauche = ceux où les deux sont faibles
+(Denguélé, Savanes, Woroba). Les cellules hors-diagonale révèlent les
+contrastes : Zanzan, peu dense mais avec une espérance de vie parmi les plus
+hautes ; Sassandra-Marahoué, assez dense mais à espérance de vie basse.
+
+Techniques utilisées :
+
+- `cp.load()` pour lire le GeoJSON — aucun `import geopandas` nécessaire
+- `Map.add_bivariate()` — surcouche de `plot_bivariate_choropleth()` qui
+  dessine sur l'axe de la carte, avec sa légende carrée positionnable
+- `palette="teal_orange"` parmi les palettes bivariées intégrées (voir aussi
+  `generate_bivariate_palette()` pour croiser deux rampes au choix)
+- `legend_position=(x, y, w, h)` (coordonnées figure) pour placer **et
+  dimensionner** la légende carrée ; `legend_fontsize` pour ses étiquettes
+- `add_custom_labels(regions, "<{NAME_1}>\\n{densite:.0f} hab/km²…")` pour
+  étiqueter chaque district en une passe : nom en gras (segment `<...>`) +
+  les deux valeurs croisées, une seule étiquette par entité au
+  `representative_point()`
+- `google_font()` + `add_custom_text(..., to="fig", font=...)` pour un bloc
+  titre / sous-titre / source typographié, indépendant du cadrage de la carte
+- GeoDataFrame enrichi récupéré via `m.last_bivariate` (colonnes
+  `var1_class`, `var2_class`, `bi_class`, `bi_color`)
+
+```python
+import cartograpy as cp
+
+# --- Données : districts CIV + indicateurs réels (via cp.load, pas geopandas) ---
+regions = cp.load("gadm_CIV_ADM1_reel.geojson")
+regions = regions[["NAME_1", "densite", "esperance_vie_2022", "geometry"]]
+
+# --- Polices ---
+font_title = cp.google_font("Bebas Neue")
+font_text = cp.google_font("Fira Sans", weight="light")
+font_bold = cp.google_font("Fira Sans", weight="medium")
+
+# --- Carte bivariée ---
+m = cp.Map(figsize=(9, 9), dpi=150, basemap=False, title="", verbose=False)
+m.set_background_color("white")
+m.add_bivariate(
+    regions, "densite", "esperance_vie_2022",
+    var1_label="Densité (hab/km²)", var2_label="Espérance de vie (ans)",
+    palette="teal_orange", n_classes=3,
+    legend_position=(0.07, 0.13, 0.14, 0.14), legend_fontsize=7,
+    edgecolor="#555555", linewidth=0.5,
+)
+
+# --- Étiquettes par district (nom en gras + les deux valeurs croisées) ---
+m.add_custom_labels(
+    regions,
+    "<{NAME_1}>\n{densite:.0f} hab/km²  ·  {esperance_vie_2022:.1f} ans",
+    fontsize=6.5, color="#1a1a1a", linespacing=1.35,
+    highlight_textprops=[{"font": font_bold, "fontsize": 8, "color": "#000000"}],
+)
+
+# --- Habillage typographique ---
+m.add_custom_text(
+    "Densité de population × espérance de vie", (0.5, 0.97), to="fig",
+    color="#1a1a1a", fontsize=26, font=font_title, ha="center", va="top",
+)
+m.add_custom_text(
+    "Districts de Côte d'Ivoire — 2021-2022", (0.5, 0.925), to="fig",
+    color="#555555", fontsize=13, font=font_text, ha="center", va="top",
+)
+m.add_custom_text(
+    "<Source :> Global Data Lab (Subnational HDI)   <Géométries :> GADM v4.1",
+    (0.5, 0.045), to="fig", color="#555555", fontsize=9, font=font_text,
+    ha="center", va="center",
+    highlight_textprops=[{"font": font_bold}, {"font": font_bold}],
+)
+m.add_custom_text(
+    "<By> : Anicet Cyrille KAMBOU", (0.5, 0.02), to="fig",
+    color="#555555", fontsize=8, font=font_text, ha="center", va="center",
+    highlight_textprops=[{"font": font_bold}],
+)
+
+m.save("bivariate-civ.png", dpi=150)
+
+# Classe bivariée de chaque district (ex. "3-3" = densité forte, espérance de vie forte) :
+print(m.last_bivariate[["NAME_1", "densite", "esperance_vie_2022", "bi_class"]])
+```

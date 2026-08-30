@@ -477,6 +477,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -642,7 +666,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><code>cartograpy/data/</code> — un fichier par source de données : <code>io.py</code> (lecture/écriture générique), <code>boundaries.py</code> (<code>GeoBoundaries</code>, <code>Bound</code>), <code>geocoding.py</code> (<code>Geocoder</code>), <code>osm.py</code> (<code>OSM</code>), <code>hydro.py</code> (<code>Hydro</code>), <code>dem.py</code> (<code>DEM</code>), <code>worldbank.py</code> (<code>WorldBank</code>), <code>gee.py</code> (<code>Gee</code>), plus <code>_optional.py</code>/<code>_types.py</code> pour le code partagé en interne.</li>
 <li><code>cartograpy/processing/</code> — <code>vector.py</code> (fonctions vectorielles + <code>VectorTools</code>) et <code>raster.py</code> (<code>RasterTools</code>).</li>
-<li><code>cartograpy/mapper/</code> — <code>helpers.py</code> (<code>read_image</code>, <code>plot_choropleth</code>), <code>map.py</code> (<code>Map</code>), <code>map2d.py</code> (<code>Map2D</code>), <code>webmap.py</code> (<code>WebMap</code>), <code>situation.py</code> (<code>SituationMap</code>), plus <code>_optional_deps.py</code> pour les dépendances graphiques optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>, <code>matplotlib-map-utils</code>) partagées entre <code>Map</code> et <code>SituationMap</code>.</li>
+<li><code>cartograpy/mapper/</code> — <code>helpers.py</code> (<code>read_image</code>, <code>plot_choropleth</code>), <code>map.py</code> (<code>Map</code>), <code>map2d.py</code> (<code>Map2D</code>), <code>webmap.py</code> (<code>WebMap</code>), <code>situation.py</code> (<code>SituationMap</code>), <code>bivariate.py</code> (choroplèthes bivariées), <code>hexgrid.py</code> (grilles hexagonales / hexbin, via <code>geohexgrid</code>), plus <code>_optional_deps.py</code> pour les dépendances graphiques optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>, <code>matplotlib-map-utils</code>) partagées entre <code>Map</code> et <code>SituationMap</code>.</li>
 </ul>
 <p><code>Map</code> (dans <code>mapper/map.py</code>) reste volontairement une seule classe de grande taille — son découpage interne en mixins thématiques est un chantier à part, pas encore fait.</p>
 </section>

@@ -1,0 +1,75 @@
+---
+title: "Densité d'exploitations — grille hexagonale"
+description: "Carte hexbin : 2000 exploitations agrégées dans une grille hexagonale régulière, comptage par cellule."
+image: /assets/hexbin-farms-example.png
+---
+
+![](/assets/hexbin-farms-example.png)
+
+Plus de 2000 parcelles agricoles de la région du Western Cape (jeu de données
+d'entraînement QGIS, `farms_33S.shp`, en UTM 33S — donc en mètres) ramenées à
+leur point représentatif, puis agrégées dans une grille d'hexagones réguliers
+de 3 km de rayon. Chaque hexagone est coloré par le **nombre d'exploitations**
+qu'il contient (`n_points`), les cellules vides étant masquées.
+
+C'est le cas d'usage classique du *hexbin* : révéler une densité spatiale sans
+biais de forme ni de taille des unités administratives, à partir d'un semis de
+points brut.
+
+Techniques utilisées :
+
+- `make_hex_grid()` pour générer la grille (rayon en mètres, CRS projeté)
+- `aggregate_to_hex()` pour compter les points par cellule et moyenner une
+  variable (`surface_ha`) au passage
+- `plot_hexgrid_choropleth(..., min_count=1)` pour ne tracer que les cellules
+  non vides, avec barre de couleur
+- variante `Map.add_hexgrid()` pour enchaîner les trois étapes sur une carte
+  `Map` déjà stylée (flèche du Nord, échelle…)
+
+```python
+import geopandas as gpd
+import cartograpy as cp
+from cartograpy.mapper import make_hex_grid, aggregate_to_hex, plot_hexgrid_choropleth
+
+# --- Données : polygones d'exploitations -> points ---
+farms = gpd.read_file(
+    "data/QGIS-Training-Data/exercise_data/projected_data/farms_33S.shp"
+)[["geometry"]].copy()
+farms["surface_ha"] = farms.geometry.area / 10_000
+farms["geometry"] = farms.geometry.representative_point()
+
+# --- Grille hexagonale + agrégation ---
+grid = make_hex_grid(farms, hex_size=3000)                     # hexagones de 3 km
+hexd = aggregate_to_hex(
+    farms, grid,
+    value_cols=["surface_ha"], agg_funcs={"surface_ha": "mean"},
+)
+
+# --- Tracé : comptage par hexagone ---
+fig, ax = plot_hexgrid_choropleth(
+    hexd, "n_points",
+    cmap="magma", min_count=1,
+    edgecolor="white", linewidth=0.4,
+    colorbar_label="Exploitations par hexagone (3 km)",
+    title="Densité d'exploitations agricoles — Western Cape",
+    figsize=(9, 7),
+)
+fig.savefig("hexbin-farms.png", dpi=150, bbox_inches="tight")
+```
+
+### Version `Map` (une seule méthode)
+
+`Map.add_hexgrid()` fait la génération, l'agrégation et le tracé en un appel,
+sur une carte que l'on peut habiller comme n'importe quelle autre :
+
+```python
+m = cp.Map(figsize=(9, 7), basemap=False, title="", verbose=False)
+m.add_hexgrid(
+    farms, "n_points", hex_size=3000,
+    value_cols=["surface_ha"], min_count=1,
+    cmap="magma", colorbar_label="Exploitations / hexagone",
+)
+m.add_north_arrow()
+m.add_scale_bar()
+m.save("hexbin-farms-map.png", dpi=150)
+```
