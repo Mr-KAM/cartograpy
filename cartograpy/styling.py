@@ -648,11 +648,10 @@ def list_all_styles():
     # 3. Styles mplcyberpunk
     try:
         import mplcyberpunk
-        # mplcyberpunk ajoute le style "cyberpunk" à Matplotlib
-        if "cyberpunk" in plt.style.available:
-            styles['mplcyberpunk'] = ["cyberpunk"]
-        else:
-            styles['mplcyberpunk'] = []
+        # Le style "cyberpunk" n'apparaît dans plt.style.available qu'après
+        # un premier plt.style.use("cyberpunk") (enregistrement paresseux de
+        # matplotlib) : on ne peut donc pas s'y fier pour la détection.
+        styles['mplcyberpunk'] = list(mplcyberpunk.cyberpunk_stylesheets.keys())
     except ImportError:
         styles['mplcyberpunk'] = []
     

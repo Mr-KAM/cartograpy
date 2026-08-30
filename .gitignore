@@ -71,4 +71,4 @@ Thumbs.db
 .pypirc
 
 # === SVG files ===
-#cartograpy/svg/
+cartograpy/svg/

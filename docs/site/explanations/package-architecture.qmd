@@ -36,7 +36,8 @@ lignes et mélangé plusieurs responsabilités indépendantes dans un seul fichi
   `raster.py` (`RasterTools`).
 - `cartograpy/mapper/` — `helpers.py` (`read_image`, `plot_choropleth`), `map.py`
   (`Map`), `map2d.py` (`Map2D`), `webmap.py` (`WebMap`), `situation.py`
-  (`SituationMap`), plus `_optional_deps.py` pour les dépendances graphiques
+  (`SituationMap`), `bivariate.py` (choroplèthes bivariées), `hexgrid.py`
+  (grilles hexagonales / hexbin, via `geohexgrid`), plus `_optional_deps.py` pour les dépendances graphiques
   optionnelles (`contextily`, `matplotlib-scalebar`, `matplotlib-map-utils`) partagées
   entre `Map` et `SituationMap`.
 

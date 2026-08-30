@@ -93,8 +93,8 @@ list_all_styles()               # tout ce qui est disponible, par source
 
 set_style("ggplot")                              # matplotlib
 set_style("whitegrid", source="seaborn")          # seaborn
-set_style("cyberpunk", source="mplcyberpunk")     # nécessite mplcyberpunk installé
-set_style("ieee", source="scienceplots")          # nécessite SciencePlots installé
+set_style("cyberpunk", source="mplcyberpunk")     # mplcyberpunk (dépendance cœur)
+set_style("ieee", source="scienceplots")          # SciencePlots (dépendance cœur)
 ```
 
 ::: {.callout-warning}

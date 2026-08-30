@@ -116,6 +116,8 @@ pip install cartograpy
 - `rasterio` pour les rasters
 - `cartopy` et `matplotlib` pour les cartes statiques
 - `folium` (via `WebMap`) et `geemap` pour les usages web et Google Earth Engine
+- `geohexgrid` pour les grilles hexagonales / hexbin
+- `scienceplots` et `mplcyberpunk` pour les styles graphiques de `styling`
 
 Voir [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd)
 pour la liste complète et les dépendances optionnelles (`contextily`,

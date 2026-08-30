@@ -409,7 +409,9 @@ Le paramètre `query` de `get_indicators()` est accepté mais **n'est pas transm
 Interface haut niveau pour Google Earth Engine : Sentinel-2, Landsat-9, Sentinel-1, NDVI, export local ou vers Google Drive, carte interactive `geemap`.
 
 ::: {.callout-note}
-`Gee` est accessible via `cartograpy.data.Gee` (ou `from cartograpy.data import Gee`), mais **n'est pas réexportée à la racine du package** — contrairement à la plupart des autres classes de `data`, il n'existe pas de `cartograpy.Gee`.
+`Gee` est réexportée à la racine du package (`from cartograpy import Gee`) comme
+les autres classes de `data`. L'import ne tire pas `earthengine-api` : le paquet
+`ee` n'est requis qu'à l'instanciation de `Gee()`.
 :::
 
 ```python

@@ -184,11 +184,10 @@ set_style("ieee", source="scienceplots")
 ```
 :::
 
-::: {.callout-warning}
-`source="seaborn"`, `"mplcyberpunk"` et `"scienceplots"` nécessitent les paquets
-correspondants installés séparément (seaborn est une dépendance cœur de
-cartograpy, mais `mplcyberpunk` et `SciencePlots` sont optionnels et ne font pas
-partie des dépendances de `pyproject.toml`).
+::: {.callout-note}
+`seaborn`, `mplcyberpunk` et `scienceplots` sont désormais tous des dépendances
+cœur de cartograpy (`pyproject.toml`) : aucune installation séparée n'est
+nécessaire.
 :::
 
 ### `list_all_styles()`
@@ -196,6 +195,13 @@ partie des dépendances de `pyproject.toml`).
 Liste tous les styles disponibles, groupés par source (`matplotlib`, `seaborn`,
 `mplcyberpunk`, `SciencePlots` — chaque source renvoie une liste vide si le paquet
 correspondant n'est pas installé plutôt que de lever une erreur).
+
+::: {.callout-note}
+Les styles `mplcyberpunk` sont listés en lisant `mplcyberpunk.cyberpunk_stylesheets`
+directement : ils apparaissent même avant un premier `plt.style.use("cyberpunk")`
+(matplotlib n'enregistre ces feuilles de style que paresseusement, on ne peut donc
+pas se fier à `plt.style.available` pour les détecter).
+:::
 
 ```python
 styles = list_all_styles()

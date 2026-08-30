@@ -86,7 +86,13 @@ Toutes déclarées dans `pyproject.toml`, installées automatiquement avec
 `highlight-text`, `matplotlib`, `numpy`, `osmnx`, `pandas`, `pillow`, `pykml`,
 `pypalettes`, `pyproj`, `rasterio`, `reportlab`, `requests`, `requests-cache`,
 `seaborn`, `shapely`, `svglib`, `tabulate`, `tqdm`, `wbdata`, `fiona`,
-`matplotlib-map-utils`, `jupyter`, `geemap`, `pyfonts`, `marimo`.
+`matplotlib-map-utils`, `jupyter`, `geemap`, `pyfonts`, `marimo`,
+`scienceplots`, `mplcyberpunk`, `geohexgrid`.
+
+`scienceplots` et `mplcyberpunk` alimentent `styling.set_style()` /
+`list_all_styles()` ; `geohexgrid` alimente les grilles hexagonales de
+`cartograpy.mapper` (`make_hex_grid`, `aggregate_to_hex`,
+`plot_hexgrid_choropleth`).
 
 ::: {.callout-warning}
 Plusieurs de ces paquets (`cartopy`, `rasterio`, `fiona`, `geopandas`, `shapely`,

@@ -26,7 +26,9 @@ les statistiques, le raster processing et bien plus.
 #### [Produire des cartes](/reference/mapper.qmd)
 
 Cartes statiques (`Map`, `Map2D`), mini-cartes de situation
-(`SituationMap`) et cartes interactives (`WebMap`).
+(`SituationMap`) et cartes interactives (`WebMap`). Choroplèthes bivariées
+(`plot_bivariate_choropleth`) et grilles hexagonales / hexbin
+(`make_hex_grid`, `aggregate_to_hex`, `plot_hexgrid_choropleth`).
 
 #### [Organiser un projet](/reference/project.qmd)
 
@@ -77,7 +79,9 @@ graph TD
 ```
 
 ::: {.callout-note}
-Un septième connecteur, `Gee` (Google Earth Engine), est disponible via `cartograpy.data.Gee` mais n'est pas réexporté à la racine du package — il nécessite le paquet `earthengine-api` et une authentification interactive (`ee.Authenticate()`).
+Un septième connecteur, `Gee` (Google Earth Engine), est disponible via
+`cartograpy.data.Gee` ou `cartograpy.Gee` — il nécessite en plus le paquet
+`earthengine-api` et une authentification interactive (`ee.Authenticate()`).
 :::
 
 Toutes les données sont formatées pour être retournées sous forme de `GeoDataFrame` ou de `DataFrame`, afin d'en faciliter la manipulation.

@@ -19,6 +19,11 @@ from .bivariate import (
     preview_bivariate_palette,
     BIVARIATE_PALETTES,
 )
+from .hexgrid import (
+    make_hex_grid,
+    aggregate_to_hex,
+    plot_hexgrid_choropleth,
+)
 
 __all__ = [
     "Map", "Map2D", "WebMap", "SituationMap",
@@ -28,4 +33,5 @@ __all__ = [
     "get_bivariate_palette", "generate_bivariate_palette",
     "list_bivariate_palettes",
     "preview_bivariate_palette", "BIVARIATE_PALETTES",
+    "make_hex_grid", "aggregate_to_hex", "plot_hexgrid_choropleth",
 ]

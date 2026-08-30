@@ -17,12 +17,22 @@ Les exports publics sont centralisés dans `cartograpy.__init__`.
 ## Objets majeurs
 
 - `Map`, `Map2D`, `WebMap`, `SituationMap`
-- `GeoBoundaries`, `Bound`, `OSM`, `Hydro`, `DEM`, `WorldBank`
+- `GeoBoundaries`, `Bound`, `Geocoder`, `OSM`, `Hydro`, `DEM`, `DEMDownloadError`, `WorldBank`, `Gee`
 - `VectorTools`, `RasterTools`
 - `Project`
 
-Accessibles via `cartograpy.data` mais non réexportés à la racine du package :
-`Geocoder`, `DEMDownloadError`, `Gee`, `describe`.
+## Fonctions cartographiques
+
+- `read_image`, `plot_choropleth`
+- Choroplèthe bivariée : `plot_bivariate_choropleth`, `plot_bivariate_legend`,
+  `assign_bivariate_classes`, `classify_variable`, `get_bivariate_palette`,
+  `generate_bivariate_palette`, `list_bivariate_palettes`,
+  `preview_bivariate_palette`, `BIVARIATE_PALETTES`
+- Grille hexagonale : `make_hex_grid`, `aggregate_to_hex`, `plot_hexgrid_choropleth`
+
+Toute la surface publique de `cartograpy.data` (dont `Geocoder`, `DEMDownloadError`,
+`Gee`, `describe`) est réexportée à la racine du package — `from cartograpy import
+Gee` fonctionne au même titre que `from cartograpy.data import Gee`.
 
 ## Recommandation
 
