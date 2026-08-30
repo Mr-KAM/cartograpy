@@ -480,6 +480,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -834,26 +858,27 @@ Note
 <section id="polices-et-carte-de-base" class="level3">
 <h3 class="anchored" data-anchor-id="polices-et-carte-de-base">2. Polices et carte de base</h3>
 <p><code>google_font()</code> télécharge/charge une police Google Fonts et renvoie un <code>FontProperties</code> réutilisable partout où <code>Map</code> accepte un paramètre <code>font</code>. <code>basemap=False</code> désactive les côtes/frontières automatiques puisque le GeoDataFrame <code>data</code> fournit déjà tous les contours nécessaires.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>font_title <span class="op">=</span> cp.google_font(<span class="st">"Bebas Neue"</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>font_text <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"light"</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>font_bold <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"medium"</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>text_color <span class="op">=</span> <span class="st">"black"</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>background_color <span class="op">=</span> <span class="st">"white"</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> cp.Map(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>), dpi<span class="op">=</span><span class="dv">400</span>, basemap<span class="op">=</span><span class="va">False</span>, title<span class="op">=</span><span class="st">""</span>)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>m.set_background_color(background_color)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>m.add_polygons_choropleth(</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    data,</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    column_to_plot<span class="op">=</span><span class="st">"Total"</span>,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span><span class="st">"Apricot"</span>,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"black"</span>,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    show_labels<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    show_colorbar<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>m.set_extent([<span class="op">-</span><span class="dv">11</span>, <span class="dv">32</span>, <span class="dv">41</span>, <span class="dv">73</span>])</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>m.hide_gridline()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>my_cmap <span class="op">=</span> <span class="st">"PonyoDark"</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>font_title <span class="op">=</span> cp.google_font(<span class="st">"Bebas Neue"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>font_text <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"light"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>font_bold <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"medium"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>text_color <span class="op">=</span> <span class="st">"black"</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>background_color <span class="op">=</span> <span class="st">"white"</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> cp.Map(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>), dpi<span class="op">=</span><span class="dv">400</span>, basemap<span class="op">=</span><span class="va">False</span>, title<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>m.set_background_color(background_color)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>m.add_polygons_choropleth(</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    data,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    column_to_plot<span class="op">=</span><span class="st">"Total"</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span>my_cmap,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    show_labels<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    show_colorbar<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>m.set_extent([<span class="op">-</span><span class="dv">11</span>, <span class="dv">32</span>, <span class="dv">41</span>, <span class="dv">73</span>])</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>m.hide_gridline()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="annotations-par-pays" class="level3">
 <h3 class="anchored" data-anchor-id="annotations-par-pays">3. Annotations par pays</h3>
@@ -882,7 +907,7 @@ Note
 <span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    m.add_custom_text(</span>
 <span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"&lt;</span><span class="sc">{</span>label<span class="sc">.</span>upper()<span class="sc">}</span><span class="ss">&gt;: </span><span class="sc">{</span>rate<span class="sc">:.2f}</span><span class="ss">"</span>, (x, y), to<span class="op">=</span><span class="st">"ax"</span>,</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"white"</span> <span class="cf">if</span> rate <span class="op">&gt;</span> <span class="dv">7</span> <span class="cf">else</span> text_color,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"white"</span> <span class="cf">if</span> rate <span class="op">&lt;</span> <span class="dv">6</span> <span class="cf">else</span> text_color,</span>
 <span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
 <span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>        highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
 <span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -896,7 +921,7 @@ Note
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    m.add_fig_arrow(</span>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        tail_position<span class="op">=</span>(<span class="fl">0.32</span>, <span class="fl">0.70</span>),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        head_position<span class="op">=</span>(<span class="fl">0.375</span>, <span class="fl">0.45</span>),</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        head_position<span class="op">=</span>(<span class="fl">0.39</span>, <span class="fl">0.48</span>),</span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        radius<span class="op">=</span><span class="fl">0.3</span>,</span>
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        width<span class="op">=</span><span class="fl">0.5</span>, head_width<span class="op">=</span><span class="dv">4</span>, head_length<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"black"</span>,</span>
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    )</span>
@@ -912,7 +937,7 @@ Note
 <p>Une légende à bins manuels (plutôt qu’une barre de couleur continue) : <code>add_swatch_legend()</code> dessine un rectangle de couleur par classe à une position géographique donnée, avec le label exact voulu (<code>"0-2 t"</code>, etc.) — plus de contrôle qu’un <code>scheme</code> mapclassify auto-généré, sans dépendance supplémentaire.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>value_ranges <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>]</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"0-2 t"</span>, <span class="st">"2-4 t"</span>, <span class="st">"4-6 t"</span>, <span class="st">"6-8 t"</span>, <span class="st">"8-10 t"</span>, <span class="st">"10-12 t"</span>, <span class="st">"12+ t"</span>]</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>cmap_obj <span class="op">=</span> cp.load_cmap(<span class="st">"Apricot"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>cmap_obj <span class="op">=</span> cp.load_cmap(my_cmap)</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [</span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    (lab, cmap_obj((value_ranges[i] <span class="op">+</span> value_ranges[i <span class="op">+</span> <span class="dv">1</span>]) <span class="op">/</span> <span class="dv">2</span> <span class="op">/</span> value_ranges[<span class="op">-</span><span class="dv">1</span>]))</span>
@@ -930,7 +955,7 @@ Note
 <h3 class="anchored" data-anchor-id="titre-sous-titre-et-logo">6. Titre, sous-titre et logo</h3>
 <p>Trois blocs de texte figure-relatifs pour le titre, la source et la signature, plus le logo du package en filigrane via <code>add_image()</code> (<code>to="fig"</code> par défaut) — chaque élément hors-carte est positionné indépendamment du zoom/étendue de la carte elle-même.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Émissions de CO₂ par habitant en Europe (2021)"</span>, (<span class="fl">0.5</span>, <span class="fl">0.24</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Émissions de CO₂ par habitant en Europe (2021)"</span>, (<span class="fl">0.5</span>, <span class="fl">0.87</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">25</span>, font<span class="op">=</span>font_title,</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>,</span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>

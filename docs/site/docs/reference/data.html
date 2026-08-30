@@ -477,6 +477,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -1361,7 +1385,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>Gee</code> est accessible via <code>cartograpy.data.Gee</code> (ou <code>from cartograpy.data import Gee</code>), mais <strong>n’est pas réexportée à la racine du package</strong> — contrairement à la plupart des autres classes de <code>data</code>, il n’existe pas de <code>cartograpy.Gee</code>.</p>
+<p><code>Gee</code> est réexportée à la racine du package (<code>from cartograpy import Gee</code>) comme les autres classes de <code>data</code>. L’import ne tire pas <code>earthengine-api</code> : le paquet <code>ee</code> n’est requis qu’à l’instanciation de <code>Gee()</code>.</p>
 </div>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Gee</span>

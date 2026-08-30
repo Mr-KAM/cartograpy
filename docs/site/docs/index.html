@@ -444,6 +444,30 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -602,7 +626,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="produire-des-cartes" class="level4">
 <h4 class="anchored" data-anchor-id="produire-des-cartes"><a href="./reference/mapper.html">Produire des cartes</a></h4>
-<p>Cartes statiques (<code>Map</code>, <code>Map2D</code>), mini-cartes de situation (<code>SituationMap</code>) et cartes interactives (<code>WebMap</code>).</p>
+<p>Cartes statiques (<code>Map</code>, <code>Map2D</code>), mini-cartes de situation (<code>SituationMap</code>) et cartes interactives (<code>WebMap</code>). Choroplèthes bivariées (<code>plot_bivariate_choropleth</code>) et grilles hexagonales / hexbin (<code>make_hex_grid</code>, <code>aggregate_to_hex</code>, <code>plot_hexgrid_choropleth</code>).</p>
 </section>
 <section id="organiser-un-projet" class="level4">
 <h4 class="anchored" data-anchor-id="organiser-un-projet"><a href="./reference/project.html">Organiser un projet</a></h4>
@@ -677,7 +701,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Un septième connecteur, <code>Gee</code> (Google Earth Engine), est disponible via <code>cartograpy.data.Gee</code> mais n’est pas réexporté à la racine du package — il nécessite le paquet <code>earthengine-api</code> et une authentification interactive (<code>ee.Authenticate()</code>).</p>
+<p>Un septième connecteur, <code>Gee</code> (Google Earth Engine), est disponible via <code>cartograpy.data.Gee</code> ou <code>cartograpy.Gee</code> — il nécessite en plus le paquet <code>earthengine-api</code> et une authentification interactive (<code>ee.Authenticate()</code>).</p>
 </div>
 </div>
 <p>Toutes les données sont formatées pour être retournées sous forme de <code>GeoDataFrame</code> ou de <code>DataFrame</code>, afin d’en faciliter la manipulation.</p>

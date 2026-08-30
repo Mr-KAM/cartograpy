@@ -51,6 +51,7 @@ proj = data.to_crs(epsg=3035)
 data["centroid"] = proj.geometry.centroid.to_crs(data.crs)
 
 # --- Polices ---
+my_cmap = "PonyoDark"
 font_title = cp.google_font("Bebas Neue")
 font_text = cp.google_font("Fira Sans", weight="light")
 font_bold = cp.google_font("Fira Sans", weight="medium")
@@ -64,7 +65,7 @@ m.set_background_color(background_color)
 m.add_polygons_choropleth(
     data,
     column_to_plot="Total",
-    cmap="Apricot",
+    cmap=my_cmap,
     edge_color="black",
     linewidth=0.5,
     show_labels=True,
@@ -98,7 +99,7 @@ for country in countries_to_annotate:
 
     m.add_custom_text(
         f"<{label.upper()}>: {rate:.2f}", (x, y), to="ax",
-        fontsize=9, color="white" if rate > 7 else text_color,
+        fontsize=9, color="white" if rate < 6 else text_color,
         ha="center", va="center",
         highlight_textprops=[{"font": font_bold}],
     )
@@ -109,7 +110,7 @@ if not lux.empty:
     lux_value = lux.iloc[0]["Total"]
     m.add_fig_arrow(
         tail_position=(0.32, 0.70),
-        head_position=(0.375, 0.45),
+        head_position=(0.39, 0.48),
         radius=0.3,
         width=0.5, head_width=4, head_length=8, color="black",
     )
@@ -123,7 +124,7 @@ if not lux.empty:
 # --- Légende par classes ---
 value_ranges = [0, 2, 4, 6, 8, 10, 12, 15]
 labels = ["0-2 t", "2-4 t", "4-6 t", "6-8 t", "8-10 t", "10-12 t", "12+ t"]
-cmap_obj = cp.load_cmap("Apricot")
+cmap_obj = cp.load_cmap(my_cmap)
 
 items = [
     (lab, cmap_obj((value_ranges[i] + value_ranges[i + 1]) / 2 / value_ranges[-1]))
@@ -139,7 +140,7 @@ m.add_swatch_legend(
 
 # --- Titre, sous-titre, signature, logo ---
 m.add_custom_text(
-    "Émissions de CO₂ par habitant en Europe (2021)", (0.5, 0.24), to="fig",
+    "Émissions de CO₂ par habitant en Europe (2021)", (0.5, 0.87), to="fig",
     color=text_color, fontsize=25, font=font_title,
     ha="center", va="top",
 )
@@ -155,7 +156,7 @@ m.add_custom_text(
     ha="center", va="center",
     highlight_textprops=[{"font": font_bold}],
 )
-m.add_image("logo.png", (0.44, 0.1), zoom=0.035)
+m.add_image("assets/img/logo.png", (0.44, 0.1), zoom=0.035)
 
 m.save("co2-europe.png", dpi=600)
 ```

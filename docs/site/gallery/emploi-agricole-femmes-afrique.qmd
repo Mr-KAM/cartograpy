@@ -1,0 +1,137 @@
+---
+title: "Emploi agricole des femmes — Afrique"
+description: "Choroplèthe continentale sur données World Bank : jointure par ISO3, légende en déciles, étiquette chiffrée par pays."
+image: /assets/emploi-agricole-femmes-afrique-example.png
+---
+
+![](/assets/emploi-agricole-femmes-afrique-example.png)
+
+Part des femmes actives employées dans l'agriculture (indicateur World Bank
+`SL.AGR.EMPL.FE.ZS`, 2025), pour tous les pays d'Afrique. Les valeurs sont
+récupérées via `WorldBank`, rattachées aux frontières Natural Earth par code
+ISO3, puis cartographiées avec une palette séquentielle et une légende en
+déciles.
+
+L'exemple illustre le chaînage **données en ligne → jointure → carte
+éditoriale** : `cartograpy.data` pour l'indicateur et les géométries,
+`cartograpy.mapper` pour tout le rendu (choroplèthe, légende, étiquettes,
+flèche du Nord, échelle et logo hors-carte).
+
+Techniques utilisées :
+
+- `WorldBank.get_data()` pour l'indicateur, `Bound.get_world("country")` pour
+  les frontières, jointure `merge` sur `iso3`
+- `add_polygons_choropleth(..., show_colorbar=False)` — coloration continue
+  sans barre de couleur (remplacée par la légende en déciles)
+- `add_swatch_legend()` avec des bornes calculées par `np.quantile`
+- `add_custom_text(..., to="ax")` pour l'étiquette chiffrée de chaque pays,
+  avec le nom en gras inline (`<...>` + `highlight_textprops`)
+- `add_north_arrow(to="fig")`, `add_scale_bar(to="fig")` et `add_image()` en
+  coordonnées figure, indépendants du cadrage de la carte
+
+```python
+import numpy as np
+import wbdata
+import cartograpy as cp
+from cartograpy.data import WorldBank, Bound
+from cartograpy.styling import load_cmap
+
+my_cmap = "atomic_clock"
+cmap = load_cmap(my_cmap)
+
+font_title = cp.google_font("Bebas Neue")
+font_text = cp.google_font("Fira Sans", weight="light")
+font_bold = cp.google_font("Fira Sans", weight="medium")
+text_color = "black"
+
+wb = WorldBank()
+bound = Bound()
+
+INDICATOR = "SL.AGR.EMPL.FE.ZS"  # Employées, agriculture, femmes (% d'emploi des femmes)
+
+# --- 1. Indicateur World Bank (2025) ---
+df = wb.get_data({INDICATOR: "valeur"}, country="all", date="2025").reset_index()
+
+# --- 2. Nom de pays -> ISO3 (agrégats régionaux exclus) ---
+name_to_iso3 = {
+    c["name"]: c["id"]
+    for c in wbdata.get_countries()
+    if c["region"]["value"] != "Aggregates"
+}
+df["iso3"] = df["country"].map(name_to_iso3)
+df = df.dropna(subset=["iso3", "valeur"])
+
+# --- 3. Frontières d'Afrique + fusion ---
+world = bound.get_world("country")          # name, iso3, continent, geometry
+africa = world[world["continent"] == "Africa"]
+gdf = africa.merge(df[["iso3", "valeur"]], on="iso3", how="inner")
+
+# --- 4. Carte ---
+m = cp.Map(figsize=(10, 10), title="", dpi=600, basemap=False)
+m.add_polygons_choropleth(
+    gdf, column_to_plot="valeur", cmap=my_cmap, show_colorbar=False,
+)
+
+# Légende en déciles
+n_bins = 10
+bin_edges = np.quantile(gdf["valeur"], np.linspace(0, 1, n_bins + 1))
+items = [
+    (f"{bin_edges[i]:.0f} - {bin_edges[i + 1]:.0f} %", cmap(i / (n_bins - 1)))
+    for i in range(n_bins)
+]
+m.add_swatch_legend(
+    items, xy=(-5, -1),
+    rect_width=2, rect_height=3, y_step=3,
+    fontsize=12, color=text_color, edge_color="black", linewidth=0.6,
+    font=font_text,
+)
+
+# Étiquette chiffrée par pays (noms Natural Earth)
+gdf["centroid"] = gdf.geometry.centroid
+countries_to_annotate = [
+    "Algeria", "Libya", "Tunisia", "Morocco", "Egypt",
+    "Nigeria", "Ghana", "Senegal", "Mali", "Niger", "Burkina Faso",
+    "Cameroon", "Chad", "Dem. Rep. Congo", "Congo", "Gabon", "Central African Rep.",
+    "Ethiopia", "Kenya", "Tanzania", "Uganda", "Somalia", "S. Sudan", "Sudan",
+    "South Africa", "Zambia", "Zimbabwe", "Mozambique", "Namibia", "Botswana", "Angola",
+    "Madagascar", "Malawi",
+]
+abbreviations = {"Dem. Rep. Congo": "RD Congo", "Central African Rep.": "RCA"}
+adjustments = {"Madagascar": (-3, 0), "Congo": (0, -1.5)}
+
+data_by_country = gdf.set_index("name")
+for country in countries_to_annotate:
+    if country not in data_by_country.index:
+        continue
+    row = data_by_country.loc[country]
+    dx, dy = adjustments.get(country, (0, 0))
+    x, y = row["centroid"].x + dx, row["centroid"].y + dy
+    label = abbreviations.get(country, country)
+    m.add_custom_text(
+        f"<{label.upper()}>: {row['valeur']:.1f}", (x, y), to="ax",
+        fontsize=9, color=text_color, ha="center", va="center", font=font_text,
+        highlight_textprops=[{"font": font_bold}],
+    )
+
+# Titre, source, signature, habillage hors-carte
+m.add_custom_text(
+    "Emploi des femmes dans l'agriculture par pays en Afrique (2025)",
+    (0.5, 0.95), to="fig", fontsize=20, fontweight="bold", ha="center", font=font_title,
+)
+m.add_custom_text(
+    "<Source:> Organisation internationale du travail, Indicateurs clés du marché du travail.",
+    (0.5, 0.92), to="fig", fontsize=10, ha="center", font=font_text,
+    highlight_textprops=[{"font": font_bold}],
+)
+m.add_custom_text(
+    "<By> : Anicet Cyrille KAMBOU", (0.8, 0.1), to="fig",
+    color="black", fontsize=9, font=font_text, ha="center", va="center",
+    highlight_textprops=[{"font": font_bold}],
+)
+m.add_image("assets/img/logo.png", (0.722, 0.09), zoom=0.05)
+m.hide_gridline()
+m.add_north_arrow(to="fig", shadow=False, scale=0.3, label=" ", position=(0.8, 0.86))
+m.add_scale_bar(style="ticks", to="fig", position=(0.1, 0.08))
+
+m.save("emploi-agricole-femmes-afrique.png", dpi=600)
+```

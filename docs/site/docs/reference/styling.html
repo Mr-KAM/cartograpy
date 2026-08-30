@@ -477,6 +477,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -790,23 +814,36 @@ Note
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Avertissement
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>source="seaborn"</code>, <code>"mplcyberpunk"</code> et <code>"scienceplots"</code> nécessitent les paquets correspondants installés séparément (seaborn est une dépendance cœur de cartograpy, mais <code>mplcyberpunk</code> et <code>SciencePlots</code> sont optionnels et ne font pas partie des dépendances de <code>pyproject.toml</code>).</p>
+<p><code>seaborn</code>, <code>mplcyberpunk</code> et <code>scienceplots</code> sont désormais tous des dépendances cœur de cartograpy (<code>pyproject.toml</code>) : aucune installation séparée n’est nécessaire.</p>
 </div>
 </div>
 </section>
 <section id="list_all_styles" class="level3">
 <h3 class="anchored" data-anchor-id="list_all_styles"><code>list_all_styles()</code></h3>
 <p>Liste tous les styles disponibles, groupés par source (<code>matplotlib</code>, <code>seaborn</code>, <code>mplcyberpunk</code>, <code>SciencePlots</code> — chaque source renvoie une liste vide si le paquet correspondant n’est pas installé plutôt que de lever une erreur).</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les styles <code>mplcyberpunk</code> sont listés en lisant <code>mplcyberpunk.cyberpunk_stylesheets</code> directement : ils apparaissent même avant un premier <code>plt.style.use("cyberpunk")</code> (matplotlib n’enregistre ces feuilles de style que paresseusement, on ne peut donc pas se fier à <code>plt.style.available</code> pour les détecter).</p>
+</div>
+</div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>styles <span class="op">=</span> list_all_styles()</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>styles[<span class="st">"matplotlib"</span>]  <span class="co"># tous les styles matplotlib installés</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 

@@ -1,0 +1,71 @@
+---
+title: "Districts de Côte d'Ivoire — carte de référence"
+description: "Carte administrative sobre : graticule, flèche du Nord SVG, barre d'échelle à graduations, étiquettes et mini-carte de situation circulaire."
+image: /assets/civ-districts-example.png
+---
+
+![](/assets/civ-districts-example.png)
+
+Carte de référence des 14 districts de Côte d'Ivoire (frontières `GeoBoundaries`
+niveau ADM-1) : pas de choroplèthe, juste une carte administrative propre avec
+tous les repères cartographiques attendus — graticule légendé, flèche du Nord,
+échelle, noms des districts et une mini-carte de situation circulaire qui place
+le pays dans le continent africain.
+
+C'est le squelette type d'une carte de localisation ou d'annexe de rapport.
+
+Techniques utilisées :
+
+- `Bound.get_admin("CIV", adm=1)` pour les frontières des districts
+- `add_layer()` — ajout vecteur générique (détecte le type de géométrie)
+- `add_gridlines()` pour le graticule avec labels de coordonnées
+- `add_north_arrow(style="svg", arrow=12)` — flèche du Nord depuis une des
+  icônes SVG embarquées
+- `add_scale_bar(style="ticks")` — barre d'échelle à graduations
+- `add_labels(..., label_column="shapeName")` pour le nom de chaque district
+- `add_inset(..., on=bound.get_continent("Africa"), zoom_to_on=True,
+  circular=True)` — mini-carte de situation ronde, cadrée sur l'Afrique
+- `add_custom_text(..., to="fig")` pour titre et signature hors-carte
+
+```python
+import cartograpy as cp
+from cartograpy.data import Bound
+from cartograpy.mapper import Map
+
+# --- Polices ---
+font_title = cp.google_font("Bebas Neue")
+font_text = cp.google_font("Fira Sans", weight="light")
+font_bold = cp.google_font("Fira Sans", weight="medium")
+font = cp.google_font("Fira Sans", weight="medium")
+
+# --- Données : districts (ADM-1) de Côte d'Ivoire ---
+bound = Bound()
+civ = bound.get_admin("CIV", adm=1)
+
+# --- Carte ---
+m = Map(basemap=False, dpi=600)
+m.set_background_color("white")
+
+m.add_layer(civ, facecolor="lightyellow", edgecolor="black")
+m.add_north_arrow(style="svg", arrow=12, zoom=0.4, color="black")
+m.add_gridlines()
+m.add_scale_bar(style="ticks")
+m.add_labels(civ, label_column="shapeName", font=font, color="black")
+m.add_inset(
+    data=civ, on=bound.get_continent("Africa"),
+    zoom_to_on=True, box_color="black", box_linewidth=1,
+    to="fig", circular=True, position=(0.7, 0.2),
+)
+
+m.add_custom_text(
+    "Carte des districts de la Côte d'Ivoire (2025)", (0.5, 1.05), to="fig",
+    color="black", fontsize=26, font=font_title, ha="center", va="top",
+)
+m.add_custom_text(
+    "<By> : Anicet Cyrille KAMBOU", (0.50, 0.08), to="fig",
+    color="black", fontsize=9, font=font_text, ha="center", va="center",
+    highlight_textprops=[{"font": font_bold}],
+)
+
+m.save("civ-districts.png", dpi=600)
+```

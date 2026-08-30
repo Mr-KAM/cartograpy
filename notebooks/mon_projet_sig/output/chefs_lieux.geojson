@@ -1,0 +1,20 @@
+{
+"type": "FeatureCollection",
+"name": "chefs_lieux",
+"features": [
+{ "type": "Feature", "properties": { "shapeName": "Bas-Sassandra", "shapeISO": "", "shapeID": "83157122B96959932745266", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -6.680398166435846, 5.358915601641624 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Denguele", "shapeISO": "", "shapeID": "83157122B12160353323799", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -7.385474080556644, 9.638686898619916 ] } },
+{ "type": "Feature", "properties": { "shapeName": "District Autonome D'Abidjan", "shapeISO": "", "shapeID": "83157122B76853064397847", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -4.075195174656556, 5.413974331497895 ] } },
+{ "type": "Feature", "properties": { "shapeName": "District Autonome De Yamoussoukro", "shapeISO": "", "shapeID": "83157122B30232425959699", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -5.268671873123624, 6.855823669878761 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Goh-Djiboua", "shapeISO": "", "shapeID": "83157122B34711482467037", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -5.612492106384559, 5.958918925157316 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Lacs", "shapeISO": "", "shapeID": "83157122B20352934117266", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -4.445065881641794, 7.046741657171768 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Montagnes", "shapeISO": "", "shapeID": "83157122B69310198422077", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -7.653042649237783, 6.947545909998879 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Sassandra-Marahoue", "shapeISO": "", "shapeID": "83157122B74959515955757", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -6.34500581032166, 7.053895298723662 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Savanes", "shapeISO": "", "shapeID": "83157122B28791092437733", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -5.557192521070776, 9.567775659966813 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Valle Du Bandama", "shapeISO": "", "shapeID": "83157122B62906982633778", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -4.958472134634883, 8.260919275500694 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Woroba", "shapeISO": "", "shapeID": "83157122B58892240487392", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -6.747598945166328, 8.377641772900549 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Zanzan", "shapeISO": "", "shapeID": "83157122B79983119233374", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -3.348031531878876, 8.672746960904494 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Lagunes", "shapeISO": "", "shapeID": "83157122B73612976130091", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -4.270735391733828, 5.832690603241178 ] } },
+{ "type": "Feature", "properties": { "shapeName": "Comoe", "shapeISO": "", "shapeID": "83157122B96325295181308", "shapeGroup": "CIV", "shapeType": "ADM1" }, "geometry": { "type": "Point", "coordinates": [ -3.302299362201932, 6.091408397037791 ] } }
+]
+}

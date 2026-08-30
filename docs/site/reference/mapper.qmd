@@ -65,7 +65,7 @@ m.show()
 
 ## Méthodes de Map
 
-67 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
+68 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
 défaut) et description en une ligne — pour les paramètres en détail, se référer
 au docstring de la méthode dans `cartograpy/mapper/map.py`.
 
@@ -236,6 +236,18 @@ add_highlight_fig_text(text, x, y, fontsize=12, color='black', highlight_textpro
 add_custom_text(text, xy, to='ax', **kwargs)
 ```
 Dispatch vers `add_highlight_text` (`to="ax"`) ou `add_highlight_fig_text` (`to="fig"`) selon le système de coordonnées voulu.
+
+```python
+add_custom_labels(gdf, template, dx=0.0, dy=0.0, except_=None, highlight_textprops=None, **kwargs)
+```
+Version « par entité » de `add_custom_text` : étiquette chaque ligne de `gdf`
+avec `template.format(**row)` (les `{...}` sont des noms de colonnes, ex.
+`"<{NAME_1}>\n{densite:.0f} hab/km²"`), segments `<...>` mis en évidence via
+`highlight_textprops`. Ancre = point de l'entité (`Point`/`MultiPoint`) ou
+`representative_point()` pour un `Polygon`/`MultiPolygon` (un seul point par
+entité, multipolygones compris). `dx`/`dy` décalent l'ancre (unité de l'axe).
+`except_=(colonne, [valeurs])` exclut les entités dont `row[colonne]` figure
+dans `valeurs`. Reprojette en EPSG:4326 si besoin.
 
 ```python
 add_fig_arrow(tail_position, head_position, radius=0, color='black', width=1, head_width=4, head_length=8, **kwargs)

@@ -3137,6 +3137,131 @@ class Map:
             return self.add_highlight_fig_text(text, xy[0], xy[1], **kwargs)
         raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
 
+    def add_custom_labels(
+        self,
+        gdf,
+        template,
+        dx=0.0,
+        dy=0.0,
+        except_=None,
+        highlight_textprops=None,
+        **kwargs,
+    ):
+        """
+        Étiquette en lot chaque entité d'un GeoDataFrame avec un texte
+        composé à partir de ses colonnes — version « par entité » de
+        `add_custom_text()`, avec le même support des segments `<mis en
+        évidence>` (`highlight_textprops`).
+
+        Le texte de chaque étiquette est produit par `template.format(**row)` :
+        les `{...}` de `template` sont des noms de colonnes du GeoDataFrame
+        (spécificateurs de format autorisés, ex. `{densite:.0f}`). Les
+        segments entourés de `<...>` sont mis en évidence.
+
+        L'ancre de l'étiquette est :
+
+        - la position du point si la géométrie est un `Point`/`MultiPoint` ;
+        - le `representative_point()` (point garanti à l'intérieur) pour un
+          `Polygon`/`MultiPolygon` — un seul point par entité, y compris pour
+          les multipolygones (contrairement à `add_labels`).
+
+        Paramètres:
+        -----------
+        gdf : geopandas.GeoDataFrame
+            Entités à étiqueter (reprojeté en EPSG:4326 si besoin, comme les
+            autres couches de `Map`).
+        template : str
+            Gabarit façon f-string, ex. `"<{NAME_1}>\\n{densite:.0f} hab/km²"`.
+        dx, dy : float
+            Décalage appliqué à l'ancre, dans l'unité de l'axe (degrés pour
+            `Map`). Positif = vers l'est / le nord.
+        except_ : tuple (str, list), optionnel
+            `(nom_colonne, valeurs)` : les entités dont `row[nom_colonne]` est
+            dans `valeurs` ne reçoivent pas d'étiquette
+            (ex. `except_=("shapeName", ["Côte d'Ivoire", "Guinée"])`).
+        highlight_textprops : list[dict], optionnel
+            Un dict de propriétés par segment `<...>` du gabarit, dans l'ordre
+            (ex. `[{"font": font_bold}]`) — appliqué à chaque étiquette.
+        **kwargs :
+            Transmis à `add_highlight_text()` pour chaque étiquette
+            (`fontsize`, `color`, `font`, `ha`, `va`…). `ha`/`va` valent
+            `"center"` par défaut ici.
+
+        Retourne:
+        ---------
+        Map : self (chaînable).
+
+        Raises:
+        -------
+            KeyError : si `template` référence une colonne absente.
+            ValueError : si `except_` n'est pas un couple `(str, list)`.
+
+        Exemples:
+        ---------
+            >>> m.add_custom_labels(
+            ...     regions, "<{NAME_1}> : {densite:.0f}",
+            ...     dy=0.15, fontsize=8, color="#222",
+            ...     highlight_textprops=[{"font": font_bold}],
+            ...     except_=("NAME_1", ["Abidjan"]),
+            ... )
+        """
+        if except_ is not None:
+            if (not isinstance(except_, (tuple, list)) or len(except_) != 2):
+                raise ValueError(
+                    "except_ doit être un couple (nom_colonne, liste_de_valeurs), "
+                    f"reçu : {except_!r}"
+                )
+            skip_col, skip_values = except_
+            skip_values = set(skip_values)
+        else:
+            skip_col = None
+
+        geodf, transform = self._prepare_display_gdf(gdf)
+        kwargs.setdefault("ha", "center")
+        kwargs.setdefault("va", "center")
+        kwargs.setdefault(
+            "transform", transform if transform is not None else self.ax.transData
+        )
+
+        for _, row in geodf.iterrows():
+            if skip_col is not None and row[skip_col] in skip_values:
+                continue
+
+            try:
+                label = template.format(**row.to_dict())
+            except KeyError as e:
+                raise KeyError(
+                    f"Colonne {e} référencée par `template` mais absente du "
+                    f"GeoDataFrame. Colonnes disponibles : {list(geodf.columns)}"
+                ) from None
+
+            # highlight_text exige autant de dicts que de segments <...> ;
+            # si l'appelant n'en fournit pas, on neutralise chaque segment.
+            props = highlight_textprops
+            if props is None:
+                n_seg = label.count("<")
+                props = [{}] * n_seg if n_seg else None
+
+            geom = row.geometry
+            if geom is None or geom.is_empty:
+                continue
+            if geom.geom_type == "Point":
+                anchors = [(geom.x, geom.y)]
+            elif geom.geom_type == "MultiPoint":
+                anchors = [(p.x, p.y) for p in geom.geoms]
+            else:
+                p = geom.representative_point()
+                anchors = [(p.x, p.y)]
+
+            for x, y in anchors:
+                self.add_highlight_text(
+                    label, (x + dx, y + dy),
+                    highlight_textprops=props,
+                    **kwargs,
+                )
+
+        return self
+
     def add_fig_arrow(
         self,
         tail_position: tuple,

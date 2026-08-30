@@ -35,7 +35,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../reference/data.html" rel="next">
-<link href="../gallery/cote-divoire-densite.html" rel="prev">
+<link href="../gallery/hexbin-farm-density.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -442,6 +442,30 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -550,6 +574,7 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#modules-publics" id="toc-modules-publics" class="nav-link active" data-scroll-target="#modules-publics">Modules publics</a></li>
   <li><a href="#objets-majeurs" id="toc-objets-majeurs" class="nav-link" data-scroll-target="#objets-majeurs">Objets majeurs</a></li>
+  <li><a href="#fonctions-cartographiques" id="toc-fonctions-cartographiques" class="nav-link" data-scroll-target="#fonctions-cartographiques">Fonctions cartographiques</a></li>
   <li><a href="#recommandation" id="toc-recommandation" class="nav-link" data-scroll-target="#recommandation">Recommandation</a></li>
   </ul>
 </nav>
@@ -598,11 +623,19 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="objets-majeurs">Objets majeurs</h2>
 <ul>
 <li><code>Map</code>, <code>Map2D</code>, <code>WebMap</code>, <code>SituationMap</code></li>
-<li><code>GeoBoundaries</code>, <code>Bound</code>, <code>OSM</code>, <code>Hydro</code>, <code>DEM</code>, <code>WorldBank</code></li>
+<li><code>GeoBoundaries</code>, <code>Bound</code>, <code>Geocoder</code>, <code>OSM</code>, <code>Hydro</code>, <code>DEM</code>, <code>DEMDownloadError</code>, <code>WorldBank</code>, <code>Gee</code></li>
 <li><code>VectorTools</code>, <code>RasterTools</code></li>
 <li><code>Project</code></li>
 </ul>
-<p>Accessibles via <code>cartograpy.data</code> mais non réexportés à la racine du package : <code>Geocoder</code>, <code>DEMDownloadError</code>, <code>Gee</code>, <code>describe</code>.</p>
+</section>
+<section id="fonctions-cartographiques" class="level2">
+<h2 class="anchored" data-anchor-id="fonctions-cartographiques">Fonctions cartographiques</h2>
+<ul>
+<li><code>read_image</code>, <code>plot_choropleth</code></li>
+<li>Choroplèthe bivariée : <code>plot_bivariate_choropleth</code>, <code>plot_bivariate_legend</code>, <code>assign_bivariate_classes</code>, <code>classify_variable</code>, <code>get_bivariate_palette</code>, <code>generate_bivariate_palette</code>, <code>list_bivariate_palettes</code>, <code>preview_bivariate_palette</code>, <code>BIVARIATE_PALETTES</code></li>
+<li>Grille hexagonale : <code>make_hex_grid</code>, <code>aggregate_to_hex</code>, <code>plot_hexgrid_choropleth</code></li>
+</ul>
+<p>Toute la surface publique de <code>cartograpy.data</code> (dont <code>Geocoder</code>, <code>DEMDownloadError</code>, <code>Gee</code>, <code>describe</code>) est réexportée à la racine du package — <code>from cartograpy import Gee</code> fonctionne au même titre que <code>from cartograpy.data import Gee</code>.</p>
 </section>
 <section id="recommandation" class="level2">
 <h2 class="anchored" data-anchor-id="recommandation">Recommandation</h2>
@@ -1027,8 +1060,8 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../gallery/cote-divoire-densite.html" class="pagination-link" aria-label="Densité de population — Côte d'Ivoire">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Densité de population — Côte d’Ivoire</span>
+      <a href="../gallery/hexbin-farm-density.html" class="pagination-link" aria-label="Densité d'exploitations — grille hexagonale">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Densité d’exploitations — grille hexagonale</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
