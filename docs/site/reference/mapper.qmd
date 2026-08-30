@@ -7,6 +7,11 @@ description: "Référence des cartes statiques et interactives."
 
 - `read_image`
 - `plot_choropleth`
+- Choroplèthe bivariée : `plot_bivariate_choropleth`, `plot_bivariate_legend`,
+  `assign_bivariate_classes`, `classify_variable`, `get_bivariate_palette`,
+  `generate_bivariate_palette`, `list_bivariate_palettes`,
+  `preview_bivariate_palette`, `BIVARIATE_PALETTES`
+- Grille hexagonale : `make_hex_grid`, `aggregate_to_hex`, `plot_hexgrid_choropleth`
 
 ## Classes
 
@@ -26,6 +31,8 @@ description: "Référence des cartes statiques et interactives."
 | `map2d.py` | `Map2D` (hérite de `Map`) — cartes sans projection cartographique |
 | `webmap.py` | `WebMap` — cartes interactives Folium/Leaflet |
 | `situation.py` | `SituationMap` — carte + mini-carte de localisation |
+| `bivariate.py` | choroplèthes bivariées (croisement de deux variables) |
+| `hexgrid.py` | grilles hexagonales et cartes hexbin (via `geohexgrid`) |
 
 Tout reste importable depuis `cartograpy.mapper` directement (`from cartograpy.mapper import Map`).
 
@@ -36,12 +43,12 @@ découpage interne en mixins thématiques n'a pas encore été fait.
 ## Constructeur de Map
 
 ```python
-Map(figsize=(12, 8), title="Carte", projection=ccrs.PlateCarree(),
+Map(figsize=(12, 8), title="", projection=ccrs.PlateCarree(),
     data_crs="EPSG:4326", dpi=300, verbose=True, basemap=True)
 ```
 
 - **`figsize`** (`tuple`, `str` ou `dict`, défaut `(12, 8)`) : taille en pouces, format papier (`"A4"`, `"A3"`...) ou `{"paper": ..., "orientation": ...}`.
-- **`title`** (`str`, défaut `"Carte"`) : titre de la carte.
+- **`title`** (`str`, défaut `""`) : titre de la carte — vide par défaut, aucun titre n'est affiché.
 - **`projection`** (`cartopy.crs`, défaut `ccrs.PlateCarree()`) : projection cartographique de l'axe.
 - **`data_crs`** (`str`, défaut `"EPSG:4326"`) : CRS supposé des données ajoutées.
 - **`dpi`** (`int`, défaut `300`) : résolution de la figure.
@@ -58,7 +65,7 @@ m.show()
 
 ## Méthodes de Map
 
-65 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
+67 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
 défaut) et description en une ligne — pour les paramètres en détail, se référer
 au docstring de la méthode dans `cartograpy/mapper/map.py`.
 
@@ -518,3 +525,90 @@ save(filename, dpi=300, bbox_inches='tight')
 to_bytes(format='png', dpi=300)
 ```
 Affiche / sauvegarde dans un fichier / exporte en mémoire.
+
+## Méthodes de `Map` : bivarié et hexbin
+
+En plus des fonctions autonomes ci-dessous, `Map` expose deux méthodes qui
+dessinent directement sur l'axe de la carte (avec flèche du nord, échelle,
+inset... déjà en place) au lieu de créer une figure :
+
+```python
+add_bivariate(gdf, var1, var2, **kwargs)
+```
+Surcouche de `plot_bivariate_choropleth` — tous ses paramètres nommés passent
+par `**kwargs` (`var1_label`, `palette`, `n_classes`, `legend_position`...). Le
+GeoDataFrame enrichi est aussi stocké dans `Map.last_bivariate`.
+
+```python
+add_hexgrid(gdf, column, hex_size=None, hex_grid=None, value_cols=None,
+            agg_funcs=None, predicate="within", count_col="n_points", **kwargs)
+```
+Enchaîne `make_hex_grid` → `aggregate_to_hex` → `plot_hexgrid_choropleth`. Si
+`hex_size` (ou `hex_grid`) est fourni, `gdf` est agrégé ; sinon `gdf` est
+supposé déjà agrégé et tracé tel quel. `**kwargs` va à
+`plot_hexgrid_choropleth`. Grille stockée dans `Map.last_hexgrid`.
+
+```python
+from cartograpy.data import Bound
+from cartograpy.mapper import Map
+
+m = Map(title="Densité × revenu")
+m.add_bivariate(regions, "densite", "revenu", var1_label="Densité", var2_label="Revenu")
+m.add_north_arrow()
+m.show()
+
+m = Map(title="Richesse spécifique")
+m.add_hexgrid(points_occurrence, "richesse", hex_size=25_000, cmap="YlGn", min_count=3)
+m.show()
+```
+
+Les deux méthodes reprojettent automatiquement les données en EPSG:4326 pour
+l'axe cartopy de `Map` (sur `Map2D`, les données sont laissées dans leur CRS).
+
+## Grille hexagonale (`hexgrid.py`)
+
+Trois fonctions pour produire une carte hexbin : générer une grille régulière
+sur la zone d'étude, y agréger des données ponctuelles ou polygonales, tracer le
+résultat. Nécessite le paquet `geohexgrid` (dépendance cœur). Le GeoDataFrame
+agrégé est standard et réutilisable tel quel avec `plot_bivariate_choropleth`
+(ou `Map.add_bivariate`) pour une carte hexagonale bivariée.
+
+```python
+make_hex_grid(source, hex_size, crs=None, trim_mode="intersect")
+```
+Génère une grille d'hexagones réguliers (sommet plat) couvrant une zone.
+`source` : un `GeoDataFrame` (son étendue et son CRS sont repris ; les hexagones
+hors zone sont écartés selon `trim_mode` — `"intersect"` par défaut, ou `"clip"`)
+**ou** un tuple de bornes `(minx, miny, maxx, maxy)` — dans ce cas `crs` est
+requis. `hex_size` : circumradius de l'hexagone dans l'unité du CRS (utiliser un
+CRS projeté en mètres). Retourne un `GeoDataFrame` `cell_id`, `geometry`.
+
+```python
+aggregate_to_hex(source_gdf, hex_grid, value_cols, agg_funcs=None,
+                 count_col="n_points", predicate="within")
+```
+Agrège `source_gdf` dans chaque hexagone de `hex_grid` (reprojeté au besoin).
+`value_cols` : colonnes numériques à agréger ; `agg_funcs` : fonction par colonne
+(`"mean"` partout par défaut). `predicate` : `"within"` (points) ou
+`"intersects"` (polygones à cheval). Retourne `hex_grid` enrichi des colonnes
+agrégées et de `count_col` (0 et NaN pour les hexagones sans donnée — à filtrer,
+ex. `result[result.n_points >= 3]`).
+
+```python
+plot_hexgrid_choropleth(hex_gdf, column, cmap="viridis", min_count=None,
+                        count_col="n_points", edgecolor="white", linewidth=0.3,
+                        title=None, figsize=(10, 8), show_colorbar=True,
+                        colorbar_label=None, ax_map=None, transform=None,
+                        save_path=None, dpi=300, **plot_kwargs)
+```
+Trace une choroplèthe sur la grille hexagonale (une variable). `min_count` filtre
+les hexagones sous-échantillonnés. `ax_map` permet de dessiner sur un axe
+existant (ex. `Map.ax`), `transform` accompagne une GeoAxes cartopy. Retourne
+`(figure, axe)`.
+
+```python
+grid = make_hex_grid(regions, hex_size=25_000)          # 25 km, CRS projeté
+hex_data = aggregate_to_hex(points, grid, value_cols=["richesse", "structure"])
+hex_data = hex_data[hex_data["n_points"] >= 3]
+fig, ax = plot_hexgrid_choropleth(hex_data, "richesse", cmap="YlGn", min_count=3)
+```

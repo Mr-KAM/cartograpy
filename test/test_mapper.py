@@ -38,7 +38,7 @@ class TestMapClass:
 
     def test_instantiation_default(self):
         m = Map(verbose=False)
-        assert m.title == "Carte"
+        assert m.title == ""  # pas de titre par défaut (cf. Map.__init__)
         assert m.fig is not None
         assert m.ax is not None
         import matplotlib.pyplot as plt

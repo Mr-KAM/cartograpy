@@ -26,6 +26,8 @@ import rasterio
 from cartograpy.styling import load_cmap, get_available_palettes
 import seaborn as sns
 from .helpers import read_image
+from .bivariate import plot_bivariate_choropleth
+from .hexgrid import make_hex_grid, aggregate_to_hex, plot_hexgrid_choropleth
 from ._optional_deps import *  # noqa: F401,F403
 import logging
 
@@ -2433,6 +2435,128 @@ class Map:
             stacklevel=2,
         )
         return self.add_points_choropleth(*args, **kwargs)
+
+    # ----------------------------------------------------------------------
+    # =========== Cartes bivariées et grilles hexagonales ================
+    # ----------------------------------------------------------------------
+
+    def _prepare_display_gdf(self, gdf):
+        """Valide un GeoDataFrame et le prépare pour l'axe courant.
+
+        Renvoie ``(geodf, transform)`` : reprojeté en EPSG:4326 avec
+        ``transform=ccrs.PlateCarree()`` si la carte a une projection cartopy
+        (``Map``), ou inchangé avec ``transform=None`` sinon (``Map2D``).
+        """
+        geodf = self._validate_geodataframe(gdf)
+        if self.projection is None:
+            return geodf, None
+        if geodf.crs is not None and not geodf.crs.equals("EPSG:4326"):
+            try:
+                geodf = geodf.to_crs(epsg=4326)
+            except Exception as e:
+                self._log(f"⚠️  Erreur de transformation CRS: {e}")
+        return geodf, ccrs.PlateCarree()
+
+    def _register_rendered_layer(self, layer_type, geodf, name=None, replay=None):
+        """Enregistre une couche déjà dessinée directement sur ``self.ax``.
+
+        ``replay`` : callable sans argument qui re-trace la couche sur
+        ``self.ax``, appelé par ``_render()`` après un ``ax.clear()`` (déclenché
+        par ``set_paper``/``set_projection``...).
+        """
+        self.layers.append({
+            "type": layer_type, "name": name,
+            "gdf": geodf, "data": geodf, "rendered": True,
+            "label": None, "src": None, "style": {}, "_replay": replay,
+        })
+        if self.projection is not None:
+            self._update_bounds(geodf)
+            self._apply_smart_centering()
+
+    def add_bivariate(self, gdf, var1, var2, **kwargs):
+        """Ajoute une choroplèthe bivariée (deux variables croisées) à la carte.
+
+        Surcouche de :func:`cartograpy.mapper.plot_bivariate_choropleth` qui
+        dessine sur l'axe de cette carte (``self.ax``) plutôt que de créer une
+        figure. Tous ses paramètres nommés passent par ``**kwargs``
+        (``var1_label``, ``var2_label``, ``palette``, ``n_classes``,
+        ``method``, ``legend_position``...). Le GeoDataFrame enrichi (classes
+        et couleurs bivariées) est aussi stocké dans ``self.last_bivariate``.
+
+        Retourne ``self`` (chaînable).
+        """
+        geodf, transform = self._prepare_display_gdf(gdf)
+
+        def _draw():
+            return plot_bivariate_choropleth(
+                geodf, var1, var2, ax_map=self.ax, transform=transform, **kwargs
+            )
+
+        _, _, gdf_bi = _draw()
+        self.last_bivariate = gdf_bi
+        self._register_rendered_layer(
+            "bivariate", gdf_bi, name=kwargs.get("title"), replay=_draw
+        )
+        return self
+
+    def add_hexgrid(self, gdf, column, hex_size=None, hex_grid=None,
+                    value_cols=None, agg_funcs=None, predicate="within",
+                    count_col="n_points", **kwargs):
+        """Ajoute une carte hexbin (grille hexagonale agrégée) à la carte.
+
+        Enchaîne :func:`~cartograpy.mapper.make_hex_grid`,
+        :func:`~cartograpy.mapper.aggregate_to_hex` et
+        :func:`~cartograpy.mapper.plot_hexgrid_choropleth`, en dessinant sur
+        ``self.ax``.
+
+        Paramètres:
+        -----------
+        gdf : GeoDataFrame
+            Données à agréger (points ou polygones) si ``hex_size`` ou
+            ``hex_grid`` est fourni ; sinon, grille déjà agrégée tracée telle
+            quelle.
+        column : str
+            Colonne à cartographier.
+        hex_size : float, optionnel
+            Rayon des hexagones (unité du CRS de ``gdf`` — utiliser un CRS
+            projeté). Déclenche la génération d'une grille et l'agrégation.
+        hex_grid : GeoDataFrame, optionnel
+            Grille existante (sortie de ``make_hex_grid``) au lieu d'en
+            générer une.
+        value_cols : list[str], optionnel
+            Colonnes à agréger (défaut : ``[column]``).
+        agg_funcs, predicate, count_col :
+            Passés à ``aggregate_to_hex``.
+        **kwargs :
+            Passés à ``plot_hexgrid_choropleth`` (``cmap``, ``min_count``,
+            ``edgecolor``, ``colorbar_label``...).
+
+        Le GeoDataFrame hexagonal est stocké dans ``self.last_hexgrid``.
+        Retourne ``self`` (chaînable).
+        """
+        if hex_size is not None or hex_grid is not None:
+            grid = hex_grid if hex_grid is not None else make_hex_grid(gdf, hex_size)
+            hex_gdf = aggregate_to_hex(
+                gdf, grid, value_cols or [column],
+                agg_funcs=agg_funcs, count_col=count_col, predicate=predicate,
+            )
+        else:
+            hex_gdf = gdf
+
+        geodf, transform = self._prepare_display_gdf(hex_gdf)
+        kwargs.setdefault("count_col", count_col)
+
+        def _draw():
+            return plot_hexgrid_choropleth(
+                geodf, column, ax_map=self.ax, transform=transform, **kwargs
+            )
+
+        _draw()
+        self.last_hexgrid = geodf
+        self._register_rendered_layer(
+            "hexgrid", geodf, name=kwargs.get("title"), replay=_draw
+        )
+        return self
 
     # ----------------------------------------------------------------------
     # ================Custom map appearence=================================
@@ -5461,6 +5585,14 @@ class Map:
                 rstyle = layer["style"].copy()
                 data_transform = rstyle.pop("transform", ccrs.PlateCarree())
                 self.ax.imshow(layer["data"], transform=data_transform, **rstyle)
+                layer["rendered"] = True
+            elif layer.get("_replay") is not None:
+                # bivarié / hexbin : dessinés directement à l'ajout, rejoués
+                # via leur closure après un ax.clear() (set_paper, etc.).
+                # ponytail: la légende bivariée est ré-ajoutée en add_axes à
+                # chaque rejeu ; sans fig.clear() (set_paper) elles se
+                # superposent au même endroit — acceptable, la dernière prime.
+                layer["_replay"]()
                 layer["rendered"] = True
 
         if title is not None:

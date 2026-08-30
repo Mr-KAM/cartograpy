@@ -17,7 +17,12 @@ if not _logger.handlers:
 
 from .iso_code import countries_iso3 as COUNTRY_ISO3
 
-from .data import load, save, list_geofiles, GeoBoundaries, Bound, WorldBank, OSM, Hydro, DEM
+from .data import (
+    load, save, describe, list_geofiles,
+    GeoBoundaries, Bound, Geocoder,
+    OSM, Hydro, DEM, DEMDownloadError,
+    WorldBank, Gee,
+)
 
 from .processing import (
     centroids,
@@ -39,11 +44,15 @@ from .mapper import (
     plot_bivariate_choropleth,
     plot_bivariate_legend,
     assign_bivariate_classes,
+    classify_variable,
     get_bivariate_palette,
     generate_bivariate_palette,
     list_bivariate_palettes,
     preview_bivariate_palette,
     BIVARIATE_PALETTES,
+    make_hex_grid,
+    aggregate_to_hex,
+    plot_hexgrid_choropleth,
 )
 
 from .styling import (
@@ -70,17 +79,19 @@ from .project import Project, init_project
 
 __all__ = [
     # data
-    "load", "save", "list_geofiles", "GeoBoundaries", "Bound", "WorldBank", "OSM", "Hydro", "DEM",
+    "load", "save", "describe", "list_geofiles", "GeoBoundaries", "Bound",
+    "Geocoder", "OSM", "Hydro", "DEM", "DEMDownloadError", "WorldBank", "Gee",
     # processing
     "centroids", "join", "fusion", "add_column", "split_multipolygon", "VectorTools", "RasterTools",
     # mapper
     "Map", "Map2D", "WebMap", "SituationMap",
     "plot_choropleth", "read_image",
     "plot_bivariate_choropleth", "plot_bivariate_legend",
-    "assign_bivariate_classes", "get_bivariate_palette",
+    "assign_bivariate_classes", "classify_variable", "get_bivariate_palette",
     "generate_bivariate_palette",
     "list_bivariate_palettes", "preview_bivariate_palette",
     "BIVARIATE_PALETTES",
+    "make_hex_grid", "aggregate_to_hex", "plot_hexgrid_choropleth",
     # styling
     "get_fonts", "get_available_palettes",
     "color_palettes", "custom_palettes", "load_cmap", "to_cmap",
