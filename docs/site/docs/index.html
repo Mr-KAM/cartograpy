@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -441,31 +441,31 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -612,7 +612,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>cartograpy est une boîte à outils Python orientée cartographie, traitement géospatial et production de cartes statiques ou web — de la récupération des données jusqu’au rendu final, sans limite géographique : n’importe quel pays, continent ou zone d’étude, partout dans le monde.</p>
+<p>cartograpy est une boîte à outils Python orientée cartographie, traitement géospatial et production de cartes statiques ou web : de la récupération des données jusqu’au rendu final, sans limite géographique : n’importe quel pays, continent ou zone d’étude, partout dans le monde.</p>
 <p><img src=".\assets/create_python_maps.py.png" class="img-fluid"></p>
 <section id="ce-que-vous-pouvez-faire" class="level2">
 <h2 class="anchored" data-anchor-id="ce-que-vous-pouvez-faire">Ce que vous pouvez faire</h2>
@@ -662,7 +662,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <section id="obtention-de-données-géographiques" class="level3">
 <h3 class="anchored" data-anchor-id="obtention-de-données-géographiques">Obtention de données géographiques</h3>
-<p>Pour télécharger simplement des données dans cartograpy, vous devez utiliser le module <code>data</code>. Il existe présentement six (6) types de données que vous pouvez télécharger avec cartograpy :</p>
+<p>Pour télécharger simplement des données dans cartograpy, vous devez utiliser le module <code>data</code>. Il existe présentement sept (7) types de données que vous pouvez télécharger avec cartograpy :</p>
 <ul>
 <li>les limites des continents et le découpage administratif des pays (<code>GeoBoundaries</code>, <code>Bound</code>)</li>
 <li>des données par géocodage (<code>Geocoder</code>)</li>
@@ -670,6 +670,7 @@ ul.task-list li input[type="checkbox"] {
 <li>des données hydrographiques (<code>Hydro</code>)</li>
 <li>des données de la World Bank, différents indicateurs de différentes sources (<code>WorldBank</code>)</li>
 <li>un modèle numérique de terrain SRTM à 30 m de résolution (<code>DEM</code>)</li>
+<li>des séries météo/climat globales via NASA POWER (<code>Climate</code>)</li>
 </ul>
 <p>Ces ressources permettent un gain considérable de temps et facilitent la création de vos cartes.</p>
 <div class="cell" data-layout-align="default">
@@ -685,6 +686,7 @@ ul.task-list li input[type="checkbox"] {
     A --&gt; E[Hydro&lt;br&gt;&lt;i&gt;Données hydrographiques&lt;/i&gt;]
     A --&gt; F[WorldBank&lt;br&gt;&lt;i&gt;Indicateurs de la Banque&lt;br&gt;Mondiale et autres sources&lt;/i&gt;]
     A --&gt; G[DEM&lt;br&gt;&lt;i&gt;SRTM à 30 m de résolution&lt;/i&gt;]
+    A --&gt; H[Climate&lt;br&gt;&lt;i&gt;Météo/climat NASA POWER&lt;/i&gt;]
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -701,7 +703,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Un septième connecteur, <code>Gee</code> (Google Earth Engine), est disponible via <code>cartograpy.data.Gee</code> ou <code>cartograpy.Gee</code> — il nécessite en plus le paquet <code>earthengine-api</code> et une authentification interactive (<code>ee.Authenticate()</code>).</p>
+<p>Un huitième connecteur, <code>Gee</code> (Google Earth Engine), est disponible via <code>cartograpy.data.Gee</code> ou <code>cartograpy.Gee</code> : il nécessite en plus le paquet <code>earthengine-api</code> et une authentification interactive (<code>ee.Authenticate()</code>).</p>
 </div>
 </div>
 <p>Toutes les données sont formatées pour être retournées sous forme de <code>GeoDataFrame</code> ou de <code>DataFrame</code>, afin d’en faciliter la manipulation.</p>
@@ -711,18 +713,18 @@ Note
 <h2 class="anchored" data-anchor-id="parcours-recommandé">Parcours recommandé</h2>
 <ol type="1">
 <li><p><strong>Installation</strong></p>
-<p>Voir <a href="./getting-started/installation.html">Installation</a> — Python 3.11+ et les dépendances système de la stack géospatiale.</p></li>
+<p>Voir <a href="./getting-started/installation.html">Installation</a> : Python 3.11+ et les dépendances système de la stack géospatiale.</p></li>
 <li><p><strong>Quickstart</strong></p>
-<p>Voir <a href="./getting-started/quickstart.html">Quickstart</a> — une première carte en moins de 10 lignes.</p></li>
+<p>Voir <a href="./getting-started/quickstart.html">Quickstart</a> : une première carte en moins de 10 lignes.</p></li>
 <li><p><strong>Premier projet</strong></p>
-<p>Voir <a href="./getting-started/first-project.html">Premier projet</a> — structurer un dossier de travail avec <code>Project</code>.</p></li>
+<p>Voir <a href="./getting-started/first-project.html">Premier projet</a> : structurer un dossier de travail avec <code>Project</code>.</p></li>
 <li><p><strong>Guides par tâche</strong></p>
 <p>Explorer les <a href="./guides/load-and-save-data.html">Guides</a> selon votre besoin : charger des données, récupérer des frontières administratives, traiter du vecteur ou du raster, produire des cartes statiques ou web.</p></li>
 </ol>
 </section>
 <section id="architecture-en-un-coup-dœil" class="level2">
 <h2 class="anchored" data-anchor-id="architecture-en-un-coup-dœil">Architecture en un coup d’œil</h2>
-<p>Cinq blocs pivots, chacun un sous-package organisé par responsabilité — voir <a href="./explanations/package-architecture.html">Architecture du package</a> pour le détail.</p>
+<p>Cinq blocs pivots, chacun un sous-package organisé par responsabilité : voir <a href="./explanations/package-architecture.html">Architecture du package</a> pour le détail.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -763,7 +765,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Tout reste importable directement depuis <code>cartograpy</code> (<code>from cartograpy import Map, Bound, Project</code>) ou depuis chaque sous-module (<code>from cartograpy.data import Bound</code>) — l’organisation interne en fichiers est un détail d’implémentation, pas une contrainte d’usage.</p>
+<p>Tout reste importable directement depuis <code>cartograpy</code> (<code>from cartograpy import Map, Bound, Project</code>) ou depuis chaque sous-module (<code>from cartograpy.data import Bound</code>) : l’organisation interne en fichiers est un détail d’implémentation, pas une contrainte d’usage.</p>
 </div>
 </div>
 
@@ -771,6 +773,20 @@ Note
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1200,11 +1216,13 @@ Note
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -474,31 +474,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -669,7 +669,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Si le CRS est géographique (degrés, ex. EPSG:4326), le centroïde est calculé sans reprojection — geopandas émet un avertissement, le résultat peut être imprécis pour des polygones étendus. Reprojeter en CRS métrique avant si la précision compte.</p>
+<p>Si le CRS est géographique (degrés, ex. EPSG:4326), le centroïde est calculé sans reprojection : geopandas émet un avertissement, le résultat peut être imprécis pour des polygones étendus. Reprojeter en CRS métrique avant si la précision compte.</p>
 </div>
 </div>
 </section>
@@ -711,7 +711,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Si un des éléments est un <code>GeoDataFrame</code>, le résultat force le CRS du <strong>premier</strong> élément de la liste — vérifiez l’ordre si vos couches ont des CRS différents et <code>ignore_crs=True</code>.</p>
+<p>Si un des éléments est un <code>GeoDataFrame</code>, le résultat force le CRS du <strong>premier</strong> élément de la liste : vérifiez l’ordre si vos couches ont des CRS différents et <code>ignore_crs=True</code>.</p>
 </div>
 </div>
 </section>
@@ -773,7 +773,7 @@ Note
 <h2 class="anchored" data-anchor-id="get_multipolygon_infomultipolygon"><code>get_multipolygon_info(multipolygon)</code></h2>
 <p>Renvoie des statistiques descriptives sur un <code>MultiPolygon</code> (ou <code>Polygon</code>, ou WKT).</p>
 <ul>
-<li><strong><code>retour</code></strong> (<code>dict</code>) : <code>type</code>, <code>num_polygons</code>, <code>total_area</code>, <code>bounds</code>, <code>areas</code> — et pour un vrai <code>MultiPolygon</code> : <code>largest_polygon_area</code>, <code>smallest_polygon_area</code>.</li>
+<li><strong><code>retour</code></strong> (<code>dict</code>) : <code>type</code>, <code>num_polygons</code>, <code>total_area</code>, <code>bounds</code>, <code>areas</code> : et pour un vrai <code>MultiPolygon</code> : <code>largest_polygon_area</code>, <code>smallest_polygon_area</code>.</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing <span class="im">import</span> get_multipolygon_info</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -798,7 +798,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Cette fonction n’a pas de valeur de retour exploitable (elle affiche via <code>logging</code> et ne renvoie rien) — à utiliser pour de l’inspection interactive, pas dans un pipeline qui a besoin du résultat.</p>
+<p>Cette fonction n’a pas de valeur de retour exploitable (elle affiche via <code>logging</code> et ne renvoie rien) : à utiliser pour de l’inspection interactive, pas dans un pipeline qui a besoin du résultat.</p>
 </div>
 </div>
 </section>
@@ -829,7 +829,7 @@ Note
 </section>
 <section id="clip_gdf_by_bboxgdf_source-gdf_emprise-crsepsg4326" class="level2">
 <h2 class="anchored" data-anchor-id="clip_gdf_by_bboxgdf_source-gdf_emprise-crsepsg4326"><code>clip_gdf_by_bbox(gdf_source, gdf_emprise, crs="EPSG:4326")</code></h2>
-<p>Même principe que <code>clip_gdf_by_mask</code>, mais découpe selon la <strong>bounding box</strong> de l’emprise plutôt que sa géométrie exacte — plus rapide, moins précis (garde des zones hors de l’emprise réelle si elle n’est pas rectangulaire).</p>
+<p>Même principe que <code>clip_gdf_by_mask</code>, mais découpe selon la <strong>bounding box</strong> de l’emprise plutôt que sa géométrie exacte : plus rapide, moins précis (garde des zones hors de l’emprise réelle si elle n’est pas rectangulaire).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing <span class="im">import</span> clip_gdf_by_bbox</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>apercu_rapide <span class="op">=</span> clip_gdf_by_bbox(gros_raster_vecteur, zone_interet)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -851,6 +851,20 @@ Astuce
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1283,11 +1297,13 @@ Astuce
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

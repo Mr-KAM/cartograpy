@@ -529,6 +529,63 @@ class TestAddCustomLabels:
         plt.close(m.fig)
 
 
+class TestBackgroundImage:
+    """Tests de add_background_image() / set_background_image()."""
+
+    @staticmethod
+    def _img(tmp_path):
+        import numpy as np
+        from PIL import Image
+        p = tmp_path / "bg.png"
+        Image.fromarray(
+            (np.random.default_rng(0).random((20, 30, 3)) * 255).astype("uint8")
+        ).save(p)
+        return str(p)
+
+    @staticmethod
+    def _n_images(ax):
+        from matplotlib.image import AxesImage
+        return sum(isinstance(c, AxesImage) for c in ax.get_children())
+
+    def test_add_stores_artist_and_kwargs(self, tmp_path):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        m.set_extent([-9, -2, 4, 11])
+        out = m.add_background_image(self._img(tmp_path), alpha=0.4)
+        assert out is m
+        assert m._background_image_artist is not None
+        assert m._background_image_kwargs["alpha"] == 0.4
+        assert self._n_images(m.ax) == 1
+        plt.close(m.fig)
+
+    def test_survives_ax_clear(self, tmp_path):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        m.set_extent([-9, -2, 4, 11])
+        m.add_background_image(self._img(tmp_path))
+        m._invalidate_render()           # ax.clear() + _reapply_persistent_artists()
+        assert self._n_images(m.ax) == 1  # re-dessinée
+        plt.close(m.fig)
+
+    def test_set_merges_and_replaces(self, tmp_path):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        m.set_extent([-9, -2, 4, 11])
+        m.add_background_image(self._img(tmp_path), alpha=0.5, zoom=1.0)
+        m.set_background_image(alpha=0.2)
+        assert m._background_image_kwargs["alpha"] == 0.2
+        assert m._background_image_kwargs["zoom"] == 1.0   # conservé
+        assert self._n_images(m.ax) == 1                   # pas d'empilement
+        plt.close(m.fig)
+
+    def test_set_without_add_raises(self):
+        import matplotlib.pyplot as plt
+        m = Map(basemap=False, verbose=False)
+        with pytest.raises(RuntimeError):
+            m.set_background_image(alpha=0.2)
+        plt.close(m.fig)
+
+
 class TestMap2D:
     """Tests de la classe Map2D."""
 

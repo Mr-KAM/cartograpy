@@ -26,7 +26,7 @@ Formats vectoriels supportés : `shp`, `geojson`, `gpkg`, `kml`, `gpx`, `csv`,
 
 ### Cas particulier : GPX
 
-Les fichiers GPX ont plusieurs couches (`tracks`, `waypoints`, `routes`) —
+Les fichiers GPX ont plusieurs couches (`tracks`, `waypoints`, `routes`) :
 précisez celle qui vous intéresse :
 
 ```python
@@ -36,7 +36,7 @@ tracks = load("data/randonnee.gpx", layer="tracks")  # couche par défaut
 
 ### Cas particulier : raster
 
-`load()` renvoie un objet `rasterio.io.DatasetReader` **ouvert** — fermez-le
+`load()` renvoie un objet `rasterio.io.DatasetReader` **ouvert** : fermez-le
 explicitement ou utilisez un context manager :
 
 ```python
@@ -113,7 +113,7 @@ save(
 
 ::: {.callout-warning}
 `save()` refuse d'écraser un fichier existant que si vous ne passez pas
-`timestamp=True` — mais elle ne vérifie pas non plus l'existence préalable :
+`timestamp=True` : mais elle ne vérifie pas non plus l'existence préalable :
 contrairement à `Project.add_data()` (qui lève `FileExistsError` sans
 `overwrite=True`), un appel direct à `save()` écrase silencieusement. Passez par
 `Project` si vous voulez cette protection.
@@ -134,7 +134,7 @@ géospatiale reconnue (`.shp`, `.geojson`, `.gpkg`, `.kml`, `.csv`, `.parquet`,
 
 ## Aller plus loin
 
-- [Premier projet](/getting-started/first-project.qmd) — passer par `Project` pour que
+- [Premier projet](/getting-started/first-project.qmd) : passer par `Project` pour que
   chargement/sauvegarde restent relatifs à un dossier de travail plutôt qu'à des
   chemins en dur
-- [Reference data](/reference/data.qmd) — signatures complètes
+- [Reference data](/reference/data.qmd) : signatures complètes

@@ -66,6 +66,14 @@ class TestImports:
         from cartograpy import init_project
         assert callable(init_project)
 
+    def test_version_string(self):
+        import re
+        import cartograpy
+        assert isinstance(cartograpy.__version__, str)
+        # numérique (paquet installé) ou repli "0.0.0+unknown"
+        assert re.match(r"^\d+\.\d+", cartograpy.__version__) or \
+            cartograpy.__version__ == "0.0.0+unknown"
+
 
 class TestStyling:
     """Vérifie les fonctions de styling."""

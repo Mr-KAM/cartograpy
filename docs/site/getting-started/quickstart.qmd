@@ -30,7 +30,7 @@ m.show()
 ```
 
 ::: {.callout-note}
-`"CIV"` est un code ISO3 — n'importe quel pays fonctionne de la même façon
+`"CIV"` est un code ISO3 : n'importe quel pays fonctionne de la même façon
 (`bound.get_admin("SEN", adm=0)`, `bound.get_admin("France", adm=1)`...). Voir
 [Frontières et données administratives](/guides/boundaries-and-admin-data.qmd).
 :::
@@ -66,16 +66,16 @@ m.save("carte_densite.png", dpi=300)
 
 1. **Initialiser un projet**
 
-   [Premier projet](/getting-started/first-project.qmd) — structurer `data/` et
+   [Premier projet](/getting-started/first-project.qmd) : structurer `data/` et
    `output/` avec `Project` plutôt que des chemins en dur.
 1. **Charger ses propres données**
 
-   [Charger et enregistrer des données](/guides/load-and-save-data.qmd) — tous les
+   [Charger et enregistrer des données](/guides/load-and-save-data.qmd) : tous les
    formats supportés (`shp`, `geojson`, `gpkg`, `kml`, `gpx`, `csv`, `parquet`,
    `tif`).
 1. **Produire une première carte statique**
 
-   [Cartes statiques](/guides/static-maps.qmd) — couches, légende, échelle, flèche du
+   [Cartes statiques](/guides/static-maps.qmd) : couches, légende, échelle, flèche du
    Nord, export.
 1. **Explorer les outils vectoriels et raster**
 

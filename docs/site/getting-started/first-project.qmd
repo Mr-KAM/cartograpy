@@ -92,5 +92,5 @@ project.save_manifest()      # écrit project.json (CRS, inventaire, dates)
 
 ## Pages liées
 
-- [Reference project](/reference/project.qmd) — référence complète de la classe
-- [Organisation de projet](/guides/project-organization.qmd) — guide détaillé
+- [Reference project](/reference/project.qmd) : référence complète de la classe
+- [Organisation de projet](/guides/project-organization.qmd) : guide détaillé

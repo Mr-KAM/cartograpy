@@ -10,7 +10,7 @@ pays au niveau mondial via Natural Earth. Aucune limite géographique : `"France
 `"SEN"`, `"เซเนกัล"` ou `"Côte d'Ivoire"` fonctionnent de la même façon.
 
 ::: {.callout-note}
-Utilisez `Bound` plutôt que `GeoBoundaries` directement — elle expose les mêmes
+Utilisez `Bound` plutôt que `GeoBoundaries` directement : elle expose les mêmes
 fonctionnalités avec des méthodes plus explicites (`get_country`, `get_continent`,
 `get_neighbors`...).
 :::
@@ -46,7 +46,7 @@ b.get_admin("CIV", adm=-1)  # le plus petit niveau disponible pour ce pays
 | ADM5 | Quartier / Secteur |
 
 ::: {.callout-warning}
-Tous les pays n'ont pas tous les niveaux disponibles dans geoBoundaries — `adm=-1`
+Tous les pays n'ont pas tous les niveaux disponibles dans geoBoundaries : `adm=-1`
 évite de deviner, ou testez avec `b.is_valid_adm("CIV", "ADM3")` avant d'appeler
 `get_admin`.
 :::
@@ -62,7 +62,7 @@ b.get_world("country")     # tous les pays (Natural Earth, résolution 110m)
 ```
 
 ::: {.callout-tip}
-`get_world()` vient de Natural Earth (faible résolution, rapide) — pour des
+`get_world()` vient de Natural Earth (faible résolution, rapide) : pour des
 frontières nationales précises, préférez `get_admin(pays, adm=0)` (geoBoundaries)
 pays par pays.
 :::
@@ -83,12 +83,12 @@ b.get_area("CIV")           # km², calculé en projection équivalente-surface
 b.get_area(["SEN", "Mali"], unit="ha")
 
 b.clip(routes_gdf, "CIV")                  # découpe un GeoDataFrame par frontière
-b.contains("CIV", (6.85, -5.28))           # True — point (lat, lon) dans le pays ?
+b.contains("CIV", (6.85, -5.28))           # True : point (lat, lon) dans le pays ?
 ```
 
 ::: {.callout-note}
 `get_area()` reprojette automatiquement en Mollweide (`ESRI:54009`) avant le
-calcul — voir [CRS et projections](/explanations/crs-and-projections.qmd). Le calcul
+calcul : voir [CRS et projections](/explanations/crs-and-projections.qmd). Le calcul
 d'aire est donc fiable sans manipulation manuelle de CRS.
 :::
 
@@ -105,7 +105,7 @@ b.list_continents_names()   # mapping FR/EN -> nom Natural Earth
 ## Cache et performance
 
 `Bound`/`GeoBoundaries` mettent en cache les réponses HTTP (`requests_cache`, 7
-jours par défaut) — un deuxième appel identique ne repasse pas par le réseau :
+jours par défaut) : un deuxième appel identique ne repasse pas par le réseau :
 
 ```python
 b = Bound(cache_expire_seconds=3600)   # 1h au lieu de 7 jours
@@ -123,9 +123,9 @@ b.adminLevels()             # tableau explicatif des niveaux ADM
 
 ## Aller plus loin
 
-- [CRS et projections](/explanations/crs-and-projections.qmd) — pourquoi `get_area()`
+- [CRS et projections](/explanations/crs-and-projections.qmd) : pourquoi `get_area()`
   reprojette automatiquement
-- [Traitement vectoriel](/guides/vector-processing.qmd) — `clip_gdf_by_mask` pour
+- [Traitement vectoriel](/guides/vector-processing.qmd) : `clip_gdf_by_mask` pour
   découper avec plus d'options qu'un simple `Bound.clip`
-- [Reference data](/reference/data.qmd) — signatures complètes de `GeoBoundaries` et
+- [Reference data](/reference/data.qmd) : signatures complètes de `GeoBoundaries` et
   `Bound`

@@ -1,5 +1,5 @@
 ---
-title: "Densité de population — Côte d'Ivoire"
+title: "Densité de population : Côte d'Ivoire"
 description: "Choroplèthe simple avec flèche du Nord, logo en filigrane et légende par classes hors-carte."
 image: /assets/cote-divoire-densite-example.png
 ---
@@ -39,7 +39,7 @@ m.hide_gridline()
 m.add_north_arrow(location="upper right", scale=0.35)
 m.add_image("assets/img/logo.png", (0.10, 0.10), zoom=0.05)
 m.add_custom_text(
-    "Densité de population (exemple) — Côte d'Ivoire",
+    "Densité de population (exemple) : Côte d'Ivoire",
     (0.5, 0.06), to="fig", fontsize=13, ha="center", va="center",
 )
 

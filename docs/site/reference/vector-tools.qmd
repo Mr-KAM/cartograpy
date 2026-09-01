@@ -13,7 +13,7 @@ vt = VectorTools(gdf)  # lève TypeError si gdf n'est pas un GeoDataFrame
 
 ::: {.callout-note}
 Chaque méthode retourne une **nouvelle** instance de `VectorTools` (le
-`GeoDataFrame` interne n'est jamais modifié sur place) — elles sont donc
+`GeoDataFrame` interne n'est jamais modifié sur place) : elles sont donc
 chaînables. Récupérez le résultat final avec `.gdf` :
 
 ```python
@@ -184,7 +184,7 @@ Nécessitent `libpysal` (`spatial_weights`) et `esda` (les indices eux-mêmes).
 |---|---|
 | `spatial_weights(method="queen", k=4, distance=None)` | Matrice de poids spatiaux (`"queen"`, `"rook"`, `"knn"`, `"distance"`). |
 | `morans_i(column, method="queen", **kwargs)` | Autocorrélation spatiale globale (I de Moran). |
-| `local_morans(column, method="queen", significance=0.05, **kwargs)` | LISA — indicateurs locaux (`lisa_I`, `lisa_p`, `lisa_q`, `lisa_cluster`). |
+| `local_morans(column, method="queen", significance=0.05, **kwargs)` | LISA : indicateurs locaux (`lisa_I`, `lisa_p`, `lisa_q`, `lisa_cluster`). |
 | `gearys_c(column, method="queen", **kwargs)` | Indice C de Geary. |
 | `spatial_autocorrelation_report(column, method="queen", **kwargs)` | Rapport combiné Moran + Geary + LISA. |
 :::

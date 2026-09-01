@@ -4,8 +4,8 @@ description: "Utiliser les fonctions utilitaires et la classe VectorTools."
 ---
 
 `cartograpy.processing` expose une API en deux niveaux : des fonctions simples pour
-les opérations fréquentes, et `VectorTools` — une classe chaînable de plus de 100
-méthodes — pour les workflows plus avancés.
+les opérations fréquentes, et `VectorTools` : une classe chaînable de plus de 100
+méthodes : pour les workflows plus avancés.
 
 ## Fonctions rapides
 
@@ -27,10 +27,10 @@ routes_civ = clip_gdf_by_mask(routes_gdf, frontiere_civ)
 
 Détail complet de chacune : [Reference processing functions](/reference/processing-functions.qmd).
 
-## VectorTools — l'API chaînable
+## VectorTools : l'API chaînable
 
 `VectorTools` encapsule un `GeoDataFrame`. Chaque méthode de transformation renvoie
-une **nouvelle** instance (rien n'est modifié sur place) — on chaîne donc les
+une **nouvelle** instance (rien n'est modifié sur place) : on chaîne donc les
 opérations et on récupère le résultat avec `.gdf` :
 
 ```python
@@ -51,7 +51,7 @@ result = (
 
 ::: {.callout-note}
 Quelques méthodes sortent de ce pattern et renvoient directement une valeur
-(`dict`, `DataFrame`, chemin de fichier) plutôt qu'un `VectorTools` — la liste
+(`dict`, `DataFrame`, chemin de fichier) plutôt qu'un `VectorTools` : la liste
 exacte est dans [Reference VectorTools](/reference/vector-tools.qmd).
 :::
 
@@ -151,6 +151,6 @@ Liste complète des méthodes par famille : [Reference VectorTools](/reference/v
 ::: {.callout-warning}
 Certaines familles avancées (réseau/accessibilité, clustering, statistiques
 spatiales, krigeage) chargent une dépendance optionnelle à l'appel
-(`networkx`, `scikit-learn`, `libpysal`/`esda`, `pykrige`) — non incluse dans les
+(`networkx`, `scikit-learn`, `libpysal`/`esda`, `pykrige`) : non incluse dans les
 dépendances cœur de cartograpy, à installer séparément si vous les utilisez.
 :::

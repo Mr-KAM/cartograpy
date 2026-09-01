@@ -45,28 +45,36 @@ AWS S3, puis mosaïqué. Utilisé par `DEM`.
 
 Indicateurs socio-économiques par pays, via `wbdata`. Utilisé par `WorldBank`.
 
+#### NASA POWER
+
+Séries météo/climat globales (température, précipitations, vent, rayonnement,
+humidité) journalières à climatologiques, via l'API REST `power.larc.nasa.gov`
+: **sans clé API**. Utilisé par `Climate`. Réponses mises en cache localement
+(`requests_cache`, 7 jours par défaut).
+
 #### Google Earth Engine
 
-Imagerie satellite et analyses à grande échelle. Utilisé par `Gee` — nécessite
+Imagerie satellite et analyses à grande échelle. Utilisé par `Gee` : nécessite
 en plus un compte Google Earth Engine et une authentification (`ee.Authenticate()`),
 au-delà de l'installation des paquets Python.
 
-## Ce qui a besoin du réseau — et ce qui n'en a pas besoin
+## Ce qui a besoin du réseau : et ce qui n'en a pas besoin
 
 | Fonctionnalité | Réseau requis ? |
 |---|---|
-| `load`, `save`, `describe`, `list_geofiles` | Non — fichiers locaux uniquement |
+| `load`, `save`, `describe`, `list_geofiles` | Non : fichiers locaux uniquement |
 | `VectorTools`, `RasterTools`, `centroids`, `join`, `fusion`, `add_column`, `split_multipolygon`, `clip_gdf_by_*` | Non |
 | `Project` (toutes les méthodes) | Non |
 | `styling` (polices Google Fonts exceptées, voir ci-dessous) | Non |
-| `GeoBoundaries` / `Bound` | Oui (geoboundaries.org, Natural Earth) — mis en cache après le premier appel |
+| `GeoBoundaries` / `Bound` | Oui (geoboundaries.org, Natural Earth) : mis en cache après le premier appel |
 | `OSM` | Oui (Overpass via osmnx) |
 | `Geocoder` | Oui (Nominatim et/ou Overpass) |
 | `Hydro` | Oui (hydrosheds.org), puis lecture locale une fois téléchargé |
 | `DEM` | Oui (AWS S3), puis lecture locale une fois téléchargé |
 | `WorldBank` | Oui (API World Bank) |
+| `Climate` | Oui (API NASA POWER) : mis en cache après le premier appel |
 | `Gee` | Oui, + authentification Google Earth Engine préalable |
-| `google_font()` (styling) | Oui (Google Fonts) — `path_font()`/`local_font()` sont locaux |
+| `google_font()` (styling) | Oui (Google Fonts) : `path_font()`/`local_font()` sont locaux |
 | `Map.add_basemap()` | Oui (tuiles web via `contextily`) |
 | `WebMap` | Non pour la génération de la carte (tuiles chargées côté navigateur au moment de l'affichage, pas au moment de l'appel Python) |
 
@@ -111,12 +119,12 @@ n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
 |---|---|---|
 | `contextily` | `Map.add_basemap()` (fonds de carte tuilés) | Non |
 | `matplotlib-scalebar` | Barre d'échelle alternative sur `Map`/`SituationMap` | Non |
-| `earthengine-api` (`ee`) | `Gee` (toutes les méthodes) | **Non** — écart à corriger, voir ci-dessous |
+| `earthengine-api` (`ee`) | `Gee` (toutes les méthodes) | **Non** : écart à corriger, voir ci-dessous |
 
 ::: {.callout-warning}
 Écart connu : `Gee` importe le paquet `ee` (`earthengine-api`) via
 `_require_ee()`, mais ce paquet n'apparaît nulle part dans les dépendances de
-`pyproject.toml` — seul `geemap` y est déclaré (en dépendance cœur, alors qu'il
+`pyproject.toml` : seul `geemap` y est déclaré (en dépendance cœur, alors qu'il
 n'est en réalité utilisé qu'à travers ce même mécanisme optionnel). Installer
 cartograpy seul ne suffit donc pas à faire fonctionner `Gee` : il faut ajouter
 manuellement `pip install earthengine-api`.

@@ -11,11 +11,11 @@ en local.
 - Python 3.11 ou supérieur
 - Un environnement virtuel dédié (`venv`, `conda` ou `uv`)
 - Les bibliothèques système requises par `geopandas`, `rasterio`, `fiona` et
-  `cartopy` (GDAL, GEOS, PROJ) — voir la section par plateforme ci-dessous
+  `cartopy` (GDAL, GEOS, PROJ) : voir la section par plateforme ci-dessous
 
 ## Installation rapide
 
-cartograpy est publié sur PyPI — il n'existe pas de paquet conda-forge, donc `conda`/`uv`
+cartograpy est publié sur PyPI : il n'existe pas de paquet conda-forge, donc `conda`/`uv`
 servent ici à créer l'environnement, `pip` reste l'outil qui installe cartograpy lui-même.
 
 ::: {.panel-tabset}
@@ -62,7 +62,7 @@ cd cartograpy
 pip install -e .[dev]
 ```
 
-`[dev]` ajoute `pytest`, `black`, `flake8`, `mypy` et `jupyterlab` — nécessaires pour
+`[dev]` ajoute `pytest`, `black`, `flake8`, `mypy` et `jupyterlab` : nécessaires pour
 contribuer, inutiles pour un simple usage du package.
 
 ## Dépendances par plateforme
@@ -71,7 +71,7 @@ contribuer, inutiles pour un simple usage du package.
 ## Windows
 
 Les roues précompilées (`.whl`) de `geopandas`, `rasterio`, `fiona`, `cartopy` et
-`pyproj` couvrent la majorité des cas via `pip install cartograpy` directement —
+`pyproj` couvrent la majorité des cas via `pip install cartograpy` directement :
 aucune compilation locale requise dans la plupart des configurations récentes
 de Python 3.11+/pip.
 
@@ -145,9 +145,10 @@ marimo edit mon_notebook.py
 ## Vérifier l'installation
 
 ```python
-import cartograpy
+import cartograpy as cp
 
-print(cartograpy.COUNTRY_ISO3["france"])  # "fra"
+print(cp.__version__)                  # ex. "1.1.0"
+print(cp.COUNTRY_ISO3["france"])       # "fra"
 ```
 
 ::: {.callout-note}

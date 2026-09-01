@@ -26,14 +26,14 @@ distance réelle.
 ## Pourquoi ça casse silencieusement
 
 Un `GeoDataFrame` en `EPSG:4326` a des géométries en degrés. Appeler `.area` ou
-`.length` dessus renvoie un nombre — geopandas ne lève pas d'erreur — mais ce nombre
+`.length` dessus renvoie un nombre : geopandas ne lève pas d'erreur : mais ce nombre
 est en degrés carrés ou en degrés, pas en m² ou en mètres. C'est le piège le plus
 courant.
 
 ::: {.callout-warning}
 `cartograpy.processing.centroids()` émet un avertissement geopandas
 (`UserWarning: Geometry is in a geographic CRS...`) si vous calculez un centroïde
-sans reprojection préalable — le résultat reste utilisable pour un usage visuel,
+sans reprojection préalable : le résultat reste utilisable pour un usage visuel,
 mais peut être imprécis pour de grands polygones (le vrai centre de masse dévie
 du calcul planaire near les pôles ou sur de grandes étendues est-ouest).
 :::
@@ -54,7 +54,7 @@ b.get_area("CIV", unit="ha")
 
 `clip_gdf_by_mask` et `clip_gdf_by_bbox` (dans `cartograpy.processing`) reprojettent
 automatiquement l'emprise de découpe dans le CRS de la couche source si les deux
-diffèrent — vous n'avez pas à harmoniser les CRS vous-même avant un découpage :
+diffèrent : vous n'avez pas à harmoniser les CRS vous-même avant un découpage :
 
 ```python
 from cartograpy.processing import clip_gdf_by_mask
@@ -77,7 +77,7 @@ routes_civ = clip_gdf_by_mask(routes_gdf, frontiere_civ)
 1. **Superposition de couches vecteur/raster**
 
    Les opérations d'intersection, de clip ou de zonal stats supposent des
-   géométries dans le même CRS que le raster — reprojetez la couche vecteur (ou le
+   géométries dans le même CRS que le raster : reprojetez la couche vecteur (ou le
    raster, via `RasterTools`) avant toute analyse combinée.
 1. **Affichage**
 
@@ -108,7 +108,7 @@ Project.available_crs(name_contains="UTM zone 30N")
 ## `Project` et le CRS
 
 `Project` porte un CRS de référence (`EPSG:4326` par défaut), stocké comme objet
-`pyproj.CRS` sur `project.crs` — mais il ne reprojette pas automatiquement les
+`pyproj.CRS` sur `project.crs` : mais il ne reprojette pas automatiquement les
 données que vous chargez ou sauvegardez : c'est une métadonnée de projet, pas une
 transformation appliquée en cascade.
 

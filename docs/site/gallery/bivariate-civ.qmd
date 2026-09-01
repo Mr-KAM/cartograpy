@@ -1,5 +1,5 @@
 ---
-title: "Choroplèthe bivariée — Côte d'Ivoire"
+title: "Choroplèthe bivariée : Côte d'Ivoire"
 description: "Densité de population croisée avec l'espérance de vie sur les 14 districts : palette 3×3, légende carrée, étiquettes par entité via add_custom_labels()."
 image: /assets/bivariate-civ-example.png
 ---
@@ -20,8 +20,8 @@ hautes ; Sassandra-Marahoué, assez dense mais à espérance de vie basse.
 
 Techniques utilisées :
 
-- `cp.load()` pour lire le GeoJSON — aucun `import geopandas` nécessaire
-- `Map.add_bivariate()` — surcouche de `plot_bivariate_choropleth()` qui
+- `cp.load()` pour lire le GeoJSON : aucun `import geopandas` nécessaire
+- `Map.add_bivariate()` : surcouche de `plot_bivariate_choropleth()` qui
   dessine sur l'axe de la carte, avec sa légende carrée positionnable
 - `palette="teal_orange"` parmi les palettes bivariées intégrées (voir aussi
   `generate_bivariate_palette()` pour croiser deux rampes au choix)
@@ -73,7 +73,7 @@ m.add_custom_text(
     color="#1a1a1a", fontsize=26, font=font_title, ha="center", va="top",
 )
 m.add_custom_text(
-    "Districts de Côte d'Ivoire — 2021-2022", (0.5, 0.925), to="fig",
+    "Districts de Côte d'Ivoire : 2021-2022", (0.5, 0.925), to="fig",
     color="#555555", fontsize=13, font=font_text, ha="center", va="top",
 )
 m.add_custom_text(

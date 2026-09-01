@@ -9,7 +9,7 @@ image: /assets/co2-europe-example.png
 Carte éditoriale (émissions de CO₂ par habitant en Europe, 2021), inspirée
 d'un exemple de [The Python Graph
 Gallery](https://python-graph-gallery.com/), entièrement reconstruite avec
-`Map` — sans `matplotlib`/`highlight_text`/`drawarrow` importés directement
+`Map` : sans `matplotlib`/`highlight_text`/`drawarrow` importés directement
 dans le script. Le détail pas-à-pas de chaque bloc est dans le guide
 [Cartes statiques](/guides/static-maps.qmd#exemple-complet) ; cette page
 donne le code complet, prêt à copier-coller.

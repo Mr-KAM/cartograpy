@@ -27,17 +27,17 @@ description: "Référence des cartes statiques et interactives."
 | Fichier | Contenu |
 |---|---|
 | `helpers.py` | `read_image`, `plot_choropleth` |
-| `map.py` | `Map` — la classe principale, cartes statiques matplotlib/cartopy |
-| `map2d.py` | `Map2D` (hérite de `Map`) — cartes sans projection cartographique |
-| `webmap.py` | `WebMap` — cartes interactives Folium/Leaflet |
-| `situation.py` | `SituationMap` — carte + mini-carte de localisation |
+| `map.py` | `Map` : la classe principale, cartes statiques matplotlib/cartopy |
+| `map2d.py` | `Map2D` (hérite de `Map`) : cartes sans projection cartographique |
+| `webmap.py` | `WebMap` : cartes interactives Folium/Leaflet |
+| `situation.py` | `SituationMap` : carte + mini-carte de localisation |
 | `bivariate.py` | choroplèthes bivariées (croisement de deux variables) |
 | `hexgrid.py` | grilles hexagonales et cartes hexbin (via `geohexgrid`) |
 
 Tout reste importable depuis `cartograpy.mapper` directement (`from cartograpy.mapper import Map`).
 
 `Map` concentre encore la majorité de la logique (création, couches, légende,
-échelle, flèche du nord, export...) dans une seule classe volumineuse — un
+échelle, flèche du nord, export...) dans une seule classe volumineuse : un
 découpage interne en mixins thématiques n'a pas encore été fait.
 
 ## Constructeur de Map
@@ -48,12 +48,12 @@ Map(figsize=(12, 8), title="", projection=ccrs.PlateCarree(),
 ```
 
 - **`figsize`** (`tuple`, `str` ou `dict`, défaut `(12, 8)`) : taille en pouces, format papier (`"A4"`, `"A3"`...) ou `{"paper": ..., "orientation": ...}`.
-- **`title`** (`str`, défaut `""`) : titre de la carte — vide par défaut, aucun titre n'est affiché.
+- **`title`** (`str`, défaut `""`) : titre de la carte : vide par défaut, aucun titre n'est affiché.
 - **`projection`** (`cartopy.crs`, défaut `ccrs.PlateCarree()`) : projection cartographique de l'axe.
 - **`data_crs`** (`str`, défaut `"EPSG:4326"`) : CRS supposé des données ajoutées.
 - **`dpi`** (`int`, défaut `300`) : résolution de la figure.
 - **`verbose`** (`bool`, défaut `True`) : afficher les messages d'information.
-- **`basemap`** (`bool`, défaut `True`) : ajouter automatiquement côtes et frontières (`cfeature.BORDERS`, `coastlines`). Mettre `False` pour une carte vierge — garde la projection cartopy (donc `add_north_arrow`/`add_scale_bar`/`add_inset_map` restent utilisables), contrairement à `Map2D` qui abandonne la projection cartopy entièrement.
+- **`basemap`** (`bool`, défaut `True`) : ajouter automatiquement côtes et frontières (`cfeature.BORDERS`, `coastlines`). Mettre `False` pour une carte vierge : garde la projection cartopy (donc `add_north_arrow`/`add_scale_bar`/`add_inset_map` restent utilisables), contrairement à `Map2D` qui abandonne la projection cartopy entièrement.
 
 ```python
 # Carte sans côtes ni frontières automatiques, mais avec projection cartopy
@@ -65,8 +65,8 @@ m.show()
 
 ## Méthodes de Map
 
-68 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
-défaut) et description en une ligne — pour les paramètres en détail, se référer
+69 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
+défaut) et description en une ligne : pour les paramètres en détail, se référer
 au docstring de la méthode dans `cartograpy/mapper/map.py`.
 
 ::: {.callout-note collapse="true"}
@@ -90,7 +90,7 @@ Définit la couleur de fond de la carte.
 ```python
 set_extent(bounds, crs=None)
 ```
-Définit les limites de la carte.
+Définit les limites de la carte. `bounds` au format cartopy `[x0, x1, y0, y1]` (ouest, est, sud, nord). `self.bounds` reste mémorisé en `[minx, miny, maxx, maxy]` pour le reste de l'API (`add_background_image`, centrage…).
 
 ```python
 set_projection(projection)
@@ -185,7 +185,7 @@ Ajoute une couche de points vectoriels, taille et/ou couleur proportionnelles à
 add_polygons_cloropleth(*args, **kwargs)
 add_points_cloropleth(*args, **kwargs)
 ```
-Alias dépréciés (faute de frappe historique) — utiliser `add_polygons_choropleth` / `add_points_choropleth`.
+Alias dépréciés (faute de frappe historique) : utiliser `add_polygons_choropleth` / `add_points_choropleth`.
 
 ```python
 add_colorbar(cmap='viridis', vmin=0, vmax=1, label=None, orientation='vertical', shrink=0.6, pad=0.05, aspect=20, ticks=None, tick_labels=None)
@@ -230,7 +230,7 @@ Ajoute du texte avec des segments `<mis en évidence>` (police/couleur différen
 ```python
 add_highlight_fig_text(text, x, y, fontsize=12, color='black', highlight_textprops=None, **kwargs)
 ```
-Équivalent de `add_highlight_text` mais hors-carte, en coordonnées figure (0-1) — pour titre/sous-titre.
+Équivalent de `add_highlight_text` mais hors-carte, en coordonnées figure (0-1) : pour titre/sous-titre.
 
 ```python
 add_custom_text(text, xy, to='ax', **kwargs)
@@ -265,8 +265,9 @@ Ajoute une image (logo, photo, illustration) à un endroit précis de la carte, 
 
 ```python
 add_background_image(image, extent=None, zoom=1, aspect='equal', alpha=1.0, zorder=-100, color=None, **kwargs)
+set_background_image(**kwargs)
 ```
-Ajoute une image de fond derrière toutes les couches, sur l'étendue de la carte (`self.bounds` par défaut). L'image garde ses proportions (recadrée au besoin plutôt que déformée) ; `zoom` doit être > 0.
+Ajoute une image de fond derrière toutes les couches, sur l'étendue de la carte (`self.bounds` par défaut) / modifie celle déjà ajoutée. L'image garde ses proportions (recadrée au besoin plutôt que déformée) ; `zoom` (> 0) est un facteur d'échelle autour du centre : `> 1` agrandit l'image, `< 1` la réduit. Une seule image de fond à la fois (la précédente est retirée), et elle est re-dessinée automatiquement après `set_paper`/`set_projection` (comme la grille et la flèche du Nord). `set_background_image` fusionne les paramètres passés avec ceux du dernier appel : ex. `set_background_image(alpha=0.25)` : et lève `RuntimeError` si aucune image n'a encore été ajoutée.
 
 ```python
 get_north_arrows(arrows_subdir='arrows')
@@ -283,7 +284,7 @@ Ajoute une flèche du Nord sur la carte / modifie celle déjà créée. `to="ax"
 Mode `style="svg"` : les 17 icônes embarquées ont des résolutions natives très
 différentes une fois rastérisées (de 5x16 à 580x580 px selon l'icône). Elles
 sont automatiquement ramenées à une taille de référence commune avant
-d'appliquer `zoom` — `zoom=1` donne donc une taille cohérente quelle que soit
+d'appliquer `zoom` : `zoom=1` donne donc une taille cohérente quelle que soit
 l'icône choisie, plutôt que de dépendre de la résolution brute du fichier SVG.
 Le fond des icônes est rendu transparent (pas de carré blanc opaque derrière
 la flèche).
@@ -293,7 +294,7 @@ la flèche).
 add_scale_bar(length=None, location='lower left', linewidth=2, units='km', color='black', fontsize=11, pad=0.1, alpha=1, label=None, style='auto', box_color='white', box_alpha=0.8, scale_loc='bottom', label_loc='top', add_as_layer=True, bar_style='boxes', major_div=None, minor_div=None, size=None, bar=None, labels=None, text=None, to='ax', position=(0.05, 0.05), aob=None, font=None, **kwargs)
 set_scale_bar(**kwargs)
 ```
-Ajoute une barre d'échelle sur la carte / modifie celle déjà créée. `major_div`/`minor_div` : `None` par défaut (calcul automatique par `matplotlib-map-utils`) — ne les fixer qu'ensemble avec un `major_mult` (via le dict `bar=...`), sinon le calcul de la barre échoue. `to` (défaut `"ax"`) : `"fig"` ancre la barre à la figure entière plutôt qu'à l'axe carte (modes `map-utils`/`scalebar` uniquement — avertissement et retour à l'axe en mode `manual`, intrinsèquement géographique), même convention que `add_north_arrow(..., to=...)`. `position` : point d'ancrage exact en coordonnées figure (0-1), utilisé uniquement si `to="fig"` — `location` détermine toujours quel coin de la barre touche ce point.
+Ajoute une barre d'échelle sur la carte / modifie celle déjà créée. `major_div`/`minor_div` : `None` par défaut (calcul automatique par `matplotlib-map-utils`) : ne les fixer qu'ensemble avec un `major_mult` (via le dict `bar=...`), sinon le calcul de la barre échoue. `to` (défaut `"ax"`) : `"fig"` ancre la barre à la figure entière plutôt qu'à l'axe carte (modes `map-utils`/`scalebar` uniquement : avertissement et retour à l'axe en mode `manual`, intrinsèquement géographique), même convention que `add_north_arrow(..., to=...)`. `position` : point d'ancrage exact en coordonnées figure (0-1), utilisé uniquement si `to="fig"` : `location` détermine toujours quel coin de la barre touche ce point.
 
 ::: {.callout-note}
 `font` (FontProperties, ex. via `google_font()`) : matplotlib-map-utils ne supporte qu'une famille CSS générique (`"serif"`, `"sans-serif"`, `"cursive"`, `"fantasy"`, `"monospace"`), pas une police précise. Si le style résolu est `map-utils` (`"auto"`, `"ticks"`, `"boxes"`) et `font` est fourni, bascule automatiquement vers `style="scalebar"` (avec avertissement) pour l'appliquer réellement. Fonctionne nativement en modes `"scalebar"` et `"manual"`.
@@ -305,11 +306,11 @@ set_inset(**kwargs)
 ```
 Ajoute une mini-carte de situation (inset map) montrant la zone étudiée dans son contexte / modifie celle déjà créée.
 
-- **`data`** (`list[float] | GeoDataFrame`, optionnel) : zone à surligner sur l'inset — bbox `[minx, miny, maxx, maxy]` ou GeoDataFrame. `None` (défaut) : reprend `self.bounds`, indicateur calculé depuis l'étendue actuelle de la carte principale (comportement hérité).
+- **`data`** (`list[float] | GeoDataFrame`, optionnel) : zone à surligner sur l'inset : bbox `[minx, miny, maxx, maxy]` ou GeoDataFrame. `None` (défaut) : reprend `self.bounds`, indicateur calculé depuis l'étendue actuelle de la carte principale (comportement hérité).
 - **`on`** (`GeoDataFrame | list`, optionnel) : couche(s) de contexte dessinée(s) sur l'inset (ex. tous les pays d'un continent, pour situer `data` dedans). GeoDataFrame unique ou liste de `{"data": gdf, "kwargs": {...}}`.
-- **`mode`** (`str`, défaut `"bbox"`) : comment dessiner `data` quand c'est un GeoDataFrame — `"bbox"` (rectangle de son étendue) ou `"geometry"` (sa géométrie réelle). Sans effet si `data` est déjà une bbox.
+- **`mode`** (`str`, défaut `"bbox"`) : comment dessiner `data` quand c'est un GeoDataFrame : `"bbox"` (rectangle de son étendue) ou `"geometry"` (sa géométrie réelle). Sans effet si `data` est déjà une bbox.
 - **`zoom_to_on`** (`bool`, défaut `False`) : si `True`, zoome l'inset sur l'étendue totale de `on` (au lieu de la vue globale) et l'encadre d'un rectangle (`box_color`/`box_linewidth`). Sans effet si `on` n'est pas fourni (avertissement). Prioritaire sur `global_view`/`extent`.
-- **`to`** (`str`, défaut `"ax"`) : ancre du positionnement — `"ax"` : `position` (mode classique) ou `location`/`coords` (mode map-utils) relatifs à l'axe de la carte principale. `"fig"` : relatifs à la figure entière. Même convention que `add_north_arrow(..., to=...)`.
+- **`to`** (`str`, défaut `"ax"`) : ancre du positionnement : `"ax"` : `position` (mode classique) ou `location`/`coords` (mode map-utils) relatifs à l'axe de la carte principale. `"fig"` : relatifs à la figure entière. Même convention que `add_north_arrow(..., to=...)`.
 - **`circular`** (`bool`, défaut `False`) : si `True`, découpe l'inset en cercle plutôt qu'en rectangle (`Axes.set_boundary`), avec correction d'aspect pour un vrai cercle même si l'inset n'est pas physiquement carré (`size` ou `position` non carrés).
 
 ```python
@@ -327,7 +328,7 @@ m.add_inset_map(
 ```
 
 ::: {.callout-warning}
-`data` valide un GeoDataFrame/GeoSeries ou une bbox de 4 éléments — tout autre
+`data` valide un GeoDataFrame/GeoSeries ou une bbox de 4 éléments : tout autre
 type (ex. passer par erreur un GeoDataFrame là où l'ancienne API attendait une
 bbox `bounds=`) lève un `TypeError` explicite plutôt que d'être ignoré
 silencieusement ou de planter plus loin avec une erreur confuse.
@@ -469,7 +470,7 @@ Masque les axes matplotlib.
 
 ## Méthodes de WebMap
 
-6 méthodes publiques — carte interactive Folium/Leaflet, indépendante de `Map`.
+6 méthodes publiques : carte interactive Folium/Leaflet, indépendante de `Map`.
 
 ```python
 add_layer(gdf, column=None, cmap='YlOrRd', style_function=None, tooltip_columns=None, popup_columns=None, name=None, **kwargs)
@@ -503,7 +504,7 @@ Sauvegarde la carte en HTML.
 
 ## Méthodes de SituationMap
 
-9 méthodes publiques — carte principale + mini-carte de localisation, indépendante de `Map`.
+9 méthodes publiques : carte principale + mini-carte de localisation, indépendante de `Map`.
 
 ```python
 add_main_layer(gdf, facecolor='green', edgecolor='black', linewidth=0.5, alpha=0.7, column=None, cmap='viridis', **kwargs)
@@ -547,7 +548,7 @@ inset... déjà en place) au lieu de créer une figure :
 ```python
 add_bivariate(gdf, var1, var2, **kwargs)
 ```
-Surcouche de `plot_bivariate_choropleth` — tous ses paramètres nommés passent
+Surcouche de `plot_bivariate_choropleth` : tous ses paramètres nommés passent
 par `**kwargs` (`var1_label`, `palette`, `n_classes`, `legend_position`...). Le
 GeoDataFrame enrichi est aussi stocké dans `Map.last_bivariate`.
 
@@ -590,8 +591,8 @@ make_hex_grid(source, hex_size, crs=None, trim_mode="intersect")
 ```
 Génère une grille d'hexagones réguliers (sommet plat) couvrant une zone.
 `source` : un `GeoDataFrame` (son étendue et son CRS sont repris ; les hexagones
-hors zone sont écartés selon `trim_mode` — `"intersect"` par défaut, ou `"clip"`)
-**ou** un tuple de bornes `(minx, miny, maxx, maxy)` — dans ce cas `crs` est
+hors zone sont écartés selon `trim_mode` : `"intersect"` par défaut, ou `"clip"`)
+**ou** un tuple de bornes `(minx, miny, maxx, maxy)` : dans ce cas `crs` est
 requis. `hex_size` : circumradius de l'hexagone dans l'unité du CRS (utiliser un
 CRS projeté en mètres). Retourne un `GeoDataFrame` `cell_id`, `geometry`.
 
@@ -603,7 +604,7 @@ Agrège `source_gdf` dans chaque hexagone de `hex_grid` (reprojeté au besoin).
 `value_cols` : colonnes numériques à agréger ; `agg_funcs` : fonction par colonne
 (`"mean"` partout par défaut). `predicate` : `"within"` (points) ou
 `"intersects"` (polygones à cheval). Retourne `hex_grid` enrichi des colonnes
-agrégées et de `count_col` (0 et NaN pour les hexagones sans donnée — à filtrer,
+agrégées et de `count_col` (0 et NaN pour les hexagones sans donnée : à filtrer,
 ex. `result[result.n_points >= 3]`).
 
 ```python

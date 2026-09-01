@@ -1,5 +1,5 @@
 ---
-title: "Emploi agricole des femmes — Afrique"
+title: "Emploi agricole des femmes : Afrique"
 description: "Choroplèthe continentale sur données World Bank : jointure par ISO3, légende en déciles, étiquette chiffrée par pays."
 image: /assets/emploi-agricole-femmes-afrique-example.png
 ---
@@ -21,7 +21,7 @@ Techniques utilisées :
 
 - `WorldBank.get_data()` pour l'indicateur, `Bound.get_world("country")` pour
   les frontières, jointure `merge` sur `iso3`
-- `add_polygons_choropleth(..., show_colorbar=False)` — coloration continue
+- `add_polygons_choropleth(..., show_colorbar=False)` : coloration continue
   sans barre de couleur (remplacée par la légende en déciles)
 - `add_swatch_legend()` avec des bornes calculées par `np.quantile`
 - `add_custom_text(..., to="ax")` pour l'étiquette chiffrée de chaque pays,

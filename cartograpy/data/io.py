@@ -20,7 +20,8 @@ def load(filepath,layer=None):
         filepath : str
             Chemin complet vers le fichier à charger. L'extension détermine le type de données.
         layer : str, optionnel
-            Pour les fichiers multi-couches (ex: GPX), spécifie la couche à charger (ex: "tracks", "waypoints"). Par défaut None, ce qui charge la couche par défaut.
+            Pour les fichiers multi-couches (.gpkg, GPX), spécifie la couche à charger
+            (ex: "zones", "tracks", "waypoints"). Par défaut None = couche par défaut.
 
     Retourne :
         - geopandas.GeoDataFrame : Pour les fichiers vectoriels (.shp, .geojson, .gpkg, .kml, .gpx)
@@ -58,7 +59,9 @@ def load(filepath,layer=None):
 
     if ext in vector_exts:
         if ext in ['shp', 'geojson', 'gpkg']:
-            return gpd.read_file(filepath)
+            # `layer` ne concerne que les conteneurs multi-couches (.gpkg) ;
+            # gpd l'ignore pour shp/geojson, None = couche par défaut.
+            return gpd.read_file(filepath, layer=layer) if layer else gpd.read_file(filepath)
         elif ext == 'kml':
             try:
                 return gpd.read_file(filepath, driver="LIBKML")

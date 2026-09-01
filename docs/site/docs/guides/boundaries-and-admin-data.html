@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -474,31 +474,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -658,7 +658,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Utilisez <code>Bound</code> plutôt que <code>GeoBoundaries</code> directement — elle expose les mêmes fonctionnalités avec des méthodes plus explicites (<code>get_country</code>, <code>get_continent</code>, <code>get_neighbors</code>…).</p>
+<p>Utilisez <code>Bound</code> plutôt que <code>GeoBoundaries</code> directement : elle expose les mêmes fonctionnalités avec des méthodes plus explicites (<code>get_country</code>, <code>get_continent</code>, <code>get_neighbors</code>…).</p>
 </div>
 </div>
 <section id="récupérer-un-pays" class="level2">
@@ -720,7 +720,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Tous les pays n’ont pas tous les niveaux disponibles dans geoBoundaries — <code>adm=-1</code> évite de deviner, ou testez avec <code>b.is_valid_adm("CIV", "ADM3")</code> avant d’appeler <code>get_admin</code>.</p>
+<p>Tous les pays n’ont pas tous les niveaux disponibles dans geoBoundaries : <code>adm=-1</code> évite de deviner, ou testez avec <code>b.is_valid_adm("CIV", "ADM3")</code> avant d’appeler <code>get_admin</code>.</p>
 </div>
 </div>
 </section>
@@ -741,7 +741,7 @@ Astuce
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>get_world()</code> vient de Natural Earth (faible résolution, rapide) — pour des frontières nationales précises, préférez <code>get_admin(pays, adm=0)</code> (geoBoundaries) pays par pays.</p>
+<p><code>get_world()</code> vient de Natural Earth (faible résolution, rapide) : pour des frontières nationales précises, préférez <code>get_admin(pays, adm=0)</code> (geoBoundaries) pays par pays.</p>
 </div>
 </div>
 </section>
@@ -758,7 +758,7 @@ Astuce
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>b.get_area([<span class="st">"SEN"</span>, <span class="st">"Mali"</span>], unit<span class="op">=</span><span class="st">"ha"</span>)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>b.clip(routes_gdf, <span class="st">"CIV"</span>)                  <span class="co"># découpe un GeoDataFrame par frontière</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>b.contains(<span class="st">"CIV"</span>, (<span class="fl">6.85</span>, <span class="op">-</span><span class="fl">5.28</span>))           <span class="co"># True — point (lat, lon) dans le pays ?</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>b.contains(<span class="st">"CIV"</span>, (<span class="fl">6.85</span>, <span class="op">-</span><span class="fl">5.28</span>))           <span class="co"># True : point (lat, lon) dans le pays ?</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -769,7 +769,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>get_area()</code> reprojette automatiquement en Mollweide (<code>ESRI:54009</code>) avant le calcul — voir <a href="../explanations/crs-and-projections.html">CRS et projections</a>. Le calcul d’aire est donc fiable sans manipulation manuelle de CRS.</p>
+<p><code>get_area()</code> reprojette automatiquement en Mollweide (<code>ESRI:54009</code>) avant le calcul : voir <a href="../explanations/crs-and-projections.html">CRS et projections</a>. Le calcul d’aire est donc fiable sans manipulation manuelle de CRS.</p>
 </div>
 </div>
 </section>
@@ -783,7 +783,7 @@ Note
 </section>
 <section id="cache-et-performance" class="level2">
 <h2 class="anchored" data-anchor-id="cache-et-performance">Cache et performance</h2>
-<p><code>Bound</code>/<code>GeoBoundaries</code> mettent en cache les réponses HTTP (<code>requests_cache</code>, 7 jours par défaut) — un deuxième appel identique ne repasse pas par le réseau :</p>
+<p><code>Bound</code>/<code>GeoBoundaries</code> mettent en cache les réponses HTTP (<code>requests_cache</code>, 7 jours par défaut) : un deuxième appel identique ne repasse pas par le réseau :</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> Bound(cache_expire_seconds<span class="op">=</span><span class="dv">3600</span>)   <span class="co"># 1h au lieu de 7 jours</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>b.set_cache_expire_time(<span class="dv">86400</span>)         <span class="co"># ajuste sans vider le cache existant</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>b.clear_cache()                        <span class="co"># vide le cache</span></span>
@@ -797,15 +797,29 @@ Note
 <section id="aller-plus-loin" class="level2">
 <h2 class="anchored" data-anchor-id="aller-plus-loin">Aller plus loin</h2>
 <ul>
-<li><a href="../explanations/crs-and-projections.html">CRS et projections</a> — pourquoi <code>get_area()</code> reprojette automatiquement</li>
-<li><a href="../guides/vector-processing.html">Traitement vectoriel</a> — <code>clip_gdf_by_mask</code> pour découper avec plus d’options qu’un simple <code>Bound.clip</code></li>
-<li><a href="../reference/data.html">Reference data</a> — signatures complètes de <code>GeoBoundaries</code> et <code>Bound</code></li>
+<li><a href="../explanations/crs-and-projections.html">CRS et projections</a> : pourquoi <code>get_area()</code> reprojette automatiquement</li>
+<li><a href="../guides/vector-processing.html">Traitement vectoriel</a> : <code>clip_gdf_by_mask</code> pour découper avec plus d’options qu’un simple <code>Bound.clip</code></li>
+<li><a href="../reference/data.html">Reference data</a> : signatures complètes de <code>GeoBoundaries</code> et <code>Bound</code></li>
 </ul>
 
 
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1238,11 +1252,13 @@ Note
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

@@ -79,7 +79,7 @@ m.add_polygons_choropleth(regions_gdf, column_to_plot="densite", cmap=cmaps["p9"
 
 ::: {.callout-tip}
 Une palette discrète (qualitative, catégories) et une palette continue (séquentielle,
-valeurs numériques) ne se choisissent pas pour les mêmes données — utilisez
+valeurs numériques) ne se choisissent pas pour les mêmes données : utilisez
 `to_cmap(colors, cmap_type="discrete")` pour des catégories, `"continuous"`
 (défaut) pour des valeurs continues.
 :::
@@ -98,7 +98,7 @@ set_style("ieee", source="scienceplots")          # SciencePlots (dépendance c�
 ```
 
 ::: {.callout-warning}
-`set_style` s'applique globalement (via `matplotlib.pyplot.style.use`) — appelez-la
+`set_style` s'applique globalement (via `matplotlib.pyplot.style.use`) : appelez-la
 avant de créer vos objets `Map`, pas après, pour que le style s'applique à toute la
 figure.
 :::
@@ -123,5 +123,5 @@ m.show()
 
 ## Aller plus loin
 
-- [Cartes statiques](/guides/static-maps.qmd) — appliquer polices et palettes à une `Map`
-- [Reference styling](/reference/styling.qmd) — toutes les fonctions en détail
+- [Cartes statiques](/guides/static-maps.qmd) : appliquer polices et palettes à une `Map`
+- [Reference styling](/reference/styling.qmd) : toutes les fonctions en détail

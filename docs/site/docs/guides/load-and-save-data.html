@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -474,31 +474,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -672,13 +672,13 @@ Note
 </div>
 <section id="cas-particulier-gpx" class="level3">
 <h3 class="anchored" data-anchor-id="cas-particulier-gpx">Cas particulier : GPX</h3>
-<p>Les fichiers GPX ont plusieurs couches (<code>tracks</code>, <code>waypoints</code>, <code>routes</code>) — précisez celle qui vous intéresse :</p>
+<p>Les fichiers GPX ont plusieurs couches (<code>tracks</code>, <code>waypoints</code>, <code>routes</code>) : précisez celle qui vous intéresse :</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>waypoints <span class="op">=</span> load(<span class="st">"data/randonnee.gpx"</span>, layer<span class="op">=</span><span class="st">"waypoints"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tracks <span class="op">=</span> load(<span class="st">"data/randonnee.gpx"</span>, layer<span class="op">=</span><span class="st">"tracks"</span>)  <span class="co"># couche par défaut</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="cas-particulier-raster" class="level3">
 <h3 class="anchored" data-anchor-id="cas-particulier-raster">Cas particulier : raster</h3>
-<p><code>load()</code> renvoie un objet <code>rasterio.io.DatasetReader</code> <strong>ouvert</strong> — fermez-le explicitement ou utilisez un context manager :</p>
+<p><code>load()</code> renvoie un objet <code>rasterio.io.DatasetReader</code> <strong>ouvert</strong> : fermez-le explicitement ou utilisez un context manager :</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> load(<span class="st">"data/elevation.tif"</span>) <span class="im">as</span> src:</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    array <span class="op">=</span> src.read(<span class="dv">1</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(src.crs, src.bounds)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -746,7 +746,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>save()</code> refuse d’écraser un fichier existant que si vous ne passez pas <code>timestamp=True</code> — mais elle ne vérifie pas non plus l’existence préalable : contrairement à <code>Project.add_data()</code> (qui lève <code>FileExistsError</code> sans <code>overwrite=True</code>), un appel direct à <code>save()</code> écrase silencieusement. Passez par <code>Project</code> si vous voulez cette protection.</p>
+<p><code>save()</code> refuse d’écraser un fichier existant que si vous ne passez pas <code>timestamp=True</code> : mais elle ne vérifie pas non plus l’existence préalable : contrairement à <code>Project.add_data()</code> (qui lève <code>FileExistsError</code> sans <code>overwrite=True</code>), un appel direct à <code>save()</code> écrase silencieusement. Passez par <code>Project</code> si vous voulez cette protection.</p>
 </div>
 </div>
 </section>
@@ -761,14 +761,28 @@ Avertissement
 <section id="aller-plus-loin" class="level2">
 <h2 class="anchored" data-anchor-id="aller-plus-loin">Aller plus loin</h2>
 <ul>
-<li><a href="../getting-started/first-project.html">Premier projet</a> — passer par <code>Project</code> pour que chargement/sauvegarde restent relatifs à un dossier de travail plutôt qu’à des chemins en dur</li>
-<li><a href="../reference/data.html">Reference data</a> — signatures complètes</li>
+<li><a href="../getting-started/first-project.html">Premier projet</a> : passer par <code>Project</code> pour que chargement/sauvegarde restent relatifs à un dossier de travail plutôt qu’à des chemins en dur</li>
+<li><a href="../reference/data.html">Reference data</a> : signatures complètes</li>
 </ul>
 
 
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1201,11 +1215,13 @@ Avertissement
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 
