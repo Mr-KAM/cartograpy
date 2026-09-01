@@ -8,7 +8,7 @@ polices, gestion de palettes de couleurs / colormaps, et application de styles
 graphiques globaux (matplotlib, seaborn, mplcyberpunk, SciencePlots).
 
 ::: {.callout-note}
-Toutes ces fonctions sont des utilitaires purs — elles ne dépendent d'aucun objet
+Toutes ces fonctions sont des utilitaires purs : elles ne dépendent d'aucun objet
 `Map`, mais leurs résultats (`FontProperties`, colormap) sont conçus pour être passés
 directement aux méthodes de `Map` (paramètre `font=...`, `cmap=...`).
 :::
@@ -34,7 +34,7 @@ ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
 
 ### `path_font(font_url)`
 
-Charge une police depuis une URL (fichier `.ttf`/`.otf`, par exemple sur GitHub —
+Charge une police depuis une URL (fichier `.ttf`/`.otf`, par exemple sur GitHub :
 ajouter `?raw=true` à l'URL).
 
 ```python
@@ -113,7 +113,7 @@ Charge un colormap par son nom via `pypalettes.load_cmap`.
 
 ### `create_palette(colors, mode="continuous")` / `palette(name, mode="continuous")`
 
-Alias de confort autour de `to_cmap`/`load_cmap` — `create_palette` construit un
+Alias de confort autour de `to_cmap`/`load_cmap` : `create_palette` construit un
 colormap à partir d'une liste de couleurs, `palette` en charge un par son nom.
 
 ### `show_palette(palette, n_colors=8, custom_palettes=None, ax=None)`
@@ -193,7 +193,7 @@ nécessaire.
 ### `list_all_styles()`
 
 Liste tous les styles disponibles, groupés par source (`matplotlib`, `seaborn`,
-`mplcyberpunk`, `SciencePlots` — chaque source renvoie une liste vide si le paquet
+`mplcyberpunk`, `SciencePlots` : chaque source renvoie une liste vide si le paquet
 correspondant n'est pas installé plutôt que de lever une erreur).
 
 ::: {.callout-note}

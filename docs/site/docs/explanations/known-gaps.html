@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -438,31 +438,31 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -615,7 +615,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="résolu-depuis" class="level2">
 <h2 class="anchored" data-anchor-id="résolu-depuis">Résolu depuis</h2>
 <ul>
-<li>le site docs était un placeholder Mintlify où la plupart des pages de <code>reference/</code> et <code>explanations/</code> étaient des squelettes (listes de noms, sections “à documenter”). Le site a été converti en projet Quarto (<code>docs/_quarto.yml</code>, fichiers <code>.qmd</code>) et chaque page de <code>reference/</code> a été rédigée avec signatures complètes, paramètres et exemples — vérifié méthode par méthode contre le code (<code>Map</code> : 65/65, <code>RasterTools</code> : 82/82, <code>Map2D</code>/<code>WebMap</code>/<code>SituationMap</code> : 3/6/9, fonctions autonomes de <code>processing</code> : 10/10).</li>
+<li>le site docs était un placeholder Mintlify où la plupart des pages de <code>reference/</code> et <code>explanations/</code> étaient des squelettes (listes de noms, sections “à documenter”). Le site a été converti en projet Quarto (<code>docs/_quarto.yml</code>, fichiers <code>.qmd</code>) et chaque page de <code>reference/</code> a été rédigée avec signatures complètes, paramètres et exemples : vérifié méthode par méthode contre le code (<code>Map</code> : 69/69, <code>RasterTools</code> : 82/82, <code>Map2D</code>/<code>WebMap</code>/<code>SituationMap</code> : 3/6/9, fonctions autonomes de <code>processing</code> : 10/10).</li>
 <li><code>cartograpy.converter</code> et <code>cartograpy.geocoder</code> étaient référencés dans <code>__init__.py</code>, dans des tests et dans la doc sans jamais avoir existé comme modules. Retirés partout (le géocodage reste disponible via <code>Geocoder</code> dans <code>cartograpy.data</code>, qui lui existe et fonctionne).</li>
 <li><code>data.py</code>, <code>mapper.py</code> et <code>processing.py</code> étaient des fichiers plats de plusieurs milliers de lignes mélangeant plusieurs responsabilités. Découpés en sous-packages organisés par domaine (voir <a href="../explanations/package-architecture.html">Architecture du package</a>).</li>
 <li><code>VectorTools.eliminate_small_polygons()</code> existait dans le code sans être documenté dans <a href="../reference/vector-tools.html">Reference VectorTools</a>. Ajouté.</li>
@@ -630,6 +630,20 @@ ul.task-list li input[type="checkbox"] {
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1059,11 +1073,13 @@ ul.task-list li input[type="checkbox"] {
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

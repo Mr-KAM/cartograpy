@@ -135,6 +135,8 @@ class Map:
         self._scale_bar_artist = None
         self._north_arrow_kwargs = None
         self._gridline_kwargs = None
+        self._background_image_kwargs = None
+        self._background_image_artist = None
         self._first_layer = False
 
         # Configuration de base
@@ -187,9 +189,12 @@ class Map:
             layer["rendered"] = False
 
     def _reapply_persistent_artists(self):
-        """Recrée la grille et la flèche du Nord après un ax.clear()/
-        fig.clear() : contrairement aux layers et à la scale bar, elles ne
-        sont pas re-dessinées automatiquement par _render()."""
+        """Recrée l'image de fond, la grille et la flèche du Nord après un
+        ax.clear()/fig.clear() : contrairement aux layers et à la scale bar,
+        elles ne sont pas re-dessinées automatiquement par _render()."""
+        if self._background_image_kwargs is not None:
+            self._background_image_artist = None  # l'ancien artiste a été effacé
+            self.add_background_image(**self._background_image_kwargs)
         if self._gridline_kwargs is not None:
             self.add_gridlines(**self._gridline_kwargs)
         if self._north_arrow_kwargs is not None:
@@ -2668,15 +2673,20 @@ class Map:
         Paramètres:
         -----------
         bounds : list or tuple
-            Limites [minx, miny, maxx, maxy] ou (minx, miny, maxx, maxy)
+            Limites au format cartopy ``[x0, x1, y0, y1]`` (ouest, est, sud,
+            nord), comme ``GeoAxes.set_extent``.
         crs : cartopy.crs
             Système de coordonnées des limites (par défaut PlateCarree)
         """
         if crs is None:
             crs = ccrs.PlateCarree()
 
-        self.bounds = bounds
         self.ax.set_extent(bounds, crs=crs)
+        # `self.bounds` est toujours mémorisé au format [minx, miny, maxx, maxy]
+        # (le reste du code — _apply_smart_centering, add_background_image… — le
+        # lit dans cet ordre), quel que soit l'ordre passé ici.
+        x0, x1, y0, y1 = bounds
+        self.bounds = [min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)]
 
         return self
 
@@ -3457,10 +3467,9 @@ class Map:
             carte (`self.bounds`, mis à jour par les couches déjà ajoutées
             ou par `set_extent()`).
         zoom : float
-            Facteur de zoom (> 0) appliqué à `extent`, autour de son centre
-            (défaut 1 = pas de changement). > 1 recadre sur une zone plus
-            petite (image agrandie) ; < 1 couvre une zone plus grande
-            (image réduite).
+            Facteur d'échelle (> 0) appliqué à l'image autour du centre de
+            `extent` (défaut 1 = pas de changement). > 1 agrandit l'image
+            (elle couvre une zone plus grande) ; < 1 la réduit.
         aspect : str
             ``"equal"`` (défaut) : les unités géographiques x/y restent à
             échelle égale, cohérent avec le reste de la carte — l'image
@@ -3486,6 +3495,19 @@ class Map:
         >>> map_obj.set_extent([-11, 32, 41, 73])
         >>> map_obj.add_background_image("texture.jpg")
         """
+        # Mémorise les arguments d'origine : ils servent à re-dessiner
+        # l'image après un ax.clear() (set_paper/set_projection) et à
+        # fusionner les modifications de set_background_image().
+        extent_arg = tuple(extent) if extent is not None else None
+
+        # Une seule image de fond à la fois : on retire la précédente.
+        if getattr(self, "_background_image_artist", None) is not None:
+            try:
+                self._background_image_artist.remove()
+            except (ValueError, NotImplementedError):
+                pass
+            self._background_image_artist = None
+
         img = read_image(image, color) if isinstance(image, str) else image
         img_arr = np.asarray(img)
 
@@ -3495,6 +3517,8 @@ class Map:
                     "Aucune étendue disponible : passez extent=... ou "
                     "appelez set_extent() / ajoutez une couche d'abord."
                 )
+            # self.bounds est au format [minx, miny, maxx, maxy] ;
+            # imshow() attend (left, right, bottom, top).
             minx, miny, maxx, maxy = self.bounds
             extent = (minx, maxx, miny, maxy)
         else:
@@ -3506,8 +3530,8 @@ class Map:
 
         if zoom != 1:
             cx, cy = (extent[0] + extent[1]) / 2, (extent[2] + extent[3]) / 2
-            half_w = (extent[1] - extent[0]) / 2 / zoom
-            half_h = (extent[3] - extent[2]) / 2 / zoom
+            half_w = (extent[1] - extent[0]) / 2 * zoom
+            half_h = (extent[3] - extent[2]) / 2 * zoom
             extent = (cx - half_w, cx + half_w, cy - half_h, cy + half_h)
 
         # `aspect="equal"` seul ne suffit pas : imshow() étire toujours le
@@ -3535,9 +3559,13 @@ class Map:
         except Exception:
             current_view = None
 
-        self.ax.imshow(
+        self._background_image_artist = self.ax.imshow(
             img_arr, extent=extent, transform=ccrs.PlateCarree(),
             aspect=aspect, alpha=alpha, zorder=zorder, **kwargs,
+        )
+        self._background_image_kwargs = dict(
+            image=image, extent=extent_arg, zoom=zoom, aspect=aspect,
+            alpha=alpha, zorder=zorder, color=color, **kwargs,
         )
 
         if current_view is not None:
@@ -3545,6 +3573,40 @@ class Map:
 
         self._log("🖼️ Image de fond ajoutée")
         return self
+
+    def set_background_image(self, **kwargs) -> "Map":
+        """
+        Modifie l'image de fond existante créée par ``add_background_image``.
+
+        Chaque paramètre passé remplace celui mémorisé lors du dernier
+        ``add_background_image()`` / ``set_background_image()`` ; les autres
+        sont conservés. L'ancienne image est retirée et une nouvelle est
+        dessinée avec les paramètres fusionnés.
+
+        Parameters
+        ----------
+        image : str, array-like ou PIL.Image, optional
+            Nouvelle image.
+        extent, zoom, aspect, alpha, zorder, color : optional
+            Voir ``add_background_image``.
+        **kwargs :
+            Autres paramètres transmis à ``Axes.imshow()``.
+
+        Returns
+        -------
+        Map : self pour le chaînage de méthodes.
+
+        Example
+        -------
+        >>> m.add_background_image("notebooks/bg_image.jpg", alpha=0.5)
+        >>> m.set_background_image(alpha=0.25, zoom=1.2)   # ajuste sans tout ré-écrire
+        """
+        if self._background_image_kwargs is None:
+            raise RuntimeError(
+                "Aucune image de fond. Utilisez add_background_image() d'abord."
+            )
+        merged = {**self._background_image_kwargs, **kwargs}
+        return self.add_background_image(**merged)
 
     def add_north_arrow(
         self,

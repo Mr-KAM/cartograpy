@@ -4,7 +4,7 @@ description: "Télécharger des données OSM, hydrographiques, DEM et World Bank
 ---
 
 Cartograpy embarque plusieurs clients orientés téléchargement de données, tous dans
-`cartograpy.data`. Chacun nécessite une connexion réseau au premier appel — voir
+`cartograpy.data`. Chacun nécessite une connexion réseau au premier appel : voir
 [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd)
 pour le détail par source.
 
@@ -25,7 +25,7 @@ routes = osm.get_data((-4.1, 5.2, -3.9, 5.4), tags={"highway": True}, data_type=
 poi = osm.get_data(commune_gdf, tags={"shop": True}, data_type="points")
 ```
 
-- **`data_type`** (`str`, défaut `all`) : `"points"`, `"polygons"`, `"lines"` ou `"all"` — filtre le résultat par type de géométrie après récupération.
+- **`data_type`** (`str`, défaut `all`) : `"points"`, `"polygons"`, `"lines"` ou `"all"` : filtre le résultat par type de géométrie après récupération.
 
 ### Découvrir les tags OSM disponibles
 
@@ -39,7 +39,7 @@ osm.get_common_tag()["restaurants"]   # combinaisons courantes prêtes à l'empl
 
 ::: {.callout-tip}
 `get_common_tag()` couvre une vingtaine de requêtes usuelles (écoles, hôpitaux,
-pharmacies, routes principales, rivières, gares...) — pratique pour éviter de
+pharmacies, routes principales, rivières, gares...) : pratique pour éviter de
 chercher le bon tag OSM à chaque fois.
 :::
 
@@ -56,7 +56,7 @@ print(hydro.describe_variables())        # explication des colonnes HydroRIVERS
 Télécharge et extrait les données HydroRIVERS pour une région continentale, met en
 cache localement le zip extrait pour ne pas re-télécharger à chaque appel.
 
-## Altitude — modèle numérique de terrain (`DEM`)
+## Altitude : modèle numérique de terrain (`DEM`)
 
 ```python
 from cartograpy.data import DEM
@@ -66,7 +66,7 @@ mnt = dem.download(bbox=(-8.6, 4.3, -2.5, 10.7))   # (west, south, east, north)
 ```
 
 Télécharge les tuiles SRTM (~30m) couvrant l'emprise depuis un miroir AWS, les
-mosaïque et les découpe à l'emprise demandée — pas de clé API nécessaire. Lève
+mosaïque et les découpe à l'emprise demandée : pas de clé API nécessaire. Lève
 `DEMDownloadError` en cas d'échec de téléchargement ou de traitement.
 
 ## Indicateurs World Bank (`WorldBank`)
@@ -80,6 +80,31 @@ wb.get_indicators(source=2, query="population")     # indicateurs correspondants
 wb.get_countries(query="Africa")                    # pays disponibles
 wb.get_data(["SP.POP.TOTL"], country=["CIV", "SEN"])  # DataFrame résultat
 ```
+
+## Météo & climat NASA POWER (`Climate`)
+
+```python
+from cartograpy.data import Climate
+
+clim = Climate()  # API NASA POWER, sans clé, réponses mises en cache
+
+# Série journalière en un point
+gdf_pt = clim.get_point(
+    -3.99, 5.35, "2023-01-01", "2023-12-31",       # lon, lat, début, fin
+    parameters=["T2M", "T2M_MIN", "T2M_MAX", "PRECTOTCORR"],
+    community="ag", temporal="daily",
+)                                                   # GeoDataFrame indexé par date (géométrie constante)
+
+# Grille de points sur une emprise, en mensuel
+gdf = clim.get_region(
+    (-6, 4, -2, 8), 2020, 2022,                     # bbox [xmin,ymin,xmax,ymax], années
+    parameters=["T2M", "PRECTOTCORR"], temporal="monthly",
+)                                                   # GeoDataFrame long : parameter, date, value, geometry
+```
+
+`parameters=None` utilise `Climate.DEFAULT_PARAMETERS`. `temporal` ∈
+`"daily"`, `"hourly"`, `"monthly"`, `"climatology"` ; `community` ∈ `"ag"`,
+`"sb"`, `"re"`. Codes de paramètres : <https://power.larc.nasa.gov/parameters/>.
 
 ## Google Earth Engine (`Gee`)
 
@@ -95,7 +120,7 @@ gee.zonal_stats(ndvi, regions_gdf)
 
 ::: {.callout-warning}
 `Gee` nécessite en plus `earthengine-api` (`ee`), qui n'est **pas** déclaré dans
-les dépendances de `pyproject.toml` — installez-le manuellement
+les dépendances de `pyproject.toml` : installez-le manuellement
 (`pip install earthengine-api`) et authentifiez-vous
 (`ee.Authenticate()` puis `ee.Initialize()`) avant d'utiliser cette classe. Voir
 [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd).
@@ -120,7 +145,7 @@ bbox = geocoder.bbox("Abidjan, Côte d'Ivoire")
 
 Renvoie un `GeoDataFrame` (colonnes `query`, `address`, `latitude`, `longitude`,
 `geometry`...) et la liste de ce qui n'a pas été trouvé, plutôt que de lever une
-erreur — pratique pour géocoder un lot d'adresses en continuant malgré les échecs
+erreur : pratique pour géocoder un lot d'adresses en continuant malgré les échecs
 individuels.
 
 ::: {.callout-note}
@@ -131,6 +156,6 @@ volumes.
 
 ## Aller plus loin
 
-- [Frontières et données administratives](/guides/boundaries-and-admin-data.qmd) —
+- [Frontières et données administratives](/guides/boundaries-and-admin-data.qmd) :
   `GeoBoundaries`/`Bound`, une source spécialisée dans les limites administratives
-- [Reference data](/reference/data.qmd) — signatures complètes de toutes ces classes
+- [Reference data](/reference/data.qmd) : signatures complètes de toutes ces classes

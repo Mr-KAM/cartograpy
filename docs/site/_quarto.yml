@@ -9,7 +9,8 @@ website:
   description: "Package Python pour charger, traiter et cartographier des données géographiques"
   page-navigation: true
   page-footer:
-    center: "cartograpy — Package Python pour créer des cartes facilement"
+    center: "cartograpy : Package Python pour créer des cartes facilement"
+    right: '<div id="google_translate_element" aria-label="Traduire la page"></div>'
   navbar:
     background: primary
     logo: assets/logo-small.png
@@ -84,3 +85,4 @@ format:
       dark: [darkly, style.scss]
     toc: true
     number-sections: false
+    include-after-body: _includes/google-translate.html

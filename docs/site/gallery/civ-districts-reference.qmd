@@ -1,5 +1,5 @@
 ---
-title: "Districts de Côte d'Ivoire — carte de référence"
+title: "Districts de Côte d'Ivoire : carte de référence"
 description: "Carte administrative sobre : graticule, flèche du Nord SVG, barre d'échelle à graduations, étiquettes et mini-carte de situation circulaire."
 image: /assets/civ-districts-example.png
 ---
@@ -8,7 +8,7 @@ image: /assets/civ-districts-example.png
 
 Carte de référence des 14 districts de Côte d'Ivoire (frontières `GeoBoundaries`
 niveau ADM-1) : pas de choroplèthe, juste une carte administrative propre avec
-tous les repères cartographiques attendus — graticule légendé, flèche du Nord,
+tous les repères cartographiques attendus : graticule légendé, flèche du Nord,
 échelle, noms des districts et une mini-carte de situation circulaire qui place
 le pays dans le continent africain.
 
@@ -17,14 +17,14 @@ C'est le squelette type d'une carte de localisation ou d'annexe de rapport.
 Techniques utilisées :
 
 - `Bound.get_admin("CIV", adm=1)` pour les frontières des districts
-- `add_layer()` — ajout vecteur générique (détecte le type de géométrie)
+- `add_layer()` : ajout vecteur générique (détecte le type de géométrie)
 - `add_gridlines()` pour le graticule avec labels de coordonnées
-- `add_north_arrow(style="svg", arrow=12)` — flèche du Nord depuis une des
+- `add_north_arrow(style="svg", arrow=12)` : flèche du Nord depuis une des
   icônes SVG embarquées
-- `add_scale_bar(style="ticks")` — barre d'échelle à graduations
+- `add_scale_bar(style="ticks")` : barre d'échelle à graduations
 - `add_labels(..., label_column="shapeName")` pour le nom de chaque district
 - `add_inset(..., on=bound.get_continent("Africa"), zoom_to_on=True,
-  circular=True)` — mini-carte de situation ronde, cadrée sur l'Afrique
+  circular=True)` : mini-carte de situation ronde, cadrée sur l'Afrique
 - `add_custom_text(..., to="fig")` pour titre et signature hors-carte
 
 ```python

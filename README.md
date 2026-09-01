@@ -10,7 +10,7 @@
 **Mapping in Python, the way it was always meant to be.**
 
 Cartograpy est un package Python pour charger, traiter et cartographier des
-données géographiques en quelques lignes de code — des frontières
+données géographiques en quelques lignes de code : des frontières
 administratives d'un pays jusqu'à la carte statique finale, prête à exporter,
 partout dans le monde.
 
@@ -18,20 +18,21 @@ partout dans le monde.
 
 ## Fonctionnalités
 
-- **Données** — téléchargez en une ligne des frontières administratives
+- **Données** : téléchargez en une ligne des frontières administratives
   (`GeoBoundaries`), des données OpenStreetMap, hydrographiques, de géocodage,
-  d'altitude (SRTM), des indicateurs World Bank ou de l'imagerie Google Earth
-  Engine ; résultats renvoyés en `GeoDataFrame`/`DataFrame`.
-- **Traitement** — importez/exportez tous les formats courants (Shapefile,
+  d'altitude (SRTM), des indicateurs World Bank, des séries météo/climat
+  (NASA POWER) ou de l'imagerie Google Earth Engine ; résultats renvoyés en
+  `GeoDataFrame`/`DataFrame`.
+- **Traitement** : importez/exportez tous les formats courants (Shapefile,
   GeoJSON, KML, GPX, GPKG, CSV, Parquet…), reprojetez, découpez, fusionnez,
   calculez centroïdes, jointures et attributs dynamiques (`VectorTools`,
   `RasterTools`).
-- **Cartographie** — cartes choroplèthes, points, polygones, raster, bivariées
+- **Cartographie** : cartes choroplèthes, points, polygones, raster, bivariées
   ou hexbin avec la classe `Map` : flèche du nord, barre d'échelle, mini-carte
   de situation, légendes, graticule, export PNG/SVG.
-- **Style** — polices Google Fonts, 16 palettes intégrées + seaborn/matplotlib,
+- **Style** : polices Google Fonts, 16 palettes intégrées + seaborn/matplotlib,
   styles graphiques (`scienceplots`, `mplcyberpunk`).
-- **Projet** — `Project` structure dossiers et sorties, garde une trace du CRS
+- **Projet** : `Project` structure dossiers et sorties, garde une trace du CRS
   et valide l'intégrité des jeux de données.
 
 ## Installation
@@ -99,4 +100,4 @@ notebook [`notebooks/README.ipynb`](notebooks/README.ipynb).
 
 ## Licence
 
-MIT — voir [`LICENSE`](LICENSE).
+MIT : voir [`LICENSE`](LICENSE).

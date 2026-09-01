@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -474,31 +474,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -662,17 +662,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="organisation-interne" class="level2">
 <h2 class="anchored" data-anchor-id="organisation-interne">Organisation interne</h2>
-<p><code>data</code>, <code>processing</code> et <code>mapper</code> sont chacun un sous-package (un dossier), pas un seul fichier — découpage nécessaire une fois que chacun a dépassé plusieurs milliers de lignes et mélangé plusieurs responsabilités indépendantes dans un seul fichier plat :</p>
+<p><code>data</code>, <code>processing</code> et <code>mapper</code> sont chacun un sous-package (un dossier), pas un seul fichier : découpage nécessaire une fois que chacun a dépassé plusieurs milliers de lignes et mélangé plusieurs responsabilités indépendantes dans un seul fichier plat :</p>
 <ul>
-<li><code>cartograpy/data/</code> — un fichier par source de données : <code>io.py</code> (lecture/écriture générique), <code>boundaries.py</code> (<code>GeoBoundaries</code>, <code>Bound</code>), <code>geocoding.py</code> (<code>Geocoder</code>), <code>osm.py</code> (<code>OSM</code>), <code>hydro.py</code> (<code>Hydro</code>), <code>dem.py</code> (<code>DEM</code>), <code>worldbank.py</code> (<code>WorldBank</code>), <code>gee.py</code> (<code>Gee</code>), plus <code>_optional.py</code>/<code>_types.py</code> pour le code partagé en interne.</li>
-<li><code>cartograpy/processing/</code> — <code>vector.py</code> (fonctions vectorielles + <code>VectorTools</code>) et <code>raster.py</code> (<code>RasterTools</code>).</li>
-<li><code>cartograpy/mapper/</code> — <code>helpers.py</code> (<code>read_image</code>, <code>plot_choropleth</code>), <code>map.py</code> (<code>Map</code>), <code>map2d.py</code> (<code>Map2D</code>), <code>webmap.py</code> (<code>WebMap</code>), <code>situation.py</code> (<code>SituationMap</code>), <code>bivariate.py</code> (choroplèthes bivariées), <code>hexgrid.py</code> (grilles hexagonales / hexbin, via <code>geohexgrid</code>), plus <code>_optional_deps.py</code> pour les dépendances graphiques optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>, <code>matplotlib-map-utils</code>) partagées entre <code>Map</code> et <code>SituationMap</code>.</li>
+<li><code>cartograpy/data/</code> : un fichier par source de données : <code>io.py</code> (lecture/écriture générique), <code>boundaries.py</code> (<code>GeoBoundaries</code>, <code>Bound</code>), <code>geocoding.py</code> (<code>Geocoder</code>), <code>osm.py</code> (<code>OSM</code>), <code>hydro.py</code> (<code>Hydro</code>), <code>dem.py</code> (<code>DEM</code>), <code>worldbank.py</code> (<code>WorldBank</code>), <code>climate.py</code> (<code>Climate</code>, NASA POWER), <code>gee.py</code> (<code>Gee</code>), plus <code>_optional.py</code>/<code>_types.py</code> pour le code partagé en interne.</li>
+<li><code>cartograpy/processing/</code> : <code>vector.py</code> (fonctions vectorielles + <code>VectorTools</code>) et <code>raster.py</code> (<code>RasterTools</code>).</li>
+<li><code>cartograpy/mapper/</code> : <code>helpers.py</code> (<code>read_image</code>, <code>plot_choropleth</code>), <code>map.py</code> (<code>Map</code>), <code>map2d.py</code> (<code>Map2D</code>), <code>webmap.py</code> (<code>WebMap</code>), <code>situation.py</code> (<code>SituationMap</code>), <code>bivariate.py</code> (choroplèthes bivariées), <code>hexgrid.py</code> (grilles hexagonales / hexbin, via <code>geohexgrid</code>), plus <code>_optional_deps.py</code> pour les dépendances graphiques optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>, <code>matplotlib-map-utils</code>) partagées entre <code>Map</code> et <code>SituationMap</code>.</li>
 </ul>
-<p><code>Map</code> (dans <code>mapper/map.py</code>) reste volontairement une seule classe de grande taille — son découpage interne en mixins thématiques est un chantier à part, pas encore fait.</p>
+<p><code>Map</code> (dans <code>mapper/map.py</code>) reste volontairement une seule classe de grande taille : son découpage interne en mixins thématiques est un chantier à part, pas encore fait.</p>
 </section>
 <section id="messages-et-journalisation" class="level2">
 <h2 class="anchored" data-anchor-id="messages-et-journalisation">Messages et journalisation</h2>
-<p>Les méthodes qui affichent un statut (<code>Project.init()</code>, <code>Project.infos()</code>, <code>Bound.get_country()</code>, etc.) passent par le module <code>logging</code> standard plutôt que par <code>print()</code> directement. Par défaut, ces messages restent visibles exactement comme avant — aucune configuration requise. Pour les couper :</p>
+<p>Les méthodes qui affichent un statut (<code>Project.init()</code>, <code>Project.infos()</code>, <code>Bound.get_country()</code>, etc.) passent par le module <code>logging</code> standard plutôt que par <code>print()</code> directement. Par défaut, ces messages restent visibles exactement comme avant : aucune configuration requise. Pour les couper :</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>logging.getLogger(<span class="st">"cartograpy"</span>).setLevel(logging.ERROR)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
@@ -684,6 +684,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1116,11 +1130,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

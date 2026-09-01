@@ -25,28 +25,29 @@ interne évolue.
 ## Organisation interne
 
 `data`, `processing` et `mapper` sont chacun un sous-package (un dossier), pas un seul
-fichier — découpage nécessaire une fois que chacun a dépassé plusieurs milliers de
+fichier : découpage nécessaire une fois que chacun a dépassé plusieurs milliers de
 lignes et mélangé plusieurs responsabilités indépendantes dans un seul fichier plat :
 
-- `cartograpy/data/` — un fichier par source de données : `io.py` (lecture/écriture
+- `cartograpy/data/` : un fichier par source de données : `io.py` (lecture/écriture
   générique), `boundaries.py` (`GeoBoundaries`, `Bound`), `geocoding.py` (`Geocoder`),
   `osm.py` (`OSM`), `hydro.py` (`Hydro`), `dem.py` (`DEM`), `worldbank.py` (`WorldBank`),
-  `gee.py` (`Gee`), plus `_optional.py`/`_types.py` pour le code partagé en interne.
-- `cartograpy/processing/` — `vector.py` (fonctions vectorielles + `VectorTools`) et
+  `climate.py` (`Climate`, NASA POWER), `gee.py` (`Gee`), plus `_optional.py`/`_types.py`
+  pour le code partagé en interne.
+- `cartograpy/processing/` : `vector.py` (fonctions vectorielles + `VectorTools`) et
   `raster.py` (`RasterTools`).
-- `cartograpy/mapper/` — `helpers.py` (`read_image`, `plot_choropleth`), `map.py`
+- `cartograpy/mapper/` : `helpers.py` (`read_image`, `plot_choropleth`), `map.py`
   (`Map`), `map2d.py` (`Map2D`), `webmap.py` (`WebMap`), `situation.py`
   (`SituationMap`), `bivariate.py` (choroplèthes bivariées), `hexgrid.py`
   (grilles hexagonales / hexbin, via `geohexgrid`), plus `_optional_deps.py` pour les dépendances graphiques
   optionnelles (`contextily`, `matplotlib-scalebar`, `matplotlib-map-utils`) partagées
   entre `Map` et `SituationMap`.
 
-`Map` (dans `mapper/map.py`) reste volontairement une seule classe de grande taille —
+`Map` (dans `mapper/map.py`) reste volontairement une seule classe de grande taille :
 son découpage interne en mixins thématiques est un chantier à part, pas encore fait.
 
 ## Messages et journalisation
 
-Les méthodes qui affichent un statut (`Project.init()`, `Project.infos()`, `Bound.get_country()`, etc.) passent par le module `logging` standard plutôt que par `print()` directement. Par défaut, ces messages restent visibles exactement comme avant — aucune configuration requise. Pour les couper :
+Les méthodes qui affichent un statut (`Project.init()`, `Project.infos()`, `Bound.get_country()`, etc.) passent par le module `logging` standard plutôt que par `print()` directement. Par défaut, ces messages restent visibles exactement comme avant : aucune configuration requise. Pour les couper :
 
 ```python
 import logging

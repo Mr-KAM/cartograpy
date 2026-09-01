@@ -47,9 +47,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -439,31 +439,31 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -573,7 +573,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#sources-externes" id="toc-sources-externes" class="nav-link active" data-scroll-target="#sources-externes">Sources externes</a></li>
-  <li><a href="#ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin" id="toc-ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin" class="nav-link" data-scroll-target="#ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin">Ce qui a besoin du réseau — et ce qui n’en a pas besoin</a></li>
+  <li><a href="#ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin" id="toc-ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin" class="nav-link" data-scroll-target="#ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin">Ce qui a besoin du réseau : et ce qui n’en a pas besoin</a></li>
   <li><a href="#dépendances-cœur" id="toc-dépendances-cœur" class="nav-link" data-scroll-target="#dépendances-cœur">Dépendances cœur</a></li>
   <li><a href="#dépendances-optionnelles-dégradation-silencieuse" id="toc-dépendances-optionnelles-dégradation-silencieuse" class="nav-link" data-scroll-target="#dépendances-optionnelles-dégradation-silencieuse">Dépendances optionnelles (dégradation silencieuse)</a></li>
   </ul>
@@ -638,13 +638,17 @@ ul.task-list li input[type="checkbox"] {
 <h4 class="anchored" data-anchor-id="world-bank">World Bank</h4>
 <p>Indicateurs socio-économiques par pays, via <code>wbdata</code>. Utilisé par <code>WorldBank</code>.</p>
 </section>
+<section id="nasa-power" class="level4">
+<h4 class="anchored" data-anchor-id="nasa-power">NASA POWER</h4>
+<p>Séries météo/climat globales (température, précipitations, vent, rayonnement, humidité) journalières à climatologiques, via l’API REST <code>power.larc.nasa.gov</code> : <strong>sans clé API</strong>. Utilisé par <code>Climate</code>. Réponses mises en cache localement (<code>requests_cache</code>, 7 jours par défaut).</p>
+</section>
 <section id="google-earth-engine" class="level4">
 <h4 class="anchored" data-anchor-id="google-earth-engine">Google Earth Engine</h4>
-<p>Imagerie satellite et analyses à grande échelle. Utilisé par <code>Gee</code> — nécessite en plus un compte Google Earth Engine et une authentification (<code>ee.Authenticate()</code>), au-delà de l’installation des paquets Python.</p>
+<p>Imagerie satellite et analyses à grande échelle. Utilisé par <code>Gee</code> : nécessite en plus un compte Google Earth Engine et une authentification (<code>ee.Authenticate()</code>), au-delà de l’installation des paquets Python.</p>
 </section>
 </section>
 <section id="ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin" class="level2">
-<h2 class="anchored" data-anchor-id="ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin">Ce qui a besoin du réseau — et ce qui n’en a pas besoin</h2>
+<h2 class="anchored" data-anchor-id="ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin">Ce qui a besoin du réseau : et ce qui n’en a pas besoin</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -659,7 +663,7 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><code>load</code>, <code>save</code>, <code>describe</code>, <code>list_geofiles</code></td>
-<td>Non — fichiers locaux uniquement</td>
+<td>Non : fichiers locaux uniquement</td>
 </tr>
 <tr class="even">
 <td><code>VectorTools</code>, <code>RasterTools</code>, <code>centroids</code>, <code>join</code>, <code>fusion</code>, <code>add_column</code>, <code>split_multipolygon</code>, <code>clip_gdf_by_*</code></td>
@@ -675,7 +679,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td><code>GeoBoundaries</code> / <code>Bound</code></td>
-<td>Oui (geoboundaries.org, Natural Earth) — mis en cache après le premier appel</td>
+<td>Oui (geoboundaries.org, Natural Earth) : mis en cache après le premier appel</td>
 </tr>
 <tr class="even">
 <td><code>OSM</code></td>
@@ -698,18 +702,22 @@ ul.task-list li input[type="checkbox"] {
 <td>Oui (API World Bank)</td>
 </tr>
 <tr class="odd">
+<td><code>Climate</code></td>
+<td>Oui (API NASA POWER) : mis en cache après le premier appel</td>
+</tr>
+<tr class="even">
 <td><code>Gee</code></td>
 <td>Oui, + authentification Google Earth Engine préalable</td>
 </tr>
-<tr class="even">
-<td><code>google_font()</code> (styling)</td>
-<td>Oui (Google Fonts) — <code>path_font()</code>/<code>local_font()</code> sont locaux</td>
-</tr>
 <tr class="odd">
+<td><code>google_font()</code> (styling)</td>
+<td>Oui (Google Fonts) : <code>path_font()</code>/<code>local_font()</code> sont locaux</td>
+</tr>
+<tr class="even">
 <td><code>Map.add_basemap()</code></td>
 <td>Oui (tuiles web via <code>contextily</code>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>WebMap</code></td>
 <td>Non pour la génération de la carte (tuiles chargées côté navigateur au moment de l’affichage, pas au moment de l’appel Python)</td>
 </tr>
@@ -778,7 +786,7 @@ Avertissement
 <tr class="odd">
 <td><code>earthengine-api</code> (<code>ee</code>)</td>
 <td><code>Gee</code> (toutes les méthodes)</td>
-<td><strong>Non</strong> — écart à corriger, voir ci-dessous</td>
+<td><strong>Non</strong> : écart à corriger, voir ci-dessous</td>
 </tr>
 </tbody>
 </table>
@@ -792,7 +800,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Écart connu : <code>Gee</code> importe le paquet <code>ee</code> (<code>earthengine-api</code>) via <code>_require_ee()</code>, mais ce paquet n’apparaît nulle part dans les dépendances de <code>pyproject.toml</code> — seul <code>geemap</code> y est déclaré (en dépendance cœur, alors qu’il n’est en réalité utilisé qu’à travers ce même mécanisme optionnel). Installer cartograpy seul ne suffit donc pas à faire fonctionner <code>Gee</code> : il faut ajouter manuellement <code>pip install earthengine-api</code>.</p>
+<p>Écart connu : <code>Gee</code> importe le paquet <code>ee</code> (<code>earthengine-api</code>) via <code>_require_ee()</code>, mais ce paquet n’apparaît nulle part dans les dépendances de <code>pyproject.toml</code> : seul <code>geemap</code> y est déclaré (en dépendance cœur, alors qu’il n’est en réalité utilisé qu’à travers ce même mécanisme optionnel). Installer cartograpy seul ne suffit donc pas à faire fonctionner <code>Gee</code> : il faut ajouter manuellement <code>pip install earthengine-api</code>.</p>
 </div>
 </div>
 
@@ -800,6 +808,20 @@ Avertissement
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1232,11 +1254,13 @@ Avertissement
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

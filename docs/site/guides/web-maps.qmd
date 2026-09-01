@@ -18,7 +18,7 @@ wm = WebMap(location=(5.35, -4.0), zoom_start=7, tiles="OpenStreetMap")
 
 ::: {.callout-warning}
 `WebMap` nécessite `folium`, qui n'est pas dans les dépendances cœur de
-cartograpy — `pip install folium` si l'import échoue.
+cartograpy : `pip install folium` si l'import échoue.
 :::
 
 ## Ajouter une couche vectorielle
@@ -36,7 +36,7 @@ wm.add_layer(routes_gdf, name="Routes")
 
 ::: {.callout-note}
 `add_layer` reprojette automatiquement en `EPSG:4326` si la couche est dans un
-autre CRS — Folium/Leaflet n'acceptent que WGS 84.
+autre CRS : Folium/Leaflet n'acceptent que WGS 84.
 :::
 
 ## Marqueurs
@@ -75,17 +75,17 @@ wm.save("carte.html")  # export HTML autonome
 | | `Map` | `WebMap` |
 |---|---|---|
 | Rendu | statique (PNG, PDF, export papier) | interactif (HTML, zoom/pan navigateur) |
-| Légende, échelle, flèche du Nord | oui, gérées en détail | non — habillage Leaflet standard uniquement |
-| Volumes de données | adapté aux gros jeux de données | à limiter — de gros GeoJSON ralentissent le navigateur |
+| Légende, échelle, flèche du Nord | oui, gérées en détail | non : habillage Leaflet standard uniquement |
+| Volumes de données | adapté aux gros jeux de données | à limiter : de gros GeoJSON ralentissent le navigateur |
 | Distribution | image/PDF à insérer dans un document | fichier HTML autonome, partageable tel quel |
 
 ::: {.callout-tip}
 Pour de gros volumes (plusieurs dizaines de milliers d'entités), simplifiez la
 géométrie avant `add_layer` (`VectorTools(gdf).simplify_geometry(tolerance=...)`)
-— un GeoJSON trop détaillé ralentit sensiblement l'affichage Leaflet.
+: un GeoJSON trop détaillé ralentit sensiblement l'affichage Leaflet.
 :::
 
 ## Aller plus loin
 
-- [Cartes statiques](/guides/static-maps.qmd) — l'équivalent pour l'export image/PDF
-- [Reference mapper](/reference/mapper.qmd) — signatures complètes
+- [Cartes statiques](/guides/static-maps.qmd) : l'équivalent pour l'export image/PDF
+- [Reference mapper](/reference/mapper.qmd) : signatures complètes

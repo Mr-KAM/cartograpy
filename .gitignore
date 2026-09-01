@@ -68,6 +68,6 @@ build/
 .DS_Store
 Thumbs.db
 .pypirc
-
+*.env
 # === SVG files ===
 cartograpy/svg/

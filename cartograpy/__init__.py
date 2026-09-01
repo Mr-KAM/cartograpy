@@ -3,6 +3,12 @@
 
 import logging
 import sys
+from importlib.metadata import version as _pkg_version, PackageNotFoundError
+
+try:
+    __version__ = _pkg_version("cartograpy")
+except PackageNotFoundError:  # exécuté depuis les sources, paquet non installé
+    __version__ = "0.0.0+unknown"
 
 # Messages visibles par défaut (comme print()), sans configuration requise.
 # `logging.getLogger("cartograpy").setLevel(logging.WARNING)` (ou plus haut)
@@ -21,7 +27,7 @@ from .data import (
     load, save, describe, list_geofiles,
     GeoBoundaries, Bound, Geocoder,
     OSM, Hydro, DEM, DEMDownloadError,
-    WorldBank, Gee,
+    WorldBank, Climate, Gee,
 )
 
 from .processing import (
@@ -78,9 +84,10 @@ from .project import Project, init_project
 
 
 __all__ = [
+    "__version__",
     # data
     "load", "save", "describe", "list_geofiles", "GeoBoundaries", "Bound",
-    "Geocoder", "OSM", "Hydro", "DEM", "DEMDownloadError", "WorldBank", "Gee",
+    "Geocoder", "OSM", "Hydro", "DEM", "DEMDownloadError", "WorldBank", "Climate", "Gee",
     # processing
     "centroids", "join", "fusion", "add_column", "split_multipolygon", "VectorTools", "RasterTools",
     # mapper

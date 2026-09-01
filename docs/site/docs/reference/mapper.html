@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -474,31 +474,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -687,19 +687,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>map.py</code></td>
-<td><code>Map</code> — la classe principale, cartes statiques matplotlib/cartopy</td>
+<td><code>Map</code> : la classe principale, cartes statiques matplotlib/cartopy</td>
 </tr>
 <tr class="odd">
 <td><code>map2d.py</code></td>
-<td><code>Map2D</code> (hérite de <code>Map</code>) — cartes sans projection cartographique</td>
+<td><code>Map2D</code> (hérite de <code>Map</code>) : cartes sans projection cartographique</td>
 </tr>
 <tr class="even">
 <td><code>webmap.py</code></td>
-<td><code>WebMap</code> — cartes interactives Folium/Leaflet</td>
+<td><code>WebMap</code> : cartes interactives Folium/Leaflet</td>
 </tr>
 <tr class="odd">
 <td><code>situation.py</code></td>
-<td><code>SituationMap</code> — carte + mini-carte de localisation</td>
+<td><code>SituationMap</code> : carte + mini-carte de localisation</td>
 </tr>
 <tr class="even">
 <td><code>bivariate.py</code></td>
@@ -712,7 +712,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 <p>Tout reste importable depuis <code>cartograpy.mapper</code> directement (<code>from cartograpy.mapper import Map</code>).</p>
-<p><code>Map</code> concentre encore la majorité de la logique (création, couches, légende, échelle, flèche du nord, export…) dans une seule classe volumineuse — un découpage interne en mixins thématiques n’a pas encore été fait.</p>
+<p><code>Map</code> concentre encore la majorité de la logique (création, couches, légende, échelle, flèche du nord, export…) dans une seule classe volumineuse : un découpage interne en mixins thématiques n’a pas encore été fait.</p>
 </section>
 <section id="constructeur-de-map" class="level2">
 <h2 class="anchored" data-anchor-id="constructeur-de-map">Constructeur de Map</h2>
@@ -720,12 +720,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    data_crs<span class="op">=</span><span class="st">"EPSG:4326"</span>, dpi<span class="op">=</span><span class="dv">300</span>, verbose<span class="op">=</span><span class="va">True</span>, basemap<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>figsize</code></strong> (<code>tuple</code>, <code>str</code> ou <code>dict</code>, défaut <code>(12, 8)</code>) : taille en pouces, format papier (<code>"A4"</code>, <code>"A3"</code>…) ou <code>{"paper": ..., "orientation": ...}</code>.</li>
-<li><strong><code>title</code></strong> (<code>str</code>, défaut <code>""</code>) : titre de la carte — vide par défaut, aucun titre n’est affiché.</li>
+<li><strong><code>title</code></strong> (<code>str</code>, défaut <code>""</code>) : titre de la carte : vide par défaut, aucun titre n’est affiché.</li>
 <li><strong><code>projection</code></strong> (<code>cartopy.crs</code>, défaut <code>ccrs.PlateCarree()</code>) : projection cartographique de l’axe.</li>
 <li><strong><code>data_crs</code></strong> (<code>str</code>, défaut <code>"EPSG:4326"</code>) : CRS supposé des données ajoutées.</li>
 <li><strong><code>dpi</code></strong> (<code>int</code>, défaut <code>300</code>) : résolution de la figure.</li>
 <li><strong><code>verbose</code></strong> (<code>bool</code>, défaut <code>True</code>) : afficher les messages d’information.</li>
-<li><strong><code>basemap</code></strong> (<code>bool</code>, défaut <code>True</code>) : ajouter automatiquement côtes et frontières (<code>cfeature.BORDERS</code>, <code>coastlines</code>). Mettre <code>False</code> pour une carte vierge — garde la projection cartopy (donc <code>add_north_arrow</code>/<code>add_scale_bar</code>/<code>add_inset_map</code> restent utilisables), contrairement à <code>Map2D</code> qui abandonne la projection cartopy entièrement.</li>
+<li><strong><code>basemap</code></strong> (<code>bool</code>, défaut <code>True</code>) : ajouter automatiquement côtes et frontières (<code>cfeature.BORDERS</code>, <code>coastlines</code>). Mettre <code>False</code> pour une carte vierge : garde la projection cartopy (donc <code>add_north_arrow</code>/<code>add_scale_bar</code>/<code>add_inset_map</code> restent utilisables), contrairement à <code>Map2D</code> qui abandonne la projection cartopy entièrement.</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carte sans côtes ni frontières automatiques, mais avec projection cartopy</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Map(title<span class="op">=</span><span class="st">"Carte vierge"</span>, basemap<span class="op">=</span><span class="va">False</span>)</span>
@@ -735,7 +735,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="méthodes-de-map" class="level2">
 <h2 class="anchored" data-anchor-id="méthodes-de-map">Méthodes de Map</h2>
-<p>68 méthodes publiques, groupées par thème. Signature complète (avec valeurs par défaut) et description en une ligne — pour les paramètres en détail, se référer au docstring de la méthode dans <code>cartograpy/mapper/map.py</code>.</p>
+<p>69 méthodes publiques, groupées par thème. Signature complète (avec valeurs par défaut) et description en une ligne : pour les paramètres en détail, se référer au docstring de la méthode dans <code>cartograpy/mapper/map.py</code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -755,7 +755,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>set_background_color(color<span class="op">=</span><span class="st">'white'</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Définit la couleur de fond de la carte.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>set_extent(bounds, crs<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Définit les limites de la carte.</p>
+<p>Définit les limites de la carte. <code>bounds</code> au format cartopy <code>[x0, x1, y0, y1]</code> (ouest, est, sud, nord). <code>self.bounds</code> reste mémorisé en <code>[minx, miny, maxx, maxy]</code> pour le reste de l’API (<code>add_background_image</code>, centrage…).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>set_projection(projection)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Change la projection de la carte (nécessite de recréer l’axe).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>center_on_bounds(bounds, margin<span class="op">=</span><span class="st">'auto'</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -807,7 +807,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Ajoute une couche de points vectoriels, taille et/ou couleur proportionnelles à une colonne.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>add_polygons_cloropleth(<span class="op">*</span>args, <span class="op">**</span>kwargs)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>add_points_cloropleth(<span class="op">*</span>args, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Alias dépréciés (faute de frappe historique) — utiliser <code>add_polygons_choropleth</code> / <code>add_points_choropleth</code>.</p>
+<p>Alias dépréciés (faute de frappe historique) : utiliser <code>add_polygons_choropleth</code> / <code>add_points_choropleth</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>add_colorbar(cmap<span class="op">=</span><span class="st">'viridis'</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>, label<span class="op">=</span><span class="va">None</span>, orientation<span class="op">=</span><span class="st">'vertical'</span>, shrink<span class="op">=</span><span class="fl">0.6</span>, pad<span class="op">=</span><span class="fl">0.05</span>, aspect<span class="op">=</span><span class="dv">20</span>, ticks<span class="op">=</span><span class="va">None</span>, tick_labels<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ajoute une barre de couleurs autonome à la carte (indépendante d’une couche choroplèthe).</p>
 </div>
@@ -839,7 +839,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>add_highlight_text(text, xy, fontsize<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span><span class="st">'black'</span>, highlight_textprops<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ajoute du texte avec des segments <code>&lt;mis en évidence&gt;</code> (police/couleur différente) via <code>highlight_text</code>, en coordonnées géographiques.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>add_highlight_fig_text(text, x, y, fontsize<span class="op">=</span><span class="dv">12</span>, color<span class="op">=</span><span class="st">'black'</span>, highlight_textprops<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Équivalent de <code>add_highlight_text</code> mais hors-carte, en coordonnées figure (0-1) — pour titre/sous-titre.</p>
+<p>Équivalent de <code>add_highlight_text</code> mais hors-carte, en coordonnées figure (0-1) : pour titre/sous-titre.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>add_custom_text(text, xy, to<span class="op">=</span><span class="st">'ax'</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Dispatch vers <code>add_highlight_text</code> (<code>to="ax"</code>) ou <code>add_highlight_fig_text</code> (<code>to="fig"</code>) selon le système de coordonnées voulu.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>add_custom_labels(gdf, template, dx<span class="op">=</span><span class="fl">0.0</span>, dy<span class="op">=</span><span class="fl">0.0</span>, except_<span class="op">=</span><span class="va">None</span>, highlight_textprops<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -863,8 +863,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="callout-body-container callout-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>add_image(image, xy, to<span class="op">=</span><span class="st">'fig'</span>, zoom<span class="op">=</span><span class="dv">1</span>, alpha<span class="op">=</span><span class="fl">1.0</span>, zorder<span class="op">=</span><span class="dv">100</span>, frameon<span class="op">=</span><span class="va">False</span>, color<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ajoute une image (logo, photo, illustration) à un endroit précis de la carte, via <code>OffsetImage</code>+<code>AnnotationBbox</code>. <code>to="fig"</code> (défaut) pour des coordonnées figure (0-1), <code>to="ax"</code> pour des coordonnées géographiques.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>add_background_image(image, extent<span class="op">=</span><span class="va">None</span>, zoom<span class="op">=</span><span class="dv">1</span>, aspect<span class="op">=</span><span class="st">'equal'</span>, alpha<span class="op">=</span><span class="fl">1.0</span>, zorder<span class="op">=-</span><span class="dv">100</span>, color<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Ajoute une image de fond derrière toutes les couches, sur l’étendue de la carte (<code>self.bounds</code> par défaut). L’image garde ses proportions (recadrée au besoin plutôt que déformée) ; <code>zoom</code> doit être &gt; 0.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>add_background_image(image, extent<span class="op">=</span><span class="va">None</span>, zoom<span class="op">=</span><span class="dv">1</span>, aspect<span class="op">=</span><span class="st">'equal'</span>, alpha<span class="op">=</span><span class="fl">1.0</span>, zorder<span class="op">=-</span><span class="dv">100</span>, color<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>set_background_image(<span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ajoute une image de fond derrière toutes les couches, sur l’étendue de la carte (<code>self.bounds</code> par défaut) / modifie celle déjà ajoutée. L’image garde ses proportions (recadrée au besoin plutôt que déformée) ; <code>zoom</code> (&gt; 0) est un facteur d’échelle autour du centre : <code>&gt; 1</code> agrandit l’image, <code>&lt; 1</code> la réduit. Une seule image de fond à la fois (la précédente est retirée), et elle est re-dessinée automatiquement après <code>set_paper</code>/<code>set_projection</code> (comme la grille et la flèche du Nord). <code>set_background_image</code> fusionne les paramètres passés avec ceux du dernier appel : ex. <code>set_background_image(alpha=0.25)</code> : et lève <code>RuntimeError</code> si aucune image n’a encore été ajoutée.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>get_north_arrows(arrows_subdir<span class="op">=</span><span class="st">'arrows'</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Liste les fichiers SVG de flèches du Nord disponibles dans le package.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>add_north_arrow(arrow<span class="op">=</span><span class="dv">1</span>, position<span class="op">=</span>(<span class="fl">0.95</span>, <span class="fl">0.95</span>), zoom<span class="op">=</span><span class="dv">1</span>, color<span class="op">=</span><span class="st">'black'</span>, style<span class="op">=</span><span class="st">'auto'</span>, location<span class="op">=</span><span class="st">'upper right'</span>, scale<span class="op">=</span><span class="va">None</span>, rotation<span class="op">=</span><span class="st">'auto'</span>, label<span class="op">=</span><span class="st">'N'</span>, fancy<span class="op">=</span><span class="va">True</span>, shadow<span class="op">=</span><span class="va">False</span>, size<span class="op">=</span><span class="va">None</span>, base<span class="op">=</span><span class="va">None</span>, pack<span class="op">=</span><span class="va">None</span>, aob<span class="op">=</span><span class="va">None</span>, zorder<span class="op">=</span><span class="dv">99</span>, to<span class="op">=</span><span class="st">'ax'</span>, <span class="op">**</span>kwargs)</span>
@@ -880,12 +881,12 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Mode <code>style="svg"</code> : les 17 icônes embarquées ont des résolutions natives très différentes une fois rastérisées (de 5x16 à 580x580 px selon l’icône). Elles sont automatiquement ramenées à une taille de référence commune avant d’appliquer <code>zoom</code> — <code>zoom=1</code> donne donc une taille cohérente quelle que soit l’icône choisie, plutôt que de dépendre de la résolution brute du fichier SVG. Le fond des icônes est rendu transparent (pas de carré blanc opaque derrière la flèche).</p>
+<p>Mode <code>style="svg"</code> : les 17 icônes embarquées ont des résolutions natives très différentes une fois rastérisées (de 5x16 à 580x580 px selon l’icône). Elles sont automatiquement ramenées à une taille de référence commune avant d’appliquer <code>zoom</code> : <code>zoom=1</code> donne donc une taille cohérente quelle que soit l’icône choisie, plutôt que de dépendre de la résolution brute du fichier SVG. Le fond des icônes est rendu transparent (pas de carré blanc opaque derrière la flèche).</p>
 </div>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>add_scale_bar(length<span class="op">=</span><span class="va">None</span>, location<span class="op">=</span><span class="st">'lower left'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, units<span class="op">=</span><span class="st">'km'</span>, color<span class="op">=</span><span class="st">'black'</span>, fontsize<span class="op">=</span><span class="dv">11</span>, pad<span class="op">=</span><span class="fl">0.1</span>, alpha<span class="op">=</span><span class="dv">1</span>, label<span class="op">=</span><span class="va">None</span>, style<span class="op">=</span><span class="st">'auto'</span>, box_color<span class="op">=</span><span class="st">'white'</span>, box_alpha<span class="op">=</span><span class="fl">0.8</span>, scale_loc<span class="op">=</span><span class="st">'bottom'</span>, label_loc<span class="op">=</span><span class="st">'top'</span>, add_as_layer<span class="op">=</span><span class="va">True</span>, bar_style<span class="op">=</span><span class="st">'boxes'</span>, major_div<span class="op">=</span><span class="va">None</span>, minor_div<span class="op">=</span><span class="va">None</span>, size<span class="op">=</span><span class="va">None</span>, bar<span class="op">=</span><span class="va">None</span>, labels<span class="op">=</span><span class="va">None</span>, text<span class="op">=</span><span class="va">None</span>, to<span class="op">=</span><span class="st">'ax'</span>, position<span class="op">=</span>(<span class="fl">0.05</span>, <span class="fl">0.05</span>), aob<span class="op">=</span><span class="va">None</span>, font<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>set_scale_bar(<span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Ajoute une barre d’échelle sur la carte / modifie celle déjà créée. <code>major_div</code>/<code>minor_div</code> : <code>None</code> par défaut (calcul automatique par <code>matplotlib-map-utils</code>) — ne les fixer qu’ensemble avec un <code>major_mult</code> (via le dict <code>bar=...</code>), sinon le calcul de la barre échoue. <code>to</code> (défaut <code>"ax"</code>) : <code>"fig"</code> ancre la barre à la figure entière plutôt qu’à l’axe carte (modes <code>map-utils</code>/<code>scalebar</code> uniquement — avertissement et retour à l’axe en mode <code>manual</code>, intrinsèquement géographique), même convention que <code>add_north_arrow(..., to=...)</code>. <code>position</code> : point d’ancrage exact en coordonnées figure (0-1), utilisé uniquement si <code>to="fig"</code> — <code>location</code> détermine toujours quel coin de la barre touche ce point.</p>
+<p>Ajoute une barre d’échelle sur la carte / modifie celle déjà créée. <code>major_div</code>/<code>minor_div</code> : <code>None</code> par défaut (calcul automatique par <code>matplotlib-map-utils</code>) : ne les fixer qu’ensemble avec un <code>major_mult</code> (via le dict <code>bar=...</code>), sinon le calcul de la barre échoue. <code>to</code> (défaut <code>"ax"</code>) : <code>"fig"</code> ancre la barre à la figure entière plutôt qu’à l’axe carte (modes <code>map-utils</code>/<code>scalebar</code> uniquement : avertissement et retour à l’axe en mode <code>manual</code>, intrinsèquement géographique), même convention que <code>add_north_arrow(..., to=...)</code>. <code>position</code> : point d’ancrage exact en coordonnées figure (0-1), utilisé uniquement si <code>to="fig"</code> : <code>location</code> détermine toujours quel coin de la barre touche ce point.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -903,11 +904,11 @@ Note
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>set_inset(<span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ajoute une mini-carte de situation (inset map) montrant la zone étudiée dans son contexte / modifie celle déjà créée.</p>
 <ul>
-<li><strong><code>data</code></strong> (<code>list[float] | GeoDataFrame</code>, optionnel) : zone à surligner sur l’inset — bbox <code>[minx, miny, maxx, maxy]</code> ou GeoDataFrame. <code>None</code> (défaut) : reprend <code>self.bounds</code>, indicateur calculé depuis l’étendue actuelle de la carte principale (comportement hérité).</li>
+<li><strong><code>data</code></strong> (<code>list[float] | GeoDataFrame</code>, optionnel) : zone à surligner sur l’inset : bbox <code>[minx, miny, maxx, maxy]</code> ou GeoDataFrame. <code>None</code> (défaut) : reprend <code>self.bounds</code>, indicateur calculé depuis l’étendue actuelle de la carte principale (comportement hérité).</li>
 <li><strong><code>on</code></strong> (<code>GeoDataFrame | list</code>, optionnel) : couche(s) de contexte dessinée(s) sur l’inset (ex. tous les pays d’un continent, pour situer <code>data</code> dedans). GeoDataFrame unique ou liste de <code>{"data": gdf, "kwargs": {...}}</code>.</li>
-<li><strong><code>mode</code></strong> (<code>str</code>, défaut <code>"bbox"</code>) : comment dessiner <code>data</code> quand c’est un GeoDataFrame — <code>"bbox"</code> (rectangle de son étendue) ou <code>"geometry"</code> (sa géométrie réelle). Sans effet si <code>data</code> est déjà une bbox.</li>
+<li><strong><code>mode</code></strong> (<code>str</code>, défaut <code>"bbox"</code>) : comment dessiner <code>data</code> quand c’est un GeoDataFrame : <code>"bbox"</code> (rectangle de son étendue) ou <code>"geometry"</code> (sa géométrie réelle). Sans effet si <code>data</code> est déjà une bbox.</li>
 <li><strong><code>zoom_to_on</code></strong> (<code>bool</code>, défaut <code>False</code>) : si <code>True</code>, zoome l’inset sur l’étendue totale de <code>on</code> (au lieu de la vue globale) et l’encadre d’un rectangle (<code>box_color</code>/<code>box_linewidth</code>). Sans effet si <code>on</code> n’est pas fourni (avertissement). Prioritaire sur <code>global_view</code>/<code>extent</code>.</li>
-<li><strong><code>to</code></strong> (<code>str</code>, défaut <code>"ax"</code>) : ancre du positionnement — <code>"ax"</code> : <code>position</code> (mode classique) ou <code>location</code>/<code>coords</code> (mode map-utils) relatifs à l’axe de la carte principale. <code>"fig"</code> : relatifs à la figure entière. Même convention que <code>add_north_arrow(..., to=...)</code>.</li>
+<li><strong><code>to</code></strong> (<code>str</code>, défaut <code>"ax"</code>) : ancre du positionnement : <code>"ax"</code> : <code>position</code> (mode classique) ou <code>location</code>/<code>coords</code> (mode map-utils) relatifs à l’axe de la carte principale. <code>"fig"</code> : relatifs à la figure entière. Même convention que <code>add_north_arrow(..., to=...)</code>.</li>
 <li><strong><code>circular</code></strong> (<code>bool</code>, défaut <code>False</code>) : si <code>True</code>, découpe l’inset en cercle plutôt qu’en rectangle (<code>Axes.set_boundary</code>), avec correction d’aspect pour un vrai cercle même si l’inset n’est pas physiquement carré (<code>size</code> ou <code>position</code> non carrés).</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>m.add_inset_map(on<span class="op">=</span>bound.get_continent(<span class="st">"Africa"</span>), zoom_to_on<span class="op">=</span><span class="va">True</span>, circular<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -928,7 +929,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>data</code> valide un GeoDataFrame/GeoSeries ou une bbox de 4 éléments — tout autre type (ex. passer par erreur un GeoDataFrame là où l’ancienne API attendait une bbox <code>bounds=</code>) lève un <code>TypeError</code> explicite plutôt que d’être ignoré silencieusement ou de planter plus loin avec une erreur confuse.</p>
+<p><code>data</code> valide un GeoDataFrame/GeoSeries ou une bbox de 4 éléments : tout autre type (ex. passer par erreur un GeoDataFrame là où l’ancienne API attendait une bbox <code>bounds=</code>) lève un <code>TypeError</code> explicite plutôt que d’être ignoré silencieusement ou de planter plus loin avec une erreur confuse.</p>
 </div>
 </div>
 </div>
@@ -1048,7 +1049,7 @@ Avertissement
 </section>
 <section id="méthodes-de-webmap" class="level2">
 <h2 class="anchored" data-anchor-id="méthodes-de-webmap">Méthodes de WebMap</h2>
-<p>6 méthodes publiques — carte interactive Folium/Leaflet, indépendante de <code>Map</code>.</p>
+<p>6 méthodes publiques : carte interactive Folium/Leaflet, indépendante de <code>Map</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>add_layer(gdf, column<span class="op">=</span><span class="va">None</span>, cmap<span class="op">=</span><span class="st">'YlOrRd'</span>, style_function<span class="op">=</span><span class="va">None</span>, tooltip_columns<span class="op">=</span><span class="va">None</span>, popup_columns<span class="op">=</span><span class="va">None</span>, name<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ajoute un GeoDataFrame comme couche GeoJson ou Choropleth.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>add_marker(location, popup<span class="op">=</span><span class="va">None</span>, tooltip<span class="op">=</span><span class="va">None</span>, icon<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1064,7 +1065,7 @@ Avertissement
 </section>
 <section id="méthodes-de-situationmap" class="level2">
 <h2 class="anchored" data-anchor-id="méthodes-de-situationmap">Méthodes de SituationMap</h2>
-<p>9 méthodes publiques — carte principale + mini-carte de localisation, indépendante de <code>Map</code>.</p>
+<p>9 méthodes publiques : carte principale + mini-carte de localisation, indépendante de <code>Map</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>add_main_layer(gdf, facecolor<span class="op">=</span><span class="st">'green'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, column<span class="op">=</span><span class="va">None</span>, cmap<span class="op">=</span><span class="st">'viridis'</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ajoute un GeoDataFrame à la carte principale.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>set_inset_box(bounds, box_color<span class="op">=</span><span class="st">'red'</span>, box_linewidth<span class="op">=</span><span class="dv">2</span>, indicator<span class="op">=</span><span class="st">'extent'</span>, indicator_facecolor<span class="op">=</span><span class="st">'red'</span>, indicator_linecolor<span class="op">=</span><span class="st">'red'</span>, indicator_alpha<span class="op">=</span><span class="fl">0.5</span>, indicator_linewidth<span class="op">=</span><span class="dv">1</span>)</span>
@@ -1085,7 +1086,7 @@ Avertissement
 <h2 class="anchored" data-anchor-id="méthodes-de-map-bivarié-et-hexbin">Méthodes de <code>Map</code> : bivarié et hexbin</h2>
 <p>En plus des fonctions autonomes ci-dessous, <code>Map</code> expose deux méthodes qui dessinent directement sur l’axe de la carte (avec flèche du nord, échelle, inset… déjà en place) au lieu de créer une figure :</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>add_bivariate(gdf, var1, var2, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Surcouche de <code>plot_bivariate_choropleth</code> — tous ses paramètres nommés passent par <code>**kwargs</code> (<code>var1_label</code>, <code>palette</code>, <code>n_classes</code>, <code>legend_position</code>…). Le GeoDataFrame enrichi est aussi stocké dans <code>Map.last_bivariate</code>.</p>
+<p>Surcouche de <code>plot_bivariate_choropleth</code> : tous ses paramètres nommés passent par <code>**kwargs</code> (<code>var1_label</code>, <code>palette</code>, <code>n_classes</code>, <code>legend_position</code>…). Le GeoDataFrame enrichi est aussi stocké dans <code>Map.last_bivariate</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>add_hexgrid(gdf, column, hex_size<span class="op">=</span><span class="va">None</span>, hex_grid<span class="op">=</span><span class="va">None</span>, value_cols<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>            agg_funcs<span class="op">=</span><span class="va">None</span>, predicate<span class="op">=</span><span class="st">"within"</span>, count_col<span class="op">=</span><span class="st">"n_points"</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Enchaîne <code>make_hex_grid</code> → <code>aggregate_to_hex</code> → <code>plot_hexgrid_choropleth</code>. Si <code>hex_size</code> (ou <code>hex_grid</code>) est fourni, <code>gdf</code> est agrégé ; sinon <code>gdf</code> est supposé déjà agrégé et tracé tel quel. <code>**kwargs</code> va à <code>plot_hexgrid_choropleth</code>. Grille stockée dans <code>Map.last_hexgrid</code>.</p>
@@ -1106,10 +1107,10 @@ Avertissement
 <h2 class="anchored" data-anchor-id="grille-hexagonale-hexgrid.py">Grille hexagonale (<code>hexgrid.py</code>)</h2>
 <p>Trois fonctions pour produire une carte hexbin : générer une grille régulière sur la zone d’étude, y agréger des données ponctuelles ou polygonales, tracer le résultat. Nécessite le paquet <code>geohexgrid</code> (dépendance cœur). Le GeoDataFrame agrégé est standard et réutilisable tel quel avec <code>plot_bivariate_choropleth</code> (ou <code>Map.add_bivariate</code>) pour une carte hexagonale bivariée.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb81"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>make_hex_grid(source, hex_size, crs<span class="op">=</span><span class="va">None</span>, trim_mode<span class="op">=</span><span class="st">"intersect"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Génère une grille d’hexagones réguliers (sommet plat) couvrant une zone. <code>source</code> : un <code>GeoDataFrame</code> (son étendue et son CRS sont repris ; les hexagones hors zone sont écartés selon <code>trim_mode</code> — <code>"intersect"</code> par défaut, ou <code>"clip"</code>) <strong>ou</strong> un tuple de bornes <code>(minx, miny, maxx, maxy)</code> — dans ce cas <code>crs</code> est requis. <code>hex_size</code> : circumradius de l’hexagone dans l’unité du CRS (utiliser un CRS projeté en mètres). Retourne un <code>GeoDataFrame</code> <code>cell_id</code>, <code>geometry</code>.</p>
+<p>Génère une grille d’hexagones réguliers (sommet plat) couvrant une zone. <code>source</code> : un <code>GeoDataFrame</code> (son étendue et son CRS sont repris ; les hexagones hors zone sont écartés selon <code>trim_mode</code> : <code>"intersect"</code> par défaut, ou <code>"clip"</code>) <strong>ou</strong> un tuple de bornes <code>(minx, miny, maxx, maxy)</code> : dans ce cas <code>crs</code> est requis. <code>hex_size</code> : circumradius de l’hexagone dans l’unité du CRS (utiliser un CRS projeté en mètres). Retourne un <code>GeoDataFrame</code> <code>cell_id</code>, <code>geometry</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>aggregate_to_hex(source_gdf, hex_grid, value_cols, agg_funcs<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>                 count_col<span class="op">=</span><span class="st">"n_points"</span>, predicate<span class="op">=</span><span class="st">"within"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Agrège <code>source_gdf</code> dans chaque hexagone de <code>hex_grid</code> (reprojeté au besoin). <code>value_cols</code> : colonnes numériques à agréger ; <code>agg_funcs</code> : fonction par colonne (<code>"mean"</code> partout par défaut). <code>predicate</code> : <code>"within"</code> (points) ou <code>"intersects"</code> (polygones à cheval). Retourne <code>hex_grid</code> enrichi des colonnes agrégées et de <code>count_col</code> (0 et NaN pour les hexagones sans donnée — à filtrer, ex. <code>result[result.n_points &gt;= 3]</code>).</p>
+<p>Agrège <code>source_gdf</code> dans chaque hexagone de <code>hex_grid</code> (reprojeté au besoin). <code>value_cols</code> : colonnes numériques à agréger ; <code>agg_funcs</code> : fonction par colonne (<code>"mean"</code> partout par défaut). <code>predicate</code> : <code>"within"</code> (points) ou <code>"intersects"</code> (polygones à cheval). Retourne <code>hex_grid</code> enrichi des colonnes agrégées et de <code>count_col</code> (0 et NaN pour les hexagones sans donnée : à filtrer, ex. <code>result[result.n_points &gt;= 3]</code>).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb83"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>plot_hexgrid_choropleth(hex_gdf, column, cmap<span class="op">=</span><span class="st">"viridis"</span>, min_count<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>                        count_col<span class="op">=</span><span class="st">"n_points"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>, linewidth<span class="op">=</span><span class="fl">0.3</span>,</span>
 <span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>                        title<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>), show_colorbar<span class="op">=</span><span class="va">True</span>,</span>
@@ -1125,6 +1126,20 @@ Avertissement
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -1557,11 +1572,13 @@ Avertissement
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

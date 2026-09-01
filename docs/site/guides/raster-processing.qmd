@@ -18,7 +18,7 @@ rt = RasterTools((array, profile))            # depuis un ndarray + profile rast
 
 ::: {.callout-note}
 Comme `VectorTools`, chaque méthode de transformation renvoie une **nouvelle**
-instance — le raster d'origine n'est jamais modifié, on chaîne les appels.
+instance : le raster d'origine n'est jamais modifié, on chaîne les appels.
 :::
 
 ## Par tâche
@@ -130,7 +130,7 @@ dépendances cœur de cartograpy.
 
 ## Aller plus loin
 
-- [CRS et projections](/explanations/crs-and-projections.qmd) — pourquoi harmoniser
+- [CRS et projections](/explanations/crs-and-projections.qmd) : pourquoi harmoniser
   CRS/résolution avant toute analyse combinée
-- [Reference RasterTools](/reference/raster-tools.qmd) — référence complète des 82
+- [Reference RasterTools](/reference/raster-tools.qmd) : référence complète des 82
   méthodes

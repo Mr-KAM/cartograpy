@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-9fbca8a2ee8f0d93aee55faa6071e8bc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-fc4ea4a6d5c4c21348c09bfa595c4bad.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7b4d4b93952755db432f3672a20d040e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-0bc1a35eb230bfe9ed3aab466dd354af.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -474,31 +474,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/cote-divoire-densite.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité de population — Côte d’Ivoire</span></a>
+ <span class="menu-text">Densité de population : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/civ-districts-reference.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Districts de Côte d’Ivoire — carte de référence</span></a>
+ <span class="menu-text">Districts de Côte d’Ivoire : carte de référence</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/emploi-agricole-femmes-afrique.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Emploi agricole des femmes — Afrique</span></a>
+ <span class="menu-text">Emploi agricole des femmes : Afrique</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/bivariate-civ.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Choroplèthe bivariée — Côte d’Ivoire</span></a>
+ <span class="menu-text">Choroplèthe bivariée : Côte d’Ivoire</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/hexbin-farm-density.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Densité d’exploitations — grille hexagonale</span></a>
+ <span class="menu-text">Densité d’exploitations : grille hexagonale</span></a>
   </div>
 </li>
       </ul>
@@ -607,7 +607,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Sur cette page</h2>
    
   <ul>
-  <li><a href="#io-chargement-sauvegarde-et-inspection-de-fichiers" id="toc-io-chargement-sauvegarde-et-inspection-de-fichiers" class="nav-link active" data-scroll-target="#io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> — chargement, sauvegarde et inspection de fichiers</a>
+  <li><a href="#io-chargement-sauvegarde-et-inspection-de-fichiers" id="toc-io-chargement-sauvegarde-et-inspection-de-fichiers" class="nav-link active" data-scroll-target="#io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> : chargement, sauvegarde et inspection de fichiers</a>
   <ul class="collapse">
   <li><a href="#loadfilepath-layernone" id="toc-loadfilepath-layernone" class="nav-link" data-scroll-target="#loadfilepath-layernone"><code>load(filepath, layer=None)</code></a></li>
   <li><a href="#describefilepath" id="toc-describefilepath" class="nav-link" data-scroll-target="#describefilepath"><code>describe(filepath)</code></a></li>
@@ -639,6 +639,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#get_dataindicators-countryall-kwargs" id="toc-get_dataindicators-countryall-kwargs" class="nav-link" data-scroll-target="#get_dataindicators-countryall-kwargs"><code>get_data(indicators, country='all', **kwargs)</code></a></li>
   </ul></li>
+  <li><a href="#climate" id="toc-climate" class="nav-link" data-scroll-target="#climate"><code>Climate</code></a></li>
   <li><a href="#gee" id="toc-gee" class="nav-link" data-scroll-target="#gee"><code>Gee</code></a>
   <ul class="collapse">
   <li><a href="#get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" id="toc-get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="nav-link" data-scroll-target="#get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone"><code>get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></a></li>
@@ -676,9 +677,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>cartograpy.data</code> regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale et Google Earth Engine. La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément — chaque section ci-dessous précise les erreurs et pièges réels du code source.</p>
+<p><code>cartograpy.data</code> regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale et Google Earth Engine. La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément : chaque section ci-dessous précise les erreurs et pièges réels du code source.</p>
 <section id="io-chargement-sauvegarde-et-inspection-de-fichiers" class="level2">
-<h2 class="anchored" data-anchor-id="io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> — chargement, sauvegarde et inspection de fichiers</h2>
+<h2 class="anchored" data-anchor-id="io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> : chargement, sauvegarde et inspection de fichiers</h2>
 <p>Quatre fonctions autonomes définies dans <code>cartograpy/data/io.py</code>. Ce sont elles que <code>Project.add_data</code>, <code>Project.load_data</code> et <code>Project.save_output</code> utilisent en interne.</p>
 <section id="loadfilepath-layernone" class="level3">
 <h3 class="anchored" data-anchor-id="loadfilepath-layernone"><code>load(filepath, layer=None)</code></h3>
@@ -728,7 +729,7 @@ Avertissement
 <li><strong><code>file_extension</code></strong> (<code>str</code>, requis) : <code>geojson</code>, <code>shp</code>, <code>gpkg</code>, <code>kml</code> (vecteur), <code>csv</code>, <code>parquet</code>, <code>geoparquet</code>, <code>xlsx</code>, <code>feather</code> (tabulaire), ou <code>tif</code>/<code>tiff</code> (raster).</li>
 <li><strong><code>filename</code></strong> (<code>str</code>, défaut <code>"output"</code>) : nom de base, sans extension.</li>
 <li><strong><code>timestamp</code></strong> (<code>bool</code>, défaut <code>False</code>) : ajoute un horodatage <code>_AAAAMMJJ_HHMMSS</code> au nom.</li>
-<li><strong><code>raster_meta</code></strong> (<code>dict</code>, optionnel) : requis si <code>data</code> est un <code>ndarray</code> — doit contenir <code>crs</code>, <code>transform</code>, <code>width</code>, <code>height</code>, <code>dtype</code>, <code>count</code>.</li>
+<li><strong><code>raster_meta</code></strong> (<code>dict</code>, optionnel) : requis si <code>data</code> est un <code>ndarray</code> : doit contenir <code>crs</code>, <code>transform</code>, <code>width</code>, <code>height</code>, <code>dtype</code>, <code>count</code>.</li>
 <li><strong>Retour</strong> (<code>str</code>) : chemin absolu du fichier écrit. Le dossier parent est créé automatiquement si besoin.</li>
 <li><strong>Erreurs</strong> : <code>ValueError</code> si le format est inconnu, si <code>filename</code> contient <code>".."</code> (anti path-traversal), ou si <code>raster_meta</code> est manquant/incomplet ; <code>TypeError</code> si le type de <code>data</code> ne correspond pas au format demandé (ex. <code>DataFrame</code> sans géométrie vers un format vectoriel, <code>ndarray</code>/<code>DatasetReader</code> vers autre chose que <code>tif</code>/<code>tiff</code>).</li>
 </ul>
@@ -746,7 +747,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Un <code>ndarray</code> 2D (une seule bande) est automatiquement promu en 3D avant écriture — inutile de le remodeler à la main.</p>
+<p>Un <code>ndarray</code> 2D (une seule bande) est automatiquement promu en 3D avant écriture : inutile de le remodeler à la main.</p>
 </div>
 </div>
 </section>
@@ -764,7 +765,7 @@ Note
 </section>
 <section id="geoboundaries-et-bound" class="level2">
 <h2 class="anchored" data-anchor-id="geoboundaries-et-bound"><code>GeoBoundaries</code> et <code>Bound</code></h2>
-<p><code>GeoBoundaries</code> est le client bas niveau pour l’API <a href="https://www.geoboundaries.org">geoboundaries.org</a> (frontières administratives ADM0–ADM5) et pour les continents Natural Earth. <code>Bound</code> en hérite et ajoute les méthodes utilitaires de haut niveau (<code>get_country</code>, <code>get_admin</code>, <code>get_neighbors</code>, <code>get_area</code>…) — c’est la classe à utiliser en pratique.</p>
+<p><code>GeoBoundaries</code> est le client bas niveau pour l’API <a href="https://www.geoboundaries.org">geoboundaries.org</a> (frontières administratives ADM0–ADM5) et pour les continents Natural Earth. <code>Bound</code> en hérite et ajoute les méthodes utilitaires de haut niveau (<code>get_country</code>, <code>get_admin</code>, <code>get_neighbors</code>, <code>get_area</code>…) : c’est la classe à utiliser en pratique.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> Bound(cache_expire_seconds<span class="op">=</span><span class="dv">604800</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -789,7 +790,7 @@ Note
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>get_country(name: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>name</code></strong> (<code>str</code> ou <code>list[str]</code>, requis) : nom de pays, code ISO2/ISO3, ou liste. Exemples : <code>"Côte d'Ivoire"</code>, <code>"CIV"</code>, <code>["SEN", "Mali"]</code>.</li>
-<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : frontières ADM0 (nationales) simplifiées — une ligne par pays si liste.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : frontières ADM0 (nationales) simplifiées : une ligne par pays si liste.</li>
 <li><strong>Erreurs</strong> : <code>KeyError</code> si un pays n’est pas trouvé.</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
@@ -816,7 +817,7 @@ Avertissement
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>get_admin(territories: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>], adm: <span class="bu">str</span> <span class="op">|</span> <span class="bu">int</span>, simplified: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>territories</code></strong> : territoire(s), mêmes valeurs acceptées que <code>get_country</code>.</li>
-<li><strong><code>adm</code></strong> (<code>str</code> ou <code>int</code>, requis) : niveau administratif — <code>"ADM0"</code> à <code>"ADM5"</code>, un entier <code>0</code>–<code>5</code>, ou <code>-1</code> pour le plus petit niveau disponible pour le pays.</li>
+<li><strong><code>adm</code></strong> (<code>str</code> ou <code>int</code>, requis) : niveau administratif : <code>"ADM0"</code> à <code>"ADM5"</code>, un entier <code>0</code>–<code>5</code>, ou <code>-1</code> pour le plus petit niveau disponible pour le pays.</li>
 <li><strong><code>simplified</code></strong> (<code>bool</code>, défaut <code>True</code>) : géométrie simplifiée (plus légère) ou complète.</li>
 <li><strong>Retour</strong> (<code>GeoDataFrame</code>) : géométries du niveau demandé (délègue à <code>adm()</code> de <code>GeoBoundaries</code>).</li>
 <li><strong>Erreurs</strong> : <code>KeyError</code> si le territoire n’est pas trouvé, ou si le niveau ADM demandé n’existe pas pour ce pays.</li>
@@ -862,7 +863,7 @@ Astuce
 <tbody>
 <tr class="odd">
 <td><code>is_valid_adm(iso3, adm)</code></td>
-<td><code>bool</code> — le niveau ADM existe-t-il pour ce pays.</td>
+<td><code>bool</code> : le niveau ADM existe-t-il pour ce pays.</td>
 </tr>
 <tr class="even">
 <td><code>get_iso3(territory)</code></td>
@@ -922,7 +923,7 @@ Astuce
 </tr>
 <tr class="even">
 <td><code>contains(territory, point)</code></td>
-<td><code>bool</code> — le point <code>(lat, lon)</code> est-il dans le territoire.</td>
+<td><code>bool</code> : le point <code>(lat, lon)</code> est-il dans le territoire.</td>
 </tr>
 <tr class="odd">
 <td><code>search_country(keyword)</code></td>
@@ -972,7 +973,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Le service Nominatim public est limité en débit — gardez <code>delay &gt;= 1</code> seconde et fournissez un <code>user_agent</code> explicite et unique à votre application, sous peine de blocage temporaire par le service. Les méthodes <code>bbox()</code>, <code>boundary()</code> et <code>within()</code> nécessitent en plus le paquet optionnel <code>osmnx</code> (<code>ImportError</code> explicite s’il est absent).</p>
+<p>Le service Nominatim public est limité en débit : gardez <code>delay &gt;= 1</code> seconde et fournissez un <code>user_agent</code> explicite et unique à votre application, sous peine de blocage temporaire par le service. Les méthodes <code>bbox()</code>, <code>boundary()</code> et <code>within()</code> nécessitent en plus le paquet optionnel <code>osmnx</code> (<code>ImportError</code> explicite s’il est absent).</p>
 </div>
 </div>
 <section id="geocodeplaces" class="level3">
@@ -980,8 +981,8 @@ Avertissement
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>geocode(places: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">tuple</span>[gpd.GeoDataFrame, <span class="bu">list</span>[<span class="bu">str</span>]]</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>places</code></strong> (<code>str</code> ou <code>list[str]</code>, requis) : localité(s) à géocoder.</li>
-<li><strong>Retour</strong> : tuple <code>(GeoDataFrame, list)</code> — <code>GeoDataFrame</code> des résultats trouvés (colonnes <code>query</code>, <code>address</code>, <code>latitude</code>, <code>longitude</code>, <code>altitude</code>, <code>raw</code>, <code>geometry</code> en <code>EPSG:4326</code>), et liste des localités non trouvées.</li>
-<li><strong>Erreurs</strong> : n’en lève pas — timeout, service indisponible ou lieu introuvable sont capturés et renvoient la localité dans la liste des non-trouvées (le détail est journalisé via <code>logging</code>).</li>
+<li><strong>Retour</strong> : tuple <code>(GeoDataFrame, list)</code> : <code>GeoDataFrame</code> des résultats trouvés (colonnes <code>query</code>, <code>address</code>, <code>latitude</code>, <code>longitude</code>, <code>altitude</code>, <code>raw</code>, <code>geometry</code> en <code>EPSG:4326</code>), et liste des localités non trouvées.</li>
+<li><strong>Erreurs</strong> : n’en lève pas : timeout, service indisponible ou lieu introuvable sont capturés et renvoient la localité dans la liste des non-trouvées (le détail est journalisé via <code>logging</code>).</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gdf, introuvables <span class="op">=</span> geocoder.geocode([<span class="st">"Abidjan"</span>, <span class="st">"Dakar"</span>, <span class="st">"Bamako"</span>])</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(introuvables)  <span class="co"># ex. ["Bamak"] si mal orthographié</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1043,7 +1044,7 @@ Avertissement
 </tr>
 <tr class="odd">
 <td><code>within(place, point)</code></td>
-<td><code>bool</code> — le point <code>(lat, lon)</code> est-il dans le polygone du lieu. Requiert <code>osmnx</code>.</td>
+<td><code>bool</code> : le point <code>(lat, lon)</code> est-il dans le polygone du lieu. Requiert <code>osmnx</code>.</td>
 </tr>
 <tr class="even">
 <td><code>bbox(place)</code></td>
@@ -1072,7 +1073,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>OSM()</code> nécessite le paquet optionnel <code>osmnx</code> — son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install osmnx</code>).</p>
+<p><code>OSM()</code> nécessite le paquet optionnel <code>osmnx</code> : son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install osmnx</code>).</p>
 </div>
 </div>
 <section id="get_dataplace-tags-data_typeall" class="level3">
@@ -1173,7 +1174,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Si <code>output_dir/region</code> existe déjà, le téléchargement est sauté — pas de re-téléchargement automatique même si les données ont changé côté source. Supprimez le dossier pour forcer une mise à jour.</p>
+<p>Si <code>output_dir/region</code> existe déjà, le téléchargement est sauté : pas de re-téléchargement automatique même si les données ont changé côté source. Supprimez le dossier pour forcer une mise à jour.</p>
 </div>
 </div>
 <p><code>hydro.describe_variables()</code> retourne une description texte (table Markdown) des colonnes du jeu de données (<code>HYRIV_ID</code>, <code>LENGTH_KM</code>, <code>DIS_AV_CMS</code>, <code>ORD_STRA</code>…), pratique pour l’affichage dans un notebook.</p>
@@ -1189,7 +1190,7 @@ Note
 <li><strong><code>work_dir</code></strong> (<code>str</code>/<code>Path</code>, défaut <code>"_dem_tiles"</code>) : dossier de travail pour les tuiles intermédiaires.</li>
 <li><strong><code>timeout</code></strong> (<code>int</code>, défaut <code>180</code>) : délai HTTP maximal par requête, en secondes.</li>
 <li><strong><code>keep_intermediate</code></strong> (<code>bool</code>, défaut <code>False</code>) : conserve les tuiles <code>.hgt.gz</code>/<code>.tif</code> après assemblage si <code>True</code>.</li>
-<li><strong><code>output_dir</code></strong> (optionnel) : alias déprécié de <code>work_dir</code> — émet un <code>UserWarning</code> si les deux sont fournis (et <code>output_dir</code> l’emporte).</li>
+<li><strong><code>output_dir</code></strong> (optionnel) : alias déprécié de <code>work_dir</code> : émet un <code>UserWarning</code> si les deux sont fournis (et <code>output_dir</code> l’emporte).</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -1227,7 +1228,7 @@ Astuce
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Une bbox traversant l’antiméridien (<code>west &gt; east</code>) est automatiquement découpée en deux et fusionnée — inutile de la gérer manuellement. Les tuiles océaniques manquantes côté serveur (HTTP 403/404) sont remplacées par des tuiles nodata plutôt que de faire échouer le téléchargement.</p>
+<p>Une bbox traversant l’antiméridien (<code>west &gt; east</code>) est automatiquement découpée en deux et fusionnée : inutile de la gérer manuellement. Les tuiles océaniques manquantes côté serveur (HTTP 403/404) sont remplacées par des tuiles nodata plutôt que de faire échouer le téléchargement.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -1302,14 +1303,14 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>WorldBank()</code> nécessite le paquet optionnel <code>wbdata</code> — son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install wbdata</code>).</p>
+<p><code>WorldBank()</code> nécessite le paquet optionnel <code>wbdata</code> : son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install wbdata</code>).</p>
 </div>
 </div>
 <section id="get_dataindicators-countryall-kwargs" class="level3">
 <h3 class="anchored" data-anchor-id="get_dataindicators-countryall-kwargs"><code>get_data(indicators, country='all', **kwargs)</code></h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>get_data(indicators, country<span class="op">=</span><span class="st">"all"</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> pandas.DataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li><strong><code>indicators</code></strong> (requis) : indicateur(s) Banque mondiale, tel qu’attendu par <code>wbdata.get_dataframe</code> — typiquement un <code>dict</code> <code>{code: alias}</code>, ex. <code>{"SP.POP.TOTL": "population"}</code>.</li>
+<li><strong><code>indicators</code></strong> (requis) : indicateur(s) Banque mondiale, tel qu’attendu par <code>wbdata.get_dataframe</code> : typiquement un <code>dict</code> <code>{code: alias}</code>, ex. <code>{"SP.POP.TOTL": "population"}</code>.</li>
 <li><strong><code>country</code></strong> (<code>str</code> ou liste, défaut <code>"all"</code>) : code(s) pays ISO2/ISO3, ou <code>"all"</code>.</li>
 <li><strong><code>**kwargs</code></strong> : transmis tels quels à <code>wbdata.get_dataframe</code> (ex. <code>date</code>, <code>freq</code>, <code>source</code>).</li>
 <li><strong>Retour</strong> (<code>DataFrame</code>) : indexé par pays/date, une colonne par indicateur.</li>
@@ -1367,10 +1368,79 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Le paramètre <code>query</code> de <code>get_indicators()</code> est accepté mais <strong>n’est pas transmis</strong> à <code>wbdata</code> — seul <code>source</code> est utilisé en interne (<code>self._wbdata.get_indicators(source=source)</code>). Filtrez le résultat côté Python si vous cherchez un indicateur précis.</p>
+<p>Le paramètre <code>query</code> de <code>get_indicators()</code> est accepté mais <strong>n’est pas transmis</strong> à <code>wbdata</code> : seul <code>source</code> est utilisé en interne (<code>self._wbdata.get_indicators(source=source)</code>). Filtrez le résultat côté Python si vous cherchez un indicateur précis.</p>
 </div>
 </div>
 </section>
+</section>
+<section id="climate" class="level2">
+<h2 class="anchored" data-anchor-id="climate"><code>Climate</code></h2>
+<dl>
+<dt>Séries météo/climat globales via l’API <a href="https://power.larc.nasa.gov/">NASA POWER</a></dt>
+<dd>
+<strong>sans clé API</strong>. Ré-analyses MERRA-2 + produits satellite : température, précipitations, vent, rayonnement, humidité… en résolution journalière, horaire, mensuelle ou climatologique. Réponses mises en cache localement (<code>requests_cache</code>, 7 jours par défaut).
+</dd>
+</dl>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Climate</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>clim <span class="op">=</span> Climate()  <span class="co"># cache_expire_seconds=604800, timeout=60</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Série journalière en un point (Abidjan)</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>gdf_pt <span class="op">=</span> clim.get_point(</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span><span class="fl">3.99</span>, <span class="fl">5.35</span>, <span class="st">"2023-01-01"</span>, <span class="st">"2023-12-31"</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>[<span class="st">"T2M"</span>, <span class="st">"T2M_MIN"</span>, <span class="st">"T2M_MAX"</span>, <span class="st">"PRECTOTCORR"</span>],</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    community<span class="op">=</span><span class="st">"ag"</span>, temporal<span class="op">=</span><span class="st">"daily"</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; GeoDataFrame (EPSG:4326) indexé par date, une colonne par paramètre + geometry</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Grille de points sur une emprise, en mensuel</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> clim.get_region(</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="dv">6</span>, <span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>, <span class="dv">8</span>), <span class="dv">2020</span>, <span class="dv">2022</span>,</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>[<span class="st">"T2M"</span>, <span class="st">"PRECTOTCORR"</span>], temporal<span class="op">=</span><span class="st">"monthly"</span>,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; GeoDataFrame long : parameter, date, value, geometry (grille ~0.5°)</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>get_point(longitude, latitude, start, end, parameters=None, community="ag", temporal="daily")</code></td>
+<td>Série temporelle en un point → <code>geopandas.GeoDataFrame</code> (EPSG:4326) indexé par date, géométrie constante.</td>
+</tr>
+<tr class="even">
+<td><code>get_region(bbox, start, end, parameters=None, community="ag", temporal="daily")</code></td>
+<td>Grille de points sur <code>[xmin, ymin, xmax, ymax]</code> → <code>geopandas.GeoDataFrame</code> au format long.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong><code>parameters</code></strong> : codes NASA POWER (voir la <a href="https://power.larc.nasa.gov/parameters/">liste complète</a>). <code>None</code> ou <code>[]</code> → <code>Climate.DEFAULT_PARAMETERS</code> (<code>T2M</code>, <code>T2M_MIN</code>, <code>T2M_MAX</code>, <code>T2MDEW</code>, <code>PRECTOTCORR</code>, <code>WS2M</code>, <code>ALLSKY_SFC_SW_DWN</code>, <code>RH2M</code>).</li>
+<li><strong><code>start</code>/<code>end</code></strong> : <code>datetime.date</code>, <code>"YYYY-MM-DD"</code> / <code>"YYYYMMDD"</code> pour <code>daily</code>/<code>hourly</code> ; une année (<code>int</code> ou <code>"YYYY"</code>) pour <code>monthly</code>/<code>climatology</code>.</li>
+<li><strong><code>community</code></strong> : <code>"ag"</code> (agro, défaut), <code>"sb"</code> (bâtiment durable), <code>"re"</code> (énergies renouvelables) : change le jeu de paramètres proposé et certaines conventions.</li>
+<li><strong><code>temporal</code></strong> : <code>"daily"</code> (défaut), <code>"hourly"</code>, <code>"monthly"</code>, <code>"climatology"</code>.</li>
+<li>Les valeurs manquantes de l’API (<code>-999</code>) sont remplacées par <code>NaN</code> ; en <code>monthly</code>, la ligne « moyenne annuelle » (mois 13) est écartée.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>L’emprise de <code>get_region</code> doit rester modérée (l’API POWER limite la taille de la région) ; au-delà, découpez en plusieurs appels. Pour cartographier une grille, pivoter : <code>gdf.pivot_table(index="geometry", columns="parameter", values="value")</code>.</p>
+</div>
+</div>
 </section>
 <section id="gee" class="level2">
 <h2 class="anchored" data-anchor-id="gee"><code>Gee</code></h2>
@@ -1388,9 +1458,9 @@ Note
 <p><code>Gee</code> est réexportée à la racine du package (<code>from cartograpy import Gee</code>) comme les autres classes de <code>data</code>. L’import ne tire pas <code>earthengine-api</code> : le paquet <code>ee</code> n’est requis qu’à l’instanciation de <code>Gee()</code>.</p>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Gee</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Gee</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>project</code></strong> (<code>str</code>, optionnel) : ID du projet GCP Earth Engine ; sinon lu depuis la variable d’environnement <code>GEE_PROJECT</code>.</li>
 <li><strong><code>service_account</code></strong> / <strong><code>key_file</code></strong> (<code>str</code>, optionnels) : authentification non interactive par compte de service (les deux doivent être fournis ensemble).</li>
@@ -1405,37 +1475,37 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>Gee()</code> nécessite les paquets optionnels <code>earthengine-api</code> (module <code>ee</code>) et <code>geemap</code> — <code>ImportError</code> explicite dès l’instanciation s’ils sont absents. Sans authentification déjà en cache localement, l’initialisation peut déclencher <code>ee.Authenticate()</code>, un flux <strong>interactif</strong> (ouverture de navigateur) — à éviter dans un script non interactif ou un pipeline CI.</p>
+<p><code>Gee()</code> nécessite les paquets optionnels <code>earthengine-api</code> (module <code>ee</code>) et <code>geemap</code> : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents. Sans authentification déjà en cache localement, l’initialisation peut déclencher <code>ee.Authenticate()</code>, un flux <strong>interactif</strong> (ouverture de navigateur) : à éviter dans un script non interactif ou un pipeline CI.</p>
 </div>
 </div>
 <section id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="level3">
 <h3 class="anchored" data-anchor-id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone"><code>get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>get_sentinel2(bbox, start: <span class="bu">str</span>, end: <span class="bu">str</span>, mosaic: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, clip: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, cloud: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.2</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> ee.Image <span class="op">|</span> ee.ImageCollection</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>get_sentinel2(bbox, start: <span class="bu">str</span>, end: <span class="bu">str</span>, mosaic: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, clip: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, cloud: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.2</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> ee.Image <span class="op">|</span> ee.ImageCollection</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>bbox</code></strong> (<code>[xmin, ymin, xmax, ymax]</code>, requis) : emprise en WGS-84.</li>
 <li><strong><code>start</code></strong>, <strong><code>end</code></strong> (<code>str</code>, requis) : dates au format <code>"YYYY-MM-DD"</code>.</li>
 <li><strong><code>mosaic</code></strong> (<code>bool</code>, défaut <code>True</code>) : renvoie une mosaïque médiane (<code>ee.Image</code>) plutôt qu’une <code>ee.ImageCollection</code>.</li>
 <li><strong><code>clip</code></strong> (<code>bool</code>, défaut <code>True</code>) : découpe le résultat sur la bbox.</li>
 <li><strong><code>cloud</code></strong> (<code>float</code>, défaut <code>0.2</code>) : seuil <code>CLOUDY_PIXEL_PERCENTAGE</code> (fraction, <code>0.2</code> = 20 %).</li>
-<li><strong><code>bands</code></strong> (<code>list[str]</code>, optionnel) : bandes à sélectionner (défaut : Blue/Green/Red/NIR — <code>B2</code>, <code>B3</code>, <code>B4</code>, <code>B8</code>).</li>
+<li><strong><code>bands</code></strong> (<code>list[str]</code>, optionnel) : bandes à sélectionner (défaut : Blue/Green/Red/NIR : <code>B2</code>, <code>B3</code>, <code>B4</code>, <code>B8</code>).</li>
 <li><strong>Retour</strong> : <code>ee.Image</code> si <code>mosaic=True</code>, sinon <code>ee.ImageCollection</code>. Un masque de nuages (bande <code>QA60</code>) est appliqué automatiquement à chaque image.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>bbox_abidjan <span class="op">=</span> [<span class="op">-</span><span class="fl">4.10</span>, <span class="fl">5.25</span>, <span class="op">-</span><span class="fl">3.85</span>, <span class="fl">5.40</span>]</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> gee.get_sentinel2(bbox_abidjan, <span class="st">"2024-01-01"</span>, <span class="st">"2024-03-01"</span>, cloud<span class="op">=</span><span class="fl">0.15</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>bbox_abidjan <span class="op">=</span> [<span class="op">-</span><span class="fl">4.10</span>, <span class="fl">5.25</span>, <span class="op">-</span><span class="fl">3.85</span>, <span class="fl">5.40</span>]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> gee.get_sentinel2(bbox_abidjan, <span class="st">"2024-01-01"</span>, <span class="st">"2024-03-01"</span>, cloud<span class="op">=</span><span class="fl">0.15</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" class="level3">
 <h3 class="anchored" data-anchor-id="downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue"><code>download(data, bbox=None, filename="image.tif", scale=10, crs="EPSG:4326", bands=None, output_dir=".", mosaic_col=True)</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>download(data, bbox<span class="op">=</span><span class="va">None</span>, filename: <span class="bu">str</span> <span class="op">=</span> <span class="st">"image.tif"</span>, scale: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, crs: <span class="bu">str</span> <span class="op">=</span> <span class="st">"EPSG:4326"</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"."</span>, mosaic_col: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>download(data, bbox<span class="op">=</span><span class="va">None</span>, filename: <span class="bu">str</span> <span class="op">=</span> <span class="st">"image.tif"</span>, scale: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, crs: <span class="bu">str</span> <span class="op">=</span> <span class="st">"EPSG:4326"</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"."</span>, mosaic_col: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li><strong><code>data</code></strong> (<code>ee.Image</code> ou <code>ee.ImageCollection</code>, requis) : à exporter — une collection est réduite en médiane (ou mosaïquée si <code>mosaic_col=False</code>) avant export.</li>
-<li><strong><code>bbox</code></strong> (optionnel) : région d’export — nécessaire si <code>data</code> n’est pas déjà découpée sur une zone.</li>
+<li><strong><code>data</code></strong> (<code>ee.Image</code> ou <code>ee.ImageCollection</code>, requis) : à exporter : une collection est réduite en médiane (ou mosaïquée si <code>mosaic_col=False</code>) avant export.</li>
+<li><strong><code>bbox</code></strong> (optionnel) : région d’export : nécessaire si <code>data</code> n’est pas déjà découpée sur une zone.</li>
 <li><strong><code>filename</code></strong> (<code>str</code>, défaut <code>"image.tif"</code>) : nom du fichier de sortie.</li>
 <li><strong><code>scale</code></strong> (<code>int</code>, défaut <code>10</code>) : résolution en mètres (10 pour S2, 30 pour L9/SRTM).</li>
 <li><strong><code>crs</code></strong> (<code>str</code>, défaut <code>"EPSG:4326"</code>), <strong><code>bands</code></strong> (optionnel), <strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"."</code>).</li>
 <li><strong>Retour</strong> (<code>Path</code>) : chemin du fichier téléchargé localement (via <code>geemap.ee_export_image</code>).</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>gee.download(s2, bbox<span class="op">=</span>bbox_abidjan, filename<span class="op">=</span><span class="st">"abidjan_s2.tif"</span>, scale<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gee.download(s2, bbox<span class="op">=</span>bbox_abidjan, filename<span class="op">=</span><span class="st">"abidjan_s2.tif"</span>, scale<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1446,11 +1516,11 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>download()</code> télécharge en local via <code>geemap</code> — synchrone, limité par les quotas d’export direct d’Earth Engine. Pour de plus gros volumes, utilisez <code>export_to_drive()</code>, qui lance une tâche <strong>asynchrone</strong> vers Google Drive (à suivre avec <code>ee.batch.Task.list()</code>).</p>
+<p><code>download()</code> télécharge en local via <code>geemap</code> : synchrone, limité par les quotas d’export direct d’Earth Engine. Pour de plus gros volumes, utilisez <code>export_to_drive()</code>, qui lance une tâche <strong>asynchrone</strong> vers Google Drive (à suivre avec <code>ee.batch.Task.list()</code>).</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-23-contents" aria-controls="callout-23" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1459,7 +1529,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-23" class="callout-23-contents callout-collapse collapse">
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1576,6 +1646,10 @@ Note
 <td><code>WorldBank</code></td>
 </tr>
 <tr class="even">
+<td><code>climate.py</code></td>
+<td><code>Climate</code></td>
+</tr>
+<tr class="odd">
 <td><code>gee.py</code></td>
 <td><code>Gee</code></td>
 </tr>
@@ -1587,6 +1661,20 @@ Note
 </section>
 
 </main> <!-- /main -->
+<!-- Widget de traduction Google Translate.
+     Le conteneur #google_translate_element est déclaré dans le page-footer
+     (_quarto.yml) ; ces scripts, injectés en fin de <body>, l'activent. -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'fr',                        // langue d'origine du site
+      includedLanguages: 'en,es,de,it,pt,ar,fr', // langues proposées
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
@@ -2019,11 +2107,13 @@ Note
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>cartograpy — Package Python pour créer des cartes facilement</p>
+<p>cartograpy : Package Python pour créer des cartes facilement</p>
 </div>
     <div class="nav-footer-right">
-      &nbsp;
-    </div>
+<div id="google_translate_element" aria-label="Traduire la page">
+
+</div>
+</div>
   </div>
 </footer>
 

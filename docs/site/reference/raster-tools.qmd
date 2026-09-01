@@ -22,7 +22,7 @@ rt2.export_geotiff("resultat.tif")
 ```
 
 ::: {.callout-note}
-82 méthodes publiques, groupées ci-dessous par famille. Chaque entrée montre la signature et un résumé d'une ligne — voir le docstring de la méthode dans `cartograpy/processing/raster.py` pour le détail des paramètres.
+82 méthodes publiques, groupées ci-dessous par famille. Chaque entrée montre la signature et un résumé d'une ligne : voir le docstring de la méthode dans `cartograpy/processing/raster.py` pour le détail des paramètres.
 :::
 
 ::: {.callout-note collapse="true"}
@@ -182,12 +182,12 @@ Supprime les taches connexes plus petites que `min_size` pixels.
 ```python
 majority_filter(size=3, band_index=0)
 ```
-Filtre majoritaire — remplace chaque pixel par la valeur la plus fréquente dans son voisinage.
+Filtre majoritaire : remplace chaque pixel par la valeur la plus fréquente dans son voisinage.
 
 ```python
 sieve_raster(threshold, band_index=0, connectivity=4)
 ```
-Filtre de tamisage (`rasterio.features.sieve`) — supprime les groupes de pixels sous `threshold`.
+Filtre de tamisage (`rasterio.features.sieve`) : supprime les groupes de pixels sous `threshold`.
 
 ```python
 smooth_classes(size=3, band_index=0)

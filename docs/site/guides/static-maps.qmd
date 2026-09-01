@@ -4,7 +4,7 @@ description: "Composer une carte 2D avec Map, couches, légende et mise en page.
 ---
 
 `Map` (dans `cartograpy.mapper`) centralise la production de cartes statiques avec
-Matplotlib et Cartopy — couches vectorielles/raster, choroplèthes, légende, échelle,
+Matplotlib et Cartopy : couches vectorielles/raster, choroplèthes, légende, échelle,
 flèche du Nord, grille, export. C'est la classe la plus riche du package (65
 méthodes publiques).
 
@@ -74,7 +74,7 @@ m.add_points_choropleth(villes_gdf, column_to_plot="population", point_size_colu
 
 ::: {.callout-note}
 `add_polygons_cloropleth`/`add_points_cloropleth` (avec la faute de frappe
-historique) existent encore comme alias dépréciés — préférez
+historique) existent encore comme alias dépréciés : préférez
 `add_polygons_choropleth`/`add_points_choropleth`.
 :::
 
@@ -154,7 +154,7 @@ m.show()
 m.save("carte_finale.png", dpi=300)
 ```
 
-Référence complète des 65 méthodes de `Map`, groupées par thème :
+Référence complète des 69 méthodes de `Map`, groupées par thème :
 [Reference mapper](/reference/mapper.qmd).
 
 ## Exemple complet
@@ -317,7 +317,7 @@ if not lux.empty:
 
 Une légende à bins manuels (plutôt qu'une barre de couleur continue) :
 `add_swatch_legend()` dessine un rectangle de couleur par classe à une
-position géographique donnée, avec le label exact voulu (`"0-2 t"`, etc.) —
+position géographique donnée, avec le label exact voulu (`"0-2 t"`, etc.) :
 plus de contrôle qu'un `scheme` mapclassify auto-généré, sans dépendance
 supplémentaire.
 
@@ -343,7 +343,7 @@ m.add_swatch_legend(
 
 Trois blocs de texte figure-relatifs pour le titre, la source et la
 signature, plus le logo du package en filigrane via `add_image()`
-(`to="fig"` par défaut) — chaque élément hors-carte est positionné
+(`to="fig"` par défaut) : chaque élément hors-carte est positionné
 indépendamment du zoom/étendue de la carte elle-même.
 
 ```python
@@ -379,7 +379,7 @@ m.save("web-map-with-custom-legend.png", dpi=600)
 
 #### [Map2D](/reference/mapper.qmd)
 
-Hérite de `Map`, sans projection cartographique (axes matplotlib classiques) —
+Hérite de `Map`, sans projection cartographique (axes matplotlib classiques) :
 pour des schémas ou plans où la projection géographique n'est pas nécessaire.
 
 #### [SituationMap](/reference/mapper.qmd)
@@ -403,6 +403,6 @@ sm.show()
 
 ## Aller plus loin
 
-- [Styles, palettes et polices](/guides/styling-and-palettes.qmd) — personnaliser les
+- [Styles, palettes et polices](/guides/styling-and-palettes.qmd) : personnaliser les
   couleurs et polices utilisées par `Map`
-- [Cartes web](/guides/web-maps.qmd) — l'équivalent interactif avec `WebMap`
+- [Cartes web](/guides/web-maps.qmd) : l'équivalent interactif avec `WebMap`

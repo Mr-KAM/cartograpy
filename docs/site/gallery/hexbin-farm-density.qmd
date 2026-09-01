@@ -1,5 +1,5 @@
 ---
-title: "Densité d'exploitations — grille hexagonale"
+title: "Densité d'exploitations : grille hexagonale"
 description: "Carte hexbin : 2000 exploitations agrégées dans une grille hexagonale régulière, comptage par cellule."
 image: /assets/hexbin-farms-example.png
 ---
@@ -7,7 +7,7 @@ image: /assets/hexbin-farms-example.png
 ![](/assets/hexbin-farms-example.png)
 
 Plus de 2000 parcelles agricoles de la région du Western Cape (jeu de données
-d'entraînement QGIS, `farms_33S.shp`, en UTM 33S — donc en mètres) ramenées à
+d'entraînement QGIS, `farms_33S.shp`, en UTM 33S : donc en mètres) ramenées à
 leur point représentatif, puis agrégées dans une grille d'hexagones réguliers
 de 3 km de rayon. Chaque hexagone est coloré par le **nombre d'exploitations**
 qu'il contient (`n_points`), les cellules vides étant masquées.
@@ -51,7 +51,7 @@ fig, ax = plot_hexgrid_choropleth(
     cmap="magma", min_count=1,
     edgecolor="white", linewidth=0.4,
     colorbar_label="Exploitations par hexagone (3 km)",
-    title="Densité d'exploitations agricoles — Western Cape",
+    title="Densité d'exploitations agricoles : Western Cape",
     figsize=(9, 7),
 )
 fig.savefig("hexbin-farms.png", dpi=150, bbox_inches="tight")

@@ -236,3 +236,64 @@ class TestBound:
         b = Bound()
         with pytest.raises(ValueError, match="non supporté"):
             b.get_world("invalid_level")
+
+
+class TestClimate:
+    """Tests de la classe Climate (NASA POWER) — hors ligne, _get mocké."""
+
+    @staticmethod
+    def _clim():
+        from cartograpy.data import Climate
+        return Climate(cache_expire_seconds=0)
+
+    def test_fmt_date(self):
+        import datetime
+        from cartograpy.data import Climate
+        f = Climate._fmt_date
+        assert f(datetime.date(2022, 3, 5), "daily") == "20220305"
+        assert f("2022-03-05", "daily") == "20220305"
+        assert f("20220305", "daily") == "20220305"
+        assert f(2022, "monthly") == "2022"
+        assert f(datetime.date(2022, 3, 5), "monthly") == "2022"
+
+    def test_validate_rejects_bad_args(self):
+        clim = self._clim()
+        with pytest.raises(ValueError):
+            clim._validate("yearly", "ag", ["T2M"])
+        with pytest.raises(ValueError):
+            clim._validate("daily", "xx", ["T2M"])
+
+    def test_get_point_parses_payload(self, monkeypatch):
+        clim = self._clim()
+        payload = {"properties": {"parameter": {
+            "T2M": {"20230101": 26.4, "20230102": 25.9},
+            "PRECTOTCORR": {"20230101": -999.0, "20230102": 12.3},
+        }}}
+        monkeypatch.setattr(type(clim), "_get", lambda self, url, params: payload)
+        gdf = clim.get_point(-3.99, 5.35, "2023-01-01", "2023-01-02",
+                             parameters=["T2M", "PRECTOTCORR"])
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert gdf.crs == "EPSG:4326"
+        assert list(gdf.geometry.iloc[0].coords)[0] == (-3.99, 5.35)
+        assert gdf.geometry.nunique() == 1          # géométrie constante
+        assert list(gdf.columns) == ["T2M", "PRECTOTCORR", "geometry"]
+        assert str(gdf.index[0].date()) == "2023-01-01"
+        assert pd.isna(gdf["PRECTOTCORR"].iloc[0])  # -999 -> NaN
+        assert gdf["T2M"].iloc[0] == 26.4
+
+    def test_get_region_returns_geodataframe(self, monkeypatch):
+        clim = self._clim()
+        payload = {"features": [
+            {"geometry": {"coordinates": [-5.0, 5.0]},
+             "properties": {"parameter": {"T2M": {"20230101": 26.4, "20230102": 26.6}}}},
+            {"geometry": {"coordinates": [-4.5, 5.0]},
+             "properties": {"parameter": {"T2M": {"20230101": 27.1, "20230102": 27.0}}}},
+        ]}
+        monkeypatch.setattr(type(clim), "_get", lambda self, url, params: payload)
+        gdf = clim.get_region((-5, 5, -4, 6), "2023-01-01", "2023-01-02",
+                              parameters=["T2M"])
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert set(gdf.columns) == {"parameter", "date", "value", "geometry"}
+        assert gdf.crs == "EPSG:4326"
+        assert gdf.geometry.nunique() == 2
+        assert len(gdf) == 4  # 2 points x 2 jours

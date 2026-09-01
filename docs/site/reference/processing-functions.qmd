@@ -24,7 +24,7 @@ centres = centroids(regions_gdf)
 
 ::: {.callout-warning}
 Si le CRS est géographique (degrés, ex. EPSG:4326), le centroïde est calculé sans
-reprojection — geopandas émet un avertissement, le résultat peut être imprécis pour
+reprojection : geopandas émet un avertissement, le résultat peut être imprécis pour
 des polygones étendus. Reprojeter en CRS métrique avant si la précision compte.
 :::
 
@@ -65,7 +65,7 @@ toutes_regions = fusion([regions_2021, regions_2022, regions_2023])
 
 ::: {.callout-note}
 Si un des éléments est un `GeoDataFrame`, le résultat force le CRS du **premier**
-élément de la liste — vérifiez l'ordre si vos couches ont des CRS différents et
+élément de la liste : vérifiez l'ordre si vos couches ont des CRS différents et
 `ignore_crs=True`.
 :::
 
@@ -131,7 +131,7 @@ eclate = split_multipolygon_from_gdf(communes_gdf)
 
 Renvoie des statistiques descriptives sur un `MultiPolygon` (ou `Polygon`, ou WKT).
 
-- **`retour`** (`dict`) : `type`, `num_polygons`, `total_area`, `bounds`, `areas` — et pour un vrai `MultiPolygon` : `largest_polygon_area`, `smallest_polygon_area`.
+- **`retour`** (`dict`) : `type`, `num_polygons`, `total_area`, `bounds`, `areas` : et pour un vrai `MultiPolygon` : `largest_polygon_area`, `smallest_polygon_area`.
 
 ```python
 from cartograpy.processing import get_multipolygon_info
@@ -155,7 +155,7 @@ get_geometry_types(gdf)
 
 ::: {.callout-warning}
 Cette fonction n'a pas de valeur de retour exploitable (elle affiche via `logging`
-et ne renvoie rien) — à utiliser pour de l'inspection interactive, pas dans un
+et ne renvoie rien) : à utiliser pour de l'inspection interactive, pas dans un
 pipeline qui a besoin du résultat.
 :::
 
@@ -182,7 +182,7 @@ diffèrent. Les géométries vides après découpage sont retirées du résultat
 ## `clip_gdf_by_bbox(gdf_source, gdf_emprise, crs="EPSG:4326")`
 
 Même principe que `clip_gdf_by_mask`, mais découpe selon la **bounding box** de
-l'emprise plutôt que sa géométrie exacte — plus rapide, moins précis (garde des
+l'emprise plutôt que sa géométrie exacte : plus rapide, moins précis (garde des
 zones hors de l'emprise réelle si elle n'est pas rectangulaire).
 
 ```python

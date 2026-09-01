@@ -50,6 +50,8 @@ class Map2D(Map):
         self.legend_params = {}
         self.custom_palettes = {}
         self.bounds = None
+        self._background_image_kwargs = None
+        self._background_image_artist = None
 
         self.ax.set_title(title, fontsize=14, fontweight="bold")
         self.ax.set_aspect("equal")

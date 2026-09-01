@@ -5,6 +5,16 @@ description: "Résumé des objets et fonctions exportés par cartograpy."
 
 Les exports publics sont centralisés dans `cartograpy.__init__`.
 
+## Version
+
+`cartograpy.__version__` expose la version installée (lue depuis les métadonnées
+du paquet, comme `numpy.__version__` / `pandas.__version__`) :
+
+```python
+import cartograpy as cp
+cp.__version__   # ex. "1.1.0"
+```
+
 ## Modules publics
 
 - `data`
@@ -17,7 +27,7 @@ Les exports publics sont centralisés dans `cartograpy.__init__`.
 ## Objets majeurs
 
 - `Map`, `Map2D`, `WebMap`, `SituationMap`
-- `GeoBoundaries`, `Bound`, `Geocoder`, `OSM`, `Hydro`, `DEM`, `DEMDownloadError`, `WorldBank`, `Gee`
+- `GeoBoundaries`, `Bound`, `Geocoder`, `OSM`, `Hydro`, `DEM`, `DEMDownloadError`, `WorldBank`, `Climate`, `Gee`
 - `VectorTools`, `RasterTools`
 - `Project`
 
@@ -31,7 +41,7 @@ Les exports publics sont centralisés dans `cartograpy.__init__`.
 - Grille hexagonale : `make_hex_grid`, `aggregate_to_hex`, `plot_hexgrid_choropleth`
 
 Toute la surface publique de `cartograpy.data` (dont `Geocoder`, `DEMDownloadError`,
-`Gee`, `describe`) est réexportée à la racine du package — `from cartograpy import
+`Gee`, `describe`) est réexportée à la racine du package : `from cartograpy import
 Gee` fonctionne au même titre que `from cartograpy.data import Gee`.
 
 ## Recommandation

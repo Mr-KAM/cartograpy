@@ -10,6 +10,7 @@ from .osm import OSM
 from .hydro import Hydro
 from .dem import DEMDownloadError, DEM
 from .worldbank import WorldBank
+from .climate import Climate
 from .gee import Gee
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     "Hydro",
     "DEMDownloadError", "DEM",
     "WorldBank",
+    "Climate",
     "Gee",
 ]

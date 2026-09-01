@@ -112,7 +112,7 @@ project.organize_project()
 ```
 
 Inspecte les extensions de `data/` et répartit les fichiers entre `vector/`,
-`raster/` et `tabular/` — met aussi à jour `project.vector_files`,
+`raster/` et `tabular/` : met aussi à jour `project.vector_files`,
 `project.raster_files`, `project.tabular_files`.
 
 ## Valider l'intégrité du projet
@@ -172,7 +172,7 @@ Le CRS choisi est stocké comme objet `pyproj.CRS` dans `project.crs`.
 - le classement automatique (`organize_project`, `list_data`) repose uniquement sur
   les extensions de fichiers, pas sur une inspection du contenu
 - les sous-dossiers ne sont personnalisables qu'au niveau de `data_dir` et
-  `output_dir` — pas de sous-catégories au-delà de `vector/raster/tabular`
+  `output_dir` : pas de sous-catégories au-delà de `vector/raster/tabular`
 - `set_crs()` change la métadonnée de référence du projet, elle ne reprojette
   aucun fichier déjà présent dans `data/`
 

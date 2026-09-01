@@ -4,7 +4,7 @@ description: "Package Python pour charger, traiter et cartographier des données
 ---
 
 cartograpy est une boîte à outils Python orientée cartographie, traitement géospatial
-et production de cartes statiques ou web — de la récupération des données jusqu'au
+et production de cartes statiques ou web : de la récupération des données jusqu'au
 rendu final, sans limite géographique : n'importe quel pays, continent ou zone
 d'étude, partout dans le monde.
 
@@ -56,7 +56,7 @@ graph TD
 
 ### Obtention de données géographiques
 
-Pour télécharger simplement des données dans cartograpy, vous devez utiliser le module `data`. Il existe présentement six (6) types de données que vous pouvez télécharger avec cartograpy :
+Pour télécharger simplement des données dans cartograpy, vous devez utiliser le module `data`. Il existe présentement sept (7) types de données que vous pouvez télécharger avec cartograpy :
 
 - les limites des continents et le découpage administratif des pays (`GeoBoundaries`, `Bound`)
 - des données par géocodage (`Geocoder`)
@@ -64,6 +64,7 @@ Pour télécharger simplement des données dans cartograpy, vous devez utiliser 
 - des données hydrographiques (`Hydro`)
 - des données de la World Bank, différents indicateurs de différentes sources (`WorldBank`)
 - un modèle numérique de terrain SRTM à 30 m de résolution (`DEM`)
+- des séries météo/climat globales via NASA POWER (`Climate`)
 
 Ces ressources permettent un gain considérable de temps et facilitent la création de vos cartes.
 
@@ -76,11 +77,12 @@ graph TD
     A --> E[Hydro<br><i>Données hydrographiques</i>]
     A --> F[WorldBank<br><i>Indicateurs de la Banque<br>Mondiale et autres sources</i>]
     A --> G[DEM<br><i>SRTM à 30 m de résolution</i>]
+    A --> H[Climate<br><i>Météo/climat NASA POWER</i>]
 ```
 
 ::: {.callout-note}
-Un septième connecteur, `Gee` (Google Earth Engine), est disponible via
-`cartograpy.data.Gee` ou `cartograpy.Gee` — il nécessite en plus le paquet
+Un huitième connecteur, `Gee` (Google Earth Engine), est disponible via
+`cartograpy.data.Gee` ou `cartograpy.Gee` : il nécessite en plus le paquet
 `earthengine-api` et une authentification interactive (`ee.Authenticate()`).
 :::
 
@@ -90,15 +92,15 @@ Toutes les données sont formatées pour être retournées sous forme de `GeoDat
 
 1. **Installation**
 
-   Voir [Installation](/getting-started/installation.qmd) — Python 3.11+ et les
+   Voir [Installation](/getting-started/installation.qmd) : Python 3.11+ et les
    dépendances système de la stack géospatiale.
 1. **Quickstart**
 
-   Voir [Quickstart](/getting-started/quickstart.qmd) — une première carte en moins de
+   Voir [Quickstart](/getting-started/quickstart.qmd) : une première carte en moins de
    10 lignes.
 1. **Premier projet**
 
-   Voir [Premier projet](/getting-started/first-project.qmd) — structurer un dossier
+   Voir [Premier projet](/getting-started/first-project.qmd) : structurer un dossier
    de travail avec `Project`.
 1. **Guides par tâche**
 
@@ -108,7 +110,7 @@ Toutes les données sont formatées pour être retournées sous forme de `GeoDat
 
 ## Architecture en un coup d'œil
 
-Cinq blocs pivots, chacun un sous-package organisé par responsabilité — voir
+Cinq blocs pivots, chacun un sous-package organisé par responsabilité : voir
 [Architecture du package](/explanations/package-architecture.qmd) pour le détail.
 
 | Bloc | Rôle |
@@ -122,6 +124,6 @@ Cinq blocs pivots, chacun un sous-package organisé par responsabilité — voir
 ::: {.callout-note}
 Tout reste importable directement depuis `cartograpy` (`from cartograpy import
 Map, Bound, Project`) ou depuis chaque sous-module (`from cartograpy.data import
-Bound`) — l'organisation interne en fichiers est un détail d'implémentation, pas
+Bound`) : l'organisation interne en fichiers est un détail d'implémentation, pas
 une contrainte d'usage.
 :::
