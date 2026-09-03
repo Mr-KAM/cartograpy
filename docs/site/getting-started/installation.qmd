@@ -147,7 +147,7 @@ marimo edit mon_notebook.py
 ```python
 import cartograpy as cp
 
-print(cp.__version__)                  # ex. "1.1.0"
+print(cp.__version__)                  # ex. "2.0.0"
 print(cp.COUNTRY_ISO3["france"])       # "fra"
 ```
 

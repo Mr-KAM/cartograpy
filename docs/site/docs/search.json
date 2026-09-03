@@ -1314,7 +1314,7 @@
     "href": "getting-started/installation.html#vérifier-linstallation",
     "title": "Installation",
     "section": "Vérifier l’installation",
-    "text": "Vérifier l’installation\nimport cartograpy as cp\n\nprint(cp.__version__)                  # ex. \"1.1.0\"\nprint(cp.COUNTRY_ISO3[\"france\"])       # \"fra\"\n\n\n\n\n\n\nNote\n\n\n\nSi cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème vient des dépendances système (voir la section par plateforme ci-dessus), pas de cartograpy lui-même.",
+    "text": "Vérifier l’installation\nimport cartograpy as cp\n\nprint(cp.__version__)                  # ex. \"2.0.0\"\nprint(cp.COUNTRY_ISO3[\"france\"])       # \"fra\"\n\n\n\n\n\n\nNote\n\n\n\nSi cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème vient des dépendances système (voir la section par plateforme ci-dessus), pas de cartograpy lui-même.",
     "crumbs": [
       "Accueil",
       "Prise en main",
@@ -1818,7 +1818,7 @@
     "href": "reference/api-overview.html#version",
     "title": "Vue d’ensemble de l’API",
     "section": "Version",
-    "text": "Version\ncartograpy.__version__ expose la version installée (lue depuis les métadonnées du paquet, comme numpy.__version__ / pandas.__version__) :\nimport cartograpy as cp\ncp.__version__   # ex. \"1.1.0\"",
+    "text": "Version\ncartograpy.__version__ expose la version installée (lue depuis les métadonnées du paquet, comme numpy.__version__ / pandas.__version__) :\nimport cartograpy as cp\ncp.__version__   # ex. \"2.0.0\"",
     "crumbs": [
       "Accueil",
       "Référence API",

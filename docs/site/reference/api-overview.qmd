@@ -12,7 +12,7 @@ du paquet, comme `numpy.__version__` / `pandas.__version__`) :
 
 ```python
 import cartograpy as cp
-cp.__version__   # ex. "1.1.0"
+cp.__version__   # ex. "2.0.0"
 ```
 
 ## Modules publics
