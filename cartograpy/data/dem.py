@@ -532,6 +532,7 @@ class DEM:
         out_path: Optional[Union[str, Path]] = None,
         azimuth: float = 315.0,
         altitude: float = 45.0,
+        z_factor: float = 1.0,
     ) -> np.ndarray:
         """
         Calcule un ombrage (hillshade) à partir d'un GeoTIFF MNT.
@@ -542,6 +543,8 @@ class DEM:
         out_path  : si fourni, sauvegarde le hillshade en GeoTIFF.
         azimuth   : azimut solaire en degrés (défaut 315 = nord-ouest).
         altitude  : élévation solaire en degrés (défaut 45).
+        z_factor  : exagération verticale du relief (défaut 1 = réel ;
+                    2–3 accentue nettement les pentes).
 
         Retour
         ------
@@ -568,10 +571,10 @@ class DEM:
         dy = cellsize_y * m_per_deg
 
         # Gradients
-        dzdx = (
+        dzdx = z_factor * (
             np.roll(elev, -1, axis=1) - np.roll(elev, 1, axis=1)
         ) / (2 * dx)
-        dzdy = (
+        dzdy = z_factor * (
             np.roll(elev, 1, axis=0) - np.roll(elev, -1, axis=0)
         ) / (2 * dy)
 

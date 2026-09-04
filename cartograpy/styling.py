@@ -13,6 +13,16 @@ logger = logging.getLogger(__name__)
 # ================gestion des styles de polices ========================
 # ----------------------------------------------------------------------
 
+def _sanitize_font(fp: fm.FontProperties) -> fm.FontProperties:
+    """Retire les attributs non-hashables posés par pyfonts >=1.3 sur
+    FontProperties (ex. ``_pyfonts_provider_metadata``), qui font planter
+    ``FontProperties.__hash__`` avec matplotlib >=3.11 (hash de __dict__)."""
+    for key, val in list(vars(fp).items()):
+        if getattr(type(val), "__hash__", None) is None:
+            delattr(fp, key)
+    return fp
+
+
 def google_font(family: str, weight: Union[int, str, None] = None, italic: Optional[bool] = None) -> fm.FontProperties:
     """
     Charge une police depuis Google Fonts.
@@ -34,7 +44,7 @@ def google_font(family: str, weight: Union[int, str, None] = None, italic: Optio
         font = google_font("Roboto", weight="bold")
         ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
     """
-    return load_google_font(family, weight=weight, italic=italic)
+    return _sanitize_font(load_google_font(family, weight=weight, italic=italic))
 
 
 def path_font(font_url: str) -> fm.FontProperties:
@@ -54,7 +64,7 @@ def path_font(font_url: str) -> fm.FontProperties:
         font = path_font("https://github.com/google/fonts/blob/main/ofl/amaranth/Amaranth-Bold.ttf?raw=true")
         ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
     """
-    return load_font(font_url=font_url)
+    return _sanitize_font(load_font(font_url=font_url))
 
 
 def local_font(font_path: str) -> fm.FontProperties:
@@ -74,7 +84,7 @@ def local_font(font_path: str) -> fm.FontProperties:
         font = local_font("chemin/vers/mapolice/Ultra-Regular.ttf")
         ax.text(0.5, 0.5, "Hello", font=font, fontsize=20)
     """
-    return load_font(font_path=font_path)
+    return _sanitize_font(load_font(font_path=font_path))
 
 
 def get_fonts(pattern: str = None, sort: bool = True) -> List[str]:

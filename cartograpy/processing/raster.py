@@ -654,6 +654,59 @@ class RasterTools:
         counts, edges = np.histogram(band, bins=bins)
         return {"counts": counts, "edges": edges}
 
+    def class_areas(self, band_index=0, unit="ha", crs=None):
+        """
+        Surface de chaque classe d'un raster catégoriel (occupation du sol…).
+
+        Args:
+            band_index: Bande à analyser.
+            unit: 'pixel', 'm2', 'ha' ou 'km2'. Les unités métriques
+                exigent un CRS projeté ; passe ``crs`` pour reprojeter.
+            crs: CRS projeté cible (ex. 'EPSG:32630'). Si None et que le
+                raster est géographique, une erreur est levée pour les
+                unités métriques.
+
+        Returns:
+            pandas.DataFrame trié par classe, colonnes ``class``,
+            ``pixel_count``, ``area`` (dans ``unit``), ``percent``.
+        """
+        import pandas as pd
+
+        src = self.reproject_raster(crs) if crs is not None else self
+        band = src.data[band_index].ravel()
+        nodata = src.profile.get("nodata")
+        if nodata is not None:
+            band = band[band != nodata]
+        if np.issubdtype(band.dtype, np.floating):
+            band = band[~np.isnan(band)]
+        classes, counts = np.unique(band, return_counts=True)
+
+        unit = unit.lower()
+        if unit == "pixel":
+            factor = 1.0
+        else:
+            per_unit = {"m2": 1.0, "ha": 1e4, "km2": 1e6}
+            if unit not in per_unit:
+                raise ValueError(f"unit inconnue : {unit} (pixel, m2, ha, km2)")
+            crs_obj = src.profile.get("crs")
+            if crs_obj is not None and rasterio.crs.CRS.from_user_input(crs_obj).is_geographic:
+                raise ValueError(
+                    "CRS géographique : surface métrique impossible. "
+                    "Passe crs='EPSG:32630' (ou un autre CRS projeté)."
+                )
+            t = src.profile["transform"]
+            px_area = abs(t.a * t.e - t.b * t.d)  # unités du CRS, au carré
+            factor = px_area / per_unit[unit]
+
+        areas = counts * factor
+        total = float(areas.sum())
+        return pd.DataFrame({
+            "class": classes,
+            "pixel_count": counts.astype("int64"),
+            "area": areas,
+            "percent": 100.0 * areas / total if total else areas * 0.0,
+        })
+
     def zonal_statistics(self, geodf, stats=None, band_index=0) -> gpd.GeoDataFrame:
         """
         Statistiques zonales par polygone.

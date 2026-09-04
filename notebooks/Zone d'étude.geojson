@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "Zone d'étude",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1 }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ -5.609274117167289, 4.283466723722849 ], [ -5.619731503935415, 6.684382640574245 ], [ -2.677389907375435, 6.691252828934393 ], [ -2.678679453917522, 4.287857900316326 ], [ -5.609274117167289, 4.283466723722849 ] ] ] ] } }
+]
+}
