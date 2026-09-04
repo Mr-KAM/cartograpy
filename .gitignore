@@ -71,3 +71,12 @@ Thumbs.db
 *.env
 # === SVG files ===
 cartograpy/svg/
+
+# === Caches et sorties de notebooks (jamais versionnés) ===
+notebooks/_hydro_cache/
+notebooks/_dem_cache/
+notebooks/_raster_cache/
+notebooks/_vector_cache/
+notebooks/_cartes/
+notebooks/output_galerie/
+notebooks/HFHI_resilience_cotiere_SIG/

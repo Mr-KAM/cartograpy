@@ -1,4 +1,5 @@
 """Tests unitaires pour RasterTools."""
+import pytest
 import numpy as np
 import geopandas as gpd
 import rasterio
@@ -302,6 +303,21 @@ class TestRasterStatistics:
         hist = rt.histogram_raster(bins=10)
         assert "counts" in hist
         assert "edges" in hist
+
+    def test_class_areas(self):
+        data = np.array([[1, 1, 2, 2], [1, 2, 2, 3], [3, 3, -9999, 3]], dtype="float64")
+        rt = _make_raster(data, crs="EPSG:32630")  # pixels de 10 m -> 100 m2
+        df = rt.class_areas(unit="m2")
+        by_class = dict(zip(df["class"], df["area"]))
+        assert by_class[1] == 300.0 and by_class[2] == 400.0 and by_class[3] == 400.0
+        assert -9999 not in by_class  # nodata exclu
+        assert abs(df["percent"].sum() - 100.0) < 1e-6
+
+    def test_class_areas_geographic_rejects_metric(self):
+        rt = _make_raster(np.array([[1, 2], [2, 1]], dtype="float64"))  # EPSG:4326
+        with pytest.raises(ValueError):
+            rt.class_areas(unit="ha")
+        assert rt.class_areas(unit="pixel")["area"].sum() == 4
 
     def test_zonal_statistics(self):
         rt = _make_raster()
