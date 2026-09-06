@@ -60,6 +60,7 @@ build/
 *.tmp
 *~
 
+
 # === Fichiers de logs ===
 *.log
 
@@ -80,3 +81,9 @@ notebooks/_vector_cache/
 notebooks/_cartes/
 notebooks/output_galerie/
 notebooks/HFHI_resilience_cotiere_SIG/
+
+notebooks/13-Projet drnouf - occupation et topographie.ipynb
+notebooks/01-Lecture de fichier.ipynb
+notebooks/02-galerie demo.ipynb
+notebooks/HFHI_SIG_TELEDETECTION_master (1).ipynb
+.claude/

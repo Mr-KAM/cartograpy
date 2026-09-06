@@ -4,7 +4,7 @@ import numpy as np
 import geopandas as gpd
 import rasterio
 from rasterio.transform import from_bounds
-from shapely.geometry import box, Point
+from shapely.geometry import box
 import os
 import tempfile
 
@@ -156,6 +156,7 @@ class TestRasterHarmonisation:
         original_res = rt.check_resolution()
         rt2 = rt.resample_raster(original_res[0] * 2)
         new_res = rt2.check_resolution()
+        assert new_res[0] == pytest.approx(original_res[0] * 2)
         assert rt2.profile["width"] != rt.profile["width"] or rt2.profile["height"] != rt.profile["height"]
 
     def test_align_rasters(self):

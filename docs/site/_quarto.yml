@@ -61,6 +61,8 @@ website:
           - gallery/emploi-agricole-femmes-afrique.qmd
           - gallery/bivariate-civ.qmd
           - gallery/hexbin-farm-density.qmd
+          - gallery/relief-man-tonkpi.qmd
+          - gallery/etats-unis-mosaique.qmd
       - section: "Référence API"
         contents:
           - reference/api-overview.qmd

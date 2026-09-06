@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Créer une première carte avec les objets principaux du package.">
+<meta name="description" content="MNT SRTM teinté par altitude + ombrage exagéré (z_factor) sur fond marine, détouré à la forme du département de Tonkpi (Tonkoui, Dents de Man).">
 
-<title>Quickstart – cartograpy</title>
+<title>Relief hypsométrique : région de Man – cartograpy</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -69,8 +69,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../getting-started/first-project.html" rel="next">
-<link href="../getting-started/installation.html" rel="prev">
+<link href="../gallery/etats-unis-mosaique.html" rel="next">
+<link href="../gallery/hexbin-farm-density.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -338,7 +338,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../getting-started/installation.html">Prise en main</a></li><li class="breadcrumb-item"><a href="../getting-started/quickstart.html">Quickstart</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../gallery/index.html">Galerie</a></li><li class="breadcrumb-item"><a href="../gallery/relief-man-tonkpi.html">Relief hypsométrique : région de Man</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -358,13 +358,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
  <span class="menu-text">Prise en main</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Basculer la section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Basculer la section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../getting-started/installation.html" class="sidebar-item-text sidebar-link">
@@ -373,7 +373,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../getting-started/quickstart.html" class="sidebar-item-text sidebar-link active">
+  <a href="../getting-started/quickstart.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Quickstart</span></a>
   </div>
 </li>
@@ -452,13 +452,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
  <span class="menu-text">Galerie</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Basculer la section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Basculer la section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/index.html" class="sidebar-item-text sidebar-link">
@@ -503,7 +503,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../gallery/relief-man-tonkpi.html" class="sidebar-item-text sidebar-link">
+  <a href="../gallery/relief-man-tonkpi.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Relief hypsométrique : région de Man</span></a>
   </div>
 </li>
@@ -614,29 +614,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Sur cette page</h2>
-   
-  <ul>
-  <li><a href="#exemple-minimal" id="toc-exemple-minimal" class="nav-link active" data-scroll-target="#exemple-minimal">Exemple minimal</a></li>
-  <li><a href="#un-exemple-un-peu-plus-complet" id="toc-un-exemple-un-peu-plus-complet" class="nav-link" data-scroll-target="#un-exemple-un-peu-plus-complet">Un exemple un peu plus complet</a></li>
-  <li><a href="#suite-recommandée" id="toc-suite-recommandée" class="nav-link" data-scroll-target="#suite-recommandée">Suite recommandée</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../getting-started/installation.html">Prise en main</a></li><li class="breadcrumb-item"><a href="../getting-started/quickstart.html">Quickstart</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../gallery/index.html">Galerie</a></li><li class="breadcrumb-item"><a href="../gallery/relief-man-tonkpi.html">Relief hypsométrique : région de Man</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Quickstart</h1>
+<h1 class="title">Relief hypsométrique : région de Man</h1>
 </div>
 
 <div>
   <div class="description">
-    Créer une première carte avec les objets principaux du package.
+    MNT SRTM teinté par altitude + ombrage exagéré (z_factor) sur fond marine, détouré à la forme du département de Tonkpi (Tonkoui, Dents de Man).
   </div>
 </div>
 
@@ -653,81 +645,88 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Cartograpy s’organise autour de quelques blocs simples :</p>
+<p><img src="..\assets/relief-man-example.png" class="img-fluid"></p>
+<p>Le relief du département de <strong>Tonkpi</strong> (massif du Tonkoui, Dents de Man), le point culminant de Côte d’Ivoire, à partir d’un MNT SRTM ~30 m téléchargé et traité entièrement avec <code>cartograpy</code> — aucun appel direct à <code>rasterio</code> ou <code>numpy.nan</code> pour le détourage.</p>
+<p>Le relief est accentué par une <strong>exagération verticale du hillshade</strong> (<code>z_factor=3</code>) combinée à un soleil rasant (<code>altitude=30°</code>) : les pentes ressortent nettement plus qu’avec un ombrage « réaliste ». La palette hypsométrique (turquoise → vert → or → orange) est resserrée sur le 25ᵉ centile des altitudes pour concentrer les couleurs chaudes sur les hauteurs plutôt que sur les fonds de vallée.</p>
+<p>Techniques utilisées :</p>
 <ul>
-<li><a href="../reference/data.html"><code>data</code></a> pour charger ou télécharger des données</li>
-<li><a href="../reference/vector-tools.html"><code>processing</code></a> pour transformer les couches</li>
-<li><a href="../reference/mapper.html"><code>mapper</code></a> pour créer des cartes statiques ou web</li>
-<li><a href="../reference/styling.html"><code>styling</code></a> pour les palettes et les polices</li>
-<li><a href="../reference/project.html"><code>project</code></a> pour organiser un projet cartographique</li>
+<li><code>Bound().get_admin("CIV", adm=2)</code> filtré sur <code>shapeName == "Tonkpi"</code> pour l’emprise (variante : <code>adm=1</code> + <code>"Montagnes"</code>)</li>
+<li><code>DEM(work_dir=...).download(bbox, out_tif=...)</code> : téléchargement et mosaïque SRTM sur l’emprise, mis en cache localement</li>
+<li><code>RasterTools(tif).mask_raster(zone, invert=False)</code> : détourage à la forme exacte du département, le reste passé en NoData (plus de <code>geometry_mask</code> manuel)</li>
+<li><code>DEM.hillshade(tif, azimuth=315, altitude=30, z_factor=3)</code> : ombrage avec exagération verticale du relief</li>
+<li><code>cp.to_cmap([...], cmap_type="continuous")</code> pour la palette hypsométrique personnalisée, plutôt que <code>matplotlib.colors.LinearSegmentedColormap</code></li>
+<li><code>Map.add_raster()</code> appelé deux fois (altitude teintée + hillshade en <code>alpha=0.6</code>, mode <code>"gray"</code>) pour superposer couleur et relief</li>
+<li><code>google_font()</code> + <code>add_custom_text(..., to="fig")</code> pour l’habillage typographique, indépendant du cadrage de la carte</li>
 </ul>
-<section id="exemple-minimal" class="level2">
-<h2 class="anchored" data-anchor-id="exemple-minimal">Exemple minimal</h2>
-<p>Une carte statique d’un pays, sans télécharger aucun fichier vous-même :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> Map</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>bound <span class="op">=</span> Bound()</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>civ <span class="op">=</span> bound.get_admin(<span class="st">"CIV"</span>, adm<span class="op">=</span><span class="dv">0</span>)  <span class="co"># frontières nationales, via GeoBoundaries</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartograpy <span class="im">as</span> cp</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound, DEM</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing <span class="im">import</span> RasterTools</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Map(title<span class="op">=</span><span class="st">"Côte d'Ivoire"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>m.add_polygons(civ, facecolor<span class="op">=</span><span class="st">"lightyellow"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>m.add_north_arrow()</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>m.add_scale_bar()</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>m.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><code>"CIV"</code> est un code ISO3 : n’importe quel pays fonctionne de la même façon (<code>bound.get_admin("SEN", adm=0)</code>, <code>bound.get_admin("France", adm=1)</code>…). Voir <a href="../guides/boundaries-and-admin-data.html">Frontières et données administratives</a>.</p>
-</div>
-</div>
-</section>
-<section id="un-exemple-un-peu-plus-complet" class="level2">
-<h2 class="anchored" data-anchor-id="un-exemple-un-peu-plus-complet">Un exemple un peu plus complet</h2>
-<p>Charger des données locales, filtrer, coloriser par une colonne, exporter :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> load</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing <span class="im">import</span> clip_gdf_by_mask</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> Map</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Charger une couche locale</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>regions <span class="op">=</span> load(<span class="st">"data/regions.geojson"</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. La découper selon une emprise</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>civ <span class="op">=</span> Bound().get_admin(<span class="st">"CIV"</span>, adm<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>regions_civ <span class="op">=</span> clip_gdf_by_mask(regions, civ)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Cartographier avec une choroplèthe</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Map(title<span class="op">=</span><span class="st">"Densité de population"</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>m.add_polygons_choropleth(regions_civ, column_to_plot<span class="op">=</span><span class="st">"densite"</span>, cmap<span class="op">=</span><span class="st">"viridis"</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>m.add_north_arrow()</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>m.add_scale_bar()</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Exporter</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"carte_densite.png"</span>, dpi<span class="op">=</span><span class="dv">300</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="suite-recommandée" class="level2">
-<h2 class="anchored" data-anchor-id="suite-recommandée">Suite recommandée</h2>
-<ol type="1">
-<li><p><strong>Initialiser un projet</strong></p>
-<p><a href="../getting-started/first-project.html">Premier projet</a> : structurer <code>data/</code> et <code>output/</code> avec <code>Project</code> plutôt que des chemins en dur.</p></li>
-<li><p><strong>Charger ses propres données</strong></p>
-<p><a href="../guides/load-and-save-data.html">Charger et enregistrer des données</a> : tous les formats supportés (<code>shp</code>, <code>geojson</code>, <code>gpkg</code>, <code>kml</code>, <code>gpx</code>, <code>csv</code>, <code>parquet</code>, <code>tif</code>).</p></li>
-<li><p><strong>Produire une première carte statique</strong></p>
-<p><a href="../guides/static-maps.html">Cartes statiques</a> : couches, légende, échelle, flèche du Nord, export.</p></li>
-<li><p><strong>Explorer les outils vectoriels et raster</strong></p>
-<p><a href="../guides/vector-processing.html">Traitement vectoriel</a> et <a href="../guides/raster-processing.html">Traitement raster</a>.</p></li>
-</ol>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>font_title <span class="op">=</span> cp.google_font(<span class="st">"Bebas Neue"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>font_text <span class="op">=</span> cp.google_font(<span class="st">"Swanky and Moo Moo"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>font_bold <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"medium"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 1. Emprise : « région de Man » = département de Tonkpi ---------------</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>bound <span class="op">=</span> Bound()</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>zone <span class="op">=</span> bound.get_admin(<span class="st">"CIV"</span>, adm<span class="op">=</span><span class="dv">2</span>).set_crs(<span class="st">"EPSG:4326"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>zone <span class="op">=</span> zone[zone[<span class="st">"shapeName"</span>] <span class="op">==</span> <span class="st">"Tonkpi"</span>]            <span class="co"># variante : adm=1 + "Montagnes"</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>w, s, e, n <span class="op">=</span> zone.total_bounds</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>bbox <span class="op">=</span> (w <span class="op">-</span> <span class="fl">0.03</span>, s <span class="op">-</span> <span class="fl">0.03</span>, e <span class="op">+</span> <span class="fl">0.03</span>, n <span class="op">+</span> <span class="fl">0.03</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 2. MNT SRTM ~30 m ---------------------------------------------------</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>tif <span class="op">=</span> <span class="bu">str</span>(DEM(work_dir<span class="op">=</span><span class="st">"_dem_cache"</span>).download(bbox, out_tif<span class="op">=</span><span class="st">"_dem_cache/tonkpi_srtm.tif"</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. Détourage à la forme de la zone : le reste -&gt; NoData (RasterTools) --</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> RasterTools(tif).mask_raster(zone, invert<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>elev <span class="op">=</span> rt.data[<span class="dv">0</span>].astype(<span class="st">"float32"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>nodata <span class="op">=</span> rt.profile.get(<span class="st">"nodata"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> nodata <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    elev[elev <span class="op">==</span> nodata] <span class="op">=</span> np.nan</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>left, bottom, right, top <span class="op">=</span> rt.get_raster_info()[<span class="st">"bounds"</span>]</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>extent <span class="op">=</span> [left, right, bottom, top]</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 4. Ombrage du relief (lumière rasante nord-ouest) -----------------</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co">#     z_factor = exagération verticale ; altitude basse = ombres longues</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>hs <span class="op">=</span> DEM.hillshade(tif, azimuth<span class="op">=</span><span class="dv">315</span>, altitude<span class="op">=</span><span class="dv">30</span>, z_factor<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>hs[np.isnan(elev)] <span class="op">=</span> np.nan</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 5. Palette hypsométrique (turquoise bas -&gt; vert -&gt; or -&gt; orange) --</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>relief <span class="op">=</span> cp.to_cmap([</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"#1f6f6b"</span>, <span class="st">"#2f9e79"</span>, <span class="st">"#7cbf6a"</span>, <span class="st">"#c6cf5c"</span>, <span class="st">"#e7c452"</span>, <span class="st">"#df9a44"</span>, <span class="st">"#bd6c2f"</span>,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>], cmap_type<span class="op">=</span><span class="st">"continuous"</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">#     borne basse remontée au 25e centile : concentre les couleurs sur les hauteurs</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>lo, hi <span class="op">=</span> np.nanpercentile(elev, [<span class="dv">25</span>, <span class="dv">99</span>])</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 6. Carte cartograpy : fond marine, sans axes -----------------------</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> cp.Map(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">9</span>), dpi<span class="op">=</span><span class="dv">300</span>, basemap<span class="op">=</span><span class="va">False</span>, title<span class="op">=</span><span class="st">""</span>, verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>m.set_background_color(<span class="st">"#010F5F"</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>m.add_raster(raster_array<span class="op">=</span>elev, extent<span class="op">=</span>extent, cmap<span class="op">=</span>relief,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>             vmin<span class="op">=</span>lo, vmax<span class="op">=</span>hi, alpha<span class="op">=</span><span class="fl">1.0</span>, show_colorbar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>m.add_raster(raster_array<span class="op">=</span>hs, extent<span class="op">=</span>extent, cmap<span class="op">=</span><span class="st">"gray"</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>             vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">255</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, show_colorbar<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>m.set_extent(extent)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>m.hide_gridline()</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 7. Habillage typographique -------------------------------------</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(<span class="st">"RELIEF DE LA RÉGION DE MAN"</span>, (<span class="fl">0.5</span>, <span class="fl">0.95</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>                  color<span class="op">=</span><span class="st">"#ececec"</span>, fontsize<span class="op">=</span><span class="dv">30</span>, font<span class="op">=</span>font_title, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(<span class="st">"Département de Tonkpi (Tonkoui, Dents de Man) · MNT SRTM ~30 m"</span>,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>                  (<span class="fl">0.5</span>, <span class="fl">0.90</span>), to<span class="op">=</span><span class="st">"fig"</span>, color<span class="op">=</span><span class="st">"#ffffff"</span>, fontsize<span class="op">=</span><span class="dv">11</span>, font<span class="op">=</span>font_text,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>                  ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(<span class="ss">f"altitude : </span><span class="sc">{</span>np<span class="sc">.</span>nanmin(elev)<span class="sc">:.0f}</span><span class="ss"> - </span><span class="sc">{</span>np<span class="sc">.</span>nanmax(elev)<span class="sc">:.0f}</span><span class="ss"> m"</span>,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>                  (<span class="fl">0.5</span>, <span class="fl">0.08</span>), to<span class="op">=</span><span class="st">"fig"</span>, color<span class="op">=</span><span class="st">"#8a8a8a"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, font<span class="op">=</span>font_text,</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>                  ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(<span class="st">"&lt;By&gt; : Anicet Cyrille KAMBOU"</span>, (<span class="fl">0.5</span>, <span class="fl">0.05</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>                  color<span class="op">=</span><span class="st">"#ffffff"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, font<span class="op">=</span>font_text, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>                  highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}])</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"output_galerie"</span>).mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"output_galerie/relief_region_man_tonkpi.png"</span>, dpi<span class="op">=</span><span class="dv">300</span>, facecolor<span class="op">=</span><span class="st">"#000000"</span>)</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>m.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 
 
-</section>
 
 </main> <!-- /main -->
 <!-- Widget de traduction Google Translate.
@@ -1159,13 +1158,13 @@ Note
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../getting-started/installation.html" class="pagination-link" aria-label="Installation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Installation</span>
+      <a href="../gallery/hexbin-farm-density.html" class="pagination-link" aria-label="Densité d'exploitations : grille hexagonale">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Densité d’exploitations : grille hexagonale</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../getting-started/first-project.html" class="pagination-link" aria-label="Premier projet">
-        <span class="nav-page-text">Premier projet</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../gallery/etats-unis-mosaique.html" class="pagination-link" aria-label="Carte mosaïque : États-Unis">
+        <span class="nav-page-text">Carte mosaïque : États-Unis</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

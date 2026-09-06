@@ -616,8 +616,8 @@ def set_style(style_name, source="matplotlib"):
                 logger.info("✅ Style mplcyberpunk appliqué : cyberpunk")
             else:
                 logger.info("❌ Seul le style 'cyberpunk' est disponible pour mplcyberpunk.")
-        except ImportError:
-            logger.info("❌ mplcyberpunk n'est pas installé.")
+        except (ImportError, AttributeError):
+            logger.info("❌ mplcyberpunk n'est pas installé ou incompatible avec cette version de matplotlib.")
     
     elif source.lower() == "scienceplots":
         import scienceplots
@@ -662,7 +662,7 @@ def list_all_styles():
         # un premier plt.style.use("cyberpunk") (enregistrement paresseux de
         # matplotlib) : on ne peut donc pas s'y fier pour la détection.
         styles['mplcyberpunk'] = list(mplcyberpunk.cyberpunk_stylesheets.keys())
-    except ImportError:
+    except (ImportError, AttributeError):
         styles['mplcyberpunk'] = []
     
     # 4. Styles SciencePlots

@@ -7,7 +7,7 @@ from shapely.geometry import box
 import matplotlib
 matplotlib.use("Agg")  # Non-interactive backend for testing
 
-from cartograpy.mapper import (
+from cartograpy.mapper import (  # noqa: E402
     plot_bivariate_choropleth,
     plot_bivariate_legend,
     assign_bivariate_classes,

@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Créer une première carte avec les objets principaux du package.">
+<meta name="description" content="50 états en aplats de teintes alternées, Alaska et Hawaii repositionnés en encart façon « Albers USA », à partir des seules frontières Bound.">
 
-<title>Quickstart – cartograpy</title>
+<title>Carte mosaïque : États-Unis – cartograpy</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -69,8 +69,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../getting-started/first-project.html" rel="next">
-<link href="../getting-started/installation.html" rel="prev">
+<link href="../reference/api-overview.html" rel="next">
+<link href="../gallery/relief-man-tonkpi.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -338,7 +338,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../getting-started/installation.html">Prise en main</a></li><li class="breadcrumb-item"><a href="../getting-started/quickstart.html">Quickstart</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../gallery/index.html">Galerie</a></li><li class="breadcrumb-item"><a href="../gallery/etats-unis-mosaique.html">Carte mosaïque : États-Unis</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -358,13 +358,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
  <span class="menu-text">Prise en main</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Basculer la section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Basculer la section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../getting-started/installation.html" class="sidebar-item-text sidebar-link">
@@ -373,7 +373,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../getting-started/quickstart.html" class="sidebar-item-text sidebar-link active">
+  <a href="../getting-started/quickstart.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Quickstart</span></a>
   </div>
 </li>
@@ -452,13 +452,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
  <span class="menu-text">Galerie</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Basculer la section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Basculer la section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../gallery/index.html" class="sidebar-item-text sidebar-link">
@@ -509,7 +509,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../gallery/etats-unis-mosaique.html" class="sidebar-item-text sidebar-link">
+  <a href="../gallery/etats-unis-mosaique.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Carte mosaïque : États-Unis</span></a>
   </div>
 </li>
@@ -614,29 +614,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Sur cette page</h2>
-   
-  <ul>
-  <li><a href="#exemple-minimal" id="toc-exemple-minimal" class="nav-link active" data-scroll-target="#exemple-minimal">Exemple minimal</a></li>
-  <li><a href="#un-exemple-un-peu-plus-complet" id="toc-un-exemple-un-peu-plus-complet" class="nav-link" data-scroll-target="#un-exemple-un-peu-plus-complet">Un exemple un peu plus complet</a></li>
-  <li><a href="#suite-recommandée" id="toc-suite-recommandée" class="nav-link" data-scroll-target="#suite-recommandée">Suite recommandée</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../getting-started/installation.html">Prise en main</a></li><li class="breadcrumb-item"><a href="../getting-started/quickstart.html">Quickstart</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../gallery/index.html">Galerie</a></li><li class="breadcrumb-item"><a href="../gallery/etats-unis-mosaique.html">Carte mosaïque : États-Unis</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Quickstart</h1>
+<h1 class="title">Carte mosaïque : États-Unis</h1>
 </div>
 
 <div>
   <div class="description">
-    Créer une première carte avec les objets principaux du package.
+    50 états en aplats de teintes alternées, Alaska et Hawaii repositionnés en encart façon « Albers USA », à partir des seules frontières Bound.
   </div>
 </div>
 
@@ -653,81 +645,95 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Cartograpy s’organise autour de quelques blocs simples :</p>
+<p><img src="..\assets/etats-unis-mosaique-example.png" class="img-fluid"></p>
+<p>Reproduction du style « mosaïque colorée » : les 50 états en aplats de couleurs alternées, <strong>sans aucune donnée statistique</strong> — juste une coloration catégorielle décorative. Alaska et Hawaii sont recadrés, réduits et déplacés en bas à gauche (convention « Albers USA »), plutôt que dessinés à leur vraie position qui étirerait la carte sur tout le Pacifique.</p>
+<p>Deux pièges de rendu, invisibles à la lecture du code :</p>
 <ul>
-<li><a href="../reference/data.html"><code>data</code></a> pour charger ou télécharger des données</li>
-<li><a href="../reference/vector-tools.html"><code>processing</code></a> pour transformer les couches</li>
-<li><a href="../reference/mapper.html"><code>mapper</code></a> pour créer des cartes statiques ou web</li>
-<li><a href="../reference/styling.html"><code>styling</code></a> pour les palettes et les polices</li>
-<li><a href="../reference/project.html"><code>project</code></a> pour organiser un projet cartographique</li>
+<li><code>add_labels()</code> place une étiquette <strong>par partie</strong> d’un polygone : un état multi-parties (îles au large de Washington, de Californie, du Michigan…) reçoit son nom plusieurs fois. On étiquette donc un point unique par état, le <code>representative_point()</code> de sa plus grande partie.</li>
+<li>La géométrie d’Alaska inclut la chaîne des Aléoutiennes, qui traverse l’antiméridien : sans recadrage, l’encart devient une bande difforme large de 360°. On ne garde que le bloc continental (<code>keep_largest=True</code>).</li>
 </ul>
-<section id="exemple-minimal" class="level2">
-<h2 class="anchored" data-anchor-id="exemple-minimal">Exemple minimal</h2>
-<p>Une carte statique d’un pays, sans télécharger aucun fichier vous-même :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> Map</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>bound <span class="op">=</span> Bound()</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>civ <span class="op">=</span> bound.get_admin(<span class="st">"CIV"</span>, adm<span class="op">=</span><span class="dv">0</span>)  <span class="co"># frontières nationales, via GeoBoundaries</span></span>
+<p>Techniques utilisées :</p>
+<ul>
+<li><code>Bound().get_admin("USA", adm=1)</code> pour les frontières des états, filtrées aux 50 états (DC et territoires exclus)</li>
+<li><code>shapely.affinity.scale</code> + <code>translate</code> pour repositionner Alaska/Hawaii en encart (aucune dépendance à un système d’inset)</li>
+<li><code>add_polygons(column=..., cmap=ListedColormap(...), categorical=True)</code> pour une coloration catégorielle en couleurs discrètes exactes</li>
+<li><code>add_labels()</code> avec un GeoDataFrame de points (un par état) pour éviter les doublons sur les états multi-parties</li>
+<li><code>google_font("Poppins", weight="bold")</code> + <code>add_custom_text(..., to="fig")</code> pour le titre</li>
+</ul>
+<p>Rhode Island et Delaware (les deux plus petits états) ne sont pas étiquetés : trop exigus pour porter leur nom sans lignes de rappel.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shapely.geometry <span class="im">import</span> box</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shapely.affinity <span class="im">import</span> scale, translate</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.colors <span class="im">import</span> ListedColormap</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartograpy <span class="im">as</span> cp</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Map(title<span class="op">=</span><span class="st">"Côte d'Ivoire"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>m.add_polygons(civ, facecolor<span class="op">=</span><span class="st">"lightyellow"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>m.add_north_arrow()</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>m.add_scale_bar()</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>m.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><code>"CIV"</code> est un code ISO3 : n’importe quel pays fonctionne de la même façon (<code>bound.get_admin("SEN", adm=0)</code>, <code>bound.get_admin("France", adm=1)</code>…). Voir <a href="../guides/boundaries-and-admin-data.html">Frontières et données administratives</a>.</p>
-</div>
-</div>
-</section>
-<section id="un-exemple-un-peu-plus-complet" class="level2">
-<h2 class="anchored" data-anchor-id="un-exemple-un-peu-plus-complet">Un exemple un peu plus complet</h2>
-<p>Charger des données locales, filtrer, coloriser par une colonne, exporter :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> load</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.processing <span class="im">import</span> clip_gdf_by_mask</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> Map</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Bound</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Charger une couche locale</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>regions <span class="op">=</span> load(<span class="st">"data/regions.geojson"</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. La découper selon une emprise</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>civ <span class="op">=</span> Bound().get_admin(<span class="st">"CIV"</span>, adm<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>regions_civ <span class="op">=</span> clip_gdf_by_mask(regions, civ)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Cartographier avec une choroplèthe</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Map(title<span class="op">=</span><span class="st">"Densité de population"</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>m.add_polygons_choropleth(regions_civ, column_to_plot<span class="op">=</span><span class="st">"densite"</span>, cmap<span class="op">=</span><span class="st">"viridis"</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>m.add_north_arrow()</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>m.add_scale_bar()</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Exporter</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"carte_densite.png"</span>, dpi<span class="op">=</span><span class="dv">300</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="suite-recommandée" class="level2">
-<h2 class="anchored" data-anchor-id="suite-recommandée">Suite recommandée</h2>
-<ol type="1">
-<li><p><strong>Initialiser un projet</strong></p>
-<p><a href="../getting-started/first-project.html">Premier projet</a> : structurer <code>data/</code> et <code>output/</code> avec <code>Project</code> plutôt que des chemins en dur.</p></li>
-<li><p><strong>Charger ses propres données</strong></p>
-<p><a href="../guides/load-and-save-data.html">Charger et enregistrer des données</a> : tous les formats supportés (<code>shp</code>, <code>geojson</code>, <code>gpkg</code>, <code>kml</code>, <code>gpx</code>, <code>csv</code>, <code>parquet</code>, <code>tif</code>).</p></li>
-<li><p><strong>Produire une première carte statique</strong></p>
-<p><a href="../guides/static-maps.html">Cartes statiques</a> : couches, légende, échelle, flèche du Nord, export.</p></li>
-<li><p><strong>Explorer les outils vectoriels et raster</strong></p>
-<p><a href="../guides/vector-processing.html">Traitement vectoriel</a> et <a href="../guides/raster-processing.html">Traitement raster</a>.</p></li>
-</ol>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 1. Frontières réelles : 50 états (territoires/DC exclus) -----------</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>bound <span class="op">=</span> cp.Bound()</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>us <span class="op">=</span> bound.get_admin(<span class="st">"USA"</span>, adm<span class="op">=</span><span class="dv">1</span>).set_crs(<span class="st">"EPSG:4326"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>EXCLUDE <span class="op">=</span> {</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"District of Columbia"</span>, <span class="st">"Puerto Rico"</span>, <span class="st">"Guam"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"American Samoa"</span>, <span class="st">"United States Virgin Islands"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Commonwealth of the Northern Mariana Islands"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>us <span class="op">=</span> us[<span class="op">~</span>us[<span class="st">"shapeName"</span>].isin(EXCLUDE)].reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> largest_part(geom):</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Plus grande partie d'un MultiPolygon (bloc continental d'Alaska ; évite</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">    aussi qu'un état multi-parties reçoive plusieurs étiquettes)."""</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">max</span>(geom.geoms, key<span class="op">=</span><span class="kw">lambda</span> g: g.area) <span class="cf">if</span> geom.geom_type <span class="op">==</span> <span class="st">"MultiPolygon"</span> <span class="cf">else</span> geom</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> relocate(gdf, name, clip_box, scale_factor, dest_xy, keep_largest<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Style 'Albers USA' : recadre, réduit et déplace un état vers un point</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">    fixe, pour l'afficher en encart plutôt qu'à sa vraie position."""</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    geom <span class="op">=</span> gdf.loc[gdf[<span class="st">"shapeName"</span>] <span class="op">==</span> name, <span class="st">"geometry"</span>].iloc[<span class="dv">0</span>]</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> clip_box:</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        geom <span class="op">=</span> geom.intersection(box(<span class="op">*</span>clip_box))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> keep_largest:</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        geom <span class="op">=</span> largest_part(geom)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    cx, cy <span class="op">=</span> geom.centroid.x, geom.centroid.y</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    geom <span class="op">=</span> scale(geom, xfact<span class="op">=</span>scale_factor, yfact<span class="op">=</span>scale_factor, origin<span class="op">=</span>(cx, cy))</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    dx, dy <span class="op">=</span> dest_xy[<span class="dv">0</span>] <span class="op">-</span> geom.centroid.x, dest_xy[<span class="dv">1</span>] <span class="op">-</span> geom.centroid.y</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    geom <span class="op">=</span> translate(geom, xoff<span class="op">=</span>dx, yoff<span class="op">=</span>dy)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    gdf.loc[gdf[<span class="st">"shapeName"</span>] <span class="op">==</span> name, <span class="st">"geometry"</span>] <span class="op">=</span> geom</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gdf</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>us <span class="op">=</span> relocate(us, <span class="st">"Alaska"</span>, (<span class="op">-</span><span class="dv">172</span>, <span class="dv">51</span>, <span class="op">-</span><span class="dv">140</span>, <span class="dv">72</span>), <span class="fl">0.35</span>, (<span class="op">-</span><span class="dv">118</span>, <span class="dv">27</span>), keep_largest<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>us <span class="op">=</span> relocate(us, <span class="st">"Hawaii"</span>, (<span class="op">-</span><span class="dv">161</span>, <span class="dv">18</span>, <span class="op">-</span><span class="dv">154</span>, <span class="dv">23</span>), <span class="fl">1.0</span>, (<span class="op">-</span><span class="dv">107</span>, <span class="dv">26</span>))</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 2. Coloration catégorielle décorative (aucune donnée statistique) --</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>palette <span class="op">=</span> [<span class="st">"#3F6E71"</span>, <span class="st">"#F2E0BE"</span>, <span class="st">"#E38A67"</span>, <span class="st">"#333333"</span>, <span class="st">"#8FCFC3"</span>]</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>us <span class="op">=</span> us.sort_values(<span class="st">"shapeName"</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>us[<span class="st">"color_group"</span>] <span class="op">=</span> np.arange(<span class="bu">len</span>(us)) <span class="op">%</span> <span class="bu">len</span>(palette)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>us[<span class="st">"NAME_UP"</span>] <span class="op">=</span> us[<span class="st">"shapeName"</span>].<span class="bu">str</span>.upper()</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>font_title <span class="op">=</span> cp.google_font(<span class="st">"Poppins"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. Carte -----------------------------------------------------------</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> cp.Map(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">6.5</span>), dpi<span class="op">=</span><span class="dv">600</span>, basemap<span class="op">=</span><span class="va">False</span>, title<span class="op">=</span><span class="st">""</span>, verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>m.set_background_color(<span class="st">"#DCEEF2"</span>)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>m.add_polygons(</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    us, column<span class="op">=</span><span class="st">"color_group"</span>, cmap<span class="op">=</span>ListedColormap(palette), categorical<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"white"</span>, linewidth<span class="op">=</span><span class="fl">1.3</span>, alpha<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>m.set_extent([<span class="op">-</span><span class="dv">127</span>, <span class="op">-</span><span class="dv">66</span>, <span class="dv">20</span>, <span class="dv">50</span>])</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>m.hide_gridline()</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 4. Étiquettes : un seul point par état ----------------------------</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>TOO_SMALL_TO_LABEL <span class="op">=</span> {<span class="st">"Rhode Island"</span>, <span class="st">"Delaware"</span>}</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> us[<span class="op">~</span>us[<span class="st">"shapeName"</span>].isin(TOO_SMALL_TO_LABEL)].copy()</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>labels[<span class="st">"geometry"</span>] <span class="op">=</span> labels.geometry.<span class="bu">apply</span>(<span class="kw">lambda</span> g: largest_part(g).representative_point())</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>m.add_labels(labels, label_column<span class="op">=</span><span class="st">"NAME_UP"</span>, fontsize<span class="op">=</span><span class="dv">5</span>, color<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>             outline_color<span class="op">=</span><span class="st">"#00000066"</span>, outline_width<span class="op">=</span><span class="dv">2</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(<span class="st">"UNITED STATES"</span>, (<span class="fl">0.5</span>, <span class="fl">0.95</span>), to<span class="op">=</span><span class="st">"fig"</span>, fontsize<span class="op">=</span><span class="dv">28</span>,</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>                  font<span class="op">=</span>font_title, color<span class="op">=</span><span class="st">"#4A7A7C"</span>, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"etats-unis-mosaique.png"</span>, dpi<span class="op">=</span><span class="dv">600</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 
 
-</section>
 
 </main> <!-- /main -->
 <!-- Widget de traduction Google Translate.
@@ -1159,13 +1165,13 @@ Note
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../getting-started/installation.html" class="pagination-link" aria-label="Installation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Installation</span>
+      <a href="../gallery/relief-man-tonkpi.html" class="pagination-link" aria-label="Relief hypsométrique : région de Man">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Relief hypsométrique : région de Man</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../getting-started/first-project.html" class="pagination-link" aria-label="Premier projet">
-        <span class="nav-page-text">Premier projet</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../reference/api-overview.html" class="pagination-link" aria-label="Vue d'ensemble de l'API">
+        <span class="nav-page-text">Vue d’ensemble de l’API</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

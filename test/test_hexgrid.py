@@ -6,7 +6,7 @@ import geopandas as gpd
 import matplotlib
 matplotlib.use("Agg")  # Non-interactive backend for testing
 
-from cartograpy.mapper import make_hex_grid, aggregate_to_hex, plot_hexgrid_choropleth
+from cartograpy.mapper import make_hex_grid, aggregate_to_hex, plot_hexgrid_choropleth  # noqa: E402
 
 
 @pytest.fixture
