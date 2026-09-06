@@ -1,0 +1,113 @@
+---
+title: "Carte mosaïque : États-Unis"
+description: "50 états en aplats de teintes alternées, Alaska et Hawaii repositionnés en encart façon « Albers USA », à partir des seules frontières Bound."
+image: /assets/etats-unis-mosaique-example.png
+---
+
+![](/assets/etats-unis-mosaique-example.png)
+
+Reproduction du style « mosaïque colorée » : les 50 états en aplats de
+couleurs alternées, **sans aucune donnée statistique** — juste une
+coloration catégorielle décorative. Alaska et Hawaii sont recadrés, réduits
+et déplacés en bas à gauche (convention « Albers USA »), plutôt que dessinés
+à leur vraie position qui étirerait la carte sur tout le Pacifique.
+
+Deux pièges de rendu, invisibles à la lecture du code :
+
+- `add_labels()` place une étiquette **par partie** d'un polygone : un état
+  multi-parties (îles au large de Washington, de Californie, du Michigan…)
+  reçoit son nom plusieurs fois. On étiquette donc un point unique par état,
+  le `representative_point()` de sa plus grande partie.
+- La géométrie d'Alaska inclut la chaîne des Aléoutiennes, qui traverse
+  l'antiméridien : sans recadrage, l'encart devient une bande difforme
+  large de 360°. On ne garde que le bloc continental (`keep_largest=True`).
+
+Techniques utilisées :
+
+- `Bound().get_admin("USA", adm=1)` pour les frontières des états, filtrées
+  aux 50 états (DC et territoires exclus)
+- `shapely.affinity.scale` + `translate` pour repositionner Alaska/Hawaii en
+  encart (aucune dépendance à un système d'inset)
+- `add_polygons(column=..., cmap=ListedColormap(...), categorical=True)` pour
+  une coloration catégorielle en couleurs discrètes exactes
+- `add_labels()` avec un GeoDataFrame de points (un par état) pour éviter les
+  doublons sur les états multi-parties
+- `google_font("Poppins", weight="bold")` + `add_custom_text(..., to="fig")`
+  pour le titre
+
+Rhode Island et Delaware (les deux plus petits états) ne sont pas étiquetés :
+trop exigus pour porter leur nom sans lignes de rappel.
+
+```python
+import numpy as np
+from shapely.geometry import box
+from shapely.affinity import scale, translate
+from matplotlib.colors import ListedColormap
+import cartograpy as cp
+
+# --- 1. Frontières réelles : 50 états (territoires/DC exclus) -----------
+bound = cp.Bound()
+us = bound.get_admin("USA", adm=1).set_crs("EPSG:4326")
+EXCLUDE = {
+    "District of Columbia", "Puerto Rico", "Guam",
+    "American Samoa", "United States Virgin Islands",
+    "Commonwealth of the Northern Mariana Islands",
+}
+us = us[~us["shapeName"].isin(EXCLUDE)].reset_index(drop=True)
+
+
+def largest_part(geom):
+    """Plus grande partie d'un MultiPolygon (bloc continental d'Alaska ; évite
+    aussi qu'un état multi-parties reçoive plusieurs étiquettes)."""
+    return max(geom.geoms, key=lambda g: g.area) if geom.geom_type == "MultiPolygon" else geom
+
+
+def relocate(gdf, name, clip_box, scale_factor, dest_xy, keep_largest=False):
+    """Style 'Albers USA' : recadre, réduit et déplace un état vers un point
+    fixe, pour l'afficher en encart plutôt qu'à sa vraie position."""
+    geom = gdf.loc[gdf["shapeName"] == name, "geometry"].iloc[0]
+    if clip_box:
+        geom = geom.intersection(box(*clip_box))
+    if keep_largest:
+        geom = largest_part(geom)
+    cx, cy = geom.centroid.x, geom.centroid.y
+    geom = scale(geom, xfact=scale_factor, yfact=scale_factor, origin=(cx, cy))
+    dx, dy = dest_xy[0] - geom.centroid.x, dest_xy[1] - geom.centroid.y
+    geom = translate(geom, xoff=dx, yoff=dy)
+    gdf.loc[gdf["shapeName"] == name, "geometry"] = geom
+    return gdf
+
+
+us = relocate(us, "Alaska", (-172, 51, -140, 72), 0.35, (-118, 27), keep_largest=True)
+us = relocate(us, "Hawaii", (-161, 18, -154, 23), 1.0, (-107, 26))
+
+# --- 2. Coloration catégorielle décorative (aucune donnée statistique) --
+palette = ["#3F6E71", "#F2E0BE", "#E38A67", "#333333", "#8FCFC3"]
+us = us.sort_values("shapeName").reset_index(drop=True)
+us["color_group"] = np.arange(len(us)) % len(palette)
+us["NAME_UP"] = us["shapeName"].str.upper()
+
+font_title = cp.google_font("Poppins", weight="bold")
+
+# --- 3. Carte -----------------------------------------------------------
+m = cp.Map(figsize=(9, 6.5), dpi=600, basemap=False, title="", verbose=False)
+m.set_background_color("#DCEEF2")
+m.add_polygons(
+    us, column="color_group", cmap=ListedColormap(palette), categorical=True,
+    edge_color="white", linewidth=1.3, alpha=1.0,
+)
+m.set_extent([-127, -66, 20, 50])
+m.hide_gridline()
+
+# --- 4. Étiquettes : un seul point par état ----------------------------
+TOO_SMALL_TO_LABEL = {"Rhode Island", "Delaware"}
+labels = us[~us["shapeName"].isin(TOO_SMALL_TO_LABEL)].copy()
+labels["geometry"] = labels.geometry.apply(lambda g: largest_part(g).representative_point())
+m.add_labels(labels, label_column="NAME_UP", fontsize=5, color="white",
+             outline_color="#00000066", outline_width=2, fontweight="bold")
+
+m.add_custom_text("UNITED STATES", (0.5, 0.95), to="fig", fontsize=28,
+                  font=font_title, color="#4A7A7C", ha="center", va="top")
+
+m.save("etats-unis-mosaique.png", dpi=600)
+```

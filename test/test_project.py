@@ -6,7 +6,7 @@ import pytest
 from cartograpy.project import (
     Project, VECTOR_EXTENSIONS, RASTER_EXTENSIONS, TABULAR_EXTENSIONS,
     SHAPEFILE_SIDECARS, TAB_SIDECARS,
-    _classify_extension, _get_sidecars_for, _ALL_SIDECAR_EXTENSIONS,
+    _classify_extension, _get_sidecars_for,
 )
 
 

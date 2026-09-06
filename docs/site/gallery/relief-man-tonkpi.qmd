@@ -1,0 +1,107 @@
+---
+title: "Relief hypsométrique : région de Man"
+description: "MNT SRTM teinté par altitude + ombrage exagéré (z_factor) sur fond marine, détouré à la forme du département de Tonkpi (Tonkoui, Dents de Man)."
+image: /assets/relief-man-example.png
+---
+
+![](/assets/relief-man-example.png)
+
+Le relief du département de **Tonkpi** (massif du Tonkoui, Dents de Man), le
+point culminant de Côte d'Ivoire, à partir d'un MNT SRTM ~30 m téléchargé et
+traité entièrement avec `cartograpy` — aucun appel direct à `rasterio` ou
+`numpy.nan` pour le détourage.
+
+Le relief est accentué par une **exagération verticale du hillshade**
+(`z_factor=3`) combinée à un soleil rasant (`altitude=30°`) : les pentes
+ressortent nettement plus qu'avec un ombrage « réaliste ». La palette
+hypsométrique (turquoise → vert → or → orange) est resserrée sur le 25ᵉ
+centile des altitudes pour concentrer les couleurs chaudes sur les hauteurs
+plutôt que sur les fonds de vallée.
+
+Techniques utilisées :
+
+- `Bound().get_admin("CIV", adm=2)` filtré sur `shapeName == "Tonkpi"` pour
+  l'emprise (variante : `adm=1` + `"Montagnes"`)
+- `DEM(work_dir=...).download(bbox, out_tif=...)` : téléchargement et mosaïque
+  SRTM sur l'emprise, mis en cache localement
+- `RasterTools(tif).mask_raster(zone, invert=False)` : détourage à la forme
+  exacte du département, le reste passé en NoData (plus de `geometry_mask`
+  manuel)
+- `DEM.hillshade(tif, azimuth=315, altitude=30, z_factor=3)` : ombrage avec
+  exagération verticale du relief
+- `cp.to_cmap([...], cmap_type="continuous")` pour la palette hypsométrique
+  personnalisée, plutôt que `matplotlib.colors.LinearSegmentedColormap`
+- `Map.add_raster()` appelé deux fois (altitude teintée + hillshade en
+  `alpha=0.6`, mode `"gray"`) pour superposer couleur et relief
+- `google_font()` + `add_custom_text(..., to="fig")` pour l'habillage
+  typographique, indépendant du cadrage de la carte
+
+```python
+import numpy as np
+from pathlib import Path
+import cartograpy as cp
+from cartograpy.data import Bound, DEM
+from cartograpy.processing import RasterTools
+
+font_title = cp.google_font("Bebas Neue")
+font_text = cp.google_font("Swanky and Moo Moo")
+font_bold = cp.google_font("Fira Sans", weight="medium")
+
+# --- 1. Emprise : « région de Man » = département de Tonkpi ---------------
+bound = Bound()
+zone = bound.get_admin("CIV", adm=2).set_crs("EPSG:4326")
+zone = zone[zone["shapeName"] == "Tonkpi"]            # variante : adm=1 + "Montagnes"
+w, s, e, n = zone.total_bounds
+bbox = (w - 0.03, s - 0.03, e + 0.03, n + 0.03)
+
+# --- 2. MNT SRTM ~30 m ---------------------------------------------------
+tif = str(DEM(work_dir="_dem_cache").download(bbox, out_tif="_dem_cache/tonkpi_srtm.tif"))
+
+# --- 3. Détourage à la forme de la zone : le reste -> NoData (RasterTools) --
+rt = RasterTools(tif).mask_raster(zone, invert=False)
+elev = rt.data[0].astype("float32")
+nodata = rt.profile.get("nodata")
+if nodata is not None:
+    elev[elev == nodata] = np.nan
+left, bottom, right, top = rt.get_raster_info()["bounds"]
+extent = [left, right, bottom, top]
+
+# --- 4. Ombrage du relief (lumière rasante nord-ouest) -----------------
+#     z_factor = exagération verticale ; altitude basse = ombres longues
+hs = DEM.hillshade(tif, azimuth=315, altitude=30, z_factor=3)
+hs[np.isnan(elev)] = np.nan
+
+# --- 5. Palette hypsométrique (turquoise bas -> vert -> or -> orange) --
+relief = cp.to_cmap([
+    "#1f6f6b", "#2f9e79", "#7cbf6a", "#c6cf5c", "#e7c452", "#df9a44", "#bd6c2f",
+], cmap_type="continuous")
+#     borne basse remontée au 25e centile : concentre les couleurs sur les hauteurs
+lo, hi = np.nanpercentile(elev, [25, 99])
+
+# --- 6. Carte cartograpy : fond marine, sans axes -----------------------
+m = cp.Map(figsize=(8, 9), dpi=300, basemap=False, title="", verbose=False)
+m.set_background_color("#010F5F")
+m.add_raster(raster_array=elev, extent=extent, cmap=relief,
+             vmin=lo, vmax=hi, alpha=1.0, show_colorbar=False)
+m.add_raster(raster_array=hs, extent=extent, cmap="gray",
+             vmin=0, vmax=255, alpha=0.6, show_colorbar=False)
+m.set_extent(extent)
+m.hide_gridline()
+
+# --- 7. Habillage typographique -------------------------------------
+m.add_custom_text("RELIEF DE LA RÉGION DE MAN", (0.5, 0.95), to="fig",
+                  color="#ececec", fontsize=30, font=font_title, ha="center", va="top")
+m.add_custom_text("Département de Tonkpi (Tonkoui, Dents de Man) · MNT SRTM ~30 m",
+                  (0.5, 0.90), to="fig", color="#ffffff", fontsize=11, font=font_text,
+                  ha="center", va="top")
+m.add_custom_text(f"altitude : {np.nanmin(elev):.0f} - {np.nanmax(elev):.0f} m",
+                  (0.5, 0.08), to="fig", color="#8a8a8a", fontsize=10, font=font_text,
+                  ha="center", va="center")
+m.add_custom_text("<By> : Anicet Cyrille KAMBOU", (0.5, 0.05), to="fig",
+                  color="#ffffff", fontsize=9, font=font_text, ha="center", va="center",
+                  highlight_textprops=[{"font": font_bold}])
+
+Path("output_galerie").mkdir(exist_ok=True)
+m.save("output_galerie/relief_region_man_tonkpi.png", dpi=300, facecolor="#000000")
+m.show()
+```

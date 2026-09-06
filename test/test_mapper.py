@@ -317,7 +317,6 @@ class TestMapClass:
 
         m = Map(verbose=False)
         m.add_polygons(sample_gdf)
-        n_before = len(m.ax.collections)
         m.add_inset(data=sample_gdf, on=sample_gdf, style="classic")
         # `on` est dessiné via GeoDataFrame.plot() sur l'axe de l'inset,
         # pas sur l'axe principal - on vérifie juste que l'inset a du contenu.
