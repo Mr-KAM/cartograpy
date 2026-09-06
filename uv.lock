@@ -299,6 +299,7 @@ dependencies = [
     { name = "drawarrow" },
     { name = "fiona" },
     { name = "geemap" },
+    { name = "geohexgrid" },
     { name = "geojson" },
     { name = "geopandas" },
     { name = "geopy" },
@@ -308,6 +309,7 @@ dependencies = [
     { name = "marimo", extra = ["recommended"] },
     { name = "matplotlib" },
     { name = "matplotlib-map-utils" },
+    { name = "mplcyberpunk" },
     { name = "numpy" },
     { name = "osmnx" },
     { name = "pandas" },
@@ -320,6 +322,8 @@ dependencies = [
     { name = "reportlab" },
     { name = "requests" },
     { name = "requests-cache" },
+    { name = "rlpycairo" },
+    { name = "scienceplots" },
     { name = "seaborn" },
     { name = "shapely" },
     { name = "svglib" },
@@ -346,6 +350,7 @@ requires-dist = [
     { name = "fiona", specifier = ">=1.10.1" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "geemap", specifier = ">=0.37.2" },
+    { name = "geohexgrid", specifier = ">=3.0" },
     { name = "geojson", specifier = ">=3.0" },
     { name = "geopandas", specifier = ">=0.14" },
     { name = "geopy", specifier = ">=2.4" },
@@ -355,7 +360,8 @@ requires-dist = [
     { name = "jupyterlab", marker = "extra == 'dev'", specifier = ">=4.0.0" },
     { name = "marimo", extras = ["recommended"], specifier = ">=0.23.0" },
     { name = "matplotlib", specifier = ">=3.8" },
-    { name = "matplotlib-map-utils", specifier = ">=3.1.2" },
+    { name = "matplotlib-map-utils", specifier = "==3.1.2" },
+    { name = "mplcyberpunk", specifier = ">=0.7" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "osmnx", specifier = ">=1.9" },
@@ -370,6 +376,8 @@ requires-dist = [
     { name = "reportlab", specifier = ">=4.0" },
     { name = "requests", specifier = ">=2.31" },
     { name = "requests-cache", specifier = ">=1.1" },
+    { name = "rlpycairo", specifier = ">=0.4" },
+    { name = "scienceplots", specifier = ">=2.1" },
     { name = "seaborn", specifier = ">=0.13" },
     { name = "shapely", specifier = ">=2.0" },
     { name = "svglib", specifier = ">=1.5" },
@@ -1163,6 +1171,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/df/78/4892343230a9d29faa1364564e525307a37e54ad776ea62c12129dbba704/geographiclib-2.1.tar.gz", hash = "sha256:6a6545e6262d0ed3522e13c515713718797e37ed8c672c31ad7b249f372ef108", size = 37004, upload-time = "2025-08-21T21:34:26Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/31/b3/802576f2ea5dcb48501bb162e4c7b7b3ca5654a42b2c968ef98a797a4c79/geographiclib-2.1-py3-none-any.whl", hash = "sha256:e2a873b9b9e7fc38721ad73d5f4e6c9ed140d428a339970f505c07056997d40b", size = 40740, upload-time = "2025-08-21T21:34:24.955Z" },
+]
+
+[[package]]
+name = "geohexgrid"
+version = "3.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "geopandas" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "shapely" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/92/f6/3183114f2632c32a025d42a9635de9e69cd8829bbe19d28d9dcd019e3c20/geohexgrid-3.0.3.tar.gz", hash = "sha256:f2eceae5f8fa36e5922f9632ffecf33b52961f70decbcd36a0f62d23cf105936", size = 628958, upload-time = "2026-07-06T22:02:54.407Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4f/77/5b7fe4105abacf7e571eafd5e23d22071ad3203ef9b4eb0842337474b345/geohexgrid-3.0.3-py3-none-any.whl", hash = "sha256:c4392f43930bf0b9b281ffa0fcd64111af7307f786305bfaf0a7066ac6a25074", size = 12040, upload-time = "2026-07-06T22:02:52.426Z" },
 ]
 
 [[package]]
@@ -2564,6 +2587,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/9d/55/d01f0c4b45ade6536c51170b9043db8b2ec6ddf4a35c7ea3f5f559ac935b/mistune-3.2.0.tar.gz", hash = "sha256:708487c8a8cdd99c9d90eb3ed4c3ed961246ff78ac82f03418f5183ab70e398a", size = 95467, upload-time = "2025-12-23T11:36:34.994Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9b/f7/4a5e785ec9fbd65146a27b6b70b6cdc161a66f2024e4b04ac06a67f5578b/mistune-3.2.0-py3-none-any.whl", hash = "sha256:febdc629a3c78616b94393c6580551e0e34cc289987ec6c35ed3f4be42d0eee1", size = 53598, upload-time = "2025-12-23T11:36:33.211Z" },
+]
+
+[[package]]
+name = "mplcyberpunk"
+version = "0.7.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/21/53/9cf3da89c28374b92a2cb9b975fd1031858e0eaee31edd762e3a4619ecb7/mplcyberpunk-0.7.6.tar.gz", hash = "sha256:797cb36b5e1e178e7a3da5f4f215e469ef13935fd8c99d1cd20112e90bba7e22", size = 1605851, upload-time = "2025-02-26T13:36:33.246Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/8f/14ede5882332b013db2479f32b0678ff4bf4f648c5e8bce20b9f97d646bc/mplcyberpunk-0.7.6-py3-none-any.whl", hash = "sha256:5884f7add690a418695ef2f598257fedef89758c17884448518a307470590b42", size = 6527, upload-time = "2025-02-26T13:36:31.938Z" },
 ]
 
 [[package]]
@@ -4349,6 +4385,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e4/46/602938f030adfa043e67112b73821024dc79f3ab4df5474c25fa4c1d2d14/ruff-0.15.10-py3-none-win32.whl", hash = "sha256:d4272e87e801e9a27a2e8df7b21011c909d9ddd82f4f3281d269b6ba19789ca5", size = 10588964, upload-time = "2026-04-09T14:06:07.14Z" },
     { url = "https://files.pythonhosted.org/packages/25/b6/261225b875d7a13b33a6d02508c39c28450b2041bb01d0f7f1a83d569512/ruff-0.15.10-py3-none-win_amd64.whl", hash = "sha256:28cb32d53203242d403d819fd6983152489b12e4a3ae44993543d6fe62ab42ed", size = 11745044, upload-time = "2026-04-09T14:05:39.473Z" },
     { url = "https://files.pythonhosted.org/packages/58/ed/dea90a65b7d9e69888890fb14c90d7f51bf0c1e82ad800aeb0160e4bacfd/ruff-0.15.10-py3-none-win_arm64.whl", hash = "sha256:601d1610a9e1f1c2165a4f561eeaa2e2ea1e97f3287c5aa258d3dab8b57c6188", size = 11035607, upload-time = "2026-04-09T14:05:47.593Z" },
+]
+
+[[package]]
+name = "scienceplots"
+version = "2.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/50/05/73a19270d548caadf145b0fc8ab94a8c716faeca528c254a4192676e048b/scienceplots-2.2.2.tar.gz", hash = "sha256:d46ce7170b4160265c777a48f73a0db1fdff8460f59a0ded0e364acb139ab115", size = 19692, upload-time = "2026-06-23T07:32:50.693Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/ff/6469a5cabf230ebc94f927246874136098dde1aacc9328bc40dceb24ba13/scienceplots-2.2.2-py3-none-any.whl", hash = "sha256:f63d04e6ec11fe2036ec120feb6c2f1d84b7c38e96cc7edcde7208064653af98", size = 33394, upload-time = "2026-06-23T07:32:49.594Z" },
 ]
 
 [[package]]
