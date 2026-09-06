@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cartograpy"
-version = "2.0.2"
+version = "2.0.3"
 description = "Packages python pour créer des cartes facilement"
 authors = [
     { name = "Anicet Cyrille KAMBOU", email = "kanicetcyrille@gmail.com" },
@@ -53,10 +53,8 @@ dependencies = [
     "wbdata>=1.0",
     "fiona>=1.10.1",
     "matplotlib-map-utils==3.1.2",
-    "jupyter>=1.1.1",
     "geemap>=0.37.2",
     "pyfonts>=1.3.0",
-    "marimo[recommended]>=0.23.0",
     "scienceplots>=2.1",
     "mplcyberpunk>=0.7",
     "geohexgrid>=3.0",
@@ -66,6 +64,9 @@ dependencies = [
 file = "LICENSE"
 
 [project.optional-dependencies]
+notebook = [
+    "jupyter>=1.1.1",
+]
 dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
