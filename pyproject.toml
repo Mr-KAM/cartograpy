@@ -44,6 +44,7 @@ dependencies = [
     "rlPyCairo>=0.4",
     "requests>=2.31",
     "requests-cache>=1.1",
+    "scipy>=1.11",
     "seaborn>=0.13",
     "shapely>=2.0",
     "svglib>=1.5",
