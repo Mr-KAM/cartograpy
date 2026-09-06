@@ -1,10 +1,10 @@
-<img src="assets/img/logo.png" alt="Logo cartograpy" width="220">
+<img src="https://raw.githubusercontent.com/Mr-KAM/cartograpy/master/assets/img/logo.png" alt="Logo cartograpy" width="220">
 
 # cartograpy
 
 [![PyPI](https://img.shields.io/pypi/v/cartograpy.svg)](https://pypi.org/project/cartograpy/)
 [![Python](https://img.shields.io/pypi/pyversions/cartograpy.svg)](https://pypi.org/project/cartograpy/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Mr-KAM/cartograpy/blob/master/LICENSE)
 [![Docs](https://img.shields.io/badge/docs-mr--kam.github.io-blue.svg)](https://mr-kam.github.io/cartograpy/)
 
 **Mapping in Python, the way it was always meant to be.**
@@ -14,7 +14,7 @@ données géographiques en quelques lignes de code : des frontières
 administratives d'un pays jusqu'à la carte statique finale, prête à exporter,
 partout dans le monde.
 
-![Exemple de carte produite avec cartograpy](assets/img/create_python_maps.py.png)
+![Exemple de carte produite avec cartograpy](https://raw.githubusercontent.com/Mr-KAM/cartograpy/master/assets/img/create_python_maps.py.png)
 
 ## Fonctionnalités
 
@@ -49,6 +49,10 @@ pip install cartograpy
 
 ## Comment ça marche
 
+![Flux : sources → data → processing → mapper → carte finale](https://mermaid.ink/svg/Zmxvd2NoYXJ0IExSCiAgICBTWyJTb3VyY2VzPGJyLz5maWNoaWVycyBsb2NhdXggwrcgR2VvQm91bmRhcmllcyDCtyBPU008YnIvPkh5ZHJvIMK3IFNSVE0gwrcgV29ybGQgQmFuayDCtyBHRUUiXSAtLT4gRFsiY2FydG9ncmFweS5kYXRhIl0KICAgIEQgLS0-fCJHZW9EYXRhRnJhbWUgLyBEYXRhRnJhbWUifCBQWyJjYXJ0b2dyYXB5LnByb2Nlc3NpbmciXQogICAgUCAtLT4gTVsiY2FydG9ncmFweS5tYXBwZXIiXQogICAgU1RbImNhcnRvZ3JhcHkuc3R5bGluZyJdIC0uLT4gTQogICAgTSAtLT4gT1siQ2FydGUgZmluYWxlPGJyLz5QTkcgwrcgU1ZHIMK3IEhUTUwiXQ==)
+
+<details><summary>Source Mermaid du diagramme</summary>
+
 ```mermaid
 flowchart LR
     S["Sources<br/>fichiers locaux · GeoBoundaries · OSM<br/>Hydro · SRTM · World Bank · GEE"] --> D["cartograpy.data"]
@@ -57,6 +61,8 @@ flowchart LR
     ST["cartograpy.styling"] -.-> M
     M --> O["Carte finale<br/>PNG · SVG · HTML"]
 ```
+
+</details>
 
 ## Démarrage rapide
 
@@ -78,6 +84,10 @@ m.save("cote-divoire.png", dpi=300)          # export prêt à imprimer
 
 ## Les modules
 
+![Les modules : data, processing, mapper, styling, project](https://mermaid.ink/svg/Z3JhcGggVEQKICAgIEFbImNhcnRvZ3JhcHkiXSAtLT4gRFsiZGF0YTxici8-PGk-Y2hhcmdlbWVudC9zYXV2ZWdhcmRlLCBzb3VyY2VzIGVuIGxpZ25lPC9pPiJdCiAgICBBIC0tPiBQWyJwcm9jZXNzaW5nPGJyLz48aT50cmFpdGVtZW50IHZlY3RvcmllbCBldCByYXN0ZXI8L2k-Il0KICAgIEEgLS0-IE1bIm1hcHBlcjxici8-PGk-cmVuZHUgY2FydG9ncmFwaGlxdWUgc3RhdGlxdWUgZXQgd2ViPC9pPiJdCiAgICBBIC0tPiBTWyJzdHlsaW5nPGJyLz48aT5wb2xpY2VzLCBwYWxldHRlcywgc3R5bGVzIGdyYXBoaXF1ZXM8L2k-Il0KICAgIEEgLS0-IFBSWyJwcm9qZWN0PGJyLz48aT5vcmdhbmlzYXRpb24gZCd1biBwcm9qZXQgY2FydG9ncmFwaGlxdWU8L2k-Il0=)
+
+<details><summary>Source Mermaid du diagramme</summary>
+
 ```mermaid
 graph TD
     A["cartograpy"] --> D["data<br/><i>chargement/sauvegarde, sources en ligne</i>"]
@@ -86,6 +96,8 @@ graph TD
     A --> S["styling<br/><i>polices, palettes, styles graphiques</i>"]
     A --> PR["project<br/><i>organisation d'un projet cartographique</i>"]
 ```
+
+</details>
 
 Tout est importable depuis la racine (`from cartograpy import Map, Bound,
 Project`) ou depuis chaque sous-module.
@@ -96,8 +108,8 @@ La documentation complète (référence de l'API, guides pas-à-pas, galerie) es
 disponible sur **[mr-kam.github.io/cartograpy](https://mr-kam.github.io/cartograpy/)**.
 
 Pour une visite guidée interactive de toutes les fonctionnalités, voir le
-notebook [`notebooks/README.ipynb`](notebooks/README.ipynb).
+notebook [`notebooks/README.ipynb`](https://github.com/Mr-KAM/cartograpy/blob/master/notebooks/README.ipynb).
 
 ## Licence
 
-MIT : voir [`LICENSE`](LICENSE).
+MIT : voir [`LICENSE`](https://github.com/Mr-KAM/cartograpy/blob/master/LICENSE).
