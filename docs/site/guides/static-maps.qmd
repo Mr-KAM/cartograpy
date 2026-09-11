@@ -301,7 +301,7 @@ if not lux.empty:
 
     m.add_fig_arrow(
         tail_position=(0.32, 0.70),
-        head_position=(0.39, 0.48),
+        head_position=(0.435, 0.383),
         radius=0.3,
         width=0.5, head_width=4, head_length=8, color="black",
     )
