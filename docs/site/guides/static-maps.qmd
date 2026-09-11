@@ -224,7 +224,7 @@ data["centroid"] = proj.geometry.centroid.to_crs(data.crs)
 GeoDataFrame `data` fournit déjà tous les contours nécessaires.
 
 ```python
-my_cmap = "PonyoDark"
+my_cmap = "Acanthostracion_polygonius"
 font_title = cp.google_font("Bebas Neue")
 font_text = cp.google_font("Fira Sans", weight="light")
 font_bold = cp.google_font("Fira Sans", weight="medium")
@@ -243,7 +243,7 @@ m.add_polygons_choropleth(
     show_labels=True,
     show_colorbar=False,
 )
-m.set_extent([-11, 32, 41, 73])
+m.set_extent([-11, 40, 30, 75])
 m.hide_gridline()
 ```
 
@@ -299,9 +299,17 @@ lux = data[data["name"] == "Luxembourg"]
 if not lux.empty:
     lux_value = lux.iloc[0]["Total"]
 
+    # position figure de la flèche calculée depuis le centroïde du pays
+    # (transData -> transFigure), plutôt qu'une valeur fixe : reste correcte
+    # si l'étendue ou la taille de la figure change
+    m.fig.canvas.draw()
+    lux_point = lux.iloc[0]["centroid"]
+    head_x, head_y = m.ax.transData.transform((lux_point.x, lux_point.y))
+    head_position = tuple(m.fig.transFigure.inverted().transform((head_x, head_y)))
+
     m.add_fig_arrow(
         tail_position=(0.32, 0.70),
-        head_position=(0.435, 0.383),
+        head_position=(head_position[0] - 0.01, head_position[1] + 0.01),
         radius=0.3,
         width=0.5, head_width=4, head_length=8, color="black",
     )
@@ -365,7 +373,7 @@ m.add_custom_text(
     highlight_textprops=[{"font": font_bold}],
 )
 
-m.add_image("logo.png", (0.44, 0.1), zoom=0.035)
+m.add_image("logo.png", (0.44, 0.14), zoom=0.035)
 
 # 8. EXPORT
 m.save("web-map-with-custom-legend.png", dpi=600)
