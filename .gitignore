@@ -81,9 +81,12 @@ notebooks/_vector_cache/
 notebooks/_cartes/
 notebooks/output_galerie/
 notebooks/HFHI_resilience_cotiere_SIG/
-
+notebooks/00-Demonstration global.ipynb
+notebooks/README.ipynb
 notebooks/13-Projet drnouf - occupation et topographie.ipynb
 notebooks/01-Lecture de fichier.ipynb
 notebooks/02-galerie demo.ipynb
+notebooks/mon_projet/data/sites_cartographie_jacqueville_grand_bassam.geojson
+notebooks/mon_projet/data/sites_cartographie_jacqueville_grand_bassam_carres_4ha.geojson
 notebooks/HFHI_SIG_TELEDETECTION_master (1).ipynb
 .claude/
