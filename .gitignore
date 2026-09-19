@@ -27,6 +27,11 @@ _site/
 notebooks/__marimo__/
 notebooks/web-map-with-custom-legend.png
 
+# Ignore tout nouveau sous-dossier de notebooks/ (les sous-dossiers déjà suivis restent versionnés)
+notebooks/*/
+notebooks/*.png/
+notebooks/*.jpg/
+
 # === Cache d'outils dev ===
 .mypy_cache/
 
@@ -70,8 +75,7 @@ build/
 Thumbs.db
 .pypirc
 *.env
-# === SVG files ===
-cartograpy/svg/
+.claude/settings.json
 
 # === Caches et sorties de notebooks (jamais versionnés) ===
 notebooks/_hydro_cache/
@@ -90,3 +94,5 @@ notebooks/mon_projet/data/sites_cartographie_jacqueville_grand_bassam.geojson
 notebooks/mon_projet/data/sites_cartographie_jacqueville_grand_bassam_carres_4ha.geojson
 notebooks/HFHI_SIG_TELEDETECTION_master (1).ipynb
 .claude/
+CLAUDE.md
+notebooks/test.ipynb
