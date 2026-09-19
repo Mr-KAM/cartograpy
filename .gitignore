@@ -29,8 +29,13 @@ notebooks/web-map-with-custom-legend.png
 
 # Ignore tout nouveau sous-dossier de notebooks/ (les sous-dossiers déjà suivis restent versionnés)
 notebooks/*/
-notebooks/*.png/
-notebooks/*.jpg/
+notebooks/*.png
+notebooks/*.jpg
+notebooks/*.jpeg
+notebooks/*.gif
+notebooks/*.svg
+notebooks/*.csv
+notebooks/*.geojson
 
 # === Cache d'outils dev ===
 .mypy_cache/
