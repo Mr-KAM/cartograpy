@@ -12,34 +12,33 @@ from ._types import BBox
 
 logger = logging.getLogger(__name__)
 
-# Valeur de remplissage NASA POWER pour les données manquantes.
+# Fill value used by NASA POWER for missing data.
 _FILL_VALUE = -999.0
 
 
 class Climate:
-    """Données météo/climat globales via l'API NASA POWER — sans clé API.
+    """Global weather/climate data via the NASA POWER API — no API key needed.
 
-    NASA POWER (https://power.larc.nasa.gov/) fournit des séries
-    météorologiques journalières, horaires, mensuelles ou climatologiques,
-    partout dans le monde, issues de ré-analyses (MERRA-2) et de produits
-    satellite. Pensé au départ pour l'agro-climatologie, le solaire et le
-    bâtiment.
+    NASA POWER (https://power.larc.nasa.gov/) provides daily, hourly,
+    monthly, or climatological weather series worldwide, derived from
+    reanalysis (MERRA-2) and satellite products. Originally designed
+    for agro-climatology, solar, and building applications.
 
-    Deux points d'entrée :
+    Two entry points:
 
-    - :meth:`get_point` — série temporelle en un point (lon, lat) →
-      ``geopandas.GeoDataFrame`` indexé par date (géométrie constante).
-    - :meth:`get_region` — grille de points sur une emprise →
-      ``geopandas.GeoDataFrame`` au format long (une ligne par point ×
-      paramètre × pas de temps).
+    - :meth:`get_point` — time series at a single point (lon, lat) →
+      ``geopandas.GeoDataFrame`` indexed by date (constant geometry).
+    - :meth:`get_region` — grid of points over an extent →
+      ``geopandas.GeoDataFrame`` in long format (one row per point ×
+      parameter × time step).
 
-    Paramètres
+    Parameters
     ----------
-    cache_expire_seconds : durée de vie du cache HTTP local (7 jours par
-        défaut). ``-1`` = ne jamais expirer, ``0`` = pas de cache.
-    timeout : délai maximal par requête HTTP (secondes).
+    cache_expire_seconds : lifetime of the local HTTP cache (7 days by
+        default). ``-1`` = never expire, ``0`` = no cache.
+    timeout : maximum delay per HTTP request (seconds).
 
-    Exemple
+    Example
     -------
     >>> clim = Climate()
     >>> gdf = clim.get_point(-3.99, 5.35, "2023-01-01", "2023-12-31")   # Abidjan
@@ -52,8 +51,8 @@ class Climate:
     COMMUNITIES = ("ag", "sb", "re")
     TEMPORAL = ("hourly", "daily", "monthly", "climatology")
 
-    #: Paramètres par défaut si l'appelant n'en fournit pas (température,
-    #: rosée, précipitations, vent, rayonnement, humidité).
+    #: Default parameters if the caller doesn't provide any (temperature,
+    #: dew point, precipitation, wind, radiation, humidity).
     DEFAULT_PARAMETERS = (
         "T2M", "T2M_MIN", "T2M_MAX", "T2MDEW",
         "PRECTOTCORR", "WS2M", "ALLSKY_SFC_SW_DWN", "RH2M",
@@ -66,7 +65,7 @@ class Climate:
         )
 
     # ------------------------------------------------------------------ #
-    # API publique
+    # Public API
     # ------------------------------------------------------------------ #
 
     def get_point(
@@ -79,29 +78,29 @@ class Climate:
         community: str = "ag",
         temporal: str = "daily",
     ) -> gpd.GeoDataFrame:
-        """Série météo NASA POWER en un point.
+        """NASA POWER weather series at a single point.
 
-        Paramètres
+        Parameters
         ----------
-        longitude, latitude : coordonnées du point (WGS-84 / EPSG:4326).
-        start, end : bornes de la période. ``datetime.date``,
-            ``datetime.datetime``, ``"YYYY-MM-DD"`` ou ``"YYYYMMDD"`` pour
-            ``temporal="daily"``/``"hourly"`` ; une année (``int`` ou
-            ``"YYYY"``) pour ``"monthly"``/``"climatology"``.
-        parameters : liste de codes POWER (ex. ``["T2M", "PRECTOTCORR"]``).
-            ``None`` ou ``[]`` → :attr:`DEFAULT_PARAMETERS`. Voir la liste
-            complète : https://power.larc.nasa.gov/parameters/
-        community : ``"ag"`` (agro, défaut), ``"sb"`` (bâtiment) ou
-            ``"re"`` (renouvelable).
-        temporal : ``"daily"`` (défaut), ``"hourly"``, ``"monthly"`` ou
+        longitude, latitude : coordinates of the point (WGS-84 / EPSG:4326).
+        start, end : period bounds. ``datetime.date``,
+            ``datetime.datetime``, ``"YYYY-MM-DD"`` or ``"YYYYMMDD"`` for
+            ``temporal="daily"``/``"hourly"``; a year (``int`` or
+            ``"YYYY"``) for ``"monthly"``/``"climatology"``.
+        parameters : list of POWER codes (e.g. ``["T2M", "PRECTOTCORR"]``).
+            ``None`` or ``[]`` → :attr:`DEFAULT_PARAMETERS`. See the full
+            list: https://power.larc.nasa.gov/parameters/
+        community : ``"ag"`` (agro, default), ``"sb"`` (building) or
+            ``"re"`` (renewable).
+        temporal : ``"daily"`` (default), ``"hourly"``, ``"monthly"`` or
             ``"climatology"``.
 
-        Retour
+        Returns
         ------
-        geopandas.GeoDataFrame (CRS EPSG:4326) indexé par date/heure
-        (``DatetimeIndex`` pour daily/hourly, dates mensuelles pour monthly),
-        une colonne par paramètre + une colonne ``geometry`` constante
-        (le point interrogé). Les valeurs manquantes (-999) → ``NaN``.
+        geopandas.GeoDataFrame (CRS EPSG:4326) indexed by date/time
+        (``DatetimeIndex`` for daily/hourly, monthly dates for monthly),
+        one column per parameter + a constant ``geometry`` column
+        (the queried point). Missing values (-999) → ``NaN``.
         """
         temporal, community, params = self._validate(temporal, community, parameters)
         query = {
@@ -118,7 +117,7 @@ class Climate:
         df = pd.DataFrame(series).replace(_FILL_VALUE, pd.NA).astype("Float64")
         df.index = self._parse_index(df.index, temporal)
         df.index.name = "date"
-        if temporal == "monthly":  # écarte la ligne 'moyenne annuelle' (mois 13)
+        if temporal == "monthly":  # drop the 'annual average' row (month 13)
             df = df[df.index.notna()]
         return gpd.GeoDataFrame(
             df,
@@ -136,19 +135,19 @@ class Climate:
         community: str = "ag",
         temporal: str = "daily",
     ) -> gpd.GeoDataFrame:
-        """Grille de points NASA POWER sur une emprise.
+        """Grid of NASA POWER points over an extent.
 
-        Mêmes paramètres que :meth:`get_point`, mais ``bbox`` remplace
-        ``longitude``/``latitude`` : ``[xmin, ymin, xmax, ymax]`` en
-        EPSG:4326. L'emprise doit rester modérée (l'API limite la taille de
-        la région, ~10° de côté selon la résolution temporelle).
+        Same parameters as :meth:`get_point`, but ``bbox`` replaces
+        ``longitude``/``latitude``: ``[xmin, ymin, xmax, ymax]`` in
+        EPSG:4326. The extent must stay moderate (the API limits the
+        region size, ~10° per side depending on the temporal resolution).
 
-        Retour
+        Returns
         ------
-        geopandas.GeoDataFrame au format long : colonnes ``parameter``,
-        ``date``, ``value``, ``geometry`` (points de la grille POWER,
-        ~0.5°). Pivoter avec ``gdf.pivot_table(index="geometry",
-        columns="parameter", values="value")`` pour cartographier.
+        geopandas.GeoDataFrame in long format: columns ``parameter``,
+        ``date``, ``value``, ``geometry`` (POWER grid points, ~0.5°).
+        Pivot with ``gdf.pivot_table(index="geometry",
+        columns="parameter", values="value")`` to map it.
         """
         temporal, community, params = self._validate(temporal, community, parameters)
         xmin, ymin, xmax, ymax = bbox
@@ -183,7 +182,7 @@ class Climate:
         return gdf
 
     # ------------------------------------------------------------------ #
-    # Interne
+    # Internal
     # ------------------------------------------------------------------ #
 
     def _validate(self, temporal, community, parameters):
@@ -204,7 +203,7 @@ class Climate:
 
     @staticmethod
     def _fmt_date(value, temporal) -> str:
-        """Normalise une date en 'YYYYMMDD' (daily/hourly) ou 'YYYY'
+        """Normalizes a date to 'YYYYMMDD' (daily/hourly) or 'YYYY'
         (monthly/climatology)."""
         year_only = temporal in ("monthly", "climatology")
         if isinstance(value, int):
@@ -220,15 +219,29 @@ class Climate:
         if temporal == "climatology":
             return pd.Index(s)  # 'JAN', 'FEB', ..., 'ANN'
         if temporal == "monthly":
-            # NASA POWER: 'YYYYMM' (le mois '13' = moyenne annuelle → NaT).
+            # NASA POWER: 'YYYYMM' (month '13' = annual average → NaT).
             month_ok = (s.str.len() == 6) & (~s.str.endswith("13"))
             s = s.where(month_ok)
             return pd.Index(pd.to_datetime(s, format="%Y%m", errors="coerce"))
         fmt = "%Y%m%d%H" if temporal == "hourly" else "%Y%m%d"
         return pd.Index(pd.to_datetime(s, format=fmt, errors="coerce"))
 
+    def sources(self) -> pd.DataFrame:
+        """Returns a table of the data sources used by this class.
+
+        Returns
+        ------
+        pd.DataFrame with columns 'name', 'url', 'description'.
+        """
+        return pd.DataFrame([
+            {
+                "name": "NASA POWER",
+                "url": "https://power.larc.nasa.gov/",
+                "description": "Global weather/climate data (used by get_point() and get_region()).",
+            },
+        ])
+
     def _get(self, url, params) -> dict:
-        logger.info(f"NASA POWER: {url}")
         resp = self._session.get(url, params=params, timeout=self.timeout)
         if resp.status_code != 200:
             raise RuntimeError(

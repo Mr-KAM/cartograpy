@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pandas as pd
 import geopandas as gpd
 from ._optional import _require_osmnx
 import logging
@@ -11,23 +12,23 @@ class OSM :
     def __init__(self):
         self.api_key = ""
         self._ox = _require_osmnx()
-    
+
     def get_data(self,place, tags, data_type="all"):
         """
-        Récupère des données OpenStreetMap pour un lieu donné (str, bbox ou GeoDataFrame)
-        et des tags OSM personnalisés.
-        
+        Retrieves OpenStreetMap data for a given place (str, bbox, or GeoDataFrame)
+        and custom OSM tags.
+
         Args:
-            place (str, tuple, list, GeoDataFrame): Nom de la zone, bbox (minx, miny, maxx, maxy), ou GeoDataFrame polygonal.
-            tags (dict): Dictionnaire des tags OSM à filtrer, ex: {"amenity": "school"}.
-            data_type (str): 'points' pour POIs, 'polygons' pour surfaces, 'lines' pour lignes, 'all' pour tous types.
-            
+            place (str, tuple, list, GeoDataFrame): Area name, bbox (minx, miny, maxx, maxy), or polygonal GeoDataFrame.
+            tags (dict): Dictionary of OSM tags to filter on, e.g.: {"amenity": "school"}.
+            data_type (str): 'points' for POIs, 'polygons' for areas, 'lines' for lines, 'all' for every type.
+
         Returns:
-            geopandas.GeoDataFrame : Les objets OSM correspondant à la requête.
+            geopandas.GeoDataFrame: The OSM objects matching the query.
         """
-        
+
         def filter_by_geometry_type(gdf, data_type):
-            """Filtre le GeoDataFrame selon le type de géométrie souhaité."""
+            """Filters the GeoDataFrame by the requested geometry type."""
             if data_type == "points":
                 return gdf[gdf.geometry.type.isin(['Point', 'MultiPoint'])]
             elif data_type == "polygons":
@@ -35,99 +36,98 @@ class OSM :
             elif data_type == "lines":
                 return gdf[gdf.geometry.type.isin(['LineString', 'MultiLineString'])]
             elif data_type == "all":
-                return gdf  # Retourne tous les types de géométries
+                return gdf  # Returns every geometry type
             else:
                 raise ValueError("data_type doit être 'points', 'polygons', 'lines' ou 'all'.")
-        
+
         def handle_osm_request(request_func, *args, **kwargs):
-            """Gère les requêtes OSM avec gestion d'erreurs."""
+            """Handles OSM requests with error handling."""
             try:
                 gdf = request_func(*args, **kwargs)
                 if gdf.empty:
-                    logger.info(f"Aucune donnée trouvée avec les tags {tags}")
                     return gpd.GeoDataFrame()
                 return filter_by_geometry_type(gdf, data_type)
             except Exception as e:
-                logger.info(f"Erreur lors de la récupération des données : {e}")
+                logger.error(f"Erreur lors de la récupération des données : {e}")
                 return gpd.GeoDataFrame()
-        
-        # Cas 1 : Nom de lieu (str)
+
+        # Case 1: Place name (str)
         if isinstance(place, str):
             return handle_osm_request(self._ox.features_from_place, place, tags)
-        
-        # Cas 2 : Bounding box (tuple/list de 4 valeurs)
+
+        # Case 2: Bounding box (tuple/list of 4 values)
         elif isinstance(place, (tuple, list)) and len(place) == 4:
             minx, miny, maxx, maxy = place
             # bbox = (maxy, minx, miny, maxx)
-            # OSMnx attend : north, south, east, west
+            # OSMnx expects: north, south, east, west
             return handle_osm_request(self._ox.features_from_bbox, place, tags)
-        
-        # Cas 3 : GeoDataFrame (on prend l'enveloppe extérieure)
+
+        # Case 3: GeoDataFrame (use the outer envelope)
         elif isinstance(place, gpd.GeoDataFrame):
             try:
-                # Utilise unary_union pour garder la forme exacte (sans convex_hull)
+                # Use unary_union to keep the exact shape (no convex_hull)
                 polygon = place.union_all()
                 return handle_osm_request(self._ox.features_from_polygon, polygon, tags)
             except Exception as e:
-                logger.info(f"Erreur lors du traitement du GeoDataFrame : {e}")
+                logger.error(f"Erreur lors du traitement du GeoDataFrame : {e}")
                 return gpd.GeoDataFrame()
-        
+
         else:
             raise ValueError(
                 "L'argument 'place' doit être un nom de lieu (str), "
                 "une bbox (tuple/list de 4 valeurs) ou un GeoDataFrame."
             )
-    
+
     def list_tags(self,category=None, show_examples=False):
         """
-        Retourne une liste de tags OSM courants, ou ceux d'une catégorie donnée.
-        
+        Returns a list of common OSM tags, or those of a given category.
+
         Args:
-            category (str): Catégorie de tags OSM ('building', 'highway', 'amenity', 'water', 
+            category (str): OSM tag category ('building', 'highway', 'amenity', 'water',
                         'landuse', 'natural', 'leisure', 'shop', 'tourism', 'transport', 'barrier')
-                        Si None, retourne toutes les catégories.
-            show_examples (bool): Si True, inclut des exemples d'utilisation pour chaque catégorie.
-            
+                        If None, returns every category.
+            show_examples (bool): If True, includes usage examples for each category.
+
         Returns:
-            dict ou list: Dictionnaire de catégories avec leurs tags, ou liste des tags de la catégorie demandée.
+            dict or list: Dictionary of categories with their tags, or list of tags for the requested category.
         """
-        
-        # Tags organisés par catégorie avec valeurs courantes
+
+        # Tags organized by category with common values
         tags = {
             "building": {
-                "description": "Bâtiments et structures",
+                "description": "Buildings and structures",
                 "tags": {
                     "building": ["yes", "house", "apartment", "commercial", "industrial", "school", "hospital", "church"],
-                    "building:levels": "Nombre d'étages (valeur numérique)",
+                    "building:levels": "Number of floors (numeric value)",
                     "building:use": ["residential", "commercial", "industrial", "retail", "office"],
                     "building:material": ["brick", "concrete", "wood", "stone", "glass"]
                 },
                 "example": {"building": "house", "building:levels": "2"}
             },
-            
+
             "highway": {
-                "description": "Routes, chemins et voies de circulation",
+                "description": "Roads, paths, and traffic ways",
                 "tags": {
                     "highway": ["motorway", "trunk", "primary", "secondary", "tertiary", "residential", "footway", "cycleway"],
-                    "lanes": "Nombre de voies (valeur numérique)",
+                    "lanes": "Number of lanes (numeric value)",
                     "surface": ["asphalt", "concrete", "paved", "unpaved", "gravel", "dirt"],
-                    "maxspeed": "Vitesse maximale (ex: 50, 90, 130)",
+                    "maxspeed": "Maximum speed (e.g.: 50, 90, 130)",
                     "oneway": ["yes", "no", "-1"]
                 },
                 "example": {"highway": "primary", "lanes": "2", "maxspeed": "50"}
             },
-            
+
             "amenity": {
-                "description": "Services publics et commodités",
+                "description": "Public services and amenities",
                 "tags": {
-                    "amenity": ["school", "hospital", "bank", "cafe", "restaurant", "police", "post_office", 
+                    "amenity": ["school", "hospital", "bank", "cafe", "restaurant", "police", "post_office",
                             "pharmacy", "fuel", "parking", "library", "fire_station", "place_of_worship"]
                 },
                 "example": {"amenity": "restaurant", "cuisine": "french"}
             },
-            
+
             "water": {
-                "description": "Cours d'eau et éléments hydrauliques",
+                "description": "Waterways and water features",
                 "tags": {
                     "waterway": ["river", "stream", "canal", "drain", "ditch"],
                     "natural": ["water", "bay", "coastline"],
@@ -136,58 +136,58 @@ class OSM :
                 },
                 "example": {"waterway": "river", "name": "Seine"}
             },
-            
+
             "landuse": {
-                "description": "Utilisation du sol et zonage",
+                "description": "Land use and zoning",
                 "tags": {
-                    "landuse": ["residential", "commercial", "industrial", "forest", "farmland", 
+                    "landuse": ["residential", "commercial", "industrial", "forest", "farmland",
                             "meadow", "cemetery", "military", "recreation_ground"],
                     "natural": ["forest", "grassland", "scrub", "heath"]
                 },
                 "example": {"landuse": "residential", "residential": "urban"}
             },
-            
+
             "natural": {
-                "description": "Éléments naturels",
+                "description": "Natural features",
                 "tags": {
                     "natural": ["tree", "peak", "water", "wood", "beach", "cliff", "hill", "valley", "cave"],
                     "tree": ["deciduous", "coniferous", "palm"],
                     "leaf_type": ["broadleaved", "needleleaved"],
-                    "ele": "Altitude en mètres (valeur numérique)"
+                    "ele": "Elevation in meters (numeric value)"
                 },
                 "example": {"natural": "peak", "name": "Mont Blanc", "ele": "4809"}
             },
-            
+
             "leisure": {
-                "description": "Loisirs et activités récréatives",
+                "description": "Leisure and recreational activities",
                 "tags": {
-                    "leisure": ["park", "pitch", "stadium", "swimming_pool", "playground", "golf_course", 
+                    "leisure": ["park", "pitch", "stadium", "swimming_pool", "playground", "golf_course",
                             "sports_centre", "garden", "marina", "beach_resort"]
                 },
                 "example": {"leisure": "park", "name": "Central Park"}
             },
-            
+
             "shop": {
-                "description": "Commerces et magasins",
+                "description": "Shops and stores",
                 "tags": {
-                    "shop": ["supermarket", "bakery", "butcher", "clothes", "shoes", "books", "pharmacy", 
+                    "shop": ["supermarket", "bakery", "butcher", "clothes", "shoes", "books", "pharmacy",
                             "electronics", "furniture", "car", "bicycle", "hairdresser"]
                 },
                 "example": {"shop": "bakery", "name": "La Boulangerie"}
             },
-            
+
             "tourism": {
-                "description": "Sites touristiques et hébergements",
+                "description": "Tourist sites and lodging",
                 "tags": {
-                    "tourism": ["hotel", "museum", "attraction", "viewpoint", "information", "camp_site", 
+                    "tourism": ["hotel", "museum", "attraction", "viewpoint", "information", "camp_site",
                             "guest_house", "hostel", "monument", "artwork"],
                     "historic": ["castle", "monument", "memorial", "archaeological_site"]
                 },
                 "example": {"tourism": "museum", "name": "Louvre"}
             },
-            
+
             "transport": {
-                "description": "Transport public et infrastructure",
+                "description": "Public transport and infrastructure",
                 "tags": {
                     "railway": ["rail", "subway", "tram", "light_rail", "station", "platform"],
                     "public_transport": ["platform", "station", "stop_position"],
@@ -196,9 +196,9 @@ class OSM :
                 },
                 "example": {"railway": "station", "name": "Gare du Nord"}
             },
-            
+
             "barrier": {
-                "description": "Barrières et obstacles",
+                "description": "Barriers and obstacles",
                 "tags": {
                     "barrier": ["fence", "wall", "hedge", "gate", "bollard", "kerb"],
                     "access": ["yes", "no", "private", "permissive"]
@@ -206,9 +206,9 @@ class OSM :
                 "example": {"barrier": "fence", "material": "wood"}
             }
         }
-        
+
         def format_category_info(cat_name, cat_data):
-            """Formate les informations d'une catégorie."""
+            """Formats the information for a category."""
             if show_examples:
                 return {
                     "description": cat_data["description"],
@@ -217,7 +217,7 @@ class OSM :
                 }
             else:
                 return list(cat_data["tags"].keys())
-        
+
         if category is None:
             if show_examples:
                 return {cat: format_category_info(cat, data) for cat, data in tags.items()}
@@ -234,23 +234,23 @@ class OSM :
 
     def search_tags(self, keyword: str) -> dict:
         """
-        Recherche des tags OSM contenant un mot-clé.
-        
+        Searches OSM tags containing a keyword.
+
         Args:
-            keyword (str): Mot-clé à rechercher dans les tags
-            
+            keyword (str): Keyword to search for among the tags
+
         Returns:
-            dict: Dictionnaire avec les catégories et tags correspondants
+            dict: Dictionary with matching categories and tags
         """
         all_tags: dict = self.list_tags(show_examples=True)  # type: ignore[assignment]
         results = {}
-        
+
         keyword = keyword.lower()
-        
+
         for category, data in all_tags.items():
             matching_tags = {}
-            
-            # Recherche dans les tags
+
+            # Search within the tags
             for tag_key, tag_values in data["tags"].items():
                 if keyword in tag_key.lower():
                     matching_tags[tag_key] = tag_values
@@ -260,23 +260,38 @@ class OSM :
                         matching_tags[tag_key] = matching_values
                 elif isinstance(tag_values, str) and keyword in tag_values.lower():
                     matching_tags[tag_key] = tag_values
-            
+
             if matching_tags:
                 results[category] = {
                     "description": data["description"],
                     "matching_tags": matching_tags,
                     "example": data.get("example", {})
                 }
-        
+
         return results
 
 
+    def sources(self) -> pd.DataFrame:
+        """
+        Returns a table of the data sources used by this class.
+
+        Returns:
+            pd.DataFrame: Columns 'name', 'url', 'description'.
+        """
+        return pd.DataFrame([
+            {
+                "name": "OpenStreetMap",
+                "url": "https://www.openstreetmap.org/",
+                "description": "Crowdsourced geographic data (buildings, roads, POIs...) via osmnx.",
+            },
+        ])
+
     def get_common_tag(self):
         """
-        Retourne des combinaisons de tags couramment utilisées ensemble.
-        
+        Returns commonly used combinations of tags.
+
         Returns:
-            dict: Dictionnaire avec des exemples de requêtes courantes
+            dict: Dictionary with common query examples
         """
         return {
             "restaurants": {"amenity": "restaurant"},

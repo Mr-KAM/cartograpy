@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def _import_optional_dependency(module_name: str, package_name: Optional[str] = None):
-    """Importe une dépendance optionnelle avec un message d'erreur explicite."""
+    """Imports an optional dependency with an explicit error message."""
     try:
         return import_module(module_name)
     except ImportError as e:

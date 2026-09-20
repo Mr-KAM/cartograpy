@@ -1,6 +1,6 @@
-"""cartograpy.processing — traitement de données vectorielles et raster.
+"""cartograpy.processing — vector and raster data processing.
 
-Réexporte la même surface publique qu'avant le découpage en sous-modules.
+Re-exports the same public surface as before the split into sub-modules.
 """
 
 from .vector import (

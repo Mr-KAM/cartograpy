@@ -1,9 +1,9 @@
-"""cartograpy.mapper.bivariate — cartes choroplèthes bivariées.
+"""cartograpy.mapper.bivariate — bivariate choropleth maps.
 
-Croise deux variables continues sur une même carte via une palette de
-couleurs n x n (méthode de Joshua Stevens :
+Crosses two continuous variables on a single map via an n x n color
+palette (Joshua Stevens' method:
 https://www.joshuastevens.net/cartography/make-a-bivariate-choropleth-map/),
-avec sa légende carrée dédiée.
+with its dedicated square legend.
 """
 
 import logging
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Palettes bivariées
+# Bivariate palettes
 # ---------------------------------------------------------------------------
 
 BIVARIATE_PALETTES = {
@@ -41,12 +41,12 @@ BIVARIATE_PALETTES = {
 
 
 def list_bivariate_palettes():
-    """Liste les noms des palettes bivariées intégrées."""
+    """Lists the names of the built-in bivariate palettes."""
     return list(BIVARIATE_PALETTES.keys())
 
 
 def _interpolate_palette_grid(grid, n):
-    """Interpole bilinéairement une grille de couleurs (m, m, 3) vers (n, n, 3)."""
+    """Bilinearly interpolates a color grid (m, m, 3) to (n, n, 3)."""
     m = grid.shape[0]
     if m == n:
         return grid
@@ -65,29 +65,29 @@ def _interpolate_palette_grid(grid, n):
 
 def get_bivariate_palette(palette="blue_pink", n_classes=3):
     """
-    Résout une palette bivariée en grille de couleurs RGB (n_classes, n_classes, 3).
+    Resolves a bivariate palette into an RGB color grid (n_classes, n_classes, 3).
 
-    Paramètres:
+    Parameters:
     -----------
     palette : str | list[str] | array-like
-        - str : nom d'une palette intégrée (voir `list_bivariate_palettes()`).
-        - list[str] : n_classes**2 couleurs hex, en ligne par ligne, depuis
-          (var1=bas, var2=bas) vers (var1=haut, var2=haut).
-        - array-like (n_classes, n_classes, 3) : grille de couleurs RGB déjà
-          construite (ex. sortie d'un appel précédent à cette fonction).
+        - str: name of a built-in palette (see `list_bivariate_palettes()`).
+        - list[str]: n_classes**2 hex colors, row by row, from
+          (var1=low, var2=low) to (var1=high, var2=high).
+        - array-like (n_classes, n_classes, 3): an already-built RGB color
+          grid (e.g. output of a previous call to this function).
     n_classes : int
-        Nombre de classes par variable (grille n_classes x n_classes). Pour
-        une palette intégrée d'une autre taille native, elle est interpolée
-        bilinéairement.
+        Number of classes per variable (n_classes x n_classes grid). For a
+        built-in palette with a different native size, it is bilinearly
+        interpolated.
 
-    Retourne:
+    Returns:
     ---------
-    numpy.ndarray : grille (n_classes, n_classes, 3), indexée [var2-1, var1-1].
+    numpy.ndarray: grid (n_classes, n_classes, 3), indexed [var2-1, var1-1].
 
-    Exemples:
+    Examples:
     ---------
         >>> get_bivariate_palette("blue_pink")
-        >>> get_bivariate_palette("blue_pink", n_classes=4)  # interpolée
+        >>> get_bivariate_palette("blue_pink", n_classes=4)  # interpolated
         >>> get_bivariate_palette(["#fff", "#aaa", "#000", "#f00"], n_classes=2)
     """
     if isinstance(palette, str):
@@ -122,11 +122,11 @@ def get_bivariate_palette(palette="blue_pink", n_classes=3):
 
 
 def _resolve_color_ramp(spec, n):
-    """Échantillonne `spec` en n couleurs RGB (n, 3), du bas (valeur faible)
-    au haut (valeur forte) de la variable.
+    """Samples `spec` into n RGB colors (n, 3), from the low end to the
+    high end of the variable.
 
-    `spec` accepte : nom de colormap matplotlib (str), Colormap, ou liste/
-    tuple d'au moins 2 couleurs (dégradé linéaire entre elles)."""
+    `spec` accepts: a matplotlib colormap name (str), a Colormap, or a
+    list/tuple of at least 2 colors (linear gradient between them)."""
     if isinstance(spec, mcolors.Colormap):
         cmap = spec
     elif isinstance(spec, str):
@@ -145,33 +145,33 @@ def _resolve_color_ramp(spec, n):
 
 def generate_bivariate_palette(var1_colors, var2_colors, n_classes=3, blend="multiply"):
     """
-    Génère une palette bivariée n x n en croisant deux rampes de couleurs
-    (une par variable), au lieu de choisir parmi les palettes intégrées ou
-    de fournir une grille complète à la main.
+    Generates an n x n bivariate palette by crossing two color ramps (one
+    per variable), instead of picking from the built-in palettes or
+    providing a full grid by hand.
 
-    Paramètres:
+    Parameters:
     -----------
     var1_colors, var2_colors : str | Colormap | list[str]
-        Rampe de couleurs pour chaque variable, du niveau bas au niveau
-        haut : nom d'un colormap matplotlib (ex. `"Blues"`), objet
-        `Colormap`, ou liste d'au moins 2 couleurs (dégradé linéaire entre
-        elles, ex. `["#f0f0f0", "#08519c"]`).
+        Color ramp for each variable, from low to high: a matplotlib
+        colormap name (e.g. `"Blues"`), a `Colormap` object, or a list of
+        at least 2 colors (linear gradient between them, e.g.
+        `["#f0f0f0", "#08519c"]`).
     n_classes : int
-        Taille de la grille n x n (nombre de classes par variable).
+        Size of the n x n grid (number of classes per variable).
     blend : str
-        Comment combiner les deux rampes à chaque cellule de la grille :
-        - `"multiply"` (défaut) : produit terme à terme — assombrit le
-          coin où les deux variables sont hautes, cohérent avec l'esprit
-          des palettes intégrées (`blue_pink`, etc.).
-        - `"mean"` : moyenne simple des deux couleurs.
-        - `"screen"` : `1 - (1-a)(1-b)` — éclaircit au lieu d'assombrir.
+        How to combine the two ramps at each grid cell:
+        - `"multiply"` (default): element-wise product — darkens the
+          corner where both variables are high, consistent with the
+          spirit of the built-in palettes (`blue_pink`, etc.).
+        - `"mean"`: simple average of the two colors.
+        - `"screen"`: `1 - (1-a)(1-b)` — lightens instead of darkening.
 
-    Retourne:
+    Returns:
     ---------
-    numpy.ndarray : grille (n_classes, n_classes, 3), utilisable directement
-    comme `palette=` dans `plot_bivariate_choropleth`/`get_bivariate_palette`.
+    numpy.ndarray: grid (n_classes, n_classes, 3), directly usable as
+    `palette=` in `plot_bivariate_choropleth`/`get_bivariate_palette`.
 
-    Exemples:
+    Examples:
     ---------
         >>> grid = generate_bivariate_palette("Blues", "Reds")
         >>> fig, ax, gdf_bi = plot_bivariate_choropleth(
@@ -182,8 +182,8 @@ def generate_bivariate_palette(var1_colors, var2_colors, n_classes=3, blend="mul
     ramp1 = _resolve_color_ramp(var1_colors, n_classes)
     ramp2 = _resolve_color_ramp(var2_colors, n_classes)
 
-    a = ramp1[np.newaxis, :, :]   # (1, n, 3) — varie selon var1 (colonnes)
-    b = ramp2[:, np.newaxis, :]   # (n, 1, 3) — varie selon var2 (lignes)
+    a = ramp1[np.newaxis, :, :]   # (1, n, 3) — varies along var1 (columns)
+    b = ramp2[:, np.newaxis, :]   # (n, 1, 3) — varies along var2 (rows)
     a, b = np.broadcast_to(a, (n_classes, n_classes, 3)), np.broadcast_to(b, (n_classes, n_classes, 3))
 
     if blend == "multiply":
@@ -200,18 +200,18 @@ def generate_bivariate_palette(var1_colors, var2_colors, n_classes=3, blend="mul
 
 def preview_bivariate_palette(palette="blue_pink", n_classes=3, ax=None):
     """
-    Aperçu rapide d'une palette bivariée sous forme de grille n x n.
+    Quick preview of a bivariate palette as an n x n grid.
 
-    Paramètres:
+    Parameters:
     -----------
     palette : str | list[str] | array-like
-        Voir `get_bivariate_palette`.
+        See `get_bivariate_palette`.
     n_classes : int
-        Nombre de classes par variable.
-    ax : matplotlib.axes.Axes, optionnel
-        Axe existant à réutiliser ; un nouveau est créé si None.
+        Number of classes per variable.
+    ax : matplotlib.axes.Axes, optional
+        Existing axes to reuse; a new one is created if None.
 
-    Exemples:
+    Examples:
     ---------
         >>> preview_bivariate_palette("teal_orange")
     """
@@ -232,25 +232,25 @@ def preview_bivariate_palette(palette="blue_pink", n_classes=3, ax=None):
 
 
 # ---------------------------------------------------------------------------
-# Classification et attribution des couleurs
+# Classification and color assignment
 # ---------------------------------------------------------------------------
 
 def classify_variable(series, n_classes=3, method="quantiles"):
     """
-    Classe une série continue en n_classes classes (1..n_classes).
+    Classifies a continuous series into n_classes classes (1..n_classes).
 
-    Paramètres:
+    Parameters:
     -----------
     series : pandas.Series
-        Valeurs à classer.
+        Values to classify.
     n_classes : int
-        Nombre de classes.
+        Number of classes.
     method : str
-        "quantiles" (effectifs égaux) ou "equal" (intervalles égaux).
+        "quantiles" (equal counts) or "equal" (equal intervals).
 
-    Retourne:
+    Returns:
     ---------
-    pandas.Series : classes 1..n_classes (float, NaN si non classable).
+    pandas.Series: classes 1..n_classes (float, NaN if not classifiable).
     """
     if method == "quantiles":
         try:
@@ -267,35 +267,36 @@ def classify_variable(series, n_classes=3, method="quantiles"):
 def assign_bivariate_classes(gdf, var1, var2, palette="blue_pink", n_classes=3,
                               method="quantiles"):
     """
-    Classe deux variables et associe une couleur bivariée à chaque entité.
+    Classifies two variables and assigns a bivariate color to each feature.
 
-    Paramètres:
+    Parameters:
     -----------
     gdf : geopandas.GeoDataFrame
-        Données source (n'est pas modifié, une copie est retournée).
+        Source data (not modified, a copy is returned).
     var1, var2 : str
-        Colonnes numériques à croiser. `var1` pilote l'axe horizontal de la
-        palette/légende, `var2` l'axe vertical.
+        Numeric columns to cross. `var1` drives the palette/legend's
+        horizontal axis, `var2` the vertical axis.
     palette : str | list[str] | array-like
-        Voir `get_bivariate_palette`.
+        See `get_bivariate_palette`.
     n_classes : int
-        Nombre de classes par variable.
+        Number of classes per variable.
     method : str
-        "quantiles" (défaut) ou "equal".
+        "quantiles" (default) or "equal".
 
-    Retourne:
+    Returns:
     ---------
-    tuple :
-        - geopandas.GeoDataFrame : copie de `gdf` avec les colonnes
-          `var1_class`, `var2_class`, `bi_class` (ex. "2-3") et `bi_color`.
-        - numpy.ndarray : grille de couleurs (n_classes, n_classes, 3).
+    tuple:
+        - geopandas.GeoDataFrame: copy of `gdf` with the `var1_class`,
+          `var2_class`, `bi_class` (e.g. "2-3") and `bi_color` columns
+          added.
+        - numpy.ndarray: color grid (n_classes, n_classes, 3).
 
     Raises:
     -------
-        ValueError : si `var1`/`var2` contiennent des valeurs non classables
-            (NaN, ou trop peu de valeurs distinctes).
+        ValueError: if `var1`/`var2` contain values that can't be
+            classified (NaN, or too few distinct values).
 
-    Exemples:
+    Examples:
     ---------
         >>> gdf_bi, grid = assign_bivariate_classes(
         ...     regions, "densite_pop", "revenu_median", palette="teal_orange"
@@ -323,7 +324,7 @@ def assign_bivariate_classes(gdf, var1, var2, palette="blue_pink", n_classes=3,
 
 
 # ---------------------------------------------------------------------------
-# Tracé : carte + légende
+# Plotting: map + legend
 # ---------------------------------------------------------------------------
 
 def plot_bivariate_legend(
@@ -332,31 +333,31 @@ def plot_bivariate_legend(
     position=None, fontsize=8, arrow_color="black",
 ):
     """
-    Dessine la légende carrée n x n d'une palette bivariée, avec des flèches
-    indiquant le sens croissant de chaque variable.
+    Draws the n x n square legend for a bivariate palette, with arrows
+    showing the increasing direction of each variable.
 
-    Paramètres:
+    Parameters:
     -----------
-    target : matplotlib.axes.Axes ou matplotlib.figure.Figure
-        Un axe existant (la légende y est dessinée directement), ou une
-        figure (un nouvel axe y est créé à `position`).
+    target : matplotlib.axes.Axes or matplotlib.figure.Figure
+        An existing axes (the legend is drawn directly on it), or a
+        figure (a new axes is created at `position`).
     color_grid : array-like (n, n, 3)
-        Grille de couleurs, ex. sortie de `assign_bivariate_classes`.
+        Color grid, e.g. output of `assign_bivariate_classes`.
     var1_label, var2_label : str
-        Étiquettes des axes horizontal (var1) et vertical (var2).
-    position : tuple (x, y, w, h), optionnel
-        Position/taille de la légende en coordonnées figure (0-1). Requis
-        si `target` est une Figure ; ignoré si `target` est déjà un Axes.
+        Labels for the horizontal (var1) and vertical (var2) axes.
+    position : tuple (x, y, w, h), optional
+        Legend position/size in figure coordinates (0-1). Required if
+        `target` is a Figure; ignored if `target` is already an Axes.
     fontsize : int
-        Taille des étiquettes.
+        Label size.
     arrow_color : str
-        Couleur des flèches d'axe.
+        Axis arrow color.
 
-    Retourne:
+    Returns:
     ---------
-    matplotlib.axes.Axes : l'axe de la légende.
+    matplotlib.axes.Axes: the legend's axes.
 
-    Exemples:
+    Examples:
     ---------
         >>> plot_bivariate_legend(fig, grid, "Densité", "Revenu",
         ...                       position=(0.72, 0.08, 0.22, 0.22))
@@ -413,58 +414,58 @@ def plot_bivariate_choropleth(
     **plot_kwargs,
 ):
     """
-    Crée une carte choroplèthe bivariée (deux variables croisées via une
-    palette n x n) avec sa légende.
+    Creates a bivariate choropleth map (two variables crossed via an n x n
+    palette) with its legend.
 
-    Paramètres:
+    Parameters:
     -----------
     gdf : geopandas.GeoDataFrame
-        Données source.
+        Source data.
     var1, var2 : str
-        Colonnes numériques à croiser (`var1` -> axe horizontal de la
-        légende, `var2` -> axe vertical).
+        Numeric columns to cross (`var1` -> legend's horizontal axis,
+        `var2` -> vertical axis).
     var1_label, var2_label : str
-        Étiquettes affichées sur la légende.
+        Labels shown on the legend.
     palette : str | list[str] | array-like
-        Palette bivariée — voir `get_bivariate_palette`.
+        Bivariate palette — see `get_bivariate_palette`.
     n_classes : int
-        Nombre de classes par variable (défaut 3).
+        Number of classes per variable (default 3).
     method : str
-        Méthode de classification : "quantiles" (défaut) ou "equal".
-    title : str, optionnel
-        Titre de la carte.
+        Classification method: "quantiles" (default) or "equal".
+    title : str, optional
+        Map title.
     figsize : tuple
-        Taille de la figure, ignorée si `ax_map` est fourni.
+        Figure size, ignored if `ax_map` is provided.
     map_position : tuple (x, y, w, h)
-        Position/taille de la carte en coordonnées figure (0-1), ignorée si
-        `ax_map` est fourni.
+        Map position/size in figure coordinates (0-1), ignored if
+        `ax_map` is provided.
     legend_position : tuple (x, y, w, h)
-        Position/taille de la légende en coordonnées figure (0-1) —
-        personnalisable pour éviter qu'elle recouvre la carte.
+        Legend position/size in figure coordinates (0-1) — customizable
+        to avoid it overlapping the map.
     edgecolor, linewidth :
-        Style des contours des entités.
+        Feature outline style.
     legend_fontsize : int
-        Taille des étiquettes de la légende.
-    ax_map : matplotlib.axes.Axes, optionnel
-        Axe existant sur lequel dessiner la carte (ex. `Map.ax` d'un objet
-        `cartograpy.mapper.Map` déjà configuré) au lieu d'en créer un
-        nouveau. Dans ce cas `figsize`/`map_position` sont ignorés.
-    transform : cartopy.crs.CRS, optionnel
-        Transform à passer à `GeoDataFrame.plot()` — utile si `ax_map` est
-        une GeoAxes cartopy avec une projection.
-    save_path : str, optionnel
-        Si fourni, sauvegarde la figure à ce chemin.
+        Legend label size.
+    ax_map : matplotlib.axes.Axes, optional
+        Existing axes to draw the map on (e.g. the `Map.ax` of an already
+        configured `cartograpy.mapper.Map` object) instead of creating a
+        new one. In that case `figsize`/`map_position` are ignored.
+    transform : cartopy.crs.CRS, optional
+        Transform passed to `GeoDataFrame.plot()` — useful if `ax_map` is
+        a cartopy GeoAxes with a projection.
+    save_path : str, optional
+        If provided, saves the figure to this path.
     dpi : int
-        Résolution de sauvegarde.
+        Save resolution.
     **plot_kwargs
-        Paramètres additionnels passés à `GeoDataFrame.plot()`.
+        Additional parameters passed to `GeoDataFrame.plot()`.
 
-    Retourne:
+    Returns:
     ---------
-    tuple : (figure, axe de la carte, GeoDataFrame enrichi des colonnes
-    bivariées — voir `assign_bivariate_classes`).
+    tuple: (figure, map axes, GeoDataFrame enriched with the bivariate
+    columns — see `assign_bivariate_classes`).
 
-    Exemples:
+    Examples:
     ---------
         >>> fig, ax, gdf_bi = plot_bivariate_choropleth(
         ...     regions, "densite_pop", "revenu_median",
@@ -499,6 +500,5 @@ def plot_bivariate_choropleth(
 
     if save_path:
         fig.savefig(save_path, dpi=dpi, bbox_inches="tight")
-        logger.info(f"✅ Carte bivariée sauvegardée : {save_path}")
 
     return fig, ax_map, gdf_bi

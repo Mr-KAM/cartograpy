@@ -1,6 +1,6 @@
-"""cartograpy.mapper — rendu cartographique (statique et interactif).
+"""cartograpy.mapper — cartographic rendering (static and interactive).
 
-Réexporte la même surface publique qu'avant le découpage en sous-modules.
+Re-exports the same public surface as before the split into sub-modules.
 """
 
 from .helpers import read_image, plot_choropleth

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pandas as pd
 import geopandas as gpd
 from typing import TYPE_CHECKING, Union, List, Optional, Tuple
 import math
@@ -22,7 +23,7 @@ try:
     from rasterio.windows import from_bounds
 except ImportError as e:
     raise ImportError(
-        """Cette classe nécessite rasterio. 
+        """Cette classe nécessite rasterio.
         Installez-le avec: pip install rasterio"""
     ) from e
 from ._types import BBox
@@ -32,23 +33,23 @@ logger = logging.getLogger(__name__)
 
 
 class DEMDownloadError(RuntimeError):
-    """Erreur de téléchargement/traitement DEM."""
+    """DEM download/processing error."""
     pass
 
 class DEM:
     """
-    Télécharge un MNT (Modèle Numérique de Terrain) SRTM (~30 m) sans clé API
-    via les tuiles Skadi hébergées sur AWS, puis mosaïque et découpe selon
-    une emprise (EPSG:4326).
+    Downloads an SRTM DEM (Digital Elevation Model, ~30 m) without an API
+    key via the Skadi tiles hosted on AWS, then mosaics and clips it to
+    an extent (EPSG:4326).
 
-    Paramètres
+    Parameters
     ----------
-    work_dir : répertoire de travail pour les fichiers intermédiaires.
-    timeout : délai maximal (en secondes) par requête HTTP.
-    keep_intermediate : si True, conserve les tuiles .hgt.gz et .tif.
-    output_dir : alias déprécié de work_dir (rétrocompatibilité).
+    work_dir : working directory for intermediate files.
+    timeout : maximum delay (in seconds) per HTTP request.
+    keep_intermediate : if True, keeps the .hgt.gz and .tif tiles.
+    output_dir : deprecated alias for work_dir (backward compatibility).
 
-    Exemple
+    Example
     -------
     >>> dem = DEM(work_dir="_dem_tiles", timeout=180)
     >>> chemin = dem.download(bbox=(-8, 4, -2, 11), out_tif="srtm_ci.tif")
@@ -80,10 +81,10 @@ class DEM:
         self.gz_dir.mkdir(parents=True, exist_ok=True)
         self.tif_dir.mkdir(parents=True, exist_ok=True)
 
-        # Endpoint public (pas de clé)
+        # Public endpoint (no key)
         self._base_url = "https://s3.amazonaws.com/elevation-tiles-prod/skadi"
 
-        # P3 : cache HTTP pour éviter re-téléchargements
+        # P3: HTTP cache to avoid re-downloads
         self._session = CachedSession(
             cache_name=str(self.work_dir / ".http_cache"),
             backend="filesystem",
@@ -106,10 +107,10 @@ class DEM:
         lonc = self._lon_code(lon_ll)
         return f"{self._base_url}/{latc}/{latc}{lonc}.hgt.gz"
 
-    # Taille attendue d'un fichier .hgt.gz SRTM 1-arc-seconde (3601×3601 × 2 octets)
-    _HGT_RAW_SIZE = 3601 * 3601 * 2  # 25 934 402 octets non compressés
+    # Expected size of a 1-arc-second SRTM .hgt.gz file (3601×3601 × 2 bytes)
+    _HGT_RAW_SIZE = 3601 * 3601 * 2  # 25,934,402 uncompressed bytes
     _MAX_RETRIES = 3
-    _RETRY_BACKOFF = 2  # secondes, sera doublé à chaque tentative
+    _RETRY_BACKOFF = 2  # seconds, doubled on each attempt
 
     @staticmethod
     def _validate_bbox(bbox: BBox) -> None:
@@ -123,20 +124,20 @@ class DEM:
 
     @staticmethod
     def _split_antimeridian_bbox(bbox: BBox) -> List[BBox]:
-        """Découpe une bbox traversant l'antiméridien en deux bbox valides."""
+        """Splits a bbox crossing the antimeridian into two valid bboxes."""
         west, south, east, north = bbox
         if west <= east:
             return [bbox]
-        # west > east → traverse l'antiméridien
+        # west > east → crosses the antimeridian
         return [
-            (west, south, 180.0, north),   # partie est
-            (-180.0, south, east, north),  # partie ouest
+            (west, south, 180.0, north),   # eastern part
+            (-180.0, south, east, north),  # western part
         ]
 
     @staticmethod
     def _iter_degree_tiles_for_bbox(bbox: BBox) -> List[Tuple[int, int]]:
         """
-        Retourne la liste des tuiles 1°x1° (lat_ll, lon_ll) couvrant la bbox.
+        Returns the list of 1°x1° tiles (lat_ll, lon_ll) covering the bbox.
         """
         west, south, east, north = bbox
 
@@ -152,11 +153,11 @@ class DEM:
         return tiles
 
     def _download_file(self, url: str, dst: Path, allow_missing: bool = False) -> bool:
-        """Télécharge un fichier avec retry et écriture atomique.
+        """Downloads a file with retry and atomic writing.
 
-        Retourne True si le fichier a été téléchargé (ou existait déjà),
-        False si la tuile n'existe pas sur le serveur (HTTP 403/404)
-        et que allow_missing=True.
+        Returns True if the file was downloaded (or already existed),
+        False if the tile doesn't exist on the server (HTTP 403/404)
+        and allow_missing=True.
         """
         dst.parent.mkdir(parents=True, exist_ok=True)
         if dst.exists() and dst.stat().st_size > 0:
@@ -173,7 +174,7 @@ class DEM:
         for attempt in range(1, self._MAX_RETRIES + 1):
             try:
                 with self._session.get(url, stream=True, timeout=self.timeout) as r:
-                    # R4 : tuile manquante (océan) → ne pas lever d'erreur
+                    # R4: missing tile (ocean) → don't raise an error
                     if r.status_code in (403, 404) and allow_missing:
                         return False
                     if not r.ok:
@@ -188,8 +189,8 @@ class DEM:
                 if not tmp_dst.exists() or tmp_dst.stat().st_size == 0:
                     raise DEMDownloadError(f"Téléchargement incomplet ou vide: {url}")
 
-                # R3 : vérification d'intégrité — le .hgt.gz décompressé
-                # doit contenir exactement _HGT_RAW_SIZE octets
+                # R3: integrity check — the decompressed .hgt.gz must
+                # contain exactly _HGT_RAW_SIZE bytes
                 try:
                     with gzip.open(tmp_dst, "rb") as gz:
                         raw = gz.read()
@@ -208,7 +209,7 @@ class DEM:
 
             except DEMDownloadError:
                 last_exc = None
-                # Ne pas retry les erreurs non récupérables
+                # Don't retry unrecoverable errors
                 try:
                     if tmp_dst.exists():
                         tmp_dst.unlink()
@@ -231,7 +232,7 @@ class DEM:
                 except OSError:
                     pass
 
-        # Toutes les tentatives épuisées
+        # All attempts exhausted
         try:
             if tmp_dst.exists():
                 tmp_dst.unlink()
@@ -243,7 +244,7 @@ class DEM:
 
     @staticmethod
     def _make_nodata_geotiff(tif_path: Path, lat_ll: int, lon_ll: int) -> None:
-        """Crée une tuile GeoTIFF remplie de nodata (tuile océan manquante)."""
+        """Creates a GeoTIFF tile filled with nodata (missing ocean tile)."""
         arr = np.full((3601, 3601), -32768, dtype=np.int16)
         res = 1.0 / 3600.0
         transform = Affine(
@@ -264,7 +265,7 @@ class DEM:
     @staticmethod
     def _hgt_gz_to_geotiff(hgt_gz: Path, tif_path: Path, lat_ll: int, lon_ll: int) -> None:
         """
-        Convertit une tuile .hgt.gz (3601×3601, int16 big-endian) en GeoTIFF (EPSG:4326).
+        Converts a .hgt.gz tile (3601×3601, big-endian int16) into a GeoTIFF (EPSG:4326).
         """
         with gzip.open(hgt_gz, "rb") as gz:
             raw = gz.read()
@@ -277,7 +278,7 @@ class DEM:
 
         arr = arr.reshape((3601, 3601)).astype(np.int16)
 
-        res = 1.0 / 3600.0  # 1 arc-second en degrés
+        res = 1.0 / 3600.0  # 1 arc-second in degrees
 
         transform = Affine(
             res, 0.0, lon_ll - res / 2.0,
@@ -325,7 +326,7 @@ class DEM:
     def _download_and_convert_tile(
         self, lat_ll: int, lon_ll: int
     ) -> Path:
-        """Télécharge et convertit une tuile unique. Retourne le chemin du GeoTIFF."""
+        """Downloads and converts a single tile. Returns the GeoTIFF path."""
         url = self._skadi_url(lat_ll, lon_ll)
         gz_path = self.gz_dir / f"{self._lat_code(lat_ll)}{self._lon_code(lon_ll)}.hgt.gz"
 
@@ -348,22 +349,22 @@ class DEM:
         max_workers: int = 4,
     ) -> Path:
         """
-        Télécharge un MNT SRTM (~30 m) pour une emprise (EPSG:4326),
-        sans clé API, via Skadi.
+        Downloads an SRTM DEM (~30 m) for an extent (EPSG:4326),
+        without an API key, via Skadi.
 
-        Paramètres
+        Parameters
         ----------
-        bbox : (west, south, east, north) ou GeoDataFrame.
-               Si west > east, la bbox est automatiquement découpée
-               en deux parties de part et d'autre de l'antiméridien.
-        out_tif : chemin du GeoTIFF final (mosaïque + clip bbox).
-        verbose : si True, affiche une barre de progression tqdm.
-        max_workers : nombre de threads pour le téléchargement parallèle.
-                      Mettre 1 pour un téléchargement séquentiel.
+        bbox : (west, south, east, north) or GeoDataFrame.
+               If west > east, the bbox is automatically split into
+               two parts on either side of the antimeridian.
+        out_tif : path to the final GeoTIFF (mosaic + bbox clip).
+        verbose : if True, shows a tqdm progress bar.
+        max_workers : number of threads for parallel downloading.
+                      Set to 1 for a sequential download.
 
-        Retour
+        Returns
         ------
-        Path vers le GeoTIFF final.
+        Path to the final GeoTIFF.
         """
         if isinstance(bbox, gpd.GeoDataFrame):
             bbox = tuple(bbox.total_bounds)  # type: ignore[assignment]
@@ -375,18 +376,18 @@ class DEM:
 
         out_tif = Path(out_tif)
 
-        # Collecter toutes les tuiles de toutes les sous-bbox
+        # Collect every tile from every sub-bbox
         all_tiles: List[Tuple[int, int]] = []
         for sb in sub_bboxes:
             all_tiles.extend(self._iter_degree_tiles_for_bbox(sb))
         all_tiles = list(dict.fromkeys(all_tiles))
 
-        # F5 + P1 : téléchargement parallèle
+        # F5 + P1: parallel download
         tile_tifs: List[Path] = []
         n_workers = max(1, min(max_workers, len(all_tiles)))
 
         if n_workers == 1:
-            # Séquentiel (rétrocompatibilité / debug)
+            # Sequential (backward compatibility / debug)
             iterator = (
                 tqdm(all_tiles, desc="Téléchargement DEM", unit="tuile")
                 if verbose else all_tiles
@@ -394,7 +395,7 @@ class DEM:
             for lat_ll, lon_ll in iterator:
                 tile_tifs.append(self._download_and_convert_tile(lat_ll, lon_ll))
         else:
-            # Parallèle
+            # Parallel
             futures = {}
             with ThreadPoolExecutor(max_workers=n_workers) as pool:
                 for lat_ll, lon_ll in all_tiles:
@@ -406,30 +407,30 @@ class DEM:
                     disable=not verbose,
                 )
                 for fut in as_completed(futures):
-                    fut.result()  # propage les exceptions
+                    fut.result()  # propagates exceptions
                     pbar.update(1)
                 pbar.close()
 
-            # Reconstituer l'ordre des tuiles (important pour la mosaïque)
+            # Reconstruct tile order (important for the mosaic)
             for lat_ll, lon_ll in all_tiles:
                 tif_path = self.tif_dir / f"{self._lat_code(lat_ll)}{self._lon_code(lon_ll)}.tif"
                 tile_tifs.append(tif_path)
 
-        # P2 : mosaïque — rio_merge accepte des datasets ouverts,
-        # on les ferme proprement via ExitStack
+        # P2: mosaic — rio_merge accepts open datasets,
+        # we close them properly via ExitStack
         with ExitStack() as stack:
             srcs = [stack.enter_context(rasterio.open(p)) for p in tile_tifs]
             mosaic, mosaic_transform = rio_merge(srcs)
-            mosaic = mosaic[0]  # bande 1
+            mosaic = mosaic[0]  # band 1
             crs = srcs[0].crs
 
-        # Découpage bbox — pour l'antiméridien on utilise la bbox englobante
-        # de la mosaïque (qui couvre déjà les bonnes tuiles) puis on clip
-        # normalement sur chaque sous-bbox.
+        # Bbox clipping — for the antimeridian we use the mosaic's
+        # bounding bbox (which already covers the right tiles), then
+        # clip normally on each sub-bbox.
         if len(sub_bboxes) == 1:
             clip_bounds = sub_bboxes[0]
         else:
-            # Antiméridien : on clip sur l'emprise totale de la mosaïque
+            # Antimeridian: clip on the mosaic's total extent
             clip_bounds = (
                 min(sb[0] for sb in sub_bboxes),
                 south,
@@ -475,22 +476,32 @@ class DEM:
         self._cleanup()
         return out_tif
 
+    def sources(self) -> pd.DataFrame:
+        """Returns a table of the data sources used by this class."""
+        return pd.DataFrame([
+            {
+                "name": "AWS Terrain Tiles (SRTM, Skadi format)",
+                "url": "https://registry.opendata.aws/terrain-tiles/",
+                "description": "SRTM digital elevation model ~30 m, no API key needed (used by download()).",
+            },
+        ])
+
     # -----------------------
-    # Analyse & visualisation
+    # Analysis & visualization
     # -----------------------
 
     @staticmethod
     def info(tif_path: Union[str, Path]) -> dict:
         """
-        Affiche et retourne les métadonnées d'un GeoTIFF MNT.
+        Displays and returns the metadata of a DEM GeoTIFF.
 
-        Paramètres
+        Parameters
         ----------
-        tif_path : chemin vers un GeoTIFF.
+        tif_path : path to a GeoTIFF.
 
-        Retour
+        Returns
         ------
-        dict avec clés : crs, transform, resolution, bounds, shape, nodata,
+        dict with keys: crs, transform, resolution, bounds, shape, nodata,
                          dtype, stats (min, max, mean, std).
         """
         tif_path = Path(tif_path)
@@ -513,7 +524,7 @@ class DEM:
                     "écart-type": float(arr.std()) if arr.count() > 0 else None,
                 },
             }
-        # Affichage lisible
+        # Readable display
         logger.info(f"── Informations MNT : {tif_path.name} ──")
         logger.info(f"  CRS           : {meta['crs']}")
         logger.info(f"  Dimensions    : {meta['dimensions'][0]} × {meta['dimensions'][1]} pixels")
@@ -535,20 +546,20 @@ class DEM:
         z_factor: float = 1.0,
     ) -> np.ndarray:
         """
-        Calcule un ombrage (hillshade) à partir d'un GeoTIFF MNT.
+        Computes a hillshade from a DEM GeoTIFF.
 
-        Paramètres
+        Parameters
         ----------
-        tif_path  : chemin vers le GeoTIFF source.
-        out_path  : si fourni, sauvegarde le hillshade en GeoTIFF.
-        azimuth   : azimut solaire en degrés (défaut 315 = nord-ouest).
-        altitude  : élévation solaire en degrés (défaut 45).
-        z_factor  : exagération verticale du relief (défaut 1 = réel ;
-                    2–3 accentue nettement les pentes).
+        tif_path  : path to the source GeoTIFF.
+        out_path  : if provided, saves the hillshade as a GeoTIFF.
+        azimuth   : solar azimuth in degrees (default 315 = northwest).
+        altitude  : solar elevation in degrees (default 45).
+        z_factor  : vertical exaggeration of the relief (default 1 = real;
+                    2-3 clearly emphasizes slopes).
 
-        Retour
+        Returns
         ------
-        ndarray (float32) du hillshade (0–255).
+        ndarray (float32) of the hillshade (0-255).
         """
         tif_path = Path(tif_path)
         with rasterio.open(tif_path) as ds:
@@ -557,14 +568,14 @@ class DEM:
             transform = ds.transform
             profile = ds.profile.copy()
 
-        # Masquer nodata
+        # Mask nodata
         if nodata is not None:
             elev[elev == nodata] = np.nan
 
-        # Résolution en mètres (approximation pour EPSG:4326)
+        # Resolution in meters (approximation for EPSG:4326)
         cellsize_x = abs(transform.a)
         cellsize_y = abs(transform.e)
-        # Conversion deg → m (approximation latitude moyenne)
+        # deg → m conversion (average-latitude approximation)
         lat_center = transform.f - (elev.shape[0] / 2) * cellsize_y
         m_per_deg = 111_320 * math.cos(math.radians(lat_center))
         dx = cellsize_x * m_per_deg
@@ -578,7 +589,7 @@ class DEM:
             np.roll(elev, 1, axis=0) - np.roll(elev, -1, axis=0)
         ) / (2 * dy)
 
-        # Angles solaires
+        # Solar angles
         az_rad = math.radians(360 - azimuth + 90)
         alt_rad = math.radians(altitude)
 
@@ -609,17 +620,17 @@ class DEM:
         degrees: bool = True,
     ) -> np.ndarray:
         """
-        Calcule la pente à partir d'un GeoTIFF MNT.
+        Computes the slope from a DEM GeoTIFF.
 
-        Paramètres
+        Parameters
         ----------
-        tif_path : chemin vers le GeoTIFF source.
-        out_path : si fourni, sauvegarde en GeoTIFF.
-        degrees  : si True, retourne en degrés ; sinon en radians.
+        tif_path : path to the source GeoTIFF.
+        out_path : if provided, saves it as a GeoTIFF.
+        degrees  : if True, returns degrees; otherwise radians.
 
-        Retour
+        Returns
         ------
-        ndarray (float32) de la pente.
+        ndarray (float32) of the slope.
         """
         tif_path = Path(tif_path)
         with rasterio.open(tif_path) as ds:
@@ -661,16 +672,16 @@ class DEM:
         out_path: Optional[Union[str, Path]] = None,
     ) -> np.ndarray:
         """
-        Calcule l'orientation (aspect) à partir d'un GeoTIFF MNT.
+        Computes the aspect (orientation) from a DEM GeoTIFF.
 
-        Paramètres
+        Parameters
         ----------
-        tif_path : chemin vers le GeoTIFF source.
-        out_path : si fourni, sauvegarde en GeoTIFF.
+        tif_path : path to the source GeoTIFF.
+        out_path : if provided, saves it as a GeoTIFF.
 
-        Retour
+        Returns
         ------
-        ndarray (float32) de l'orientation en degrés (0–360, 0 = nord, sens horaire).
+        ndarray (float32) of the orientation in degrees (0-360, 0 = north, clockwise).
         """
         tif_path = Path(tif_path)
         with rasterio.open(tif_path) as ds:
@@ -692,7 +703,7 @@ class DEM:
         dzdx = (np.roll(elev, -1, axis=1) - np.roll(elev, 1, axis=1)) / (2 * dx)
         dzdy = (np.roll(elev, 1, axis=0) - np.roll(elev, -1, axis=0)) / (2 * dy)
 
-        # Convention : 0 = nord, 90 = est, 180 = sud, 270 = ouest
+        # Convention: 0 = north, 90 = east, 180 = south, 270 = west
         asp = np.degrees(np.arctan2(-dzdx, dzdy))
         asp = np.where(asp < 0, asp + 360, asp)
         asp = np.nan_to_num(asp, nan=-1.0).astype(np.float32)
@@ -716,16 +727,16 @@ class DEM:
         colorbar: bool = True,
     ) -> None:
         """
-        Affiche un aperçu rapide du MNT avec ombrage superposé.
+        Displays a quick preview of the DEM with an overlaid hillshade.
 
-        Paramètres
+        Parameters
         ----------
-        tif_path        : chemin vers le GeoTIFF.
-        cmap            : palette de couleurs matplotlib (défaut 'terrain').
-        title           : titre optionnel de la figure.
-        figsize         : taille de la figure (largeur, hauteur).
-        hillshade_alpha : transparence de l'ombrage (0 = invisible, 1 = opaque).
-        colorbar        : si True, ajoute une barre de couleurs.
+        tif_path        : path to the GeoTIFF.
+        cmap            : matplotlib color palette (default 'terrain').
+        title           : optional figure title.
+        figsize         : figure size (width, height).
+        hillshade_alpha : hillshade transparency (0 = invisible, 1 = opaque).
+        colorbar        : if True, adds a colorbar.
         """
         import matplotlib.pyplot as plt
 
@@ -770,19 +781,19 @@ class DEM:
         resampling: str = "bilinear",
     ) -> Path:
         """
-        Reprojette un GeoTIFF MNT vers un autre CRS.
+        Reprojects a DEM GeoTIFF to another CRS.
 
-        Paramètres
+        Parameters
         ----------
-        tif_path   : chemin vers le GeoTIFF source (EPSG:4326).
-        out_path   : chemin du GeoTIFF reprojeté.
-        dst_crs    : CRS cible (défaut 'EPSG:3857').
-        resampling : méthode de rééchantillonnage ('nearest', 'bilinear',
-                     'cubic', 'lanczos'…). Défaut 'bilinear'.
+        tif_path   : path to the source GeoTIFF (EPSG:4326).
+        out_path   : path to the reprojected GeoTIFF.
+        dst_crs    : target CRS (default 'EPSG:3857').
+        resampling : resampling method ('nearest', 'bilinear',
+                     'cubic', 'lanczos'...). Default 'bilinear'.
 
-        Retour
+        Returns
         ------
-        Path vers le GeoTIFF reprojeté.
+        Path to the reprojected GeoTIFF.
         """
         resampling_methods = {
             "nearest": Resampling.nearest,

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def centroids(geodf):
     """
-    Crée un nouveau GeoDataFrame contenant les centroïdes.
+    Creates a new GeoDataFrame containing the centroids.
     """
     if "geometry" not in geodf.columns:
         raise ValueError("Aucune colonne 'geometry' trouvée.")
@@ -26,7 +26,7 @@ def centroids(geodf):
 
 def join(from_tuple, to_tuple, columns_to_join=None, how='left', suffixes=('_from', '_to')):
     """
-    Réalise une jointure entre deux GeoDataFrames sur des colonnes spécifiées.
+    Performs a join between two GeoDataFrames on specified columns.
     """
     source_gdf, source_column = from_tuple
     target_gdf, target_column = to_tuple
@@ -60,29 +60,29 @@ def join(from_tuple, to_tuple, columns_to_join=None, how='left', suffixes=('_fro
 
 def fusion(dataframes_list, reset_index=True, ignore_crs=True):
     """
-    Fusionne (concatène verticalement) une liste de DataFrames ou GeoDataFrames.
+    Merges (stacks vertically) a list of DataFrames or GeoDataFrames.
 
-    Paramètres
+    Parameters
     ----------
     dataframes_list : list
-        Liste de DataFrame ou GeoDataFrame à empiler.
+        List of DataFrame or GeoDataFrame to stack.
     reset_index : bool
-        Si True, réinitialise l'index du DataFrame fusionné.
+        If True, resets the index of the merged DataFrame.
     ignore_crs : bool
-        Si True, ignore les éventuels conflits de CRS (pour GeoDataFrame).
-        Si False, lève une erreur si les CRS sont différents.
+        If True, ignores any CRS conflicts (for GeoDataFrame).
+        If False, raises an error if the CRSs differ.
 
-    Retourne
+    Returns
     --------
-    DataFrame ou GeoDataFrame fusionné.
+    Merged DataFrame or GeoDataFrame.
     """
-    # Gestion du CRS pour GeoDataFrames
+    # CRS handling for GeoDataFrames
     is_geo = any(isinstance(df, gpd.GeoDataFrame) for df in dataframes_list)
     if is_geo:
         crs_set = set(str(df.crs) for df in dataframes_list if hasattr(df, 'crs'))
         if not ignore_crs and len(crs_set) > 1:
             raise ValueError(f"Conflit de CRS détecté : {crs_set}")
-        # On force le CRS du premier GeoDataFrame pour le résultat
+        # Force the first GeoDataFrame's CRS for the result
         result = gpd.GeoDataFrame(pd.concat(dataframes_list, ignore_index=True), crs=dataframes_list[0].crs)
     else:
         result = pd.concat(dataframes_list, ignore_index=True)
@@ -93,25 +93,25 @@ def fusion(dataframes_list, reset_index=True, ignore_crs=True):
 
 def add_column(df, column_name, expression, globals_dict=None):
     """
-    Ajoute une nouvelle colonne à un DataFrame/GeoDataFrame selon une expression.
+    Adds a new column to a DataFrame/GeoDataFrame based on an expression.
 
-    Paramètres
+    Parameters
     ----------
-    df : DataFrame ou GeoDataFrame
-        Tableau de données d'entrée.
+    df : DataFrame or GeoDataFrame
+        Input data table.
     column_name : str
-        Nom de la nouvelle colonne à créer.
-    expression : callable ou str
-        - callable : fonction prenant une ligne (row) et retournant la valeur.
-          Exemple : lambda row: row['col1'] + row['col2']
-        - str : Expression pandas passée à df.eval().
-          Exemple : "col1 + col2"
+        Name of the new column to create.
+    expression : callable or str
+        - callable: function taking a row and returning the value.
+          Example: lambda row: row['col1'] + row['col2']
+        - str: pandas expression passed to df.eval().
+          Example: "col1 + col2"
     globals_dict : dict, optional
-        Dictionnaire de variables supplémentaires accessibles dans l'expression.
+        Dictionary of extra variables accessible in the expression.
 
-    Retourne
+    Returns
     -------
-    Le DataFrame/GeoDataFrame modifié (avec la nouvelle colonne).
+    The modified DataFrame/GeoDataFrame (with the new column).
     """
     if callable(expression):
         df[column_name] = df.apply(expression, axis=1)
@@ -124,51 +124,50 @@ def add_column(df, column_name, expression, globals_dict=None):
         raise TypeError("expression doit être un callable ou une chaîne (str)")
     return df
 
-def split_multipolygon(multipolygon: Union[MultiPolygon, str,gpd.GeoDataFrame], 
+def split_multipolygon(multipolygon: Union[MultiPolygon, str,gpd.GeoDataFrame],
                          return_type: str = 'geodataframe') -> Union[List[Polygon], gpd.GeoDataFrame]:
     """
-    Sépare un MultiPolygon en polygones individuels.
-    
+    Splits a MultiPolygon into individual polygons.
+
     Args:
-        multipolygon (MultiPolygon ou str): Le MultiPolygon à séparer ou sa représentation WKT
-        return_type (str): Format de retour ('list' ou 'geodataframe')
-    
+        multipolygon (MultiPolygon or str): The MultiPolygon to split, or its WKT representation
+        return_type (str): Return format ('list' or 'geodataframe')
+
     Returns:
-        List[Polygon] ou GeoDataFrame: Liste des polygones ou GeoDataFrame avec les polygones séparés
-    
+        List[Polygon] or GeoDataFrame: List of polygons or GeoDataFrame with the split polygons
+
     Examples:
-        # Avec objet MultiPolygon
+        # With a MultiPolygon object
         polygons = separate_multipolygon(multipolygon_obj)
-        
-        # Avec WKT string
+
+        # With a WKT string
         polygons = separate_multipolygon(wkt_string)
-        
-        # Retour en GeoDataFrame
+
+        # Return as GeoDataFrame
         gdf = separate_multipolygon(multipolygon_obj, return_type='geodataframe')
     """
     try:
-        # Convertir WKT en MultiPolygon si nécessaire
+        # Convert WKT to MultiPolygon if needed
         if isinstance(multipolygon, str):
             try:
                 multipolygon = wkt.loads(multipolygon)
             except Exception as e:
                 raise ValueError(f"Erreur lors du parsing WKT: {e}")
-        
-        # Vérifier que c'est bien un MultiPolygon
+
+        # Check that it is indeed a MultiPolygon
         if not isinstance(multipolygon, MultiPolygon):
             if isinstance(multipolygon, Polygon):
-                logger.info("Warning: L'objet fourni est déjà un Polygon simple")
                 return [multipolygon] if return_type == 'list' else gpd.GeoDataFrame({'geometry': [multipolygon]})
             else:
                 raise TypeError("L'objet fourni n'est pas un MultiPolygon ou Polygon")
-        
-        # Extraire les polygones individuels
+
+        # Extract the individual polygons
         polygons = list(multipolygon.geoms)
-        
+
         if return_type == 'list':
             return polygons
         elif return_type == 'geodataframe':
-            # Créer un GeoDataFrame avec les polygones séparés
+            # Build a GeoDataFrame with the split polygons
             gdf = gpd.GeoDataFrame({
                 'polygon_id': range(len(polygons)),
                 'area': [poly.area for poly in polygons],
@@ -180,33 +179,33 @@ def split_multipolygon(multipolygon: Union[MultiPolygon, str,gpd.GeoDataFrame],
     except Exception:
         return split_multipolygon_from_gdf(multipolygon)
 
-def split_multipolygon_from_gdf(gdf: gpd.GeoDataFrame, 
+def split_multipolygon_from_gdf(gdf: gpd.GeoDataFrame,
                                           multipolygon_column: str = 'geometry',
                                           preserve_attributes: bool = True) -> gpd.GeoDataFrame:
     """
-    Sépare tous les MultiPolygons d'un GeoDataFrame en polygones individuels.
-    
+    Splits every MultiPolygon of a GeoDataFrame into individual polygons.
+
     Args:
-        gdf (GeoDataFrame): GeoDataFrame contenant des MultiPolygons
-        multipolygon_column (str): Nom de la colonne contenant les géométries
-        preserve_attributes (bool): Si True, préserve les attributs pour chaque polygone
-    
+        gdf (GeoDataFrame): GeoDataFrame containing MultiPolygons
+        multipolygon_column (str): Name of the column containing the geometries
+        preserve_attributes (bool): If True, preserves the attributes for each polygon
+
     Returns:
-        GeoDataFrame: Nouveau GeoDataFrame avec les polygones séparés
-    
+        GeoDataFrame: New GeoDataFrame with the split polygons
+
     Example:
         gdf_separated = split_multipolygon_from_geodataframe(gdf)
     """
-    
+
     new_rows = []
-    
+
     for idx, row in gdf.iterrows():
         geom = row[multipolygon_column]
-        
+
         if isinstance(geom, MultiPolygon):
-            # Séparer le MultiPolygon
+            # Split the MultiPolygon
             polygons = list(geom.geoms)
-            
+
             for i, poly in enumerate(polygons):
                 if preserve_attributes:
                     new_row = row.copy()
@@ -221,7 +220,7 @@ def split_multipolygon_from_gdf(gdf: gpd.GeoDataFrame,
                         'polygon_part': i
                     })
         else:
-            # Conserver les Polygons simples
+            # Keep simple Polygons as-is
             if preserve_attributes:
                 new_row = row.copy()
                 new_row['original_index'] = idx
@@ -233,28 +232,28 @@ def split_multipolygon_from_gdf(gdf: gpd.GeoDataFrame,
                     'original_index': idx,
                     'polygon_part': 0
                 })
-    
+
     return gpd.GeoDataFrame(new_rows)
 
 def get_multipolygon_info(multipolygon: Union[MultiPolygon, str]) -> dict:
     """
-    Obtient des informations sur un MultiPolygon.
-    
+    Gets information about a MultiPolygon.
+
     Args:
-        multipolygon (MultiPolygon ou str): Le MultiPolygon à analyser
-    
+        multipolygon (MultiPolygon or str): The MultiPolygon to analyze
+
     Returns:
-        dict: Informations sur le MultiPolygon
-    
+        dict: Information about the MultiPolygon
+
     Example:
         info = get_multipolygon_info(multipolygon_obj)
         logger.info(f"Nombre de polygones: {info['num_polygons']}")
     """
-    
-    # Convertir WKT si nécessaire
+
+    # Convert WKT if needed
     if isinstance(multipolygon, str):
         multipolygon = wkt.loads(multipolygon)
-    
+
     if not isinstance(multipolygon, MultiPolygon):
         if isinstance(multipolygon, Polygon):
             return {
@@ -266,10 +265,10 @@ def get_multipolygon_info(multipolygon: Union[MultiPolygon, str]) -> dict:
             }
         else:
             raise TypeError("L'objet fourni n'est pas un MultiPolygon ou Polygon")
-    
+
     polygons = list(multipolygon.geoms)
     areas = [poly.area for poly in polygons]
-    
+
     return {
         'type': 'MultiPolygon',
         'num_polygons': len(polygons),
@@ -290,143 +289,143 @@ def get_geometry_types(df: gpd.GeoDataFrame) -> str:
 
 def clip_gdf_by_mask(gdf_source, gdf_emprise, buffer_distance=0, crs="EPSG:4326"):
     """
-    Découpe une GeoDataFrame selon l'emprise d'une seconde GeoDataFrame.
-    
+    Clips a GeoDataFrame to the extent of a second GeoDataFrame.
+
     Parameters:
     -----------
     gdf_source : geopandas.GeoDataFrame
-        La GeoDataFrame à découper
+        The GeoDataFrame to clip
     gdf_emprise : geopandas.GeoDataFrame
-        La GeoDataFrame servant de masque de découpage
+        The GeoDataFrame used as the clipping mask
     buffer_distance : float, optional
-        Distance de buffer à appliquer à l'emprise (défaut: 0)
+        Buffer distance to apply to the extent (default: 0)
     crs : str, optional
-        CRS par défaut à utiliser si les GeoDataFrames n'en ont pas (défaut: "EPSG:4326")
-        
+        Default CRS to use if the GeoDataFrames don't have one (default: "EPSG:4326")
+
     Returns:
     --------
     geopandas.GeoDataFrame
-        La GeoDataFrame découpée selon l'emprise
-        
+        The GeoDataFrame clipped to the extent
+
     Raises:
     -------
     ValueError
-        Si les GeoDataFrames ont des CRS différents
+        If the GeoDataFrames have different CRSs
     """
-    
-    # Vérification des paramètres
+
+    # Parameter checks
     if not isinstance(gdf_source, gpd.GeoDataFrame):
         raise TypeError("gdf_source doit être une GeoDataFrame")
-    
+
     if not isinstance(gdf_emprise, gpd.GeoDataFrame):
         raise TypeError("gdf_emprise doit être une GeoDataFrame")
-    
+
     if gdf_source.empty:
         warnings.warn("La GeoDataFrame source est vide")
         return gdf_source.copy()
-    
+
     if gdf_emprise.empty:
         warnings.warn("La GeoDataFrame d'emprise est vide")
         return gpd.GeoDataFrame(columns=gdf_source.columns, crs=gdf_source.crs)
-    
-    # Vérification et harmonisation des CRS
-    # Attribution d'un CRS par défaut si manquant
+
+    # Checking and harmonizing the CRSs
+    # Assign a default CRS if missing
     if gdf_source.crs is None:
         warnings.warn(f"gdf_source n'a pas de CRS défini. Attribution du CRS par défaut: {crs}")
         gdf_source = gdf_source.set_crs(crs)
-    
+
     if gdf_emprise.crs is None:
         warnings.warn(f"gdf_emprise n'a pas de CRS défini. Attribution du CRS par défaut: {crs}")
         gdf_emprise = gdf_emprise.set_crs(crs)
-    
-    # Reprojeter gdf_emprise dans le CRS de gdf_source si différent
+
+    # Reproject gdf_emprise into gdf_source's CRS if different
     if gdf_source.crs != gdf_emprise.crs:
         gdf_emprise = gdf_emprise.to_crs(gdf_source.crs)
-    
-    # Création de l'emprise totale (union de toutes les géométries)
+
+    # Build the total extent (union of every geometry)
     emprise_totale = gdf_emprise.geometry.union_all()
-    
-    # Application d'un buffer si spécifié
+
+    # Apply a buffer if specified
     if buffer_distance != 0:
         emprise_totale = emprise_totale.buffer(buffer_distance)
-    
-    # Sélection des géométries qui intersectent l'emprise
+
+    # Select the geometries that intersect the extent
     mask = gdf_source.geometry.intersects(emprise_totale)
     gdf_intersect = gdf_source[mask].copy()
-    
+
     if gdf_intersect.empty:
         warnings.warn("Aucune géométrie ne intersecte avec l'emprise")
         return gpd.GeoDataFrame(columns=gdf_source.columns, crs=gdf_source.crs)
-    
-    # Découpage des géométries
+
+    # Clip the geometries
     try:
         gdf_intersect.loc[:, 'geometry'] = gdf_intersect.geometry.intersection(emprise_totale)
-        
-        # Suppression des géométries vides après découpage
+
+        # Remove empty geometries after clipping
         gdf_result = gdf_intersect[~gdf_intersect.geometry.is_empty].copy()
-        
+
         return gdf_result
-        
+
     except Exception as e:
         raise RuntimeError(f"Erreur lors du découpage : {str(e)}")
 
 def clip_gdf_by_bbox(gdf_source, gdf_emprise, crs="EPSG:4326"):
     """
-    Version alternative qui utilise la bounding box de l'emprise.
-    Plus rapide mais moins précise que le découpage géométrique.
-    
+    Alternative version that uses the extent's bounding box.
+    Faster but less precise than geometric clipping.
+
     Parameters:
     -----------
     gdf_source : geopandas.GeoDataFrame
-        La GeoDataFrame à découper
+        The GeoDataFrame to clip
     gdf_emprise : geopandas.GeoDataFrame
-        La GeoDataFrame servant de référence pour la bbox
+        The GeoDataFrame used as the bbox reference
     crs : str, optional
-        CRS par défaut à utiliser si les GeoDataFrames n'en ont pas (défaut: "EPSG:4326")
-        
+        Default CRS to use if the GeoDataFrames don't have one (default: "EPSG:4326")
+
     Returns:
     --------
     geopandas.GeoDataFrame
-        La GeoDataFrame découpée selon la bounding box
+        The GeoDataFrame clipped to the bounding box
     """
-    
-    # Harmonisation des CRS
-    # Attribution d'un CRS par défaut si manquant
+
+    # Harmonizing the CRSs
+    # Assign a default CRS if missing
     if gdf_source.crs is None:
         gdf_source = gdf_source.set_crs(crs)
-        
+
     if gdf_emprise.crs is None:
         gdf_emprise = gdf_emprise.set_crs(crs)
-    
-    # Reprojeter gdf_emprise dans le CRS de gdf_source si différent
+
+    # Reproject gdf_emprise into gdf_source's CRS if different
     if gdf_source.crs != gdf_emprise.crs:
         gdf_emprise = gdf_emprise.to_crs(gdf_source.crs)
-    
-    # Récupération des bounds
+
+    # Get the bounds
     bounds = gdf_emprise.total_bounds  # [minx, miny, maxx, maxy]
-    
-    # Création d'un polygon de la bbox
+
+    # Build a bbox polygon
     bbox_polygon = box(bounds[0], bounds[1], bounds[2], bounds[3])
-    
-    # Sélection et découpage
+
+    # Selection and clipping
     mask = gdf_source.geometry.intersects(bbox_polygon)
     gdf_clipped = gdf_source[mask].copy()
-    
+
     if not gdf_clipped.empty:
         gdf_clipped.loc[:, 'geometry'] = gdf_clipped.geometry.intersection(bbox_polygon)
         gdf_clipped = gdf_clipped[~gdf_clipped.geometry.is_empty].copy()
-    
+
     return gdf_clipped
 
 class VectorTools:
     """
-    Boîte à outils pour le traitement de données vectorielles.
+    Toolbox for vector data processing.
 
-    Encapsule un GeoDataFrame et fournit des méthodes chaînables pour :
-    1. Prétraitements (validation, CRS, nettoyage, filtrage, découpage, topologie)
-    2. Traitements / analyses (géométrie, mesures, superposition, jointures,
-       agrégation, proximité, réseau, densité, topologie)
-    3. Post-traitements (reclassement, généralisation, export)
+    Wraps a GeoDataFrame and provides chainable methods for:
+    1. Preprocessing (validation, CRS, cleanup, filtering, clipping, topology)
+    2. Processing / analysis (geometry, measurements, overlay, joins,
+       aggregation, proximity, network, density, topology)
+    3. Post-processing (reclassification, generalization, export)
 
     Usage::
 
@@ -448,17 +447,17 @@ class VectorTools:
         return VectorTools(gdf)
 
     # ────────────────────────────────────────────────────────────────
-    #  1. PRÉTRAITEMENTS
+    #  1. PREPROCESSING
     # ────────────────────────────────────────────────────────────────
 
-    # --- Contrôle et validation ----------------------------------- #
+    # --- Checks and validation -------------------------------------- #
 
     def validity(self) -> pd.Series:
-        """Retourne une Series indiquant la validité de chaque géométrie."""
+        """Returns a Series indicating the validity of each geometry."""
         return self.gdf.geometry.is_valid
 
     def fix_invalid(self):
-        """Corrige les géométries invalides (make_valid)."""
+        """Fixes invalid geometries (make_valid)."""
         gdf = self.gdf.copy()
         invalid = ~gdf.geometry.is_valid
         if invalid.any():
@@ -468,65 +467,65 @@ class VectorTools:
         return self._wrap(gdf)
 
     def remove_empty(self):
-        """Supprime les géométries vides ou nulles."""
+        """Removes empty or null geometries."""
         gdf = self.gdf[
             ~(self.gdf.geometry.is_empty | self.gdf.geometry.isna())
         ].copy()
         return self._wrap(gdf)
 
     def duplicates(self) -> gpd.GeoDataFrame:
-        """Retourne les entités dupliquées."""
+        """Returns the duplicated features."""
         return self.gdf[self.gdf.duplicated(keep=False)]
 
     def drop_duplicates(self, subset=None):
-        """Supprime les doublons."""
+        """Removes duplicates."""
         gdf = self.gdf.drop_duplicates(subset=subset).copy()
         return self._wrap(gdf)
 
-    # --- Harmonisation des systèmes de coordonnées ---------------- #
+    # --- Coordinate system harmonization ------------------------------ #
 
     def get_crs(self):
-        """Retourne le CRS du GeoDataFrame."""
+        """Returns the GeoDataFrame's CRS."""
         return self.gdf.crs
 
     def set_crs(self, crs, allow_override=False):
-        """Attribue un CRS au GeoDataFrame."""
+        """Assigns a CRS to the GeoDataFrame."""
         gdf = self.gdf.set_crs(crs, allow_override=allow_override)
         return self._wrap(gdf)
 
     def reproject_layer(self, target_crs):
-        """Re-projette la couche vers un autre CRS."""
+        """Reprojects the layer to another CRS."""
         gdf = self.gdf.to_crs(target_crs)
         return self._wrap(gdf)
 
-    # --- Nettoyage attributaire ----------------------------------- #
+    # --- Attribute cleanup ---------------------------------------------- #
 
     def rename_fields(self, mapping: dict):
-        """Renomme des colonnes selon un dictionnaire {ancien: nouveau}."""
+        """Renames columns according to a {old: new} dictionary."""
         gdf = self.gdf.rename(columns=mapping)
         return self._wrap(gdf)
 
     def select_fields(self, columns: list):
-        """Ne conserve que les colonnes listées (+ géométrie)."""
+        """Keeps only the listed columns (+ geometry)."""
         geom_col = self.gdf.geometry.name
         cols = list(dict.fromkeys([geom_col] + columns))
         gdf = self.gdf[cols].copy()
         return self._wrap(gdf)
 
     def drop_fields(self, columns: list):
-        """Supprime les colonnes listées."""
+        """Removes the listed columns."""
         gdf = self.gdf.drop(columns=columns, errors="ignore")
         return self._wrap(gdf)
 
     def cast_field_types(self, type_mapping: dict):
-        """Convertit les types de colonnes : {"col": float, ...}."""
+        """Converts column types: {"col": float, ...}."""
         gdf = self.gdf.copy()
         for col, dtype in type_mapping.items():
             gdf[col] = gdf[col].astype(dtype)
         return self._wrap(gdf)
 
     def fill_missing_values(self, value=None, method=None, columns=None):
-        """Remplit les valeurs manquantes (value, 'ffill' ou 'bfill')."""
+        """Fills missing values (value, 'ffill', or 'bfill')."""
         gdf = self.gdf.copy()
         cols = columns if columns else [
             c for c in gdf.columns if c != gdf.geometry.name
@@ -540,7 +539,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def normalize_text_fields(self, columns=None):
-        """Normalise les champs texte (strip, Title Case)."""
+        """Normalizes text fields (strip, Title Case)."""
         gdf = self.gdf.copy()
         text_cols = columns or gdf.select_dtypes(include="object").columns.tolist()
         for col in text_cols:
@@ -550,22 +549,22 @@ class VectorTools:
                 )
         return self._wrap(gdf)
 
-    # --- Filtrage et sélection ------------------------------------ #
+    # --- Filtering and selection ----------------------------------------- #
 
     def filter_by_attribute(self, column, values):
-        """Filtre par valeurs d'attribut."""
+        """Filters by attribute values."""
         if not isinstance(values, (list, tuple)):
             values = [values]
         gdf = self.gdf[self.gdf[column].isin(values)].copy()
         return self._wrap(gdf)
 
     def filter_by_expression(self, expression: str):
-        """Filtre via une expression pandas (df.query)."""
+        """Filters via a pandas expression (df.query)."""
         gdf = self.gdf.query(expression).copy()
         return self._wrap(gdf)
 
     def filter_by_location(self, mask_gdf, predicate="intersects"):
-        """Conserve les entités qui satisfont le prédicat spatial avec le masque."""
+        """Keeps the features that satisfy the spatial predicate against the mask."""
         if isinstance(mask_gdf, VectorTools):
             mask_gdf = mask_gdf.gdf
         mask_geom = mask_gdf[[mask_gdf.geometry.name]].copy()
@@ -574,50 +573,50 @@ class VectorTools:
         return self._wrap(gdf)
 
     def select_by_bbox(self, bbox):
-        """Sélectionne les entités dans une bbox (xmin, ymin, xmax, ymax)."""
+        """Selects the features within a bbox (xmin, ymin, xmax, ymax)."""
         xmin, ymin, xmax, ymax = bbox
         gdf = self.gdf.cx[xmin:xmax, ymin:ymax].copy()
         return self._wrap(gdf)
 
-    # --- Découpage et emprise ------------------------------------- #
+    # --- Clipping and extent --------------------------------------------- #
 
     def clip(self, mask):
-        """Découpe le GeoDataFrame par un masque (GeoDataFrame ou géométrie)."""
+        """Clips the GeoDataFrame by a mask (GeoDataFrame or geometry)."""
         if isinstance(mask, VectorTools):
             mask = mask.gdf
         gdf = gpd.clip(self.gdf, mask)
         return self._wrap(gdf)
 
     def extract_by_mask(self, mask):
-        """Alias de clip()."""
+        """Alias for clip()."""
         return self.clip(mask)
 
     def crop_to_extent(self, bbox):
-        """Découpe selon une bbox (xmin, ymin, xmax, ymax)."""
+        """Clips by a bbox (xmin, ymin, xmax, ymax)."""
         xmin, ymin, xmax, ymax = bbox
         clip_geom = gpd.GeoDataFrame(
             geometry=[box(xmin, ymin, xmax, ymax)], crs=self.gdf.crs
         )
         return self.clip(clip_geom)
 
-    # --- Structuration géométrique -------------------------------- #
+    # --- Geometric structuring -------------------------------------------- #
 
     def multipart_to_singlepart(self):
-        """Éclate les multi-géométries en géométries simples."""
+        """Explodes multi-geometries into simple geometries."""
         gdf = self.gdf.explode(index_parts=False).reset_index(drop=True)
         return self._wrap(gdf)
 
     def singlepart_to_multipart(self, by):
-        """Regroupe les géométries par champ en multi-géométries (dissolve)."""
+        """Groups geometries by field into multi-geometries (dissolve)."""
         gdf = self.gdf.dissolve(by=by).reset_index()
         return self._wrap(gdf)
 
     def explode_geometries(self):
-        """Alias de multipart_to_singlepart()."""
+        """Alias for multipart_to_singlepart()."""
         return self.multipart_to_singlepart()
 
     def convert_geometry_type(self, target_type: str):
-        """Convertit vers 'point', 'line' ou 'polygon'."""
+        """Converts to 'point', 'line', or 'polygon'."""
         gdf = self.gdf.copy()
         t = target_type.lower()
         if t == "point":
@@ -633,7 +632,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def line_to_polygon(self):
-        """Convertit des lignes fermées en polygones."""
+        """Converts closed lines into polygons."""
         gdf = self.gdf.copy()
         polys = []
         for geom in gdf.geometry:
@@ -643,15 +642,15 @@ class VectorTools:
         return self._wrap(gdf)
 
     def polygon_to_line(self):
-        """Convertit des polygones en lignes (contour)."""
+        """Converts polygons into lines (outline)."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.boundary
         return self._wrap(gdf)
 
-    # --- Nettoyage topologique ------------------------------------ #
+    # --- Topological cleanup ---------------------------------------------- #
 
     def snap_geometries(self, tolerance: float):
-        """Accroche les géométries entre elles selon une tolérance."""
+        """Snaps geometries to each other within a tolerance."""
         gdf = self.gdf.copy()
         union_geom = gdf.geometry.union_all()
         gdf["geometry"] = gdf.geometry.apply(
@@ -660,12 +659,12 @@ class VectorTools:
         return self._wrap(gdf)
 
     def remove_slivers(self, min_area: float):
-        """Supprime les polygones dont la surface < min_area."""
+        """Removes polygons with area < min_area."""
         gdf = self.gdf[self.gdf.geometry.area >= min_area].copy()
         return self._wrap(gdf)
 
     def close_gaps(self, min_area: float):
-        """Ferme les petits trous (< min_area) en les fusionnant au voisin."""
+        """Closes small gaps (< min_area) by merging them into a neighbor."""
         gdf = self.gdf.copy()
         total_union = unary_union(gdf.geometry)
         hull = total_union.convex_hull
@@ -688,7 +687,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def resolve_overlaps(self):
-        """Résout les chevauchements en soustrayant du plus petit polygone."""
+        """Resolves overlaps by subtracting from the smaller polygon."""
         gdf = self.gdf.copy()
         geom_col = gdf.columns.get_loc("geometry")
         for i in range(len(gdf)):
@@ -704,41 +703,41 @@ class VectorTools:
         return self._wrap(gdf)
 
     def enforce_topology_rules(self):
-        """Applique les règles de base : fix_invalid + remove_empty."""
+        """Applies the basic rules: fix_invalid + remove_empty."""
         return self.fix_invalid().remove_empty()
 
     # ────────────────────────────────────────────────────────────────
-    #  2. TRAITEMENTS ET ANALYSES
+    #  2. PROCESSING AND ANALYSIS
     # ────────────────────────────────────────────────────────────────
 
-    # --- Opérations géométriques ---------------------------------- #
+    # --- Geometric operations ---------------------------------------------- #
 
     def buffer(self, distance: float):
-        """Crée une zone tampon autour de chaque géométrie."""
+        """Creates a buffer zone around each geometry."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.buffer(distance)
         return self._wrap(gdf)
 
     def centroid(self):
-        """Remplace les géométries par leurs centroïdes."""
+        """Replaces the geometries with their centroids."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.centroid
         return self._wrap(gdf)
 
     def convex_hull(self):
-        """Remplace les géométries par leur enveloppe convexe."""
+        """Replaces the geometries with their convex hull."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.convex_hull
         return self._wrap(gdf)
 
     def minimum_bounding_box(self):
-        """Remplace les géométries par leur rectangle englobant."""
+        """Replaces the geometries with their bounding rectangle."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.envelope
         return self._wrap(gdf)
 
     def simplify_geometry(self, tolerance: float, preserve_topology=True):
-        """Simplifie les géométries selon une tolérance."""
+        """Simplifies the geometries within a tolerance."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.simplify(
             tolerance, preserve_topology=preserve_topology
@@ -746,33 +745,33 @@ class VectorTools:
         return self._wrap(gdf)
 
     def densify_geometry(self, max_segment_length: float):
-        """Densifie les géométries (segmentize)."""
+        """Densifies the geometries (segmentize)."""
         gdf = self.gdf.copy()
         gdf["geometry"] = gdf.geometry.segmentize(max_segment_length)
         return self._wrap(gdf)
 
-    # --- Mesures géométriques ------------------------------------- #
+    # --- Geometric measurements --------------------------------------------- #
 
     def area(self, column_name="area"):
-        """Ajoute une colonne de surface."""
+        """Adds an area column."""
         gdf = self.gdf.copy()
         gdf[column_name] = gdf.geometry.area
         return self._wrap(gdf)
 
     def perimeter(self, column_name="perimeter"):
-        """Ajoute une colonne de périmètre."""
+        """Adds a perimeter column."""
         gdf = self.gdf.copy()
         gdf[column_name] = gdf.geometry.length
         return self._wrap(gdf)
 
     def length(self, column_name="length"):
-        """Ajoute une colonne de longueur."""
+        """Adds a length column."""
         gdf = self.gdf.copy()
         gdf[column_name] = gdf.geometry.length
         return self._wrap(gdf)
 
     def compactness(self, column_name="compactness"):
-        """Ajoute un indice de compacité (4πA/P²)."""
+        """Adds a compactness index (4πA/P²)."""
         gdf = self.gdf.copy()
         a = gdf.geometry.area
         p = gdf.geometry.length
@@ -780,85 +779,85 @@ class VectorTools:
         return self._wrap(gdf)
 
     def shape_index(self, column_name="shape_index"):
-        """Ajoute un indice de forme (P/√A)."""
+        """Adds a shape index (P/√A)."""
         gdf = self.gdf.copy()
         a = gdf.geometry.area
         p = gdf.geometry.length
         gdf[column_name] = np.where(a > 0, p / np.sqrt(a), 0)
         return self._wrap(gdf)
 
-    # --- Superposition spatiale ----------------------------------- #
+    # --- Spatial overlay --------------------------------------------------- #
 
     def intersection(self, other):
-        """Intersection spatiale avec une autre couche."""
+        """Spatial intersection with another layer."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.overlay(self.gdf, other_gdf, how="intersection")
         return self._wrap(gdf)
 
     def union(self, other):
-        """Union spatiale avec une autre couche."""
+        """Spatial union with another layer."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.overlay(self.gdf, other_gdf, how="union")
         return self._wrap(gdf)
 
     def difference(self, other):
-        """Différence spatiale avec une autre couche."""
+        """Spatial difference with another layer."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.overlay(self.gdf, other_gdf, how="difference")
         return self._wrap(gdf)
 
     def symmetric_difference(self, other):
-        """Différence symétrique avec une autre couche."""
+        """Symmetric difference with another layer."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.overlay(self.gdf, other_gdf, how="symmetric_difference")
         return self._wrap(gdf)
 
     def identity(self, other):
-        """Identité spatiale (conserve tout de self + attributs de other)."""
+        """Spatial identity (keeps all of self + other's attributes)."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.overlay(self.gdf, other_gdf, how="identity")
         return self._wrap(gdf)
 
-    # --- Jointures spatiales -------------------------------------- #
+    # --- Spatial joins -------------------------------------------------------- #
 
     def spatial_join(self, other, how="inner", predicate="intersects"):
-        """Jointure spatiale."""
+        """Spatial join."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.sjoin(self.gdf, other_gdf, how=how, predicate=predicate)
         return self._wrap(gdf)
 
     def join_by_nearest(self, other, max_distance=None):
-        """Jointure au plus proche voisin."""
+        """Nearest-neighbor join."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         gdf = gpd.sjoin_nearest(self.gdf, other_gdf, max_distance=max_distance)
         return self._wrap(gdf)
 
     def point_in_polygon_join(self, polygons):
-        """Jointure points-dans-polygones."""
+        """Points-in-polygons join."""
         poly_gdf = polygons.gdf if isinstance(polygons, VectorTools) else polygons
         gdf = gpd.sjoin(self.gdf, poly_gdf, how="left", predicate="within")
         return self._wrap(gdf)
 
-    # --- Agrégation et regroupement ------------------------------- #
+    # --- Aggregation and grouping ------------------------------------------- #
 
     def dissolve(self, by, aggfunc="first"):
-        """Fusionne les géométries par champ."""
+        """Merges geometries by field."""
         gdf = self.gdf.dissolve(by=by, aggfunc=aggfunc).reset_index()
         return self._wrap(gdf)
 
     def aggregate_by_field(self, by, aggfunc):
-        """Agrège par champ avec une fonction choisie."""
+        """Aggregates by field with a chosen function."""
         gdf = self.gdf.dissolve(by=by, aggfunc=aggfunc).reset_index()
         return self._wrap(gdf)
 
     def group_and_summarize(self, by, summary: dict):
-        """Regroupe + résume : summary = {'col': 'sum', ...}."""
+        """Groups + summarizes: summary = {'col': 'sum', ...}."""
         stats = (
             self.gdf.drop(columns=[self.gdf.geometry.name])
             .groupby(by)
             .agg(summary)
         )
-        # Aplatir les colonnes multi-index éventuels
+        # Flatten any multi-index columns
         if isinstance(stats.columns, pd.MultiIndex):
             stats.columns = ["_".join(c).strip("_") for c in stats.columns]
         stats = stats.reset_index()
@@ -868,10 +867,10 @@ class VectorTools:
                 gdf[col] = stats[col].values
         return self._wrap(gdf)
 
-    # --- Analyse de proximité ------------------------------------- #
+    # --- Proximity analysis -------------------------------------------------- #
 
     def distance_to_nearest(self, other, column_name="dist_nearest"):
-        """Calcule la distance au plus proche élément d'une autre couche."""
+        """Computes the distance to the nearest feature of another layer."""
         from scipy.spatial import cKDTree
 
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
@@ -888,7 +887,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def nearest_neighbor_analysis(self):
-        """Analyse du plus proche voisin (indice R de Clark-Evans)."""
+        """Nearest-neighbor analysis (Clark-Evans R index)."""
         from scipy.spatial import cKDTree
 
         points = np.array(
@@ -912,7 +911,7 @@ class VectorTools:
         }
 
     def within_distance(self, other, distance: float):
-        """Conserve les entités à moins de *distance* d'une autre couche."""
+        """Keeps the features within *distance* of another layer."""
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         buffered = other_gdf.geometry.union_all().buffer(distance)
         gdf = self.gdf[self.gdf.geometry.intersects(buffered)].copy()
@@ -920,26 +919,26 @@ class VectorTools:
 
     def distance_matrix(self, other=None, label_field=None,
                         method="centroid"):
-        """Calcule la matrice de distance entre les entités.
+        """Computes the distance matrix between features.
 
         Parameters
         ----------
         other : VectorTools | GeoDataFrame | None
-            Seconde couche. Si *None*, la matrice est calculée entre les
-            entités de la couche courante (matrice carrée).
+            Second layer. If *None*, the matrix is computed between the
+            features of the current layer (square matrix).
         label_field : str | None
-            Champ à utiliser comme étiquette (index/colonnes).
-            Si *None*, l'index du GeoDataFrame est utilisé.
+            Field to use as label (index/columns).
+            If *None*, the GeoDataFrame's index is used.
         method : str
-            ``"centroid"`` (défaut) utilise le centroïde de chaque géométrie.
-            ``"boundary"`` utilise la distance minimale entre géométries
-            (plus lent mais plus précis pour les polygones).
+            ``"centroid"`` (default) uses each geometry's centroid.
+            ``"boundary"`` uses the minimum distance between geometries
+            (slower but more precise for polygons).
 
         Returns
         -------
         pd.DataFrame
-            Matrice de distance symétrique (ou rectangulaire si *other*
-            est fourni et différent de *self*).
+            Symmetric distance matrix (or rectangular if *other* is
+            provided and different from *self*).
         """
         from scipy.spatial import distance as sp_distance
 
@@ -981,10 +980,10 @@ class VectorTools:
         )
         return pd.DataFrame(mat, index=src_labels, columns=tgt_labels)
 
-    # --- Analyse de réseau ---------------------------------------- #
+    # --- Network analysis ---------------------------------------------------- #
 
     def build_network(self):
-        """Construit un graphe networkx à partir de lignes."""
+        """Builds a networkx graph from lines."""
         try:
             import networkx as nx
         except ImportError:
@@ -1005,7 +1004,7 @@ class VectorTools:
         return G
 
     def shortest_path(self, source: tuple, target: tuple):
-        """Plus court chemin entre deux points (snap aux nœuds)."""
+        """Shortest path between two points (snapped to nodes)."""
         try:
             import networkx as nx
         except ImportError:
@@ -1019,7 +1018,7 @@ class VectorTools:
         return {"path": path, "geometry": LineString(path), "cost": cost}
 
     def service_area(self, source: tuple, max_cost: float):
-        """Zone de desserte autour d'un point source."""
+        """Service area around a source point."""
         try:
             import networkx as nx
         except ImportError:
@@ -1037,13 +1036,13 @@ class VectorTools:
         return gpd.GeoDataFrame(geometry=[], crs=self.gdf.crs)
 
     def network_distance(self, source: tuple, target: tuple) -> float:
-        """Distance réseau entre deux points."""
+        """Network distance between two points."""
         return self.shortest_path(source, target)["cost"]
 
-    # --- Analyse de densité et répartition ------------------------ #
+    # --- Density and distribution analysis ---------------------------------- #
 
     def point_density(self, radius: float, column_name="density"):
-        """Densité de points dans un rayon donné."""
+        """Point density within a given radius."""
         from scipy.spatial import cKDTree
 
         gdf = self.gdf.copy()
@@ -1057,7 +1056,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def kernel_density_from_points(self, bandwidth: float, resolution: int = 100):
-        """Estimation de densité par noyau (retourne grille numpy)."""
+        """Kernel density estimation (returns a numpy grid)."""
         from scipy.stats import gaussian_kde
 
         pts = np.array(
@@ -1072,7 +1071,7 @@ class VectorTools:
         return {"density": density, "x": xi, "y": yi, "extent": (xmin, xmax, ymin, ymax)}
 
     def spatial_clustering(self, eps: float, min_samples: int = 5, column_name="cluster"):
-        """Clustering DBSCAN (nécessite scikit-learn)."""
+        """DBSCAN clustering (requires scikit-learn)."""
         try:
             from sklearn.cluster import DBSCAN
         except ImportError:
@@ -1085,7 +1084,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def hotspot_analysis(self, column: str = None, k: int = 8):
-        """Analyse de points chauds (z-score sur voisinage k-NN)."""
+        """Hotspot analysis (z-score over a k-NN neighborhood)."""
         from scipy.spatial import cKDTree
 
         gdf = self.gdf.copy()
@@ -1119,10 +1118,10 @@ class VectorTools:
         )
         return self._wrap(gdf)
 
-    # --- Analyse topologique -------------------------------------- #
+    # --- Topological analysis ------------------------------------------------ #
 
     def check_adjacency(self) -> pd.DataFrame:
-        """Matrice d'adjacence binaire (touches)."""
+        """Binary adjacency matrix (touches)."""
         n = len(self.gdf)
         matrix = np.zeros((n, n), dtype=int)
         for i in range(n):
@@ -1132,7 +1131,7 @@ class VectorTools:
         return pd.DataFrame(matrix, index=self.gdf.index, columns=self.gdf.index)
 
     def find_touching_features(self) -> list:
-        """Liste de paires (i, j) d'entités qui se touchent."""
+        """List of (i, j) pairs of features that touch."""
         pairs = []
         for i in range(len(self.gdf)):
             for j in range(i + 1, len(self.gdf)):
@@ -1141,7 +1140,7 @@ class VectorTools:
         return pairs
 
     def detect_overlaps(self) -> gpd.GeoDataFrame:
-        """Détecte les chevauchements entre entités."""
+        """Detects overlaps between features."""
         rows = []
         for i in range(len(self.gdf)):
             for j in range(i + 1, len(self.gdf)):
@@ -1162,7 +1161,7 @@ class VectorTools:
         )
 
     def detect_gaps(self) -> gpd.GeoDataFrame:
-        """Détecte les trous entre polygones."""
+        """Detects gaps between polygons."""
         total = unary_union(self.gdf.geometry)
         hull = total.convex_hull
         gaps = hull.difference(total)
@@ -1173,7 +1172,7 @@ class VectorTools:
         return gpd.GeoDataFrame(rows, crs=self.gdf.crs)
 
     def build_contiguity_matrix(self, method="queen") -> pd.DataFrame:
-        """Matrice de contiguïté ('queen' ou 'rook')."""
+        """Contiguity matrix ('queen' or 'rook')."""
         n = len(self.gdf)
         matrix = np.zeros((n, n), dtype=int)
         for i in range(n):
@@ -1189,19 +1188,19 @@ class VectorTools:
         return pd.DataFrame(matrix, index=self.gdf.index, columns=self.gdf.index)
 
     # ────────────────────────────────────────────────────────────────
-    #  3. POST-TRAITEMENTS
+    #  3. POST-PROCESSING
     # ────────────────────────────────────────────────────────────────
 
-    # --- Reclassement et enrichissement --------------------------- #
+    # --- Reclassification and enrichment -------------------------------- #
 
     def reclassify_attributes(self, column: str, mapping: dict):
-        """Reclasse les valeurs d'une colonne selon un dictionnaire."""
+        """Reclassifies the values of a column according to a dictionary."""
         gdf = self.gdf.copy()
         gdf[column] = gdf[column].map(mapping).fillna(gdf[column])
         return self._wrap(gdf)
 
     def create_indicator_fields(self, rules: dict):
-        """Crée des colonnes indicatrices : {'nom': expression_ou_callable}."""
+        """Creates indicator columns: {'name': expression_or_callable}."""
         gdf = self.gdf.copy()
         for col_name, expression in rules.items():
             if callable(expression):
@@ -1211,7 +1210,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def calculate_scores(self, weights: dict, score_column="score"):
-        """Score pondéré normalisé : weights = {'col': poids, ...}."""
+        """Normalized weighted score: weights = {'col': weight, ...}."""
         gdf = self.gdf.copy()
         score = pd.Series(0.0, index=gdf.index)
         for col, weight in weights.items():
@@ -1225,15 +1224,15 @@ class VectorTools:
         return self._wrap(gdf)
 
     def rank_features(self, column: str, ascending=True, rank_column="rank"):
-        """Classe les entités par rang sur une colonne."""
+        """Ranks features on a column."""
         gdf = self.gdf.copy()
         gdf[rank_column] = gdf[column].rank(ascending=ascending).astype(int)
         return self._wrap(gdf)
 
-    # --- Généralisation cartographique ---------------------------- #
+    # --- Cartographic generalization -------------------------------------- #
 
     def smooth_geometry(self, iterations: int = 3):
-        """Lisse les géométries (algorithme de Chaikin)."""
+        """Smooths geometries (Chaikin's algorithm)."""
 
         def _chaikin(coords, n):
             coords = list(coords)
@@ -1262,7 +1261,7 @@ class VectorTools:
         return self._wrap(gdf)
 
     def eliminate_small_polygons(self, min_area: float):
-        """Fusionne les petits polygones avec leur plus grand voisin."""
+        """Merges small polygons with their largest neighbor."""
         gdf = self.gdf.copy()
         small = gdf[gdf.geometry.area < min_area]
         large = gdf[gdf.geometry.area >= min_area].copy()
@@ -1279,25 +1278,25 @@ class VectorTools:
                 )
         return self._wrap(large)
 
-    # --- Conversion et export ------------------------------------- #
+    # --- Conversion and export ---------------------------------------------- #
 
     def to_gpkg(self, path: str, layer: str = None):
-        """Exporte en GeoPackage."""
+        """Exports to GeoPackage."""
         self.gdf.to_file(path, driver="GPKG", layer=layer)
         return path
 
     def to_shp(self, path: str):
-        """Exporte en Shapefile."""
+        """Exports to Shapefile."""
         self.gdf.to_file(path, driver="ESRI Shapefile")
         return path
 
     def to_geojson(self, path: str):
-        """Exporte en GeoJSON."""
+        """Exports to GeoJSON."""
         self.gdf.to_file(path, driver="GeoJSON")
         return path
 
     def to_csv(self, path: str, include_geometry=True):
-        """Exporte en CSV (géométrie en WKT si demandé)."""
+        """Exports to CSV (geometry as WKT if requested)."""
         df = self.gdf.copy()
         if include_geometry:
             df["wkt_geometry"] = df.geometry.to_wkt()
@@ -1306,17 +1305,17 @@ class VectorTools:
         return path
 
     # ────────────────────────────────────────────────────────────────
-    #  4. ANALYSE SPATIALE AVANCÉE (STATISTIQUES SPATIALES)
+    #  4. ADVANCED SPATIAL ANALYSIS (SPATIAL STATISTICS)
     # ────────────────────────────────────────────────────────────────
 
     def spatial_weights(self, method="queen", k=4, distance=None):
         """
-        Construit une matrice de poids spatiaux.
+        Builds a spatial weights matrix.
 
         Args:
-            method: 'queen', 'rook', 'knn' ou 'distance'.
-            k: Nombre de voisins pour knn.
-            distance: Seuil de distance pour method='distance'.
+            method: 'queen', 'rook', 'knn', or 'distance'.
+            k: Number of neighbors for knn.
+            distance: Distance threshold for method='distance'.
 
         Returns:
             libpysal.weights.W
@@ -1340,7 +1339,7 @@ class VectorTools:
 
     def morans_i(self, column, method="queen", **kwargs):
         """
-        Autocorrélation spatiale globale (I de Moran).
+        Global spatial autocorrelation (Moran's I).
 
         Returns:
             dict: I, expected_I, p_value, z_score
@@ -1366,12 +1365,12 @@ class VectorTools:
 
     def local_morans(self, column, method="queen", significance=0.05, **kwargs):
         """
-        LISA – indicateurs locaux d'association spatiale.
+        LISA - local indicators of spatial association.
 
-        Ajoute les colonnes : lisa_I, lisa_p, lisa_q (quadrant), lisa_cluster.
+        Adds the columns: lisa_I, lisa_p, lisa_q (quadrant), lisa_cluster.
 
         Returns:
-            VectorTools avec colonnes LISA ajoutées.
+            VectorTools with LISA columns added.
         """
         try:
             from esda.moran import Moran_Local
@@ -1394,7 +1393,7 @@ class VectorTools:
 
     def gearys_c(self, column, method="queen", **kwargs):
         """
-        Indice C de Geary (autocorrélation spatiale).
+        Geary's C index (spatial autocorrelation).
 
         Returns:
             dict: C, expected_C, p_value, z_score
@@ -1420,10 +1419,10 @@ class VectorTools:
 
     def spatial_autocorrelation_report(self, column, method="queen", **kwargs):
         """
-        Rapport complet d'autocorrélation spatiale (Moran + Geary + LISA).
+        Full spatial autocorrelation report (Moran + Geary + LISA).
 
         Returns:
-            dict: moran, geary, lisa_gdf (GeoDataFrame avec clusters LISA)
+            dict: moran, geary, lisa_gdf (GeoDataFrame with LISA clusters)
         """
         moran = self.morans_i(column, method=method, **kwargs)
         geary = self.gearys_c(column, method=method, **kwargs)
@@ -1437,16 +1436,16 @@ class VectorTools:
         }
 
     # ────────────────────────────────────────────────────────────────
-    #  5. ANALYSE DE CHANGEMENT ET TEMPORALITÉ
+    #  5. CHANGE AND TEMPORAL ANALYSIS
     # ────────────────────────────────────────────────────────────────
 
     def spatial_diff(self, other, key_column):
         """
-        Compare deux couches d'une même zone et détecte les changements.
+        Compares two layers of the same area and detects changes.
 
         Args:
-            other: VectorTools ou GeoDataFrame (état T2).
-            key_column: Colonne identifiant unique.
+            other: VectorTools or GeoDataFrame (state T2).
+            key_column: Unique identifier column.
 
         Returns:
             dict: added, removed, modified (GeoDataFrames)
@@ -1481,10 +1480,10 @@ class VectorTools:
 
     def track_changes(self, other, key_column, geom_tolerance=0.0):
         """
-        Suit les évolutions géométriques entre deux états.
+        Tracks geometric changes between two states.
 
         Returns:
-            GeoDataFrame avec colonnes : change_type, area_change, area_pct_change
+            GeoDataFrame with columns: change_type, area_change, area_pct_change
         """
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         t1 = self.gdf.set_index(key_column)
@@ -1519,7 +1518,7 @@ class VectorTools:
         return self._wrap(result)
 
     def temporal_filter(self, date_column, start=None, end=None):
-        """Filtre par plage temporelle."""
+        """Filters by time range."""
         gdf = self.gdf.copy()
         gdf[date_column] = pd.to_datetime(gdf[date_column])
         if start is not None:
@@ -1530,15 +1529,15 @@ class VectorTools:
 
     def evolution_stats(self, other, key_column, measure_cols):
         """
-        Statistiques de variation entre deux états.
+        Variation statistics between two states.
 
         Args:
-            other: VectorTools ou GeoDataFrame (état T2).
-            key_column: Colonne identifiant unique.
-            measure_cols: Liste de colonnes numériques à comparer.
+            other: VectorTools or GeoDataFrame (state T2).
+            key_column: Unique identifier column.
+            measure_cols: List of numeric columns to compare.
 
         Returns:
-            DataFrame avec variation absolue et pourcentage par colonne.
+            DataFrame with the absolute and percentage variation per column.
         """
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
         t1 = self.gdf.set_index(key_column)
@@ -1563,15 +1562,15 @@ class VectorTools:
         return pd.DataFrame(rows)
 
     # ────────────────────────────────────────────────────────────────
-    #  6. ANALYSE DE FRAGMENTATION ET PAYSAGE
+    #  6. FRAGMENTATION AND LANDSCAPE ANALYSIS
     # ────────────────────────────────────────────────────────────────
 
     def landscape_metrics(self, class_column):
         """
-        Calcule les métriques paysagères par classe.
+        Computes landscape metrics per class.
 
         Returns:
-            DataFrame : class, num_patches, total_area, mean_area, std_area,
+            DataFrame: class, num_patches, total_area, mean_area, std_area,
                         largest_patch, smallest_patch, shannon_diversity
         """
         gdf = self.gdf.copy()
@@ -1606,11 +1605,11 @@ class VectorTools:
 
     def fragmentation_index(self, class_column):
         """
-        Indice de fragmentation par classe.
-        F = 1 − (plus grand patch / surface totale de la classe)
+        Fragmentation index per class.
+        F = 1 - (largest patch / class total area)
 
         Returns:
-            DataFrame : class, num_patches, total_area, largest_patch, fragmentation
+            DataFrame: class, num_patches, total_area, largest_patch, fragmentation
         """
         gdf = self.gdf.copy()
         rows = []
@@ -1631,7 +1630,7 @@ class VectorTools:
 
     def patch_connectivity(self, max_distance, class_column=None):
         """
-        Graphe de connectivité entre patches à portée de max_distance.
+        Connectivity graph between patches within max_distance.
 
         Returns:
             dict: graph (networkx), connected_components, connectivity_index
@@ -1673,10 +1672,10 @@ class VectorTools:
 
     def edge_density(self, class_column):
         """
-        Densité de lisières (périmètre total / surface totale) par classe.
+        Edge density (total perimeter / total area) per class.
 
         Returns:
-            DataFrame : class, total_perimeter, total_area, edge_density
+            DataFrame: class, total_perimeter, total_area, edge_density
         """
         gdf = self.gdf.copy()
         rows = []
@@ -1694,10 +1693,10 @@ class VectorTools:
 
     def isolation_index(self, class_column=None):
         """
-        Indice d'isolement : distance au plus proche patch de même classe.
+        Isolation index: distance to the nearest patch of the same class.
 
         Returns:
-            VectorTools avec colonne 'isolation_distance' ajoutée.
+            VectorTools with an 'isolation_distance' column added.
         """
         from scipy.spatial import cKDTree
 
@@ -1725,20 +1724,20 @@ class VectorTools:
         return self._wrap(gdf)
 
     # ────────────────────────────────────────────────────────────────
-    #  7. ACCESSIBILITÉ ET DESSERTE
+    #  7. ACCESSIBILITY AND SERVICE
     # ────────────────────────────────────────────────────────────────
 
     def isochrone(self, source: tuple, time_breaks: list, speed: float):
         """
-        Zones isochrones autour d'un point source sur le réseau.
+        Isochrone zones around a source point on the network.
 
         Args:
-            source: (x, y) du point de départ.
-            time_breaks: Liste de durées en minutes (ex: [5, 15, 30]).
-            speed: Vitesse en unités de carte par minute.
+            source: (x, y) of the starting point.
+            time_breaks: List of durations in minutes (e.g.: [5, 15, 30]).
+            speed: Speed in map units per minute.
 
         Returns:
-            GeoDataFrame avec une zone par isochrone.
+            GeoDataFrame with one zone per isochrone.
         """
         try:
             import networkx as nx
@@ -1766,12 +1765,12 @@ class VectorTools:
 
     def coverage_analysis(self, facilities, population_col, radius):
         """
-        Taux de couverture : % de population à portée d'un équipement.
+        Coverage rate: % of population within reach of a facility.
 
         Args:
-            facilities: VectorTools ou GeoDataFrame des équipements (points).
-            population_col: Colonne de population dans self.gdf.
-            radius: Rayon de couverture.
+            facilities: VectorTools or GeoDataFrame of facilities (points).
+            population_col: Population column in self.gdf.
+            radius: Coverage radius.
 
         Returns:
             dict: total_pop, covered_pop, coverage_pct, covered_gdf
@@ -1794,14 +1793,14 @@ class VectorTools:
 
     def voronoi_allocation(self, facilities=None):
         """
-        Polygones de Voronoï (Thiessen) pour l'allocation spatiale.
+        Voronoi (Thiessen) polygons for spatial allocation.
 
         Args:
-            facilities: VectorTools ou GeoDataFrame de points.
-                        Si None, utilise self.gdf comme points.
+            facilities: VectorTools or GeoDataFrame of points.
+                        If None, uses self.gdf as the points.
 
         Returns:
-            GeoDataFrame des polygones de Voronoï.
+            GeoDataFrame of the Voronoi polygons.
         """
         from scipy.spatial import Voronoi
 
@@ -1847,17 +1846,17 @@ class VectorTools:
 
     def gravity_model(self, destinations, weight_col, beta=1.0):
         """
-        Modèle gravitaire d'interaction spatiale.
+        Gravity model of spatial interaction.
 
         interaction(i,j) = (W_i * W_j) / distance(i,j)^beta
 
         Args:
-            destinations: VectorTools ou GeoDataFrame.
-            weight_col: Colonne de poids (masse) dans les deux couches.
-            beta: Exposant de friction (défaut 1.0).
+            destinations: VectorTools or GeoDataFrame.
+            weight_col: Weight (mass) column in both layers.
+            beta: Friction exponent (default 1.0).
 
         Returns:
-            DataFrame : origin, destination, weight_o, weight_d, distance, interaction
+            DataFrame: origin, destination, weight_o, weight_d, distance, interaction
         """
         dest_gdf = destinations.gdf if isinstance(destinations, VectorTools) else destinations
         rows = []
@@ -1880,18 +1879,18 @@ class VectorTools:
 
     def market_area(self, centers, demand_col, friction=2.0):
         """
-        Zones de chalandise (Huff model).
+        Trade areas (Huff model).
 
-        Chaque entité est assignée au centre ayant la plus forte attraction.
+        Each feature is assigned to the center with the strongest attraction.
         attraction(j) = weight_j / distance(i,j)^friction
 
         Args:
-            centers: VectorTools ou GeoDataFrame des centres (avec demand_col).
-            demand_col: Colonne de poids/attractivité des centres.
-            friction: Exposant de friction distance.
+            centers: VectorTools or GeoDataFrame of centers (with demand_col).
+            demand_col: Weight/attractiveness column of the centers.
+            friction: Distance friction exponent.
 
         Returns:
-            VectorTools avec colonnes assignation et probabilités.
+            VectorTools with assignment and probability columns.
         """
         centers_gdf = centers.gdf if isinstance(centers, VectorTools) else centers
         gdf = self.gdf.copy()
@@ -1915,17 +1914,17 @@ class VectorTools:
         return self._wrap(gdf)
 
     # ────────────────────────────────────────────────────────────────
-    #  8. INTERPOLATION ET ESTIMATION SURFACIQUE
+    #  8. INTERPOLATION AND SURFACE ESTIMATION
     # ────────────────────────────────────────────────────────────────
 
     def idw_interpolation(self, value_col, resolution=100, power=2):
         """
-        Interpolation par pondération inverse de la distance (IDW).
+        Inverse distance weighting (IDW) interpolation.
 
         Args:
-            value_col: Colonne de valeurs à interpoler.
-            resolution: Nombre de cellules par axe.
-            power: Exposant de distance (défaut 2).
+            value_col: Column of values to interpolate.
+            resolution: Number of cells per axis.
+            power: Distance exponent (default 2).
 
         Returns:
             dict: grid (2D array), x, y, extent
@@ -1952,21 +1951,21 @@ class VectorTools:
 
     def thiessen_polygons(self):
         """
-        Diagramme de Voronoï / polygones de Thiessen.
+        Voronoi diagram / Thiessen polygons.
 
         Returns:
-            GeoDataFrame des polygones de Thiessen.
+            GeoDataFrame of the Thiessen polygons.
         """
         return self.voronoi_allocation(facilities=None)
 
     def kriging(self, value_col, variogram_model="linear", resolution=100):
         """
-        Krigeage ordinaire (estimation géostatistique).
+        Ordinary kriging (geostatistical estimation).
 
         Args:
-            value_col: Colonne de valeurs.
-            variogram_model: Modèle de variogramme ('linear', 'power', 'gaussian', 'spherical', 'exponential').
-            resolution: Nombre de cellules par axe.
+            value_col: Column of values.
+            variogram_model: Variogram model ('linear', 'power', 'gaussian', 'spherical', 'exponential').
+            resolution: Number of cells per axis.
 
         Returns:
             dict: grid, variance, x, y, extent
@@ -1998,10 +1997,10 @@ class VectorTools:
 
     def tin_surface(self, value_col):
         """
-        Triangulation de Delaunay → surface TIN.
+        Delaunay triangulation → TIN surface.
 
         Returns:
-            dict: triangulation (Delaunay), vertices, values, GeoDataFrame des triangles
+            dict: triangulation (Delaunay), vertices, values, GeoDataFrame of the triangles
         """
         from scipy.spatial import Delaunay
 
@@ -2030,15 +2029,15 @@ class VectorTools:
 
     def contour_lines(self, value_col, levels=10, resolution=100):
         """
-        Lignes d'isovaleurs (isolignes) à partir de points.
+        Isovalue lines (contours) from points.
 
         Args:
-            value_col: Colonne de valeurs.
-            levels: Nombre de niveaux ou liste de valeurs.
-            resolution: Résolution de la grille d'interpolation.
+            value_col: Column of values.
+            levels: Number of levels or list of values.
+            resolution: Resolution of the interpolation grid.
 
         Returns:
-            GeoDataFrame : level, geometry (LineString)
+            GeoDataFrame: level, geometry (LineString)
         """
         import matplotlib.pyplot as plt
         from matplotlib.contour import QuadContourSet
@@ -2059,7 +2058,7 @@ class VectorTools:
             return gpd.GeoDataFrame(rows, crs=self.gdf.crs)
         return gpd.GeoDataFrame(columns=["level", "geometry"], crs=self.gdf.crs)
 
-    # --- Représentation ------------------------------------------- #
+    # --- Representation ------------------------------------------------ #
 
     def __repr__(self):
         return f"VectorTools({len(self.gdf)} features, CRS={self.gdf.crs})"

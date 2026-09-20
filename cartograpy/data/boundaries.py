@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 class GeoBoundaries:
     """
-    Client pour interagir avec l'API GeoBoundaries.
-    Permet de récupérer les limites administratives des territoires.
+    Client to interact with the GeoBoundaries API.
+    Allows retrieving administrative boundaries for territories.
     """
 
     _CONTINENT_MAPPING = {
@@ -36,43 +36,43 @@ class GeoBoundaries:
 
     def __init__(self, cache_expire_seconds: int = 604800):
         """
-        Initialise le client GeoBoundaries.
-        
+        Initializes the GeoBoundaries client.
+
         Args:
-            cache_expire_seconds: Durée d'expiration du cache en secondes (défaut: 1 semaine)
+            cache_expire_seconds: Cache expiration duration in seconds (default: 1 week)
         """
         self._session = CachedSession(expire_after=cache_expire_seconds)
         self._base_url = "https://www.geoboundaries.org/api/current/gbOpen"
         self._continents_gdf = None
         self._countries_gdf = None
-    
+
     def clear_cache(self):
-        """Vide le cache des requêtes."""
+        """Clears the request cache."""
         self._session.cache.clear()
-    
+
     def set_cache_expire_time(self, seconds: int):
         """
-        Met à jour le temps d'expiration du cache sans vider le cache existant.
-        
+        Updates the cache expiration time without clearing the existing cache.
+
         Args:
-            seconds: Nouvelle durée d'expiration en secondes
+            seconds: New expiration duration in seconds
         """
         self._session = CachedSession(expire_after=seconds)
-    
+
     def disable_cache(self):
-        """Désactive le cache des requêtes."""
+        """Disables the request cache."""
         self._session = CachedSession(expire_after=-1)
-    
+
     def is_valid_adm(self, iso3: str, adm: str) -> bool:
         """
-        Vérifie si un niveau ADM est valide pour un pays donné.
-        
+        Checks whether an ADM level is valid for a given country.
+
         Args:
-            iso3: Code ISO3 du pays
-            adm: Niveau administratif (ex: 'ADM0', 'ADM1', etc.)
-            
+            iso3: ISO3 code of the country
+            adm: Administrative level (e.g.: 'ADM0', 'ADM1', etc.)
+
         Returns:
-            bool: True si le niveau ADM est valide
+            bool: True if the ADM level is valid
         """
         url = f"{self._base_url}/{iso3}/{adm}/"
         resp = self._session.get(url, verify=True)
@@ -80,161 +80,160 @@ class GeoBoundaries:
             return False
         try:
             data = resp.json()
-            # L'API retourne un dict (ou liste) avec des données si le niveau existe
+            # The API returns a dict (or list) with data if the level exists
             if isinstance(data, list):
                 return len(data) > 0
             return bool(data and not data.get("error"))
         except (ValueError, AttributeError):
             return False
-    
+
     def _validate_adm(self, adm: Union[str, int]) -> str:
         """
-        Valide et normalise un niveau ADM.
-        
+        Validates and normalizes an ADM level.
+
         Args:
-            adm: Niveau administratif (int ou str)
-            
+            adm: Administrative level (int or str)
+
         Returns:
-            str: Niveau ADM validé et normalisé
-            
+            str: Validated and normalized ADM level
+
         Raises:
-            KeyError: Si le niveau ADM n'est pas valide
+            KeyError: If the ADM level is invalid
         """
         if isinstance(adm, int) or len(str(adm)) == 1:
             adm = f'ADM{adm}'
-        
+
         valid_adms = [f'ADM{i}' for i in range(6)] + ['ALL']
         if str.upper(adm) in valid_adms:
             return str.upper(adm)
-        
+
         raise KeyError(f"Niveau ADM invalide: {adm}")
-    
+
     def _get_smallest_adm(self, iso3: str) -> str:
         """
-        Trouve le plus petit niveau ADM disponible pour un pays.
-        
+        Finds the smallest ADM level available for a country.
+
         Args:
-            iso3: Code ISO3 du pays
-            
+            iso3: ISO3 code of the country
+
         Returns:
-            str: Plus petit niveau ADM disponible
+            str: Smallest available ADM level
         """
         for current_adm in range(5, -1, -1):
             adm_level = f'ADM{current_adm}'
             if self.is_valid_adm(iso3, adm_level):
-                logger.info(f'Smallest ADM level found for {iso3} : {adm_level}')
                 return adm_level
-        
+
         return 'ADM0'  # Fallback
-    
+
     def _is_valid_iso3_code(self, territory: str) -> bool:
         """
-        Vérifie si un code ISO3 est valide.
-        
+        Checks whether an ISO3 code is valid.
+
         Args:
-            territory: Code ou nom du territoire
-            
+            territory: Territory code or name
+
         Returns:
-            bool: True si le code ISO3 est valide
+            bool: True if the ISO3 code is valid
         """
         return str.lower(territory) in iso_codes
-    
+
     def _get_iso3_from_name_or_iso2(self, name: str) -> str:
         """
-        Convertit un nom de pays ou code ISO2 en code ISO3.
-        
+        Converts a country name or ISO2 code into an ISO3 code.
+
         Args:
-            name: Nom du pays ou code ISO2
-            
+            name: Country name or ISO2 code
+
         Returns:
-            str: Code ISO3 correspondant
-            
+            str: Corresponding ISO3 code
+
         Raises:
-            KeyError: Si le pays n'est pas trouvé
+            KeyError: If the country isn't found
         """
         try:
             list_iso3 = self.get_iso3(name)
             if isinstance(list_iso3, str):
                 return list_iso3.upper()
-            # Si plusieurs pays correspondent, on retourne la liste
+            # If several countries match, return the list
             elif isinstance(list_iso3, list) and len(list_iso3) >= 1:
-                # Si un seul pays correspond, on retourne son code ISO3
+                # If only one country matches, return its ISO3 code
                 return list_iso3[0][1].upper()
             else:
                 raise KeyError(f"{name} non trouvé")
-        
+
         except KeyError as e:
-            logger.info(f"KeyError : Couldn't find country named {e}")
+            logger.error(f"KeyError : Couldn't find country named {e}")
             raise KeyError(f"Pays non trouvé: {name}")
-        
+
     def get_iso3(self, territory: str) -> Union[str, List[tuple], None]:
         """
-        Récupère le code ISO3 d'un territoire.
-        
+        Retrieves the ISO3 code of a territory.
+
         Args:
-            territory: Nom du territoire ou code ISO2/ISO3
-            
+            territory: Territory name or ISO2/ISO3 code
+
         Returns:
-            str: Code ISO3 du territoire
-            
+            str: ISO3 code of the territory
+
         Raises:
-            KeyError: Si le territoire n'est pas trouvé
+            KeyError: If the territory isn't found
         """
         if self._is_valid_iso3_code(territory):
             return str.upper(territory)
         else:
             list_iso3 = [(countrie_name,iso) for countrie_name, iso in countries_iso3.items() if str.lower(territory) in str.lower(countrie_name)]
-            # Si aucun pays ne correspond, on retourne None
+            # If no country matches, return None
             if list_iso3 == []:
                 return None
-            # Si un seul pays correspond, on retourne son code ISO3
+            # If only one country matches, return its ISO3 code
             elif len(list_iso3) == 1:
                 return list_iso3[0][1].upper()
-            else : # Si plusieurs pays correspondent, avec le même ISO3, on retourne le code ISO3 correspondant
+            else : # If several countries match, with the same ISO3, return that ISO3 code
                 if len(set([iso for _, iso in list_iso3])) == 1:
                     return list_iso3[0][1].upper()
-                else :# Sinon, on retourne la liste des pays correspondants
+                else :# Otherwise, return the list of matching countries
                     return list_iso3
-    
-    
+
+
     def list_countries(self) -> List[str]:
         """
-        Récupère la liste des pays valides.
-        
+        Retrieves the list of valid countries.
+
         Returns:
-            List[str]: Liste des codes ISO3 des pays
+            List[str]: List of countries' ISO3 codes
         """
         return list(countries_iso3.keys())
-    
+
     def _generate_url(self, territory: str, adm: Union[str, int]) -> str:
         """
-        Génère l'URL de l'API pour un territoire et niveau ADM donnés.
-        
+        Generates the API URL for a given territory and ADM level.
+
         Args:
-            territory: Nom du territoire ou code ISO
-            adm: Niveau administratif
-            
+            territory: Territory name or ISO code
+            adm: Administrative level
+
         Returns:
-            str: URL de l'API
-            
+            str: API URL
+
         Raises:
-            KeyError: Si le territoire ou niveau ADM n'est pas valide
+            KeyError: If the territory or ADM level is invalid
         """
-        iso3 = (str.upper(territory) if self._is_valid_iso3_code(territory) 
+        iso3 = (str.upper(territory) if self._is_valid_iso3_code(territory)
                 else self._get_iso3_from_name_or_iso2(territory))
-        
+
         if adm != -1:
             adm = self._validate_adm(adm)
         else:
             adm = self._get_smallest_adm(iso3)
-        
+
         if not self.is_valid_adm(iso3, adm):
             error_msg = f"ADM level '{adm}' doesn't exist for country '{territory}' ({iso3})"
-            logger.info(f"KeyError : {error_msg}")
+            logger.error(f"KeyError : {error_msg}")
             raise KeyError(error_msg)
-        
+
         return f"{self._base_url}/{iso3}/{adm}/"
-    
+
     def adminLevels(self) -> str:
         return """
 | Niveau GeoBoundaries | Nom commun (FR)           | Nom commun (EN)       |
@@ -250,67 +249,67 @@ class GeoBoundaries:
 
     def metadata(self, territory: str, adm: Union[str, int]) -> dict:
         """
-        Récupère les métadonnées d'un territoire.
-        
+        Retrieves the metadata of a territory.
+
         Args:
-            territory: Nom du territoire ou code ISO
-            adm: Niveau administratif (utiliser 'ALL' pour tous les niveaux)
-            
+            territory: Territory name or ISO code
+            adm: Administrative level (use 'ALL' for every level)
+
         Returns:
-            dict: Métadonnées du territoire
+            dict: Metadata of the territory
         """
         url = self._generate_url(territory, adm)
         return self._session.get(url, verify=True).json()
-    
+
     def _get_data(self, territory: str, adm: Union[str, int], simplified: bool) -> str:
         """
-        Récupère les données géographiques d'un territoire.
-        
+        Retrieves the geographic data of a territory.
+
         Args:
-            territory: Nom du territoire ou code ISO
-            adm: Niveau administratif
-            simplified: Si True, utilise la géométrie simplifiée
-            
+            territory: Territory name or ISO code
+            adm: Administrative level
+            simplified: If True, uses simplified geometry
+
         Returns:
-            str: Données GeoJSON sous forme de chaîne
+            str: GeoJSON data as a string
         """
         geom_complexity = 'simplifiedGeometryGeoJSON' if simplified else 'gjDownloadURL'
-        
+
         try:
             json_uri = self.metadata(territory, adm)[geom_complexity]
         except Exception as e:
             error_msg = f"Error while requesting geoboudaries API\n URL : {self._generate_url(territory, adm)}\n"
-            logger.info(error_msg)
+            logger.error(error_msg)
             raise e
-        
+
         return self._session.get(json_uri).text
-    
+
     def adm(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> gpd.GeoDataFrame:
         """
-        Récupère les limites administratives des territoires spécifiés.
-        
+        Retrieves the administrative boundaries of the specified territories.
+
         Args:
-            territories: Territoire(s) à récupérer. Peut être :
-                - Un string unique : "Senegal", "SEN", "เซเนกัล"
-                - Une liste de strings : ["SEN", "Mali"], ["セネガル", "մալი"]
-            adm: Niveau administratif :
-                - 'ADM0' à 'ADM5' (si existant pour le pays)
-                - int de 0 à 5
-                - int -1 (retourne le plus petit niveau ADM disponible)
-            simplified: Si True, utilise la géométrie simplifiée (défaut: True)
-            
+            territories: Territory(ies) to retrieve. Can be:
+                - A single string: "Senegal", "SEN", "เซเนกัล"
+                - A list of strings: ["SEN", "Mali"], ["セネガル", "մալի"]
+            adm: Administrative level:
+                - 'ADM0' to 'ADM5' (if it exists for the country)
+                - int from 0 to 5
+                - int -1 (returns the smallest available ADM level)
+            simplified: If True, uses simplified geometry (default: True)
+
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame des territoires demandés
-            
+            gpd.GeoDataFrame: GeoDataFrame of the requested territories
+
         Note:
-            Valeurs autorisées pour territories :
-            - ISO 3166-1 (alpha2) : AFG, QAT, YEM, etc.
-            - ISO 3166-1 (alpha3) : AF, QA, YE, etc.
-            - Nom du pays en plusieurs langues supportées
+            Allowed values for territories:
+            - ISO 3166-1 (alpha2): AFG, QAT, YEM, etc.
+            - ISO 3166-1 (alpha3): AF, QA, YE, etc.
+            - Country name in several supported languages
         """
         if isinstance(territories, str):
             territories = [territories]
-        
+
         gdfs = []
         for territory in territories:
             gdf = gpd.GeoDataFrame.from_features(
@@ -323,27 +322,27 @@ class GeoBoundaries:
 
     def continents(self,continents: Optional[Union[str, List[str]]] = None) -> gpd.GeoDataFrame:
         """
-        Retourne un GeoDataFrame des continents du monde.
-        
+        Returns a GeoDataFrame of the world's continents.
+
         Parameters:
         -----------
         continents : str, list of str, or None, optional
-            - Si str : retourne le GeoDataFrame du continent spécifié
-            - Si list : retourne le GeoDataFrame des continents dans la liste
-            - Si None : retourne tous les continents
-        
+            - If str: returns the GeoDataFrame of the specified continent
+            - If list: returns the GeoDataFrame of the continents in the list
+            - If None: returns every continent
+
         Returns:
         --------
         gpd.GeoDataFrame
-            GeoDataFrame contenant les géométries des continents demandés
-        
+            GeoDataFrame containing the geometries of the requested continents
+
         Raises:
         -------
         ValueError
-            Si un continent spécifié n'existe pas dans les données
+            If a specified continent doesn't exist in the data
         """
-        
-        # Charger et mettre en cache les données naturalearth
+
+        # Load and cache the naturalearth data
         if self._continents_gdf is None:
             naturalearth_url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
             world = gpd.read_file(naturalearth_url)
@@ -352,13 +351,13 @@ class GeoBoundaries:
             continents_gdf = continents_gdf[[continent_col, 'geometry']]
             self._continents_gdf = continents_gdf.rename(columns={continent_col: 'continent'})
 
-        # Si aucun continent spécifié, retourner tous les continents
+        # If no continent specified, return every continent
         if continents is None:
             return self._continents_gdf.copy()
 
         mapping = self._CONTINENT_MAPPING
 
-        # Si un seul continent (string)
+        # If a single continent (string)
         if isinstance(continents, str):
             continent_name = mapping.get(continents.lower(), continents)
             filtered_gdf = self._continents_gdf[self._continents_gdf['continent'].str.contains(continent_name, case=False, na=False)]
@@ -369,7 +368,7 @@ class GeoBoundaries:
 
             return filtered_gdf
 
-        # Si une liste de continents
+        # If a list of continents
         elif isinstance(continents, list):
             normalized_continents = [mapping.get(c.lower(), c) for c in continents]
             mask = self._continents_gdf['continent'].str.lower().isin([c.lower() for c in normalized_continents])
@@ -382,7 +381,7 @@ class GeoBoundaries:
             found_continents = filtered_gdf['continent'].str.lower().tolist()
             missing = [c for c in continents if mapping.get(c.lower(), c).lower() not in found_continents]
             if missing:
-                logger.info(f"Attention: Continents non trouvés: {', '.join(missing)}")
+                logger.warning(f"Attention: Continents non trouvés: {', '.join(missing)}")
 
             return filtered_gdf
 
@@ -392,48 +391,58 @@ class GeoBoundaries:
     def list_continents_names(self) -> dict:
         return dict(self._CONTINENT_MAPPING)
 
+    def sources(self) -> pd.DataFrame:
+        """Returns a table of the data sources used by this class."""
+        return pd.DataFrame([
+            {
+                "name": "geoBoundaries",
+                "url": "https://www.geoboundaries.org/",
+                "description": "Official administrative boundaries by country and ADM level.",
+            },
+        ])
+
 class Bound(GeoBoundaries):
     """
-    Client étendu pour l'API GeoBoundaries.
-    Hérite de GeoBoundaries et ajoute des méthodes utilitaires :
+    Extended client for the GeoBoundaries API.
+    Inherits from GeoBoundaries and adds utility methods:
     get_admin, get_country, get_continent, get_world.
     """
 
     def get_admin(self, territories: Union[str, List[str]], adm: Union[str, int], simplified: bool = True) -> gpd.GeoDataFrame:
         """
-        Récupère les limites administratives des territoires spécifiés.
-        Délègue à ``adm()`` de la classe parente.
+        Retrieves the administrative boundaries of the specified territories.
+        Delegates to the parent class's ``adm()``.
 
         Args:
-            territories: Territoire(s) à récupérer. Peut être :
-                - Un string unique : "Senegal", "SEN", "เซเนกัล"
-                - Une liste de strings : ["SEN", "Mali"], ["セネガル", "մալి"]
-            adm: Niveau administratif :
-                - 'ADM0' à 'ADM5' (si existant pour le pays)
-                - int de 0 à 5
-                - int -1 (retourne le plus petit niveau ADM disponible)
-            simplified: Si True, utilise la géométrie simplifiée (défaut: True)
+            territories: Territory(ies) to retrieve. Can be:
+                - A single string: "Senegal", "SEN", "เซเนกัล"
+                - A list of strings: ["SEN", "Mali"], ["セネガル", "մալի"]
+            adm: Administrative level:
+                - 'ADM0' to 'ADM5' (if it exists for the country)
+                - int from 0 to 5
+                - int -1 (returns the smallest available ADM level)
+            simplified: If True, uses simplified geometry (default: True)
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame des territoires
+            gpd.GeoDataFrame: GeoDataFrame of the territories
         """
         return self.adm(territories, adm, simplified)
 
     def get_country(self, name: Union[str, List[str]]) -> gpd.GeoDataFrame:
         """
-        Récupère les frontières (ADM0) d'un ou plusieurs pays.
+        Retrieves the boundaries (ADM0) of one or more countries.
 
         Args:
-            name: Nom du pays, code ISO2/ISO3, ou une liste de noms/codes.
-                  Exemples : "France", "FRA", ["France", "SEN", "Mali"]
+            name: Country name, ISO2/ISO3 code, or a list of names/codes.
+                  Examples: "France", "FRA", ["France", "SEN", "Mali"]
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame contenant la/les géométrie(s) du/des pays (niveau ADM0).
+            gpd.GeoDataFrame: GeoDataFrame containing the geometry/geometries of the country/countries (ADM0 level).
 
         Raises:
-            KeyError: Si un pays n'est pas trouvé.
+            KeyError: If a country isn't found.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> france = b.get_country("France")
             >>> pays = b.get_country(["France", "SEN", "Mali"])
@@ -442,19 +451,19 @@ class Bound(GeoBoundaries):
 
     def get_continent(self, name: Union[str, List[str]]) -> gpd.GeoDataFrame:
         """
-        Récupère la géométrie d'un ou plusieurs continents à partir de leur nom.
+        Retrieves the geometry of one or more continents from their name.
 
         Args:
-            name: Nom du continent ou liste de noms (français ou anglais).
-                  Exemples : "Africa", "Afrique", ["Europe", "Afrique"], ["Asia", "Amérique du Sud"]
+            name: Continent name or list of names (French or English).
+                  Examples: "Africa", "Afrique", ["Europe", "Afrique"], ["Asia", "Amérique du Sud"]
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame contenant la/les géométrie(s) du/des continent(s).
+            gpd.GeoDataFrame: GeoDataFrame containing the geometry/geometries of the continent(s).
 
         Raises:
-            ValueError: Si un continent n'est pas trouvé.
+            ValueError: If a continent isn't found.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> afrique = b.get_continent("Afrique")
             >>> europe = b.get_continent("Europe")
@@ -464,20 +473,20 @@ class Bound(GeoBoundaries):
 
     def get_world(self, level: str = "continent") -> gpd.GeoDataFrame:
         """
-        Retourne un GeoDataFrame du monde entier, agrégé par continent ou par pays.
+        Returns a GeoDataFrame of the whole world, aggregated by continent or by country.
 
         Args:
-            level: Niveau d'agrégation. Valeurs possibles :
-                - "continent" : retourne les géométries de tous les continents (par défaut)
-                - "country" : retourne les géométries de tous les pays
+            level: Aggregation level. Possible values:
+                - "continent": returns the geometries of every continent (default)
+                - "country": returns the geometries of every country
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame contenant les géométries du monde.
+            gpd.GeoDataFrame: GeoDataFrame containing the world's geometries.
 
         Raises:
-            ValueError: Si le niveau spécifié n'est pas "continent" ou "country".
+            ValueError: If the specified level isn't "continent" or "country".
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> continents = b.get_world("continent")
             >>> pays = b.get_world("country")
@@ -493,7 +502,7 @@ class Bound(GeoBoundaries):
             )
 
     def _load_countries(self) -> gpd.GeoDataFrame:
-        """Charge et met en cache les pays Natural Earth."""
+        """Loads and caches the Natural Earth countries."""
         if self._countries_gdf is None:
             naturalearth_url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
             world = gpd.read_file(naturalearth_url)
@@ -504,16 +513,16 @@ class Bound(GeoBoundaries):
 
     def get_neighbors(self, territory: Union[str, List[str]]) -> gpd.GeoDataFrame:
         """
-        Retourne les pays voisins (adjacents) d'un ou plusieurs territoires.
+        Returns the neighboring (adjacent) countries of one or more territories.
 
         Args:
-            territory: Nom du pays, code ISO2/ISO3, ou liste de noms/codes.
-                       Exemples : "France", "CIV", ["SEN", "Mali"]
+            territory: Country name, ISO2/ISO3 code, or list of names/codes.
+                       Examples: "France", "CIV", ["SEN", "Mali"]
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame des pays voisins (sans le pays lui-même).
+            gpd.GeoDataFrame: GeoDataFrame of the neighboring countries (excluding the country itself).
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> voisins = b.get_neighbors("CIV")
             >>> voisins = b.get_neighbors(["SEN", "Mali"])
@@ -521,14 +530,14 @@ class Bound(GeoBoundaries):
         target = self.get_country(territory)
         all_countries = self._load_countries()
 
-        # Union des géométries du territoire cible
+        # Union of the target territory's geometries
         target_union = target.union_all()
 
-        # Filtrer les pays qui touchent la géométrie cible
+        # Filter the countries that touch the target geometry
         mask = all_countries.geometry.intersects(target_union)
         neighbors = all_countries[mask].copy()
 
-        # Retirer le(s) pays cible(s) eux-mêmes (par intersection > 95% de la surface)
+        # Remove the target country/countries itself/themselves (via >95% area intersection)
         target_iso_codes = set()
         if isinstance(territory, str):
             iso3 = self.get_iso3(territory)
@@ -548,18 +557,18 @@ class Bound(GeoBoundaries):
     def get_countries_by_continent(self, continent: str, adm: Union[str, int] = 0,
                                     simplified: bool = True) -> gpd.GeoDataFrame:
         """
-        Retourne tous les pays d'un continent via GeoBoundaries.
+        Returns every country of a continent via GeoBoundaries.
 
         Args:
-            continent: Nom du continent (français ou anglais).
-                       Exemples : "Africa", "Afrique", "Europe"
-            adm: Niveau administratif (défaut: 0 = frontières nationales).
-            simplified: Si True, utilise la géométrie simplifiée.
+            continent: Continent name (French or English).
+                       Examples: "Africa", "Afrique", "Europe"
+            adm: Administrative level (default: 0 = national boundaries).
+            simplified: If True, uses simplified geometry.
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame de tous les pays du continent.
+            gpd.GeoDataFrame: GeoDataFrame of every country in the continent.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> afrique = b.get_countries_by_continent("Afrique")
         """
@@ -575,22 +584,22 @@ class Bound(GeoBoundaries):
             raise ValueError(f"Continent '{continent}' non trouvé. Disponibles : {available}")
 
         iso_codes_list = countries_in_continent['iso3'].tolist()
-        # Filtrer les codes invalides (-99, etc.)
+        # Filter out invalid codes (-99, etc.)
         iso_codes_list = [c for c in iso_codes_list if len(c) == 3 and c != '-99']
 
         return self.get_admin(iso_codes_list, adm=adm, simplified=simplified)
 
     def get_bbox(self, territory: Union[str, List[str]]) -> tuple:
         """
-        Retourne la bounding box d'un ou plusieurs territoires.
+        Returns the bounding box of one or more territories.
 
         Args:
-            territory: Nom du pays, code ISO2/ISO3, ou liste de noms/codes.
+            territory: Country name, ISO2/ISO3 code, or list of names/codes.
 
         Returns:
-            tuple: (west, south, east, north) en WGS-84.
+            tuple: (west, south, east, north) in WGS-84.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> b.get_bbox("CIV")
             (-8.599..., 4.357..., -2.494..., 10.740...)
@@ -601,15 +610,15 @@ class Bound(GeoBoundaries):
 
     def get_centroid(self, territory: Union[str, List[str]]) -> gpd.GeoDataFrame:
         """
-        Retourne le centroïde d'un ou plusieurs territoires.
+        Returns the centroid of one or more territories.
 
         Args:
-            territory: Nom du pays, code ISO2/ISO3, ou liste de noms/codes.
+            territory: Country name, ISO2/ISO3 code, or list of names/codes.
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame avec les centroïdes (Point) comme géométrie.
+            gpd.GeoDataFrame: GeoDataFrame with the centroids (Point) as geometry.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> centre = b.get_centroid("CIV")
         """
@@ -621,17 +630,17 @@ class Bound(GeoBoundaries):
     def clip(self, gdf: gpd.GeoDataFrame, territory: Union[str, List[str]],
              adm: Union[str, int] = 0) -> gpd.GeoDataFrame:
         """
-        Découpe un GeoDataFrame selon les frontières d'un territoire.
+        Clips a GeoDataFrame to a territory's boundaries.
 
         Args:
-            gdf: GeoDataFrame à découper.
-            territory: Nom du pays, code ISO, ou liste de noms/codes.
-            adm: Niveau administratif pour les frontières de découpe (défaut: 0).
+            gdf: GeoDataFrame to clip.
+            territory: Country name, ISO code, or list of names/codes.
+            adm: Administrative level for the clipping boundaries (default: 0).
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame découpé.
+            gpd.GeoDataFrame: Clipped GeoDataFrame.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> routes_civ = b.clip(routes_gdf, "CIV")
         """
@@ -640,16 +649,16 @@ class Bound(GeoBoundaries):
 
     def contains(self, territory: str, point: Union[tuple, list]) -> bool:
         """
-        Vérifie si un point (latitude, longitude) est à l'intérieur d'un territoire.
+        Checks whether a point (latitude, longitude) lies within a territory.
 
         Args:
-            territory: Nom du pays ou code ISO.
-            point: Tuple ou liste (latitude, longitude).
+            territory: Country name or ISO code.
+            point: Tuple or list (latitude, longitude).
 
         Returns:
-            bool: True si le point est dans le territoire.
+            bool: True if the point is within the territory.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> b.contains("CIV", (6.85, -5.28))
             True
@@ -661,15 +670,15 @@ class Bound(GeoBoundaries):
 
     def search_country(self, keyword: str) -> List[tuple]:
         """
-        Recherche floue dans les noms de pays.
+        Fuzzy search over country names.
 
         Args:
-            keyword: Mot-clé à rechercher (insensible à la casse).
+            keyword: Keyword to search for (case-insensitive).
 
         Returns:
-            List[tuple]: Liste de tuples (nom_pays, code_iso3) correspondants.
+            List[tuple]: List of matching (country_name, iso3_code) tuples.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> b.search_country("ivo")
             [("Côte d'Ivoire", 'CIV')]
@@ -680,29 +689,27 @@ class Bound(GeoBoundaries):
             for name, iso in countries_iso3.items()
             if keyword_lower in name.lower()
         ]
-        if not results:
-            logger.info(f"Aucun pays trouvé pour '{keyword}'.")
         return results
 
     def get_area(self, territory: Union[str, List[str]], unit: str = "km2") -> Union[float, gpd.GeoDataFrame]:
         """
-        Retourne la superficie d'un ou plusieurs territoires.
+        Returns the area of one or more territories.
 
         Args:
-            territory: Nom du pays, code ISO, ou liste de noms/codes.
-            unit: Unité de surface. "km2" (défaut), "m2", ou "ha".
+            territory: Country name, ISO code, or list of names/codes.
+            unit: Area unit. "km2" (default), "m2", or "ha".
 
         Returns:
-            float: Superficie si un seul territoire.
-            gpd.GeoDataFrame: GeoDataFrame avec colonne 'area' si plusieurs territoires.
+            float: Area if a single territory.
+            gpd.GeoDataFrame: GeoDataFrame with an 'area' column if several territories.
 
         Raises:
-            ValueError: Si l'unité n'est pas supportée.
+            ValueError: If the unit isn't supported.
 
-        Exemples:
+        Examples:
             >>> b = Bound()
             >>> b.get_area("CIV")
-            322460.0  # approximatif
+            322460.0  # approximate
             >>> b.get_area(["SEN", "Mali"])
         """
         divisors = {"m2": 1, "km2": 1e6, "ha": 1e4}
@@ -710,7 +717,7 @@ class Bound(GeoBoundaries):
             raise ValueError(f"Unité '{unit}' non supportée. Utilisez : {list(divisors.keys())}")
 
         gdf = self.get_country(territory)
-        # Projeter en Equal Area (Mollweide) pour un calcul de surface correct
+        # Project to Equal Area (Mollweide) for a correct area calculation
         gdf_proj = gdf.to_crs("ESRI:54009")
         gdf['area'] = gdf_proj.geometry.area / divisors[unit]
 

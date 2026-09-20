@@ -9,30 +9,30 @@ logger = logging.getLogger(__name__)
 
 class Map2D(Map):
     """
-    Carte 2D sans projection cartographique (axes matplotlib classiques).
-    Hérite de Map pour réutiliser la gestion des formats de papier, la
-    légende, les palettes, les polices, l'export, etc.
+    2D map without a cartographic projection (classic matplotlib axes).
+    Inherits from Map to reuse paper-format handling, legend, palettes,
+    fonts, export, etc.
 
-    Utile pour des traitements locaux où la projection n'est pas nécessaire,
-    par exemple des plans urbains, des parcelles cadastrales ou des
-    visualisations rapides de GeoDataFrames.
+    Useful for local processing where projection isn't needed, e.g.
+    city plans, cadastral parcels, or quick visualizations of
+    GeoDataFrames.
 
-    Paramètres:
+    Parameters:
     -----------
     figsize : tuple
-        Taille de la figure (largeur, hauteur) en pouces
+        Figure size (width, height) in inches
     title : str
-        Titre de la carte
+        Map title
     dpi : int
-        Résolution
+        Resolution
     verbose : bool
-        Afficher les messages d'information
+        Display information messages
     """
 
     def __init__(
         self,
         figsize=(12, 8),
-        title="Carte 2D",
+        title="Map 2D",
         dpi=150,
         verbose=True,
     ):
@@ -58,17 +58,17 @@ class Map2D(Map):
 
         if self.paper_info:
             self._log(
-                f"📄 Format de papier: {self.paper_info['format']} "
+                f"📄 Paper format: {self.paper_info['format']} "
                 f"({self.paper_info['orientation']}) - "
                 f"Dimensions: {self.paper_info['dimensions_mm']} mm - "
                 f'Figure: {self.figsize[0]:.1f}" x {self.figsize[1]:.1f}"'
             )
 
-    # -- rendu interne (sans cartopy) --------------------------------------
+    # -- internal rendering (no cartopy) ------------------------------------
 
     def _render(self, legend=True, auto_extent=True, tight_layout=True,
                 smart_centering=False, title=None, **kwargs):
-        """Rendu simplifié sans projection cartographique."""
+        """Simplified rendering without a cartographic projection."""
         for layer in self.layers:
             if layer.get("rendered"):
                 continue
@@ -91,33 +91,33 @@ class Map2D(Map):
         if tight_layout:
             self.fig.tight_layout()
 
-    # -- couche vectorielle (sans transform cartopy) -----------------------
+    # -- vector layer (no cartopy transform) --------------------------------
 
     def add_layer(self, gdf, column=None, cmap="viridis", label=None,
                   edgecolor="black", linewidth=0.5, alpha=0.8, **kwargs):
         """
-        Ajoute un GeoDataFrame comme couche.
+        Adds a GeoDataFrame as a layer.
 
-        Note : la signature diffère volontairement de Map.add_layer()
-        car Map2D ne gère que des GeoDataFrames (pas de rasters ni de
-        détection automatique de type).
+        Note: the signature intentionally differs from Map.add_layer()
+        because Map2D only handles GeoDataFrames (no rasters or
+        automatic type detection).
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            Données géographiques
+            Geographic data
         column : str, optional
-            Colonne pour la coloration
+            Column used for coloring
         cmap : str
-            Palette de couleurs
+            Color palette
         label : str
-            Étiquette pour la légende
+            Legend label
         edgecolor : str
-            Couleur des contours
+            Outline color
         linewidth : float
-            Largeur des contours
+            Outline width
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         """
         plot_kwargs = dict(
             ax=self.ax, edgecolor=edgecolor, linewidth=linewidth,
@@ -139,12 +139,12 @@ class Map2D(Map):
             )
         return self
 
-    # -- étiquettes --------------------------------------------------------
+    # -- labels --------------------------------------------------------------
 
     def add_labels(self, gdf, label_column, fontsize=9, color="black",
                    outline_width=2, outline_color="white", **text_kwargs):
         """
-        Ajoute des étiquettes au centroïde / position des géométries.
+        Adds labels at the centroid / position of each geometry.
         """
         for _, row in gdf.iterrows():
             geom = row.geometry
@@ -163,9 +163,9 @@ class Map2D(Map):
             )
         return self
 
-    # -- apparence ---------------------------------------------------------
+    # -- appearance ------------------------------------------------------------
 
     def hide_axes(self):
-        """Masque les axes."""
+        """Hides the axes."""
         self.ax.axis("off")
         return self

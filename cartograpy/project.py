@@ -31,19 +31,19 @@ TABULAR_EXTENSIONS = {
     ".parquet", ".feather", ".dbf",
 }
 
-# Extensions principales des formats multi-fichiers (celles qu'on charge)
+# Primary extensions of multi-file formats (the ones we load)
 _PRIMARY_EXTENSIONS = {".shp", ".tab"}
 
-# Familles de fichiers multi-composants (sidecars)
+# Multi-component file families (sidecars)
 SHAPEFILE_SIDECARS = {".shx", ".dbf", ".prj", ".cpg", ".sbn", ".sbx", ".qix"}
 TAB_SIDECARS = {".dat", ".map", ".id"}
 
-# Toutes les extensions sidecar (jamais des fichiers principaux à charger)
+# Every sidecar extension (never a primary file to load)
 _ALL_SIDECAR_EXTENSIONS = SHAPEFILE_SIDECARS | TAB_SIDECARS
 
 
 def _classify_extension(ext):
-    """Retourne le type ('vector', 'raster', 'tabular', 'other') d'une extension."""
+    """Returns the type ('vector', 'raster', 'tabular', 'other') of an extension."""
     ext = ext.lower()
     if ext in VECTOR_EXTENSIONS:
         return "vector"
@@ -55,7 +55,7 @@ def _classify_extension(ext):
 
 
 def _get_sidecars_for(ext):
-    """Retourne le set de sidecars associé à une extension principale."""
+    """Returns the set of sidecars associated with a primary extension."""
     ext = ext.lower()
     if ext == ".shp":
         return SHAPEFILE_SIDECARS
@@ -65,17 +65,17 @@ def _get_sidecars_for(ext):
 
 
 class Project:
-    """Gestionnaire de projet cartograpy."""
+    """cartograpy project manager."""
 
     def __init__(self, path=None, data_dir="data", output_dir="output", crs="EPSG:4326"):
         """
-        Crée un objet Project.
+        Creates a Project object.
 
         Args:
-            path: Répertoire racine du projet. Si None, utilise le répertoire courant.
-            data_dir: Nom du dossier de données (par défaut "data").
-            output_dir: Nom du dossier de sortie (par défaut "output").
-            crs: Système de coordonnées de référence (par défaut "EPSG:4326" / WGS 84).
+            path: Project root directory. If None, uses the current directory.
+            data_dir: Name of the data folder (default "data").
+            output_dir: Name of the output folder (default "output").
+            crs: Coordinate reference system (default "EPSG:4326" / WGS 84).
         """
         self.path = os.path.abspath(path) if path else os.getcwd()
         self.data_dir = os.path.join(self.path, data_dir)
@@ -88,33 +88,29 @@ class Project:
 
     def init(self):
         """
-        Initialise le projet en créant les dossiers data et output.
+        Initializes the project by creating the data and output folders.
 
         Returns:
-            str: Chemin absolu du projet initialisé.
+            str: Absolute path of the initialized project.
         """
         os.makedirs(self.data_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
-
-        logger.info(f"✅ Projet initialisé dans : {self.path}")
-        logger.info(f"   📁 {self.data_dir}")
-        logger.info(f"   📁 {self.output_dir}")
 
         return self.path
 
     @staticmethod
     def available_crs(auth_name="EPSG", crs_type=None, name_contains=""):
         """
-        Liste les CRS disponibles.
+        Lists the available CRSs.
 
         Args:
-            auth_name: Autorité (par défaut "EPSG"). Mettre None pour toutes.
-            crs_type: Type de CRS à filtrer (ex: "GEOGRAPHIC_2D", "PROJECTED").
-                      None pour tous les types.
-            name_contains: Filtre textuel sur le nom du CRS (insensible à la casse).
+            auth_name: Authority (default "EPSG"). Set to None for every authority.
+            crs_type: CRS type to filter on (e.g.: "GEOGRAPHIC_2D", "PROJECTED").
+                      None for every type.
+            name_contains: Text filter on the CRS name (case-insensitive).
 
         Returns:
-            list[dict]: Liste de dictionnaires {authority, code, name, type, area}.
+            list[dict]: List of {authority, code, name, type, area} dictionaries.
         """
         results = []
         crs_infos = query_crs_info(
@@ -138,37 +134,37 @@ class Project:
                  timestamp=False, raster_meta=None,
                  overwrite=False, mode="copy", category=None):
         """
-        Ajoute des données dans le dossier data du projet.
+        Adds data to the project's data folder.
 
         Args:
-            data: Données à sauvegarder (GeoDataFrame, DataFrame, DatasetReader,
-                  numpy array) ou chemin (str/Path) vers un fichier existant.
-            file_extension: Extension du fichier de sortie (ex: 'geojson', 'shp', 'tif').
-                            Optionnel si data est un chemin (l'extension est déduite).
-            filename: Nom de base du fichier (sans extension). Par défaut "output".
-            timestamp: Si True, ajoute un horodatage au nom. Par défaut False.
-            raster_meta: Métadonnées raster si data est un numpy array.
-            overwrite: Si True, écrase un fichier existant. Par défaut False.
-            mode: "copy" (défaut), "move" ou "link" (lien symbolique).
-                  N'a d'effet que si data est un chemin de fichier.
-            category: Sous-dossier cible dans data/ ("vector", "raster", "tabular").
-                      Si None, écrit directement dans data/.
+            data: Data to save (GeoDataFrame, DataFrame, DatasetReader,
+                  numpy array) or path (str/Path) to an existing file.
+            file_extension: Output file extension (e.g.: 'geojson', 'shp', 'tif').
+                            Optional if data is a path (the extension is inferred).
+            filename: Base file name (without extension). Defaults to "output".
+            timestamp: If True, adds a timestamp to the name. Defaults to False.
+            raster_meta: Raster metadata if data is a numpy array.
+            overwrite: If True, overwrites an existing file. Defaults to False.
+            mode: "copy" (default), "move", or "link" (symlink).
+                  Only has an effect if data is a file path.
+            category: Target subfolder within data/ ("vector", "raster", "tabular").
+                      If None, writes directly into data/.
 
         Returns:
-            str: Chemin absolu vers le fichier sauvegardé ou copié.
+            str: Absolute path to the saved or copied file.
 
         Raises:
-            FileNotFoundError: Si data est un chemin et que le fichier n'existe pas.
-            FileExistsError: Si le fichier existe déjà et overwrite=False.
-            ValueError: Si file_extension manque pour un objet en mémoire
-                        ou si mode est invalide.
+            FileNotFoundError: If data is a path and the file doesn't exist.
+            FileExistsError: If the file already exists and overwrite=False.
+            ValueError: If file_extension is missing for an in-memory object
+                        or if mode is invalid.
         """
         target_dir = self.data_dir
         if category:
             target_dir = os.path.join(self.data_dir, category)
         os.makedirs(target_dir, exist_ok=True)
 
-        # Si data est un chemin vers un fichier existant
+        # If data is a path to an existing file
         if isinstance(data, (str, os.PathLike)):
             src = os.path.abspath(str(data))
             if not os.path.isfile(src):
@@ -201,7 +197,7 @@ class Project:
             transfer_fn = _transfer[mode]
             transfer_fn(src, dest)
 
-            # Transférer les sidecars
+            # Transfer the sidecars
             copied_sidecars = []
             sidecars = _get_sidecars_for(src_ext)
             src_dir = os.path.dirname(src)
@@ -212,17 +208,12 @@ class Project:
                     transfer_fn(sidecar_src, sidecar_dest)
                     copied_sidecars.append(sidecar_ext)
 
-            verb = {"copy": "copiées", "move": "déplacées", "link": "liées"}[mode]
-            if copied_sidecars:
-                logger.info(f"✅ Données {verb} : {dest} (+ {', '.join(copied_sidecars)})")
-            else:
-                logger.info(f"✅ Données {verb} : {dest}")
             return dest
 
         if file_extension is None:
             raise ValueError("file_extension est requis quand data n'est pas un chemin de fichier.")
 
-        # Réouvrir le DatasetReader s'il est fermé
+        # Reopen the DatasetReader if it's closed
         if isinstance(data, rasterio.DatasetReader) and data.closed:
             data = rasterio.open(data.name)
 
@@ -236,20 +227,19 @@ class Project:
             )
 
         result = save(data, file_extension, filename=filepath, timestamp=timestamp, raster_meta=raster_meta)
-        logger.info(f"✅ Données ajoutées : {result}")
         return result
 
     def infos(self):
         """
-        Affiche un résumé du projet : chemins, CRS et inventaire des fichiers.
+        Displays a summary of the project: paths, CRS, and file inventory.
 
         Returns:
-            dict: Dictionnaire contenant les informations du projet.
+            dict: Dictionary containing the project's information.
         """
         data_exists = os.path.isdir(self.data_dir)
         output_exists = os.path.isdir(self.output_dir)
 
-        # Compter les fichiers par catégorie dans data_dir
+        # Count files by category in data_dir
         vector_count = 0
         raster_count = 0
         tabular_count = 0
@@ -270,7 +260,7 @@ class Project:
 
         total = vector_count + raster_count + tabular_count + other_count
 
-        # Compter les fichiers dans output_dir
+        # Count files in output_dir
         output_count = 0
         if output_exists:
             for _root, _dirs, files in os.walk(self.output_dir):
@@ -305,8 +295,8 @@ class Project:
 
     def organize_project(self):
         """
-        Parcourt data_dir, classe chaque fichier dans un sous-dossier
-        vector/, raster/ ou tabular/ et met à jour les listes correspondantes.
+        Walks data_dir, sorts each file into a vector/, raster/, or
+        tabular/ subfolder, and updates the corresponding lists.
         """
         vector_dir = os.path.join(self.data_dir, "vector")
         raster_dir = os.path.join(self.data_dir, "raster")
@@ -337,36 +327,31 @@ class Project:
         self.raster_files = os.listdir(raster_dir)
         self.tabular_files = os.listdir(tabular_dir)
 
-        logger.info(f"📂 Organisation terminée dans : {self.data_dir}")
-        logger.info(f"   vector/  → {len(self.vector_files)} fichier(s)")
-        logger.info(f"   raster/  → {len(self.raster_files)} fichier(s)")
-        logger.info(f"   tabular/ → {len(self.tabular_files)} fichier(s)")
-
     def _resolve_data(self, name, base_dir=None, strict=True):
         """
-        Résout le chemin d'un fichier dans un dossier du projet.
+        Resolves the path of a file within a project folder.
 
-        Cherche par nom exact, puis par nom de base (sans extension).
-        Ignore les fichiers sidecar (.shx, .dbf, .prj…) lors d'une
-        recherche par nom de base pour éviter les ambiguïtés.
+        Looks up by exact name, then by base name (without extension).
+        Ignores sidecar files (.shx, .dbf, .prj...) during a base-name
+        search to avoid ambiguity.
 
         Args:
-            name: Nom du fichier (avec ou sans extension).
-            base_dir: Dossier de recherche. Par défaut self.data_dir.
-            strict: Si True et que plusieurs fichiers correspondent au
-                    nom de base, lève une ValueError.
+            name: File name (with or without extension).
+            base_dir: Search folder. Defaults to self.data_dir.
+            strict: If True and several files match the base name,
+                    raises a ValueError.
 
         Returns:
-            str: Chemin absolu vers le fichier trouvé.
+            str: Absolute path to the file found.
 
         Raises:
-            FileNotFoundError: Si aucun fichier ne correspond.
-            ValueError: Si strict=True et plusieurs correspondances.
+            FileNotFoundError: If no file matches.
+            ValueError: If strict=True and there are several matches.
         """
         if base_dir is None:
             base_dir = self.data_dir
 
-        # 1. Chemin direct
+        # 1. Direct path
         candidate = os.path.join(base_dir, name)
         if os.path.isfile(candidate):
             return candidate
@@ -374,13 +359,13 @@ class Project:
         if not os.path.isdir(base_dir):
             raise FileNotFoundError(f"Dossier introuvable : {base_dir}")
 
-        # 2. Recherche par nom exact
+        # 2. Exact name search
         for root, _dirs, files in os.walk(base_dir):
             for f in files:
                 if f == name:
                     return os.path.join(root, f)
 
-        # 3. Recherche par nom de base (ignore les sidecars)
+        # 3. Base name search (ignores sidecars)
         matches = []
         for root, _dirs, files in os.walk(base_dir):
             for f in files:
@@ -406,14 +391,14 @@ class Project:
 
     def list_data(self, type_filter=None):
         """
-        Liste les fichiers présents dans le dossier data du projet.
+        Lists the files present in the project's data folder.
 
         Args:
-            type_filter: Filtrer par type ("vector", "raster", "tabular").
-                         None pour tout retourner.
+            type_filter: Filter by type ("vector", "raster", "tabular").
+                         None to return everything.
 
         Returns:
-            list[dict]: Liste de fichiers avec name, extension, type, size, path.
+            list[dict]: List of files with name, extension, type, size, path.
         """
         if not os.path.isdir(self.data_dir):
             return []
@@ -442,21 +427,21 @@ class Project:
 
     def list_datasets(self, type_filter=None):
         """
-        Liste les jeux de données logiques (un shapefile + ses sidecars = 1 entrée).
+        Lists the logical datasets (a shapefile + its sidecars = 1 entry).
 
         Args:
-            type_filter: Filtrer par type ("vector", "raster", "tabular").
-                         None pour tout retourner.
+            type_filter: Filter by type ("vector", "raster", "tabular").
+                         None to return everything.
 
         Returns:
-            list[dict]: Jeux de données avec name, type, main_file, sidecars,
+            list[dict]: Datasets with name, type, main_file, sidecars,
                         total_size, path.
         """
         all_files = self.list_data()
         if not all_files:
             return []
 
-        # Indexer par (répertoire, nom de base)
+        # Index by (directory, base name)
         groups: dict[tuple[str, str], list[dict]] = {}
         for entry in all_files:
             key = (os.path.dirname(entry["path"]), entry["name"])
@@ -469,7 +454,7 @@ class Project:
             if (dirpath, basename) in seen_keys:
                 continue
 
-            # Séparer principal / sidecars
+            # Separate primary files from sidecars
             primary = []
             sidecars = []
             for e in entries:
@@ -479,8 +464,8 @@ class Project:
                     primary.append(e)
 
             if not primary:
-                # Sidecars orphelins : les rattacher s'il y a un fichier principal
-                # avec le même basename dans le même dossier
+                # Orphan sidecars: attach them if there's a primary file
+                # with the same basename in the same folder
                 continue
 
             for p in primary:
@@ -504,34 +489,34 @@ class Project:
 
     def load_data(self, name, layer=None):
         """
-        Charge un fichier depuis le dossier data du projet.
+        Loads a file from the project's data folder.
 
         Args:
-            name: Nom du fichier (avec ou sans extension) ou chemin relatif
-                  dans le dossier data.
-            layer: Couche à charger pour les fichiers multi-couches (ex: GPX).
+            name: File name (with or without extension) or relative path
+                  within the data folder.
+            layer: Layer to load for multi-layer files (e.g.: GPX).
 
         Returns:
-            GeoDataFrame, DataFrame ou DatasetReader selon le type de fichier.
+            GeoDataFrame, DataFrame, or DatasetReader depending on the file type.
 
         Raises:
-            FileNotFoundError: Si le fichier n'existe pas dans le dossier data.
+            FileNotFoundError: If the file doesn't exist in the data folder.
         """
         path = self._resolve_data(name)
         return _load_data(path, layer=layer)
 
     def remove_data(self, name):
         """
-        Supprime un fichier (et ses sidecars) du dossier data du projet.
+        Removes a file (and its sidecars) from the project's data folder.
 
         Args:
-            name: Nom du fichier (avec extension) à supprimer.
+            name: Name of the file (with extension) to remove.
 
         Returns:
-            list[str]: Liste des fichiers supprimés.
+            list[str]: List of removed files.
 
         Raises:
-            FileNotFoundError: Si le fichier n'existe pas.
+            FileNotFoundError: If the file doesn't exist.
         """
         target = self._resolve_data(name)
 
@@ -539,34 +524,32 @@ class Project:
         base_name, ext = os.path.splitext(os.path.basename(target))
         target_dir = os.path.dirname(target)
 
-        # Supprimer le fichier principal
+        # Remove the primary file
         os.remove(target)
         removed.append(target)
 
-        # Supprimer les sidecars
+        # Remove the sidecars
         for sidecar_ext in _get_sidecars_for(ext):
             sidecar_path = os.path.join(target_dir, base_name + sidecar_ext)
             if os.path.isfile(sidecar_path):
                 os.remove(sidecar_path)
                 removed.append(sidecar_path)
 
-        logger.info(f"🗑️ {len(removed)} fichier(s) supprimé(s) : {os.path.basename(target)}"
-              + (" (+ sidecars)" if len(removed) > 1 else ""))
         return removed
 
     def rename_data(self, old, new):
         """
-        Renomme un jeu de données (fichier principal + sidecars).
+        Renames a dataset (primary file + sidecars).
 
         Args:
-            old: Nom actuel du fichier (avec ou sans extension).
-            new: Nouveau nom de base (sans extension).
+            old: Current file name (with or without extension).
+            new: New base name (without extension).
 
         Returns:
-            list[tuple[str, str]]: Paires (ancien chemin, nouveau chemin).
+            list[tuple[str, str]]: (old path, new path) pairs.
 
         Raises:
-            FileNotFoundError: Si le fichier source n'existe pas.
+            FileNotFoundError: If the source file doesn't exist.
         """
         target = self._resolve_data(old)
         target_dir = os.path.dirname(target)
@@ -574,12 +557,12 @@ class Project:
 
         renamed = []
 
-        # Renommer le fichier principal
+        # Rename the primary file
         new_path = os.path.join(target_dir, new + ext)
         os.rename(target, new_path)
         renamed.append((target, new_path))
 
-        # Renommer les sidecars
+        # Rename the sidecars
         for sidecar_ext in _get_sidecars_for(ext):
             sidecar_old = os.path.join(target_dir, old_base + sidecar_ext)
             if os.path.isfile(sidecar_old):
@@ -587,61 +570,59 @@ class Project:
                 os.rename(sidecar_old, sidecar_new)
                 renamed.append((sidecar_old, sidecar_new))
 
-        logger.info(f"✏️ {len(renamed)} fichier(s) renommé(s) : {old_base} → {new}")
         return renamed
 
     def get_path(self, name, folder="data"):
         """
-        Retourne le chemin absolu d'un fichier dans le projet.
+        Returns the absolute path of a file in the project.
 
         Args:
-            name: Nom du fichier ou chemin relatif.
-            folder: "data" ou "output". Par défaut "data".
+            name: File name or relative path.
+            folder: "data" or "output". Defaults to "data".
 
         Returns:
-            str: Chemin absolu du fichier.
+            str: Absolute path of the file.
 
         Raises:
-            FileNotFoundError: Si le fichier n'existe pas.
+            FileNotFoundError: If the file doesn't exist.
         """
         base = self.data_dir if folder == "data" else self.output_dir
         return self._resolve_data(name, base_dir=base)
 
     def set_crs(self, crs):
         """
-        Change le CRS du projet.
+        Changes the project's CRS.
 
         Args:
-            crs: Nouveau CRS (code EPSG, chaîne WKT, etc.).
+            crs: New CRS (EPSG code, WKT string, etc.).
 
         Returns:
-            pyproj.CRS: Le nouveau CRS.
+            pyproj.CRS: The new CRS.
         """
         self.crs = CRS.from_user_input(crs)
-        logger.info(f"🌐 CRS mis à jour : {self.crs}")
         return self.crs
 
     def save_output(self, data, file_extension, filename="output",
                     timestamp=False, raster_meta=None, overwrite=False):
         """
-        Sauvegarde des données dans le dossier output du projet.
+        Saves data to the project's output folder.
 
-        Pendant de add_data mais ciblant output_dir.
+        Counterpart to add_data but targeting output_dir.
 
         Args:
-            data: Données à sauvegarder (GeoDataFrame, DataFrame, DatasetReader,
+            data: Data to save (GeoDataFrame, DataFrame, DatasetReader,
                   numpy array).
-            file_extension: Extension du fichier de sortie.
-            filename: Nom de base du fichier (sans extension).
-            timestamp: Si True, ajoute un horodatage au nom.
-            raster_meta: Métadonnées raster si data est un numpy array.
-            overwrite: Si True, écrase un fichier existant.
+            file_extension: Output file extension.
+            filename: Base file name (without extension).
+            timestamp: If True, adds a timestamp to the name.
+            raster_meta: Raster metadata if data is a numpy array.
+            overwrite: If True, overwrites an existing file.
 
         Returns:
-            str: Chemin absolu vers le fichier sauvegardé.
+            str: Absolute path to the saved file.
 
         Raises:
-            FileExistsError: Si le fichier existe déjà et overwrite=False.
+            FileExistsError: If the file already exists and overwrite=False.
         """
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -658,18 +639,17 @@ class Project:
 
         result = save(data, file_extension, filename=filepath,
                       timestamp=timestamp, raster_meta=raster_meta)
-        logger.info(f"✅ Sortie sauvegardée : {result}")
         return result
 
     def save_manifest(self):
         """
-        Sauvegarde un fichier project.json décrivant le projet.
+        Saves a project.json file describing the project.
 
-        Le manifeste contient le CRS, les dates, l'inventaire des données
-        et les métadonnées du projet.
+        The manifest contains the CRS, dates, data inventory, and the
+        project's metadata.
 
         Returns:
-            str: Chemin vers le fichier project.json.
+            str: Path to the project.json file.
         """
         manifest_path = os.path.join(self.path, "project.json")
 
@@ -696,18 +676,17 @@ class Project:
         with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest, f, ensure_ascii=False, indent=2)
 
-        logger.info(f"📄 Manifeste sauvegardé : {manifest_path}")
         return manifest_path
 
     def load_manifest(self):
         """
-        Charge le fichier project.json et retourne son contenu.
+        Loads the project.json file and returns its contents.
 
         Returns:
-            dict: Contenu du manifeste.
+            dict: Contents of the manifest.
 
         Raises:
-            FileNotFoundError: Si project.json n'existe pas.
+            FileNotFoundError: If project.json doesn't exist.
         """
         manifest_path = os.path.join(self.path, "project.json")
         if not os.path.isfile(manifest_path):
@@ -721,13 +700,12 @@ class Project:
 
     def clean_output(self):
         """
-        Supprime tous les fichiers du dossier output.
+        Removes every file from the output folder.
 
         Returns:
-            int: Nombre de fichiers supprimés.
+            int: Number of files removed.
         """
         if not os.path.isdir(self.output_dir):
-            logger.info("📁 Le dossier output n'existe pas.")
             return 0
 
         count = 0
@@ -738,20 +716,19 @@ class Project:
             for d in dirs:
                 os.rmdir(os.path.join(root, d))
 
-        logger.info(f"🧹 {count} fichier(s) supprimé(s) du dossier output.")
         return count
 
     def validate(self, deep=False):
         """
-        Vérifie l'intégrité du projet.
+        Checks the project's integrity.
 
         Args:
-            deep: Si True, effectue des vérifications approfondies :
-                  orphelins sidecars, noms de base ambigus, lisibilité
-                  réelle des fichiers géospatiaux.
+            deep: If True, performs thorough checks: orphan sidecars,
+                  ambiguous base names, actual readability of geospatial
+                  files.
 
         Returns:
-            dict: Rapport de validation avec les statuts et éventuels avertissements.
+            dict: Validation report with statuses and any warnings.
         """
         report = {
             "valid": True,
@@ -768,19 +745,19 @@ class Project:
         if not report["output_dir_exists"]:
             report["warnings"].append(f"Dossier output introuvable : {self.output_dir}")
 
-        # Vérifier les fichiers dans data_dir
+        # Check the files in data_dir
         if report["data_dir_exists"]:
             for root, _dirs, files in os.walk(self.data_dir):
                 shp_basenames = set()
                 all_files = set(files)
 
-                # Collecter des infos pour la validation approfondie
+                # Collect info for the thorough validation
                 basenames: dict[str, list[str]] = {}
 
                 for f in files:
                     full_path = os.path.join(root, f)
 
-                    # Vérifier la lisibilité
+                    # Check readability
                     if not os.access(full_path, os.R_OK):
                         report["warnings"].append(f"Fichier non lisible : {full_path}")
 
@@ -793,7 +770,7 @@ class Project:
                     if deep:
                         basenames.setdefault(name, []).append(ext_lower)
 
-                # Vérifier les sidecars obligatoires pour chaque shapefile
+                # Check the required sidecars for each shapefile
                 for basename in shp_basenames:
                     for required_ext in (".shx", ".dbf"):
                         if basename + required_ext not in all_files:
@@ -803,11 +780,11 @@ class Project:
                             )
 
                 if deep:
-                    # Sidecars orphelins
+                    # Orphan sidecars
                     for f in files:
                         name, ext = os.path.splitext(f)
                         if ext.lower() in _ALL_SIDECAR_EXTENSIONS:
-                            # Vérifier qu'un fichier principal existe
+                            # Check that a primary file exists
                             primary_ext = ".shp" if ext.lower() in SHAPEFILE_SIDECARS else ".tab"
                             if name + primary_ext not in all_files:
                                 report["warnings"].append(
@@ -815,8 +792,8 @@ class Project:
                                     f"(pas de {name}{primary_ext} trouvé)"
                                 )
 
-                    # Noms de base ambigus (même nom, extensions différentes
-                    # qui sont toutes des primaires)
+                    # Ambiguous base names (same name, different extensions
+                    # that are all primary)
                     for name, exts in basenames.items():
                         primary_exts = [
                             e for e in exts
@@ -828,7 +805,7 @@ class Project:
                                 f"{primary_exts}"
                             )
 
-                    # Tenter d'ouvrir les fichiers géospatiaux
+                    # Try to open the geospatial files
                     for f in files:
                         full_path = os.path.join(root, f)
                         _name, ext = os.path.splitext(f)
@@ -867,6 +844,6 @@ class Project:
 
 
 def init_project(path=None):
-    """Raccourci pour créer et initialiser un projet rapidement."""
+    """Shortcut to quickly create and initialize a project."""
     project = Project(path)
     return project.init()

@@ -16,18 +16,18 @@ logger = logging.getLogger(__name__)
 def read_image(path, color=None):
     ext = os.path.splitext(path)[1].lower()
     if ext == ".svg":
-        # On lit le SVG comme texte
+        # Read the SVG as text
         with open(path, "r", encoding="utf-8") as f:
             svg_content = f.read()
 
-        # Si une couleur est spécifiée, on modifie tous les "fill"
+        # If a color is specified, change every "fill" attribute
         if color:
             import re
 
-            # Change tous les attributs fill="..." par la nouvelle couleur
+            # Replace every fill="..." attribute with the new color
             svg_content = re.sub(r'fill="[^"]*"', f'fill="{color}"', svg_content)
 
-        # On transforme la chaîne SVG en image
+        # Turn the SVG string into an image
         from tempfile import NamedTemporaryFile
 
         with NamedTemporaryFile(
@@ -39,10 +39,10 @@ def read_image(path, color=None):
         try:
             drawing = svg2rlg(tmp_svg_path)
             buf = BytesIO()
-            # Fond transparent (au lieu du blanc opaque par défaut) : sans
-            # bg=transparent + backendFmt="RGBA", le rendu produit un carré
-            # blanc plein derrière l'icône (flèche du Nord, logo...) une
-            # fois posée sur la carte.
+            # Transparent background (instead of the default opaque white):
+            # without bg=transparent + backendFmt="RGBA", the render produces
+            # a solid white square behind the icon (north arrow, logo...)
+            # once placed on the map.
             renderPM.drawToFile(
                 drawing, buf, fmt="PNG",
                 bg=_rl_colors.transparent, backendFmt="RGBA",
@@ -70,36 +70,36 @@ def plot_choropleth(
     show_legend=True,
 ):
     """
-    Crée une carte choroplèthe avec des étiquettes possédant un contour coloré.
+    Creates a choropleth map with labels that have a colored outline.
 
-    Paramètres:
+    Parameters:
     -----------
     geodf : GeoDataFrame
-        Le GeoDataFrame à afficher
+        The GeoDataFrame to display
     column_to_plot : str
-        Colonne numérique pour la colorisation
+        Numeric column used for coloring
     label_column : str
-        Colonne des étiquettes
+        Column used for labels
     label_title : str, optional
-        Titre de la barre de couleur
+        Colorbar title
     title : str, optional
-        Titre de la carte
+        Map title
     cmap : str, optional
-        Palette de couleurs
+        Color palette
     size : float, optional
-        Taille de la figure
+        Figure size
     text_outline_color : str, optional
-        Couleur du contour des étiquettes
+        Label outline color
     text_outline_width : float, optional
-        Largeur du contour des étiquettes
+        Label outline width
 
-    Retourne:
+    Returns:
     --------
     BytesIO
-        L'image générée au format PNG
+        The generated image in PNG format
     """
 
-    # Création du graphique
+    # Create the plot
     if axes:
         fig = plt.figure(figsize=(10 * size, 8.5 * size))
         ax = fig.add_subplot(111, projection=ccrs.PlateCarree())
@@ -108,13 +108,13 @@ def plot_choropleth(
         fig, ax = plt.subplots(figsize=(10 * size, 8.5 * size))
         ax.grid(False)
         ax.axis("off")
-    # Normalisation des valeurs pour la colorisation
+    # Normalize values for coloring
     vmin = geodf[column_to_plot].min()
     vmax = geodf[column_to_plot].max()
     norm = plt.Normalize(vmin=vmin, vmax=vmax)
-    cmap = load_cmap(cmap)  # Correction ici
+    cmap = load_cmap(cmap)  # Fixed here
 
-    # Ajout des labels ou étiquettes (avec contour) au centre des polygones
+    # Add labels (with outline) at the center of each polygon
     for idx, row in geodf.iterrows():
         polygons = (
             [row.geometry]
@@ -135,7 +135,7 @@ def plot_choropleth(
             centroid = poly.centroid
             label_text = f"{row[label_column]}\n{row[column_to_plot]:,.0f}"
 
-            # Ajout du contour au texte
+            # Add the outline to the text
             ax.text(
                 centroid.x,
                 centroid.y,
@@ -145,7 +145,7 @@ def plot_choropleth(
                 va="center",
                 color="#0f172a",
                 path_effects=[
-                    patheffects.withStroke(  # Correction ici
+                    patheffects.withStroke(  # Fixed here
                         linewidth=text_outline_width, foreground=text_outline_color
                     )
                 ],

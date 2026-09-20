@@ -5,22 +5,22 @@ logger = logging.getLogger(__name__)
 
 class WebMap:
     """
-    Carte interactive basée sur Folium / Leaflet.
+    Interactive map based on Folium / Leaflet.
 
-    Paramètres:
+    Parameters:
     -----------
     location : tuple
-        Centre initial (latitude, longitude)
+        Initial center (latitude, longitude)
     zoom_start : int
-        Niveau de zoom initial
+        Initial zoom level
     tiles : str
-        Fond de carte (ex: 'OpenStreetMap', 'CartoDB positron', 'Stamen Terrain')
+        Basemap (e.g. 'OpenStreetMap', 'CartoDB positron', 'Stamen Terrain')
     width : str
-        Largeur de la carte ('100%' ou pixels)
+        Map width ('100%' or pixels)
     height : str
-        Hauteur de la carte ('600px' ou pourcentage)
+        Map height ('600px' or percentage)
 
-    Exemple:
+    Example:
     --------
     >>> wm = WebMap(location=(5.35, -4.0), zoom_start=7)
     >>> wm.add_layer(gdf, column="population", cmap="YlOrRd")
@@ -51,30 +51,30 @@ class WebMap:
             height=height,
         )
 
-    # -- couche vectorielle ------------------------------------------------
+    # -- vector layer --------------------------------------------------------
 
     def add_layer(self, gdf, column=None, cmap="YlOrRd",
                   style_function=None, tooltip_columns=None,
                   popup_columns=None, name=None, **kwargs):
         """
-        Ajoute un GeoDataFrame comme couche GeoJson ou Choropleth.
+        Adds a GeoDataFrame as a GeoJson or Choropleth layer.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            Données géographiques
+            Geographic data
         column : str, optional
-            Colonne pour la coloration choroplèthe
+            Column used for choropleth coloring
         cmap : str
-            Palette de couleurs
+            Color palette
         style_function : callable, optional
-            Fonction de style folium
+            Folium style function
         tooltip_columns : list, optional
-            Colonnes affichées au survol
+            Columns shown on hover
         popup_columns : list, optional
-            Colonnes affichées au clic
+            Columns shown on click
         name : str, optional
-            Nom de la couche (pour le contrôle de couches)
+            Layer name (for the layer control)
         """
         import branca.colormap as bcm
 
@@ -126,50 +126,50 @@ class WebMap:
         layer.add_to(self.map)
         return self
 
-    # -- marqueurs ---------------------------------------------------------
+    # -- markers ---------------------------------------------------------------
 
     def add_marker(self, location, popup=None, tooltip=None, icon=None):
         """
-        Ajoute un marqueur.
+        Adds a marker.
 
-        Paramètres:
+        Parameters:
         -----------
         location : tuple
             (latitude, longitude)
         popup : str, optional
-            Texte affiché au clic
+            Text shown on click
         tooltip : str, optional
-            Texte affiché au survol
+            Text shown on hover
         icon : folium.Icon, optional
-            Icône personnalisée
+            Custom icon
         """
         self._folium.Marker(
             location=location, popup=popup, tooltip=tooltip, icon=icon,
         ).add_to(self.map)
         return self
 
-    # -- apparence ---------------------------------------------------------
+    # -- appearance ------------------------------------------------------------
 
     def add_layer_control(self):
-        """Ajoute un contrôle de couches (LayerControl)."""
+        """Adds a layer control (LayerControl)."""
         self._folium.LayerControl().add_to(self.map)
         return self
 
     def fit_bounds(self, gdf):
-        """Adapte le zoom aux limites d'un GeoDataFrame."""
+        """Fits the zoom to a GeoDataFrame's bounds."""
         gdf_wgs84 = gdf.to_crs(epsg=4326) if gdf.crs and gdf.crs.to_epsg() != 4326 else gdf
         bounds = gdf_wgs84.total_bounds  # minx, miny, maxx, maxy
         self.map.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
         return self
 
-    # -- sortie ------------------------------------------------------------
+    # -- output ------------------------------------------------------------
 
     def show(self):
-        """Renvoie la carte Folium (affichage automatique dans un notebook)."""
+        """Returns the Folium map (auto-displayed in a notebook)."""
         return self.map
 
     def save(self, filename="map.html"):
-        """Sauvegarde la carte en HTML."""
+        """Saves the map to HTML."""
         self.map.save(filename)
         return self
 

@@ -36,14 +36,14 @@ logger = logging.getLogger(__name__)
 
 class Map:
     """
-    Classe pour créer des cartes interactives avec matplotlib, geopandas et cartopy.
-    Permet d'ajouter des GeoDataFrames avec des styles personnalisés.
-    Support des formats de papier internationaux (A0, A1, A2, A3, A4, B0, B1, B2, B3, C0, C1, C2, C3).
+    Class to create interactive maps with matplotlib, geopandas, and cartopy.
+    Allows adding GeoDataFrames with custom styles.
+    Supports international paper formats (A0, A1, A2, A3, A4, B0, B1, B2, B3, C0, C1, C2, C3).
     """
 
-    # Dimensions des formats de papier en millimètres (largeur x hauteur)
+    # Paper format dimensions in millimeters (width x height)
     PAPER_SIZES = {
-        # Série A (ISO 216)
+        # A series (ISO 216)
         "4A0": (1682, 2378),
         "2A0": (1189, 1682),
         "A0": (841, 1189),
@@ -57,7 +57,7 @@ class Map:
         "A8": (52, 74),
         "A9": (37, 52),
         "A10": (26, 37),
-        # Série B (ISO 216)
+        # B series (ISO 216)
         "B0": (1000, 1414),
         "B1": (707, 1000),
         "B2": (500, 707),
@@ -69,7 +69,7 @@ class Map:
         "B8": (62, 88),
         "B9": (44, 62),
         "B10": (31, 44),
-        # Série C (ISO 269) - principalement pour les enveloppes
+        # C series (ISO 269) - mainly for envelopes
         "C0": (917, 1297),
         "C1": (648, 917),
         "C2": (458, 648),
@@ -90,31 +90,31 @@ class Map:
         projection=ccrs.PlateCarree(),
         data_crs="EPSG:4326",
         dpi=300,
-        verbose=True,
+        verbose=False,
         basemap=True,
     ):
         """
-        Initialise une nouvelle carte avec cartopy.
+        Initializes a new map with cartopy.
 
-        Paramètres:
+        Parameters:
         -----------
         figsize : tuple, str, or dict
-            - tuple: Taille de la figure (largeur, hauteur) en pouces
-            - str: Format de papier (ex: 'A4', 'A3', 'B2', 'C1')
+            - tuple: Figure size (width, height) in inches
+            - str: Paper format (e.g.: 'A4', 'A3', 'B2', 'C1')
             - dict: {'paper': 'A4', 'orientation': 'portrait'/'landscape'}
         title : str
-            Titre de la carte
+            Map title
         projection : cartopy.crs
-            Projection cartographique (par défaut PlateCarree)
+            Cartographic projection (defaults to PlateCarree)
         data_crs : str
-            Système de coordonnées des données (par défaut WGS84)
+            Data coordinate system (defaults to WGS84)
         verbose : bool
-            Afficher les messages d'information (par défaut True)
+            Display information messages (defaults to False)
         basemap : bool
-            Ajouter automatiquement côtes et frontières (par défaut True).
-            Mettre à False pour une carte vierge (garde la projection cartopy,
-            utile si vous avez besoin de add_north_arrow/add_scale_bar/add_inset_map
-            sans le fond côtes+frontières).
+            Automatically add coastlines and borders (defaults to True).
+            Set to False for a blank map (keeps the cartopy projection,
+            useful if you need add_north_arrow/add_scale_bar/add_inset_map
+            without the coastlines+borders background).
         """
         self.verbose = verbose
         self.basemap = basemap
@@ -139,18 +139,18 @@ class Map:
         self._background_image_artist = None
         self._first_layer = False
 
-        # Configuration de base
+        # Basic configuration
         self.ax.set_title(title, fontsize=16, fontweight="bold")
 
-        # Limites par défaut (monde entier)
+        # Default bounds (whole world)
         self.bounds = [-180, -90, 180, 90]  # [minx, miny, maxx, maxy]
 
-        # Ajout des caractéristiques par défaut
+        # Add the default features
         if self.basemap:
             self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
             self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 
-        # Affichage des informations sur le format de papier
+        # Display the paper format information
         if self.paper_info:
             self._log(
                 f"📄 Format de papier: {self.paper_info['format']} "
@@ -159,23 +159,23 @@ class Map:
                 f'Figure: {self.figsize[0]:.1f}" x {self.figsize[1]:.1f}"'
             )
 
-    # --- Helpers internes -------------------------------------------------
+    # --- Internal helpers ---------------------------------------------------
 
     def _log(self, *args, **kwargs):
-        """Affiche un message seulement si verbose est activé."""
+        """Displays a message only if verbose is enabled."""
         if self.verbose:
             logger.info(" ".join(str(a) for a in args), **kwargs)
 
     def _invalidate_render(self):
-        """Réinitialise le canvas et marque les couches pour re-rendu."""
+        """Resets the canvas and flags the layers for re-rendering."""
         self.ax.clear()
         self.ax.set_title(
             self.title,
             fontsize=16 if self.projection else 14,
             fontweight="bold",
         )
-        # ax.clear() détruit tous les artistes (dont grille et flèche du
-        # Nord) : les références existantes sont désormais obsolètes.
+        # ax.clear() destroys every artist (including the grid and north
+        # arrow): the existing references are now stale.
         self.gridlines = None
         self._north_arrow_artist = None
         if self.projection is not None:
@@ -189,11 +189,11 @@ class Map:
             layer["rendered"] = False
 
     def _reapply_persistent_artists(self):
-        """Recrée l'image de fond, la grille et la flèche du Nord après un
-        ax.clear()/fig.clear() : contrairement aux layers et à la scale bar,
-        elles ne sont pas re-dessinées automatiquement par _render()."""
+        """Recreates the background image, grid, and north arrow after an
+        ax.clear()/fig.clear(): unlike the layers and scale bar, they
+        aren't automatically redrawn by _render()."""
         if self._background_image_kwargs is not None:
-            self._background_image_artist = None  # l'ancien artiste a été effacé
+            self._background_image_artist = None  # the old artist was cleared
             self.add_background_image(**self._background_image_kwargs)
         if self._gridline_kwargs is not None:
             self.add_gridlines(**self._gridline_kwargs)
@@ -201,11 +201,11 @@ class Map:
             self.add_north_arrow(**self._north_arrow_kwargs)
 
     def __enter__(self):
-        """Support du context manager (with Map(...) as m:)."""
+        """Context manager support (with Map(...) as m:)."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Ferme la figure matplotlib à la sortie du context manager."""
+        """Closes the matplotlib figure when exiting the context manager."""
         plt.close(self.fig)
         return False
 
@@ -215,16 +215,16 @@ class Map:
 
     def _process_figsize(self, figsize):
         """
-        Traite le paramètre figsize pour déterminer la taille de la figure.
+        Processes the figsize parameter to determine the figure size.
 
-        Paramètres:
+        Parameters:
         -----------
         figsize : tuple, str, or dict
-            Format désiré
+            Desired format
 
         Returns:
         --------
-        tuple: Taille de la figure en pouces (largeur, hauteur)
+        tuple: Figure size in inches (width, height)
         """
         if isinstance(figsize, tuple):
             return figsize
@@ -241,16 +241,16 @@ class Map:
 
     def _get_paper_info(self, figsize):
         """
-        Retourne les informations sur le format de papier utilisé.
+        Returns information about the paper format used.
 
-        Paramètres:
+        Parameters:
         -----------
         figsize : tuple, str, or dict
-            Format désiré
+            Desired format
 
         Returns:
         --------
-        dict or None: Informations sur le format de papier
+        dict or None: Paper format information
         """
         if isinstance(figsize, tuple):
             return None
@@ -265,9 +265,9 @@ class Map:
 
         if paper in self.PAPER_SIZES:
             width_mm, height_mm = self.PAPER_SIZES[paper]
-            # PAPER_SIZES stocke les dimensions en référence portrait
-            # (largeur < hauteur) ; les échanger en paysage pour rester
-            # cohérent avec self.figsize (voir _paper_to_inches).
+            # PAPER_SIZES stores the dimensions in portrait reference
+            # (width < height); swap them in landscape to stay consistent
+            # with self.figsize (see _paper_to_inches).
             if orientation.lower() == "landscape":
                 width_mm, height_mm = height_mm, width_mm
             return {
@@ -280,18 +280,18 @@ class Map:
 
     def _paper_to_inches(self, paper_format, orientation="landscape"):
         """
-        Convertit un format de papier en dimensions en pouces pour matplotlib.
+        Converts a paper format into inch dimensions for matplotlib.
 
-        Paramètres:
+        Parameters:
         -----------
         paper_format : str
-            Format de papier (ex: 'A4', 'A3', 'B2')
+            Paper format (e.g.: 'A4', 'A3', 'B2')
         orientation : str
-            'portrait' ou 'landscape'
+            'portrait' or 'landscape'
 
         Returns:
         --------
-        tuple: Dimensions en pouces (largeur, hauteur)
+        tuple: Dimensions in inches (width, height)
         """
         paper_format = paper_format.upper()
 
@@ -302,10 +302,10 @@ class Map:
                 f"Formats disponibles: {available_formats}"
             )
 
-        # Récupération des dimensions en mm
+        # Get the dimensions in mm
         width_mm, height_mm = self.PAPER_SIZES[paper_format]
 
-        # Conversion en pouces (1 pouce = 25.4 mm)
+        # Convert to inches (1 inch = 25.4 mm)
         width_inches = width_mm / 25.4
         height_inches = height_mm / 25.4
 
@@ -319,30 +319,30 @@ class Map:
 
     def set_paper(self, paper_format, orientation="landscape"):
         """
-        Définit le format de papier et l'orientation de la carte.
+        Sets the map's paper format and orientation.
 
-        Paramètres:
+        Parameters:
         -----------
         paper_format : str
-            Format de papier (ex: 'A4', 'A3', 'B2', 'C1')
+            Paper format (e.g.: 'A4', 'A3', 'B2', 'C1')
         orientation : str
-            'portrait' ou 'landscape'
+            'portrait' or 'landscape'
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
-        # Calcul des nouvelles dimensions
+        # Compute the new dimensions
         new_figsize = self._paper_to_inches(paper_format, orientation)
 
-        # dimensions_mm doit suivre la même convention que new_figsize
-        # (largeur/hauteur échangées en paysage), sinon les mm affichés
-        # contredisent les pouces de la même chaîne d'info.
+        # dimensions_mm must follow the same convention as new_figsize
+        # (width/height swapped in landscape), otherwise the displayed mm
+        # would contradict the inches in the same info string.
         width_mm, height_mm = self.PAPER_SIZES[paper_format.upper()]
         if orientation.lower() == "landscape":
             width_mm, height_mm = height_mm, width_mm
 
-        # Mise à jour des informations
+        # Update the information
         self.figsize = new_figsize
         self.paper_info = {
             "format": paper_format.upper(),
@@ -351,10 +351,10 @@ class Map:
             "dimensions_inches": f"{new_figsize[0]:.1f} x {new_figsize[1]:.1f}",
         }
 
-        # Redimensionnement de la figure
+        # Resize the figure
         self.fig.set_size_inches(new_figsize[0], new_figsize[1])
 
-        # Affichage des informations
+        # Display the information
         self._log(
             f"📄 Format mis à jour: {self.paper_info['format']} "
             f"({self.paper_info['orientation']}) - "
@@ -366,16 +366,16 @@ class Map:
 
     def list_paper_formats(self):
         """
-        Affiche tous les formats de papier disponibles avec leurs dimensions.
+        Displays all available paper formats with their dimensions.
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         logger.info("📋 Formats de papier disponibles:")
         logger.info("=" * 50)
 
-        # Série A
+        # Series A
         logger.info("🅰️  Série A (ISO 216):")
         for format_name, (width, height) in self.PAPER_SIZES.items():
             if format_name.startswith("A") or format_name.endswith("A0"):
@@ -384,7 +384,7 @@ class Map:
                     f'({width/25.4:4.1f}" x {height/25.4:4.1f}")'
                 )
 
-        # Série B
+        # Series B
         logger.info("\n🅱️  Série B (ISO 216):")
         for format_name, (width, height) in self.PAPER_SIZES.items():
             if format_name.startswith("B"):
@@ -393,7 +393,7 @@ class Map:
                     f'({width/25.4:4.1f}" x {height/25.4:4.1f}")'
                 )
 
-        # Série C
+        # Series C
         logger.info("\n🅲  Série C (ISO 269 - Enveloppes):")
         for format_name, (width, height) in self.PAPER_SIZES.items():
             if format_name.startswith("C"):
@@ -419,18 +419,18 @@ class Map:
 
     def _validate_geodataframe(self, gdf, expected_geom_type=None):
         """
-        Valide et prépare un GeoDataFrame pour l'affichage.
+        Validates and prepares a GeoDataFrame for display.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame à valider
+            GeoDataFrame to validate
         expected_geom_type : str, optional
-            Type de géométrie attendu ('Point', 'LineString', 'Polygon')
+            Expected geometry type ('Point', 'LineString', 'Polygon')
 
         Returns:
         --------
-        gpd.GeoDataFrame: GeoDataFrame validé et préparé
+        gpd.GeoDataFrame: Validated and prepared GeoDataFrame
         """
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise TypeError("Le paramètre doit être un GeoDataFrame")
@@ -438,21 +438,20 @@ class Map:
         if gdf.empty:
             raise ValueError("Le GeoDataFrame ne peut pas être vide")
 
-        # Vérification de la colonne géométrie
+        # Check the geometry column
         if gdf.geometry.isnull().any():
             self._log(
                 "⚠️  Attention: Le GeoDataFrame contient des géométries nulles qui seront ignorées"
             )
             gdf = gdf.dropna(subset=["geometry"])
 
-        # Vérification du CRS
+        # Check the CRS
         if gdf.crs is None:
             msg = f"Aucun CRS défini. Attribution du CRS par défaut: {self.data_crs}"
             warnings.warn(msg, UserWarning, stacklevel=3)
-            self._log(f"⚠️  Attention: {msg}")
             gdf = gdf.set_crs(self.data_crs)
 
-        # Vérification du type de géométrie si spécifié
+        # Check the geometry type if specified
         if expected_geom_type:
             geom_types = gdf.geometry.geom_type.unique()
             if not all(geom_type == expected_geom_type for geom_type in geom_types):
@@ -467,32 +466,32 @@ class Map:
                        legend_factory=None, column=None, scheme=None,
                        cmap="viridis", color_key="color"):
         """
-        Méthode interne : logique commune pour ajouter un layer GeoDataFrame.
+        Internal method: shared logic for adding a GeoDataFrame layer.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame source
+            Source GeoDataFrame
         layer_type : str
-            Type du layer ('point', 'line', 'polygon')
+            Layer type ('point', 'line', 'polygon')
         style_kwargs : dict
-            Paramètres de style spécifiques au type
+            Style parameters specific to the type
         label : str
-            Étiquette pour la légende
+            Legend label
         legend_factory : callable(bool) -> artist, optional
-            Fonction créant l'élément de légende. Reçoit use_column (bool).
+            Function that creates the legend element. Receives use_column (bool).
         column : str, optional
-            Colonne pour la coloration par données
+            Column for data-driven coloring
         scheme : str, optional
-            Schéma de classification
+            Classification scheme
         cmap : str
-            Palette de couleurs
+            Color palette
         color_key : str
-            Clé de couleur à retirer si column est utilisé ('color' ou 'facecolor')
+            Color key to remove if column is used ('color' or 'facecolor')
         """
         gdf = self._validate_geodataframe(gdf)
 
-        # Reprojection en EPSG:4326 pour compatibilité cartopy PlateCarree
+        # Reproject to EPSG:4326 for cartopy PlateCarree compatibility
         if gdf.crs is not None and not gdf.crs.equals("EPSG:4326"):
             gdf = gdf.to_crs(epsg=4326)
 
@@ -502,7 +501,7 @@ class Map:
             **style_kwargs,
         }
 
-        # Gestion de la coloration par colonne
+        # Handle column-based coloring
         use_column = False
         if column and column in gdf.columns:
             plot_kwargs["column"] = column
@@ -512,14 +511,14 @@ class Map:
             plot_kwargs.pop(color_key, None)
             use_column = True
 
-        # Ajout du layer
+        # Add the layer
         layer_info = {
             "type": layer_type, "name": label, "gdf": gdf, "data": gdf,
             "style": plot_kwargs, "label": label, "src": None,
         }
         self.layers.append(layer_info)
 
-        # Ajout à la légende
+        # Add to the legend
         if label and legend_factory:
             self.legend_elements.append(legend_factory(use_column))
 
@@ -528,20 +527,20 @@ class Map:
 
     def _add_raw_layer(self, gdf, layer_type, style_kwargs, label, legend_factory=None):
         """
-        Méthode interne : logique commune pour ajouter un layer à partir de coordonnées brutes.
+        Internal method: shared logic for adding a layer from raw coordinates.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame construit à partir des coordonnées
+            GeoDataFrame built from the coordinates
         layer_type : str
-            Type du layer ('point', 'line', 'polygon')
+            Layer type ('point', 'line', 'polygon')
         style_kwargs : dict
-            Paramètres de style
+            Style parameters
         label : str
-            Étiquette pour la légende
+            Legend label
         legend_factory : callable() -> artist, optional
-            Fonction créant l'élément de légende
+            Function that creates the legend element
         """
         layer_info = {
             "type": layer_type, "name": label, "gdf": gdf, "data": gdf,
@@ -558,50 +557,50 @@ class Map:
     def add_layer(self, data=None, layer_type="auto", label=None, name=None,
                   style: Optional[Dict[str, Any]] = None, **style_kwargs):
         """
-        Ajoute une couche générique à la carte (vecteur ou raster).
+        Adds a generic layer to the map (vector or raster).
 
-        Le type de données est détecté automatiquement :
-        - GeoDataFrame → couche vectorielle (point, line, polygon)
-        - numpy.ndarray → couche raster (nécessite extent dans style_kwargs)
-        - str (chemin fichier) → raster ou vecteur selon l'extension
+        The data type is detected automatically:
+        - GeoDataFrame → vector layer (point, line, polygon)
+        - numpy.ndarray → raster layer (requires extent in style_kwargs)
+        - str (file path) → raster or vector depending on the extension
 
-        Paramètres:
+        Parameters:
         -----------
         data : gpd.GeoDataFrame, numpy.ndarray, str, or None
-            Données à ajouter. Peut être :
-            - un GeoDataFrame (couche vectorielle)
-            - un numpy.ndarray (couche raster, fournir extent)
-            - un chemin fichier str (.tif, .shp, .geojson, .gpkg, etc.)
+            Data to add. Can be:
+            - a GeoDataFrame (vector layer)
+            - a numpy.ndarray (raster layer, provide extent)
+            - a str file path (.tif, .shp, .geojson, .gpkg, etc.)
         layer_type : str
-            Type de couche ('auto', 'point', 'line', 'polygon', 'raster').
-            Par défaut 'auto' détecte le type automatiquement.
+            Layer type ('auto', 'point', 'line', 'polygon', 'raster').
+            Defaults to 'auto', which detects the type automatically.
         label : str
-            Étiquette pour la légende (alias de name, rétrocompatible)
+            Legend label (alias for name, kept for backward compatibility)
         name : str, optional
-            Nom de la couche affiché dans la légende. Prioritaire sur label.
+            Layer name shown in the legend. Takes priority over label.
         style : dict, optional
-            Dictionnaire de style avec les clés suivantes :
-            - font : FontProperties (police pour les étiquettes, via google_font/local_font/path_font)
-            - color : str ou list (couleur de remplissage/points/lignes)
-            - palette : str (palette de couleurs, alias de cmap)
-            - border : str (couleur de bordure)
-            - border_width : float (épaisseur de bordure)
-            - column : str (colonne pour la coloration par données)
-            - scheme : str (schéma de classification : 'quantiles', 'equal_interval', etc.)
-            - alpha : float (transparence 0-1)
-            - size : int (taille des points)
-            - marker : str (style du marqueur : 'o', 's', '^', etc.)
-            - linewidth : float (épaisseur des lignes)
-            - linestyle : str (style de ligne : '-', '--', '-.', ':')
-            - legend : bool (afficher dans la légende, par défaut True)
+            Style dictionary with the following keys:
+            - font : FontProperties (font for labels, via google_font/local_font/path_font)
+            - color : str or list (fill/point/line color)
+            - palette : str (color palette, alias for cmap)
+            - border : str (border color)
+            - border_width : float (border width)
+            - column : str (column for data-driven coloring)
+            - scheme : str (classification scheme: 'quantiles', 'equal_interval', etc.)
+            - alpha : float (transparency 0-1)
+            - size : int (point size)
+            - marker : str (marker style: 'o', 's', '^', etc.)
+            - linewidth : float (line width)
+            - linestyle : str (line style: '-', '--', '-.', ':')
+            - legend : bool (show in the legend, defaults to True)
         **style_kwargs : dict
-            Paramètres de style spécifiques au type de couche (rétrocompatible).
-            Pour les rasters : cmap, alpha, vmin, vmax, extent, title,
+            Style parameters specific to the layer type (backward compatible).
+            For rasters: cmap, alpha, vmin, vmax, extent, title,
             show_colorbar.
-            Pour les vecteurs : color, facecolor, edge_color, linewidth, etc.
-            Les clés de style_kwargs sont écrasées par celles du dict style.
+            For vectors: color, facecolor, edge_color, linewidth, etc.
+            style_kwargs keys are overridden by those in the style dict.
         """
-        # --- Fusion du dictionnaire style dans style_kwargs ---
+        # --- Merge the style dict into style_kwargs ---
         if style is not None:
             _STYLE_KEY_MAP = {
                 "palette": "cmap",
@@ -612,14 +611,14 @@ class Map:
                 mapped_key = _STYLE_KEY_MAP.get(key, key)
                 style_kwargs[mapped_key] = value
 
-        # name est prioritaire sur label
+        # name takes priority over label
         legend_label = name if name is not None else label
 
-        # Source d'origine (chemin fichier), capturée avant que data ne
-        # soit remplacé par le GeoDataFrame chargé (branche vecteur ci-dessous)
+        # Original source (file path), captured before data gets
+        # replaced by the loaded GeoDataFrame (vector branch below)
         src = data if isinstance(data, str) else None
 
-        # --- Extensions raster et vecteur connues ---
+        # --- Known raster and vector extensions ---
         _RASTER_EXTENSIONS = (".tif", ".tiff", ".img", ".nc", ".hdf", ".vrt", ".jp2")
         _VECTOR_EXTENSIONS = (
             ".shp", ".geojson", ".json", ".gpkg", ".fgb", ".kml",
@@ -634,7 +633,7 @@ class Map:
                     raster_kwargs[key] = style_kwargs.pop(key)
             return raster_kwargs
 
-        # --- 1) Raster explicite via layer_type ---
+        # --- 1) Explicit raster via layer_type ---
         if layer_type == "raster":
             raster_kwargs = _extract_raster_kwargs()
             if isinstance(data, np.ndarray):
@@ -652,7 +651,7 @@ class Map:
             raster_kwargs = _extract_raster_kwargs()
             return self.add_raster(raster_array=data, **raster_kwargs)
 
-        # --- 3) Chemin fichier (str) → détection par extension ---
+        # --- 3) File path (str) → detection by extension ---
         if isinstance(data, str):
             ext = os.path.splitext(data)[1].lower()
             if ext in _RASTER_EXTENSIONS:
@@ -660,7 +659,7 @@ class Map:
                 return self.add_raster(raster_path=data, **raster_kwargs)
             elif ext in _VECTOR_EXTENSIONS:
                 data = gpd.read_file(data)
-                # on continue vers la branche vectorielle ci-dessous
+                # continue on to the vector branch below
             else:
                 raise TypeError(
                     f"Extension '{ext}' non reconnue. "
@@ -668,7 +667,7 @@ class Map:
                     f"Extensions vecteur supportées : {_VECTOR_EXTENSIONS}."
                 )
 
-        # --- 4) GeoDataFrame → couche vectorielle ---
+        # --- 4) GeoDataFrame → vector layer ---
         if data is None:
             raise ValueError(
                 "Fournir data (GeoDataFrame, ndarray ou chemin fichier)."
@@ -682,7 +681,7 @@ class Map:
 
         gdf = self._validate_geodataframe(data)
 
-        # Détection automatique du/des type(s) de géométrie
+        # Automatic detection of the geometry type(s)
         _TYPE_BUCKETS = {
             "point": ("Point", "MultiPoint"),
             "line": ("LineString", "MultiLineString"),
@@ -718,12 +717,12 @@ class Map:
                 if len(buckets_present) == 1:
                     layer_type = buckets_present[0]
                 else:
-                    # Géométries réellement mixtes (ex. points + polygones) :
-                    # une sous-couche par type, chacune avec son propre style
-                    # et sa propre entrée de légende. Sans ça, tout partait
-                    # vers un seul add_*() et la légende ne représentait plus
-                    # que le type dominant (les autres géométries se
-                    # retrouvaient tracées mais absentes de la légende).
+                    # Truly mixed geometries (e.g. points + polygons):
+                    # one sub-layer per type, each with its own style and
+                    # its own legend entry. Without this, everything went
+                    # to a single add_*() and the legend only represented
+                    # the dominant type (the other geometries ended up
+                    # drawn but missing from the legend).
                     _mixed_buckets = buckets_present
             else:
                 raise ValueError(
@@ -732,19 +731,19 @@ class Map:
                     "été retirées lors de la validation)."
                 )
 
-        # --- Préparation des kwargs selon le type de couche ---
+        # --- Prepare the kwargs based on the layer type ---
         def _prepare_kwargs(layer_t):
             kw = dict(style_kwargs)
-            # Mapping border_linewidth → linewidth du contour
+            # Map border_linewidth → outline linewidth
             bw = kw.pop("border_linewidth", None)
-            # font est stocké mais pas envoyé aux méthodes plot
+            # font is stored but not sent to the plot methods
             font = kw.pop("font", None)
-            # legend contrôle l'affichage dans la légende
+            # legend controls whether it shows up in the legend
             show_legend = kw.pop("legend", True)
             effective_label = legend_label if show_legend else None
 
             if layer_t == "polygon":
-                # color → facecolor pour les polygones
+                # color → facecolor for polygons
                 if "color" in kw and "facecolor" not in kw:
                     kw["facecolor"] = kw.pop("color")
                 if bw is not None:
@@ -758,8 +757,8 @@ class Map:
 
             return kw, effective_label, font
 
-        # Géométries réellement mixtes : une sous-couche par type détecté,
-        # chacune avec son propre style et sa propre entrée de légende.
+        # Truly mixed geometries: one sub-layer per detected type, each
+        # with its own style and its own legend entry.
         if _mixed_buckets is not None:
             _SUFFIXES = {"point": "points", "line": "lignes", "polygon": "polygones"}
             _ADD_METHODS = {
@@ -787,7 +786,7 @@ class Map:
                         self.layers[-1]["font"] = font
             return result
 
-        # Ajout de la couche selon le type
+        # Add the layer based on the type
         if layer_type == "point":
             kw, effective_label, font = _prepare_kwargs("point")
             result = self.add_points(gdf, label=effective_label, **kw)
@@ -800,7 +799,7 @@ class Map:
         else:
             raise ValueError(f"Type de couche non supporté: {layer_type}")
 
-        # name doit survivre même si legend=False a mis label à None
+        # name must survive even if legend=False set label to None
         if self.layers:
             self.layers[-1]["name"] = legend_label
             self.layers[-1]["src"] = src
@@ -825,35 +824,35 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute des points à partir d'un GeoDataFrame.
-        Pour ajouter des points à partir de coordonnées brutes, utiliser add_point().
+        Adds points from a GeoDataFrame.
+        To add points from raw coordinates, use add_point().
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame contenant des géométries Point
+            GeoDataFrame containing Point geometries
         label : str
-            Étiquette pour la légende
+            Legend label
         color : str, list, or column name
-            Couleur(s) des points ou nom de colonne pour coloration
+            Point color(s) or column name for coloring
         size : int, list, or column name
-            Taille(s) des points ou nom de colonne pour la taille
+            Point size(s) or column name for sizing
         marker : str
-            Style du marqueur ('o', 's', '^', etc.)
+            Marker style ('o', 's', '^', etc.)
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         edge_color : str
-            Couleur du contour
+            Outline color
         linewidth : float
-            Épaisseur du contour
+            Outline width
         column : str
-            Nom de la colonne pour la coloration/classification
+            Column name for coloring/classification
         scheme : str
-            Schéma de classification ('quantiles', 'equal_interval', etc.)
+            Classification scheme ('quantiles', 'equal_interval', etc.)
         cmap : str
-            Palette de couleurs
+            Color palette
         **kwargs : dict
-            Autres paramètres pour geopandas.plot()
+            Other parameters for geopandas.plot()
         """
         style = {
             "color": color, "markersize": size, "marker": marker,
@@ -886,31 +885,31 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute des lignes à partir d'un GeoDataFrame.
-        Pour ajouter des lignes à partir de coordonnées brutes, utiliser add_line().
+        Adds lines from a GeoDataFrame.
+        To add lines from raw coordinates, use add_line().
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame contenant des géométries LineString
+            GeoDataFrame containing LineString geometries
         label : str
-            Étiquette pour la légende
+            Legend label
         color : str, list, or column name
-            Couleur(s) des lignes ou nom de colonne pour coloration
+            Line color(s) or column name for coloring
         linewidth : float
-            Épaisseur des lignes
+            Line width
         linestyle : str
-            Style de ligne ('-', '--', '-.', ':')
+            Line style ('-', '--', '-.', ':')
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         column : str
-            Nom de la colonne pour la coloration/classification
+            Column name for coloring/classification
         scheme : str
-            Schéma de classification ('quantiles', 'equal_interval', etc.)
+            Classification scheme ('quantiles', 'equal_interval', etc.)
         cmap : str
-            Palette de couleurs
+            Color palette
         **kwargs : dict
-            Autres paramètres pour geopandas.plot()
+            Other parameters for geopandas.plot()
         """
         style = {
             "color": color, "linewidth": linewidth, "linestyle": linestyle,
@@ -941,31 +940,31 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute des polygones à partir d'un GeoDataFrame.
-        Pour ajouter des polygones à partir de coordonnées brutes, utiliser add_polygon().
+        Adds polygons from a GeoDataFrame.
+        To add polygons from raw coordinates, use add_polygon().
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame contenant des géométries Polygon
+            GeoDataFrame containing Polygon geometries
         label : str
-            Étiquette pour la légende
+            Legend label
         facecolor : str, list, or column name
-            Couleur(s) de remplissage ou nom de colonne pour coloration
+            Fill color(s) or column name for coloring
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         edge_color : str
-            Couleur du contour
+            Outline color
         linewidth : float
-            Épaisseur du contour
+            Outline width
         column : str
-            Nom de la colonne pour la coloration/classification
+            Column name for coloring/classification
         scheme : str
-            Schéma de classification ('quantiles', 'equal_interval', etc.)
+            Classification scheme ('quantiles', 'equal_interval', etc.)
         cmap : str
-            Palette de couleurs
+            Color palette
         **kwargs : dict
-            Autres paramètres pour geopandas.plot()
+            Other parameters for geopandas.plot()
         """
         style = {
             "facecolor": facecolor, "alpha": alpha,
@@ -996,31 +995,31 @@ class Map:
         transform=None,
     ):
         """
-        Ajoute un ou plusieurs points à la carte.
+        Adds one or more points to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         coordinates : tuple, list of tuples, or dict
-            Coordonnées du/des point(s). Format: (lon, lat) ou [(lon1, lat1), (lon2, lat2), ...]
-            Ou dict avec clés 'lon' et 'lat' pour DataFrame
+            Coordinates of the point(s). Format: (lon, lat) or [(lon1, lat1), (lon2, lat2), ...]
+            Or a dict with 'lon' and 'lat' keys for a DataFrame
         label : str
-            Étiquette pour la légende
+            Legend label
         color : str or list
-            Couleur(s) du/des point(s)
+            Color(s) of the point(s)
         size : int or list
-            Taille(s) du/des point(s)
+            Size(s) of the point(s)
         marker : str
-            Style du marqueur ('o', 's', '^', etc.)
+            Marker style ('o', 's', '^', etc.)
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         edge_color : str
-            Couleur du contour
+            Outline color
         linewidth : float
-            Épaisseur du contour
+            Outline width
         transform : cartopy.crs
-            Projection des données (par défaut utilise data_crs)
+            Data projection (defaults to data_crs)
         """
-        # Normalisation des coordonnées
+        # Normalize the coordinates
         if isinstance(coordinates, dict):
             points = [
                 Point(lon, lat)
@@ -1060,27 +1059,27 @@ class Map:
         transform=None,
     ):
         """
-        Ajoute une ou plusieurs lignes à la carte.
+        Adds one or more lines to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         coordinates : list of tuples or list of lists
-            Coordonnées de la ligne. Format: [(lon1, lat1), (lon2, lat2), ...]
-            Ou [[(lon1, lat1), (lon2, lat2)], [(lon3, lat3), (lon4, lat4)]] pour plusieurs lignes
+            Line coordinates. Format: [(lon1, lat1), (lon2, lat2), ...]
+            Or [[(lon1, lat1), (lon2, lat2)], [(lon3, lat3), (lon4, lat4)]] for several lines
         label : str
-            Étiquette pour la légende
+            Legend label
         color : str
-            Couleur de la ligne
+            Line color
         linewidth : float
-            Épaisseur de la ligne
+            Line width
         linestyle : str
-            Style de ligne ('-', '--', '-.', ':')
+            Line style ('-', '--', '-.', ':')
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         transform : cartopy.crs
-            Projection des données (par défaut utilise data_crs)
+            Data projection (defaults to data_crs)
         """
-        # Vérification du format des coordonnées
+        # Check the coordinate format
         if isinstance(coordinates[0][0], (int, float)):
             lines = [LineString(coordinates)]
         else:
@@ -1115,29 +1114,29 @@ class Map:
         transform=None,
     ):
         """
-        Ajoute un ou plusieurs polygones à la carte.
+        Adds one or more polygons to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         coordinates : list of tuples or list of lists
-            Coordonnées du polygone. Format: [(lon1, lat1), (lon2, lat2), ...]
-            Ou [[(lon1, lat1), ...], [(lon3, lat3), ...]] pour plusieurs polygones
+            Polygon coordinates. Format: [(lon1, lat1), (lon2, lat2), ...]
+            Or [[(lon1, lat1), ...], [(lon3, lat3), ...]] for several polygons
         label : str
-            Étiquette pour la légende
+            Legend label
         color : str
-            Couleur de remplissage
+            Fill color
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         edge_color : str
-            Couleur du contour
+            Outline color
         linewidth : float
-            Épaisseur du contour
+            Outline width
         fill : bool
-            Si True, remplit le polygone
+            If True, fills the polygon
         transform : cartopy.crs
-            Projection des données (par défaut utilise data_crs)
+            Data projection (defaults to data_crs)
         """
-        # Vérification du format des coordonnées
+        # Check the coordinate format
         if isinstance(coordinates[0][0], (int, float)):
             polygons = [Polygon(coordinates)]
         else:
@@ -1174,29 +1173,29 @@ class Map:
         rivers=False,
     ):
         """
-        Ajoute des caractéristiques naturelles à la carte.
+        Adds natural features to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         features : list, optional
-            Liste des caractéristiques à ajouter ('coastline', 'borders', 'land', 'ocean').
-            Par défaut ``['coastline', 'borders']``.
+            List of features to add ('coastline', 'borders', 'land', 'ocean').
+            Defaults to ``['coastline', 'borders']``.
         coastline_color : str
-            Couleur des côtes
+            Coastline color
         coastline_width : float
-            Épaisseur des côtes
+            Coastline width
         border_color : str
-            Couleur des frontières
+            Border color
         border_width : float
-            Épaisseur des frontières
+            Border width
         land_color : str
-            Couleur des terres (optionnel)
+            Land color (optional)
         ocean_color : str
-            Couleur des océans (optionnel)
+            Ocean color (optional)
         lakes : bool
-            Ajouter les lacs
+            Add lakes
         rivers : bool
-            Ajouter les rivières
+            Add rivers
         """
         if features is None:
             features = ["coastline", "borders"]
@@ -1235,28 +1234,28 @@ class Map:
         crs=None,
     ) -> "Map":
         """
-        Ajoute un fond de carte (tuiles web) via contextily.
+        Adds a basemap (web tiles) via contextily.
 
-        Paramètres:
+        Parameters:
         -----------
-        source : contextily provider ou str, optional
-            Fournisseur de tuiles. Par défaut OpenStreetMap.Mapnik.
-            Exemples : ctx.providers.Stamen.Terrain, ctx.providers.CartoDB.Positron,
+        source : contextily provider or str, optional
+            Tile provider. Defaults to OpenStreetMap.Mapnik.
+            Examples: ctx.providers.Stamen.Terrain, ctx.providers.CartoDB.Positron,
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        zoom : int ou 'auto'
-            Niveau de zoom des tuiles
+        zoom : int or 'auto'
+            Tile zoom level
         alpha : float
-            Transparence du fond de carte (0–1)
+            Basemap transparency (0-1)
         attribution : bool
-            Afficher l'attribution du fournisseur
+            Show the provider's attribution
         attribution_size : int
-            Taille de police de l'attribution
+            Attribution font size
         crs : str, optional
-            CRS cible (par défaut : celui de la projection de la carte)
+            Target CRS (defaults to the map's projection)
 
-        Retourne:
+        Returns:
         ---------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         if not HAS_CONTEXTILY:
             raise ImportError(
@@ -1279,9 +1278,9 @@ class Map:
             )
             self._log("\U0001f5fa\ufe0f  Fond de carte ajouté")
         except Exception as e:
-            # warnings.warn (pas self._log) : un \u00e9chec silencieux avec
-            # verbose=False laisserait croire que le fond de carte a \u00e9t\u00e9
-            # ajout\u00e9 alors qu'il ne l'a pas \u00e9t\u00e9.
+            # warnings.warn (not self._log): a silent failure with
+            # verbose=False would give the false impression that the
+            # basemap was added when it wasn't.
             warnings.warn(
                 f"\u00c9chec de l'ajout du fond de carte (contextily) : {e}",
                 RuntimeWarning, stacklevel=2,
@@ -1293,9 +1292,9 @@ class Map:
         self, inset_ax, bounds, data_gdf, mode,
         facecolor, edgecolor, alpha, linewidth, zorder,
     ):
-        """Dessine sur `inset_ax` la zone `data` de add_inset_map : sa
-        géométrie réelle (mode="geometry") ou le rectangle de son étendue
-        (mode="bbox", ou tout `data` fourni sous forme de bbox)."""
+        """Draws on `inset_ax` the `data` area from add_inset_map: its
+        actual geometry (mode="geometry") or the rectangle of its extent
+        (mode="bbox", or any `data` provided as a bbox)."""
         if mode == "geometry" and data_gdf is not None:
             inset_ax.add_geometries(
                 data_gdf.geometry, crs=ccrs.PlateCarree(),
@@ -1314,8 +1313,8 @@ class Map:
 
     @staticmethod
     def _resolve_on_bounds(on):
-        """Étendue totale [minx, miny, maxx, maxy] de tout ce qui est passé
-        au paramètre `on` de add_inset_map (GeoDataFrame unique ou liste de
+        """Total extent [minx, miny, maxx, maxy] of everything passed to
+        add_inset_map's `on` parameter (a single GeoDataFrame or a list of
         `{"data": gdf, ...}`)."""
         items = on if isinstance(on, list) else [on]
         all_bounds = np.array([
@@ -1328,14 +1327,14 @@ class Map:
         ]
 
     def _make_inset_circular(self, inset_ax):
-        """Découpe `inset_ax` (GeoAxes) en cercle au lieu du rectangle par
-        défaut, via `set_boundary`. Corrige l'aspect physique de l'axe (qui
-        n'est pas toujours carré, ex. `size=(4, 3)` ou `position` non carré)
-        pour obtenir un vrai cercle à l'écran plutôt qu'une ellipse.
+        """Clips `inset_ax` (GeoAxes) into a circle instead of the default
+        rectangle, via `set_boundary`. Corrects the axes' physical aspect
+        (which isn't always square, e.g. `size=(4, 3)` or a non-square
+        `position`) to get a true circle on screen rather than an ellipse.
 
-        L'ajustement d'aspect d'une GeoAxes (`set_global`/`set_extent`) est
-        paresseux — sa position finale (`get_position()`) n'est correcte
-        qu'après un rendu. On force donc un `draw()` avant de mesurer.
+        A GeoAxes' aspect adjustment (`set_global`/`set_extent`) is lazy —
+        its final position (`get_position()`) is only correct after a
+        render. So we force a `draw()` before measuring.
         """
         self.fig.canvas.draw()
         pos = inset_ax.get_position()
@@ -1394,132 +1393,131 @@ class Map:
         **kwargs,
     ) -> "Map":
         """
-        Ajoute une mini-carte de situation (inset map) montrant la zone étudiée
-        dans un contexte géographique plus large.
+        Adds a small situation (inset) map showing the study area within a
+        wider geographic context.
 
-        Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
-        positionnement intelligent, sinon revient au placement manuel.
+        Automatically uses ``matplotlib-map-utils`` if installed for smart
+        placement, otherwise falls back to manual placement.
 
-        Paramètres:
+        Parameters:
         -----------
         data : list[float] or GeoDataFrame, optional
-            La zone à surligner sur l'inset : soit une bbox
-            ``[minx, miny, maxx, maxy]``, soit un GeoDataFrame (sa
-            géométrie ou son étendue est utilisée selon ``mode``).
-            Par défaut (``None``), utilise ``self.bounds``.
+            The area to highlight on the inset: either a bbox
+            ``[minx, miny, maxx, maxy]``, or a GeoDataFrame (its geometry
+            or its extent is used depending on ``mode``).
+            Defaults to ``None``, which uses ``self.bounds``.
         on : GeoDataFrame or list, optional
-            Couche(s) de contexte à dessiner sur l'inset (ex. tous les pays
-            d'un continent, pour situer ``data`` dedans). Un GeoDataFrame
-            unique ou une liste de dicts ``[{"data": gdf, "kwargs": {...}}, ...]``.
+            Context layer(s) to draw on the inset (e.g. every country of a
+            continent, to place ``data`` within it). A single GeoDataFrame
+            or a list of dicts ``[{"data": gdf, "kwargs": {...}}, ...]``.
         mode : str
-            Comment dessiner ``data`` quand c'est un GeoDataFrame :
-            - ``"bbox"`` (défaut) : rectangle correspondant à son étendue
+            How to draw ``data`` when it is a GeoDataFrame:
+            - ``"bbox"`` (default): rectangle matching its extent
               (``total_bounds``).
-            - ``"geometry"`` : sa géométrie réelle (contour du/des polygones).
-            Sans effet si ``data`` est déjà une bbox (toujours dessinée comme
+            - ``"geometry"``: its actual geometry (outline of the polygon(s)).
+            Has no effect if ``data`` is already a bbox (always drawn as a
             rectangle).
         zoom_to_on : bool
-            Si True, zoome l'inset sur l'étendue totale de ``on`` (au lieu
-            de la vue globale) et l'encadre d'un rectangle (couleur
-            ``box_color``/``box_linewidth``). Sans effet si ``on`` n'est pas
-            fourni. Prioritaire sur ``global_view``/``extent``.
+            If True, zooms the inset to the total extent of ``on`` (instead
+            of the global view) and frames it with a rectangle (color
+            ``box_color``/``box_linewidth``). Has no effect if ``on`` isn't
+            provided. Takes priority over ``global_view``/``extent``.
         position : tuple (x, y, w, h)
-            Position et taille de la mini-carte, en coordonnées relatives
-            (0–1) de l'ancre choisie via ``to`` (mode classique uniquement —
-            sans effet en mode map-utils, qui utilise ``location``/``coords``).
-            (x, y) = coin inférieur gauche.
+            Position and size of the inset, in relative coordinates (0-1)
+            of the anchor chosen via ``to`` (classic mode only — has no
+            effect in map-utils mode, which uses ``location``/``coords``).
+            (x, y) = bottom-left corner.
         to : str
-            Ancre du positionnement : ``"ax"`` (défaut) — ``position``
-            (mode classique) ou ``location``/``coords`` (mode map-utils)
-            relatifs à l'axe de la carte principale ; ``"fig"`` — relatifs à
-            la figure entière. Même convention que ``add_north_arrow``.
+            Positioning anchor: ``"ax"`` (default) — ``position`` (classic
+            mode) or ``location``/``coords`` (map-utils mode) relative to
+            the main map's axes; ``"fig"`` — relative to the whole figure.
+            Same convention as ``add_north_arrow``.
         circular : bool
-            Si True, découpe l'inset en cercle plutôt qu'en rectangle
-            (``Axes.set_boundary``), quelle que soit la forme réelle de
-            l'axe (l'aspect est corrigé pour obtenir un vrai cercle, pas
-            une ellipse).
+            If True, clips the inset into a circle instead of a rectangle
+            (``Axes.set_boundary``), regardless of the axes' actual shape
+            (the aspect is corrected to get a true circle, not an ellipse).
         facecolor : str
-            Couleur de fond de la mini-carte.
+            Inset background color.
         edgecolor : str
-            Couleur de la bordure.
+            Border color.
         linewidth : float
-            Épaisseur de la bordure.
+            Border width.
         alpha : float
-            Transparence.
+            Transparency.
         box_color : str
-            Couleur du rectangle montrant la zone étudiée (mode classique,
-            ``data`` non fourni).
+            Color of the rectangle showing the study area (classic mode,
+            ``data`` not provided).
         box_linewidth : float
-            Épaisseur du rectangle (mode classique, ``data`` non fourni).
+            Width of the rectangle (classic mode, ``data`` not provided).
         land_color : str
-            Couleur des terres sur la mini-carte.
+            Land color on the inset.
         ocean_color : str
-            Couleur des océans.
+            Ocean color.
         projection : cartopy.crs, optional
-            Projection de la mini-carte (par défaut PlateCarree).
+            Inset projection (defaults to PlateCarree).
         style : str
-            Mode de rendu :
-            - ``"auto"`` : matplotlib-map-utils si disponible, sinon classique.
-            - ``"map-utils"`` : force le mode map-utils.
-            - ``"classic"`` : placement fig.add_axes (ancien comportement).
+            Rendering mode:
+            - ``"auto"``: matplotlib-map-utils if available, otherwise classic.
+            - ``"map-utils"``: forces map-utils mode.
+            - ``"classic"``: fig.add_axes placement (legacy behavior).
         location : str
-            Position (mode map-utils) : "upper left", "upper right",
+            Position (map-utils mode): "upper left", "upper right",
             "lower left", "lower right", "center", etc.
         size : float or tuple, optional
-            Taille de l'inset en pouces (mode map-utils). Peut être un
-            scalaire (carré) ou un tuple (largeur, hauteur).
+            Inset size in inches (map-utils mode). Can be a scalar
+            (square) or a tuple (width, height).
         pad : float or tuple, optional
-            Espacement en pouces (mode map-utils).
+            Padding in inches (map-utils mode).
         coords : tuple (x, y), optional
-            Position exacte en coordonnées axes (mode map-utils).
-            Remplace ``location`` si fourni.
+            Exact position in axes coordinates (map-utils mode).
+            Overrides ``location`` if provided.
         transform : matplotlib.transforms.Transform, optional
-            Transformation pour les coordonnées (mode map-utils).
+            Transform for the coordinates (map-utils mode).
         global_view : bool
-            Si True (défaut), l'inset montre le globe entier via set_global().
-            Si False, l'inset est zoomé sur ``extent`` ou ajusté automatiquement.
+            If True (default), the inset shows the whole globe via set_global().
+            If False, the inset is zoomed to ``extent`` or auto-adjusted.
         extent : list, optional
-            [x0, x1, y0, y1] pour restreindre l'étendue de l'inset.
-            Utile quand ``global_view=False``.
+            [x0, x1, y0, y1] to restrict the inset's extent.
+            Useful when ``global_view=False``.
         indicator : str
-            Type d'indicateur quand ``data`` n'est pas fourni (comportement
-            hérité, basé sur l'étendue actuelle de l'axe principal) :
-            "extent", "detail", ou "none". Sans effet si ``data`` est fourni
-            — l'indicateur est alors toujours dessiné d'après ``data``/``mode``.
+            Indicator type when ``data`` isn't provided (legacy behavior,
+            based on the main axes' current extent): "extent", "detail", or
+            "none". Has no effect if ``data`` is provided — the indicator is
+            then always drawn from ``data``/``mode``.
         indicator_facecolor : str
-            Couleur de remplissage de l'indicateur.
+            Indicator fill color.
         indicator_linecolor : str
-            Couleur de bordure de l'indicateur.
+            Indicator border color.
         indicator_alpha : float
-            Transparence de l'indicateur.
+            Indicator transparency.
         indicator_linewidth : float
-            Épaisseur de trait de l'indicateur.
+            Indicator line width.
         indicator_straighten : bool
-            Si True (défaut), aligne le rectangle indicateur sur les axes
-            (``data`` non fourni uniquement).
+            If True (default), aligns the indicator rectangle with the axes
+            (``data`` not provided only).
         indicator_pad : float
-            Espacement du rectangle indicateur (défaut 0.05, ``data`` non
-            fourni uniquement).
+            Indicator rectangle padding (default 0.05, ``data`` not
+            provided only).
         connector_color : str
-            Couleur des lignes de connexion (mode "detail", ``data`` non fourni).
+            Connector line color ("detail" mode, ``data`` not provided).
         connector_width : float
-            Épaisseur des lignes de connexion (mode "detail", ``data`` non fourni).
+            Connector line width ("detail" mode, ``data`` not provided).
         inset_size : str, optional
-            Taille prédéfinie ("xs", "sm", "md", "lg", "xl") — mode map-utils.
-            Appelle ``InsetMap.set_size()`` pour ajuster les défauts globaux.
+            Preset size ("xs", "sm", "md", "lg", "xl") — map-utils mode.
+            Calls ``InsetMap.set_size()`` to adjust the global defaults.
         zorder : int
-            Z-order de l'inset (défaut 99).
+            Inset z-order (default 99).
         show_borders : bool
-            Afficher les frontières sur l'inset (défaut True).
+            Show borders on the inset (default True).
         show_coastlines : bool
-            Afficher les côtes sur l'inset (défaut True).
+            Show coastlines on the inset (default True).
         **kwargs
-            Paramètres supplémentaires passés à ``InsetMap`` ou à
-            l'axe inset (ex. ``xticks=[], yticks=[]``).
+            Additional parameters passed to ``InsetMap`` or to the inset
+            axes (e.g. ``xticks=[], yticks=[]``).
 
-        Retourne:
+        Returns:
         ---------
-        Map: Instance de la carte pour chaînage.
+        Map: Map instance for chaining.
 
         Example:
         --------
@@ -1536,7 +1534,7 @@ class Map:
         if to not in ("ax", "fig"):
             raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
 
-        # Résolution de `data` en (bbox, géométrie éventuelle) -------------
+        # Resolve `data` into (bbox, optional geometry) --------------------
         data_gdf = None
         if data is None:
             bounds = self.bounds  # [minx, miny, maxx, maxy]
@@ -1583,11 +1581,11 @@ class Map:
                 )
                 style = "classic"
             else:
-                # Appliquer set_size() sur les défauts globaux AVANT création
+                # Apply set_size() on the global defaults BEFORE creation
                 if inset_size is not None:
                     MmuInsetMap.set_size(inset_size)
 
-                # Préparer to_plot (couche(s) de contexte)
+                # Prepare to_plot (context layer(s))
                 to_plot = None
                 if on is not None:
                     to_plot = on if isinstance(on, list) else [{"data": on}]
@@ -1605,11 +1603,11 @@ class Map:
                     im_kwargs["to_plot"] = to_plot
                 im_kwargs.update(kwargs)
 
-                # Créer l'axe inset via map-utils
-                # to="fig" : InsetMap ancre toujours via `pax.inset_axes()`,
-                # donc relatif à l'axe passé — on lui passe un axe fantôme
-                # couvrant toute la figure (au lieu de self.ax) pour que
-                # location/coords deviennent relatifs à la figure entière.
+                # Create the inset axes via map-utils
+                # to="fig": InsetMap always anchors via `pax.inset_axes()`,
+                # so relative to the axes passed in — we pass it a ghost
+                # axes covering the whole figure (instead of self.ax) so
+                # location/coords become relative to the whole figure.
                 im = MmuInsetMap(**im_kwargs)
                 if to == "fig":
                     host_ax = self.fig.add_axes([0, 0, 1, 1], frameon=False)
@@ -1618,7 +1616,7 @@ class Map:
                     host_ax = self.ax
                 inset_ax = im.create(host_ax, projection=projection)
 
-                # Vue globale, restreinte, ou zoomée sur `on`
+                # Global, restricted, or zoomed-to-`on` view
                 if on_bounds is not None:
                     minx, miny, maxx, maxy = on_bounds
                     inset_ax.set_extent((minx, maxx, miny, maxy), crs=ccrs.PlateCarree())
@@ -1630,7 +1628,7 @@ class Map:
                 if circular:
                     self._make_inset_circular(inset_ax)
 
-                # Ajouter les features cartographiques
+                # Add the cartographic features
                 inset_ax.add_feature(cfeature.LAND, facecolor=land_color)
                 inset_ax.add_feature(cfeature.OCEAN, facecolor=ocean_color)
                 if show_borders:
@@ -1640,14 +1638,14 @@ class Map:
                 if show_coastlines:
                     inset_ax.coastlines(resolution="110m", linewidth=0.4)
 
-                # Cadre autour de l'étendue de `on` (zoom_to_on=True)
+                # Frame around `on`'s extent (zoom_to_on=True)
                 if on_bounds is not None:
                     self._draw_inset_data_indicator(
                         inset_ax, on_bounds, None, "bbox",
                         "none", box_color, 1.0, box_linewidth, zorder,
                     )
 
-                # Appliquer le style visuel
+                # Apply the visual style
                 for spine in inset_ax.spines.values():
                     spine.set_edgecolor(edgecolor)
                     spine.set_linewidth(linewidth)
@@ -1655,18 +1653,18 @@ class Map:
                 inset_ax.patch.set_facecolor(facecolor)
 
                 if data is not None:
-                    # `data` fourni explicitement : on dessine exactement ce
-                    # qui a été demandé (bbox ou géométrie), plutôt que de
-                    # déduire l'indicateur de l'étendue actuelle de l'axe
-                    # principal (comportement hérité ci-dessous).
+                    # `data` explicitly provided: draw exactly what was
+                    # requested (bbox or geometry), instead of inferring
+                    # the indicator from the main axes' current extent
+                    # (legacy behavior below).
                     self._draw_inset_data_indicator(
                         inset_ax, bounds, data_gdf, mode,
                         indicator_facecolor, indicator_linecolor,
                         indicator_alpha, indicator_linewidth, zorder,
                     )
                 else:
-                    # Indicateur d'étendue ou de détail (comportement hérité,
-                    # basé sur l'étendue actuelle de self.ax)
+                    # Extent or detail indicator (legacy behavior, based on
+                    # self.ax's current extent)
                     pcrs = self.projection
                     bcrs = projection
                     _indicator_ok = False
@@ -1685,7 +1683,7 @@ class Map:
                             )
                             _indicator_ok = True
                         except (ValueError, TypeError) as e:
-                            self._log(f"⚠️  Indicateur extent échoué : {e}")
+                            logger.warning(f"Indicateur extent échoué : {e}")
                             _indicator_ok = False
                     elif indicator == "detail":
                         try:
@@ -1704,10 +1702,10 @@ class Map:
                             )
                             _indicator_ok = True
                         except (ValueError, TypeError) as e:
-                            self._log(f"⚠️  Indicateur detail échoué : {e}")
+                            logger.warning(f"Indicateur detail échoué : {e}")
                             _indicator_ok = False
 
-                    # Fallback : dessiner manuellement le rectangle d'étendue
+                    # Fallback: manually draw the extent rectangle
                     if not _indicator_ok and indicator in ("extent", "detail"):
                         self._draw_inset_data_indicator(
                             inset_ax, bounds, None, "bbox",
@@ -1720,11 +1718,11 @@ class Map:
                 self._log("🔍 Carte de situation ajoutée (map-utils)")
                 return self
 
-        # ------- mode classique (fallback) -------
-        # to="ax" : `position` est une fraction (0-1) de l'axe principal,
-        # convertie ici en coordonnées figure absolues (fig.add_axes() ne
-        # comprend que des coordonnées figure). to="fig" (comportement
-        # historique) : `position` est déjà en coordonnées figure.
+        # ------- classic mode (fallback) -------
+        # to="ax": `position` is a fraction (0-1) of the main axes,
+        # converted here to absolute figure coordinates (fig.add_axes()
+        # only understands figure coordinates). to="fig" (legacy
+        # behavior): `position` is already in figure coordinates.
         if to == "ax":
             ax_bbox = self.ax.get_position()
             px, py, pw, ph = position
@@ -1759,21 +1757,21 @@ class Map:
         if show_coastlines:
             inset_ax.coastlines(resolution="110m", linewidth=0.4)
 
-        # Zone étudiée (rectangle bbox ou géométrie réelle selon `mode`)
+        # Study area (bbox rectangle or actual geometry depending on `mode`)
         self._draw_inset_data_indicator(
             inset_ax, bounds, data_gdf, mode,
             "none" if data is None else indicator_facecolor, box_color,
             indicator_alpha, box_linewidth, 10,
         )
 
-        # Cadre autour de l'étendue de `on` (zoom_to_on=True)
+        # Frame around `on`'s extent (zoom_to_on=True)
         if on_bounds is not None:
             self._draw_inset_data_indicator(
                 inset_ax, on_bounds, None, "bbox",
                 "none", box_color, 1.0, box_linewidth, 10,
             )
 
-        # Bordure de la mini-carte
+        # Inset border
         for spine in inset_ax.spines.values():
             spine.set_edgecolor(edgecolor)
             spine.set_linewidth(linewidth)
@@ -1781,7 +1779,7 @@ class Map:
         inset_ax.patch.set_alpha(alpha)
         inset_ax.patch.set_facecolor(facecolor)
 
-        # Dessiner les couches de contexte optionnelles sur l'inset classique
+        # Draw the optional context layers on the classic inset
         if on is not None:
             items = on if isinstance(on, list) else [{"data": on}]
             for item in items:
@@ -1799,16 +1797,16 @@ class Map:
 
     def set_background_color(self, color: str = "white") -> "Map":
         """
-        Définit la couleur de fond de la carte.
+        Sets the map's background color.
 
-        Paramètres:
+        Parameters:
         -----------
         color : str
-            Couleur de fond (nom CSS, hex, etc.)
+            Background color (CSS name, hex, etc.)
 
-        Retourne:
+        Returns:
         ---------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         self.ax.set_facecolor(color)
         self.fig.patch.set_facecolor(color)
@@ -1828,34 +1826,34 @@ class Map:
         tick_labels=None,
     ) -> "Map":
         """
-        Ajoute une barre de couleurs autonome à la carte.
+        Adds a standalone colorbar to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         cmap : str
-            Palette de couleurs
+            Color palette
         vmin : float
-            Valeur minimale
+            Minimum value
         vmax : float
-            Valeur maximale
+            Maximum value
         label : str, optional
-            Titre de la barre de couleurs
+            Colorbar title
         orientation : str
-            'vertical' ou 'horizontal'
+            'vertical' or 'horizontal'
         shrink : float
-            Facteur de réduction (0–1)
+            Shrink factor (0-1)
         pad : float
-            Espacement par rapport à la carte
+            Padding relative to the map
         aspect : int
-            Ratio longueur/largeur de la barre
+            Length/width ratio of the bar
         ticks : list, optional
-            Positions des graduations
+            Tick positions
         tick_labels : list, optional
-            Labels personnalisés pour les graduations
+            Custom labels for the ticks
 
-        Retourne:
+        Returns:
         ---------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         cmap_obj = load_cmap(cmap)
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
@@ -1883,20 +1881,20 @@ class Map:
     def zoom_to_layer(self, index: int = None, label: str = None,
                       margin: float = 0.05) -> "Map":
         """
-        Zoome sur l'étendue d'une couche spécifique.
+        Zooms to the extent of a specific layer.
 
-        Paramètres:
+        Parameters:
         -----------
         index : int, optional
-            Index de la couche (voir list_layers())
+            Layer index (see list_layers())
         label : str, optional
-            Label de la couche
+            Layer label
         margin : float
-            Marge relative autour de la couche (0–1)
+            Relative margin around the layer (0-1)
 
-        Retourne:
+        Returns:
         ---------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         if index is None and label is None:
             raise ValueError("Fournir index ou label pour identifier la couche.")
@@ -1949,28 +1947,28 @@ class Map:
         show_colorbar=True,
     ):
         """
-        Ajoute une couche raster à la carte.
+        Adds a raster layer to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         raster_path : str
-            Chemin vers le fichier raster
+            Path to the raster file
         raster_array : numpy.ndarray
-            Tableau numpy contenant les données raster
+            Numpy array containing the raster data
         extent : tuple
-            Étendue du raster (xmin, xmax, ymin, ymax)
+            Raster extent (xmin, xmax, ymin, ymax)
         cmap : str
-            Palette de couleurs
+            Color palette
         alpha : float
-            Transparence
+            Transparency
         vmin, vmax : float
-            Valeurs min/max pour la normalisation
+            Min/max values for normalization
         transform : rasterio.transform
-            Transformation géographique
+            Geographic transform
         title : str
-            Titre pour la barre de couleur
+            Colorbar title
         show_colorbar : bool
-            Afficher la barre de couleur
+            Show the colorbar
         """
         raster_crs = None
         if raster_path:
@@ -1990,17 +1988,17 @@ class Map:
         else:
             raise ValueError("raster_path ou raster_array doit être fourni")
 
-        # Masquer les valeurs NaN
+        # Mask NaN values
         raster_data = np.ma.masked_invalid(raster_data)
 
-        # Normalisation
+        # Normalization
         if vmin is None:
             vmin = np.nanmin(raster_data)
         if vmax is None:
             vmax = np.nanmax(raster_data)
 
-        # Détermination du CRS cartopy pour le raster
-        data_transform = ccrs.PlateCarree()  # défaut pour EPSG:4326
+        # Determine the cartopy CRS for the raster
+        data_transform = ccrs.PlateCarree()  # default for EPSG:4326
         if raster_crs is not None:
             epsg = raster_crs.to_epsg()
             if epsg and epsg != 4326:
@@ -2012,7 +2010,7 @@ class Map:
                         f"utilisation de PlateCarree par défaut"
                     )
 
-        # Affichage du raster
+        # Display the raster
         im = self.ax.imshow(
             raster_data,
             extent=extent,
@@ -2024,13 +2022,13 @@ class Map:
             origin="upper",
         )
 
-        # Ajout de la barre de couleur
+        # Add the colorbar
         if show_colorbar:
             cbar = plt.colorbar(im, ax=self.ax, shrink=0.6, pad=0.05)
             if title:
                 cbar.set_label(title, rotation=270, labelpad=20)
 
-        # Stockage des informations de la couche (déjà rendu directement)
+        # Store the layer information (already rendered directly)
         layer_info = {
             "type": "raster",
             "name": title,
@@ -2070,40 +2068,40 @@ class Map:
         default_crs="EPSG:4326",
     ):
         """
-        Ajoute une couche vectorielle choroplèthe.
+        Adds a choropleth vector layer.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : GeoDataFrame
-            Données géographiques
+            Geographic data
         column_to_plot : str
-            Colonne pour la colorisation
+            Column used for coloring
         label_column : str
-            Colonne pour les étiquettes
+            Column used for labels
         cmap : str
-            Palette de couleurs
+            Color palette
         alpha : float
-            Transparence
+            Transparency
         edge_color : str
-            Couleur des contours
+            Outline color
         linewidth : float
-            Largeur des contours
+            Outline width
         show_labels : bool
-            Afficher les étiquettes
+            Show the labels
         label_size : int
-            Taille des étiquettes
+            Label size
         text_outline_color : str
-            Couleur du contour du texte
+            Text outline color
         text_outline_width : float
-            Largeur du contour du texte
+            Text outline width
         show_colorbar : bool
-            Afficher la barre de couleur
+            Show the colorbar
         title : str
-            Titre pour la barre de couleur
+            Colorbar title
         default_crs : str
-            CRS par défaut si geodf n'en a pas
+            Default CRS if geodf doesn't have one
         """
-        # Vérifier et définir le CRS si nécessaire
+        # Check and set the CRS if needed
         geodf = gdf.copy()
         if geodf.crs is None:
             self._log(
@@ -2111,22 +2109,21 @@ class Map:
             )
             geodf = geodf.set_crs(default_crs)
 
-        # Reprojection en EPSG:4326 pour compatibilité cartopy
+        # Reproject to EPSG:4326 for cartopy compatibility
         if geodf.crs is not None and not geodf.crs.equals("EPSG:4326"):
             try:
                 geodf = geodf.to_crs(epsg=4326)
             except Exception as e:
-                self._log(f"⚠️  Erreur de transformation CRS: {e}")
-                self._log("Utilisation des coordonnées originales...")
+                logger.warning(f"Erreur de transformation CRS: {e}. Utilisation des coordonnées originales.")
 
-        # Vérifier que la colonne existe
+        # Check that the column exists
         if column_to_plot not in geodf.columns:
             raise ValueError(f"Colonne '{column_to_plot}' introuvable dans le GeoDataFrame")
 
-        # Filtrer les géométries nulles/vides
+        # Filter out null/empty geometries
         geodf = geodf[geodf.geometry.notna() & ~geodf.geometry.is_empty]
 
-        # Tracé vectorisé avec gdf.plot() (remplace la boucle par-feature)
+        # Vectorized plotting with gdf.plot() (replaces the per-feature loop)
         cmap_obj = load_cmap(cmap)
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
@@ -2144,7 +2141,7 @@ class Map:
             transform=ccrs.PlateCarree(),
         )
 
-        # Ajout des étiquettes (vectorisé via apply)
+        # Add the labels (vectorized via apply)
         if show_labels and label_column and label_column in geodf.columns:
             for idx, row in geodf.iterrows():
                 try:
@@ -2171,7 +2168,7 @@ class Map:
                         f"⚠️  Étiquette impossible pour {row.get(label_column, 'inconnu')}: {e}"
                     )
 
-        # Barre de couleur
+        # Colorbar
         if show_colorbar:
             sm = plt.cm.ScalarMappable(cmap=cmap_obj, norm=norm)
             sm.set_array([])
@@ -2179,7 +2176,7 @@ class Map:
             if title:
                 cbar.set_label(title, rotation=270, labelpad=20)
 
-        # Stockage des informations (déjà rendu directement)
+        # Store the information (already rendered directly)
         layer_info = {
             "type": "polygon",
             "name": title,
@@ -2222,48 +2219,48 @@ class Map:
         default_crs="EPSG:4326",
     ):
         """
-        Ajoute une couche de points vectoriels.
+        Adds a vector point layer.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : GeoDataFrame
-            Données géographiques
+            Geographic data
         column_to_plot : str
-            Colonne pour la colorisation
+            Column used for coloring
         label_column : str
-            Colonne pour les étiquettes
+            Column used for labels
         point_size_column : str
-            Colonne pour dimensionner les points
+            Column used to size the points
         cmap : str
-            Palette de couleurs
+            Color palette
         alpha : float
-            Transparence
+            Transparency
         min_point_size : float
-            Taille minimale des points
+            Minimum point size
         max_point_size : float
-            Taille maximale des points
+            Maximum point size
         edge_color : str
-            Couleur des contours
+            Outline color
         linewidth : float
-            Largeur des contours
+            Outline width
         show_labels : bool
-            Afficher les étiquettes
+            Show the labels
         label_size : int
-            Taille des étiquettes
+            Label size
         text_outline_color : str
-            Couleur du contour du texte
+            Text outline color
         text_outline_width : float
-            Largeur du contour du texte
+            Text outline width
         show_colorbar : bool
-            Afficher la barre de couleur
+            Show the colorbar
         show_size_legend : bool
-            Afficher la légende des tailles
+            Show the size legend
         title : str
-            Titre pour la barre de couleur
+            Colorbar title
         default_crs : str
-            CRS par défaut si geodf n'en a pas
+            Default CRS if geodf doesn't have one
         """
-        # Vérifier et définir le CRS si nécessaire
+        # Check and set the CRS if needed
         geodf = gdf.copy()
         if geodf.crs is None:
             self._log(
@@ -2271,32 +2268,31 @@ class Map:
             )
             geodf = geodf.set_crs(default_crs)
 
-        # Reprojection en EPSG:4326 pour compatibilité cartopy
+        # Reproject to EPSG:4326 for cartopy compatibility
         if geodf.crs is not None and not geodf.crs.equals("EPSG:4326"):
             try:
                 geodf = geodf.to_crs(epsg=4326)
             except Exception as e:
-                self._log(f"⚠️  Erreur de transformation CRS: {e}")
-                self._log("Utilisation des coordonnées originales...")
+                logger.warning(f"Erreur de transformation CRS: {e}. Utilisation des coordonnées originales.")
 
-        # Vérifier que la colonne existe
+        # Check that the column exists
         if column_to_plot not in geodf.columns:
             raise ValueError(f"Colonne '{column_to_plot}' introuvable dans le GeoDataFrame")
 
-        # Filtrer les géométries nulles/vides
+        # Filter out null/empty geometries
         geodf = geodf[geodf.geometry.notna() & ~geodf.geometry.is_empty]
 
-        # Normalisation des couleurs
+        # Color normalization
         vmin = geodf[column_to_plot].min()
         vmax = geodf[column_to_plot].max()
         norm = plt.Normalize(vmin=vmin, vmax=vmax)
         cmap_obj = load_cmap(cmap)
 
-        # Calcul vectorisé des coordonnées (centroïde pour non-points)
+        # Vectorized coordinate computation (centroid for non-points)
         xs = geodf.geometry.apply(lambda g: g.x if g.geom_type == "Point" else g.centroid.x)
         ys = geodf.geometry.apply(lambda g: g.y if g.geom_type == "Point" else g.centroid.y)
 
-        # Calcul vectorisé des tailles
+        # Vectorized size computation
         if point_size_column:
             if point_size_column not in geodf.columns:
                 self._log(
@@ -2314,7 +2310,7 @@ class Map:
         else:
             sizes = min_point_size
 
-        # Tracé vectorisé (un seul appel scatter)
+        # Vectorized plotting (a single scatter call)
         colors = cmap_obj(norm(geodf[column_to_plot].values))
         self.ax.scatter(
             xs.values,
@@ -2327,7 +2323,7 @@ class Map:
             transform=ccrs.PlateCarree(),
         )
 
-        # Ajout des étiquettes
+        # Add the labels
         if show_labels and label_column and label_column in geodf.columns:
             for idx, (x, y) in enumerate(zip(xs, ys)):
                 try:
@@ -2354,7 +2350,7 @@ class Map:
                         f"⚠️  Étiquette impossible pour {row.get(label_column, 'inconnu')}: {e}"
                     )
 
-        # Barre de couleur
+        # Colorbar
         if show_colorbar:
             sm = plt.cm.ScalarMappable(cmap=cmap_obj, norm=norm)
             sm.set_array([])
@@ -2362,7 +2358,7 @@ class Map:
             if title:
                 cbar.set_label(title, rotation=270, labelpad=20)
 
-        # Légende des tailles
+        # Size legend
         if show_size_legend and point_size_column:
             sizes = [size_min, (size_min + size_max) / 2, size_max]
             handles = []
@@ -2394,11 +2390,11 @@ class Map:
                 framealpha=0.9,
             )
 
-        # Stockage des informations de la couche (déjà rendu directement) —
-        # sans ça, cette couche était invisible pour list_layers()/
-        # remove_layer() et ne survivait pas à un clear_layers() ailleurs
-        # (ax.clear() l'efface, contrairement à add_polygons_choropleth qui
-        # s'enregistre correctement).
+        # Store the layer information (already rendered directly) —
+        # without this, this layer was invisible to list_layers()/
+        # remove_layer() and didn't survive a clear_layers() elsewhere
+        # (ax.clear() wipes it, unlike add_polygons_choropleth which
+        # registers itself correctly).
         layer_info = {
             "type": "point",
             "name": title,
@@ -2420,9 +2416,9 @@ class Map:
 
         return self
 
-    # Alias rétrocompatibles (anciens noms avec faute de frappe)
+    # Backward-compatible aliases (old misspelled names)
     def add_polygons_cloropleth(self, *args, **kwargs):
-        """Alias déprécié — utiliser add_polygons_choropleth."""
+        """Deprecated alias — use add_polygons_choropleth."""
         warnings.warn(
             "add_polygons_cloropleth est déprécié, "
             "utiliser add_polygons_choropleth à la place.",
@@ -2432,7 +2428,7 @@ class Map:
         return self.add_polygons_choropleth(*args, **kwargs)
 
     def add_points_cloropleth(self, *args, **kwargs):
-        """Alias déprécié — utiliser add_points_choropleth."""
+        """Deprecated alias — use add_points_choropleth."""
         warnings.warn(
             "add_points_cloropleth est déprécié, "
             "utiliser add_points_choropleth à la place.",
@@ -2442,15 +2438,15 @@ class Map:
         return self.add_points_choropleth(*args, **kwargs)
 
     # ----------------------------------------------------------------------
-    # =========== Cartes bivariées et grilles hexagonales ================
+    # =========== Bivariate maps and hexagonal grids =======================
     # ----------------------------------------------------------------------
 
     def _prepare_display_gdf(self, gdf):
-        """Valide un GeoDataFrame et le prépare pour l'axe courant.
+        """Validates a GeoDataFrame and prepares it for the current axes.
 
-        Renvoie ``(geodf, transform)`` : reprojeté en EPSG:4326 avec
-        ``transform=ccrs.PlateCarree()`` si la carte a une projection cartopy
-        (``Map``), ou inchangé avec ``transform=None`` sinon (``Map2D``).
+        Returns ``(geodf, transform)``: reprojected to EPSG:4326 with
+        ``transform=ccrs.PlateCarree()`` if the map has a cartopy projection
+        (``Map``), or unchanged with ``transform=None`` otherwise (``Map2D``).
         """
         geodf = self._validate_geodataframe(gdf)
         if self.projection is None:
@@ -2459,15 +2455,15 @@ class Map:
             try:
                 geodf = geodf.to_crs(epsg=4326)
             except Exception as e:
-                self._log(f"⚠️  Erreur de transformation CRS: {e}")
+                logger.warning(f"Erreur de transformation CRS: {e}")
         return geodf, ccrs.PlateCarree()
 
     def _register_rendered_layer(self, layer_type, geodf, name=None, replay=None):
-        """Enregistre une couche déjà dessinée directement sur ``self.ax``.
+        """Registers a layer already drawn directly onto ``self.ax``.
 
-        ``replay`` : callable sans argument qui re-trace la couche sur
-        ``self.ax``, appelé par ``_render()`` après un ``ax.clear()`` (déclenché
-        par ``set_paper``/``set_projection``...).
+        ``replay``: a no-argument callable that redraws the layer onto
+        ``self.ax``, called by ``_render()`` after an ``ax.clear()``
+        (triggered by ``set_paper``/``set_projection``...).
         """
         self.layers.append({
             "type": layer_type, "name": name,
@@ -2479,16 +2475,17 @@ class Map:
             self._apply_smart_centering()
 
     def add_bivariate(self, gdf, var1, var2, **kwargs):
-        """Ajoute une choroplèthe bivariée (deux variables croisées) à la carte.
+        """Adds a bivariate choropleth (two crossed variables) to the map.
 
-        Surcouche de :func:`cartograpy.mapper.plot_bivariate_choropleth` qui
-        dessine sur l'axe de cette carte (``self.ax``) plutôt que de créer une
-        figure. Tous ses paramètres nommés passent par ``**kwargs``
+        A wrapper around :func:`cartograpy.mapper.plot_bivariate_choropleth`
+        that draws onto this map's axes (``self.ax``) instead of creating a
+        figure. All of its named parameters go through ``**kwargs``
         (``var1_label``, ``var2_label``, ``palette``, ``n_classes``,
-        ``method``, ``legend_position``...). Le GeoDataFrame enrichi (classes
-        et couleurs bivariées) est aussi stocké dans ``self.last_bivariate``.
+        ``method``, ``legend_position``...). The enriched GeoDataFrame
+        (bivariate classes and colors) is also stored in
+        ``self.last_bivariate``.
 
-        Retourne ``self`` (chaînable).
+        Returns ``self`` (chainable).
         """
         geodf, transform = self._prepare_display_gdf(gdf)
 
@@ -2507,37 +2504,37 @@ class Map:
     def add_hexgrid(self, gdf, column, hex_size=None, hex_grid=None,
                     value_cols=None, agg_funcs=None, predicate="within",
                     count_col="n_points", **kwargs):
-        """Ajoute une carte hexbin (grille hexagonale agrégée) à la carte.
+        """Adds a hexbin map (aggregated hexagonal grid) to the map.
 
-        Enchaîne :func:`~cartograpy.mapper.make_hex_grid`,
-        :func:`~cartograpy.mapper.aggregate_to_hex` et
-        :func:`~cartograpy.mapper.plot_hexgrid_choropleth`, en dessinant sur
+        Chains :func:`~cartograpy.mapper.make_hex_grid`,
+        :func:`~cartograpy.mapper.aggregate_to_hex`, and
+        :func:`~cartograpy.mapper.plot_hexgrid_choropleth`, drawing onto
         ``self.ax``.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : GeoDataFrame
-            Données à agréger (points ou polygones) si ``hex_size`` ou
-            ``hex_grid`` est fourni ; sinon, grille déjà agrégée tracée telle
-            quelle.
+            Data to aggregate (points or polygons) if ``hex_size`` or
+            ``hex_grid`` is provided; otherwise, an already-aggregated
+            grid plotted as-is.
         column : str
-            Colonne à cartographier.
-        hex_size : float, optionnel
-            Rayon des hexagones (unité du CRS de ``gdf`` — utiliser un CRS
-            projeté). Déclenche la génération d'une grille et l'agrégation.
-        hex_grid : GeoDataFrame, optionnel
-            Grille existante (sortie de ``make_hex_grid``) au lieu d'en
-            générer une.
-        value_cols : list[str], optionnel
-            Colonnes à agréger (défaut : ``[column]``).
+            Column to map.
+        hex_size : float, optional
+            Hexagon radius (in ``gdf``'s CRS unit — use a projected CRS).
+            Triggers the grid generation and aggregation.
+        hex_grid : GeoDataFrame, optional
+            Existing grid (output of ``make_hex_grid``) instead of
+            generating one.
+        value_cols : list[str], optional
+            Columns to aggregate (default: ``[column]``).
         agg_funcs, predicate, count_col :
-            Passés à ``aggregate_to_hex``.
+            Passed to ``aggregate_to_hex``.
         **kwargs :
-            Passés à ``plot_hexgrid_choropleth`` (``cmap``, ``min_count``,
+            Passed to ``plot_hexgrid_choropleth`` (``cmap``, ``min_count``,
             ``edgecolor``, ``colorbar_label``...).
 
-        Le GeoDataFrame hexagonal est stocké dans ``self.last_hexgrid``.
-        Retourne ``self`` (chaînable).
+        The hexagonal GeoDataFrame is stored in ``self.last_hexgrid``.
+        Returns ``self`` (chainable).
         """
         if hex_size is not None or hex_grid is not None:
             grid = hex_grid if hex_grid is not None else make_hex_grid(gdf, hex_size)
@@ -2564,7 +2561,7 @@ class Map:
         return self
 
     # ----------------------------------------------------------------------
-    # ================Custom map appearence=================================
+    # ================Custom map appearance==================================
     # ----------------------------------------------------------------------
 
     def add_gridlines(
@@ -2583,35 +2580,35 @@ class Map:
         fontsize=10,
     ):
         """
-        Ajoute une grille de coordonnées avec cartopy.
+        Adds a coordinate grid with cartopy.
 
-        Paramètres:
+        Parameters:
         -----------
         draw_labels : bool
-            Afficher les étiquettes de coordonnées
+            Show the coordinate labels
         dms : bool
-            Format degrés-minutes-secondes au lieu de degrés décimaux
+            Degrees-minutes-seconds format instead of decimal degrees
         x_inline : bool
-            Étiquettes X en ligne
+            Inline X labels
         y_inline : bool
-            Étiquettes Y en ligne
+            Inline Y labels
         xlocs : list
-            Positions spécifiques pour les lignes de longitude
+            Specific positions for the longitude lines
         ylocs : list
-            Positions spécifiques pour les lignes de latitude
+            Specific positions for the latitude lines
         color : str
-            Couleur de la grille
+            Grid color
         linestyle : str
-            Style de ligne de la grille
+            Grid line style
         linewidth : float
-            Épaisseur de la grille
+            Grid width
         alpha : float
-            Transparence de la grille
+            Grid transparency
         fontsize : int
-            Taille de police des étiquettes
+            Label font size
         """
-        # Mémorisation des paramètres pour pouvoir recréer la grille après
-        # un ax.clear() (remove_layer/clear_layers/set_projection).
+        # Remember the parameters so the grid can be recreated after an
+        # ax.clear() (remove_layer/clear_layers/set_projection).
         self._gridline_kwargs = dict(
             draw_labels=draw_labels, top_right=top_right, dms=dms,
             x_inline=x_inline, y_inline=y_inline, xlocs=xlocs, ylocs=ylocs,
@@ -2619,11 +2616,11 @@ class Map:
             alpha=alpha, fontsize=fontsize,
         )
 
-        # Suppression de la grille existante si présente
+        # Remove the existing grid if present
         if self.gridlines:
             self.gridlines.remove()
 
-        # Création de la grille
+        # Create the grid
         gl = self.ax.gridlines(
             draw_labels=draw_labels,
             dms=dms,
@@ -2635,12 +2632,12 @@ class Map:
             alpha=alpha,
         )
 
-        # Configuration des étiquettes
+        # Configure the labels
         if draw_labels:
             gl.xlabel_style = {"size": fontsize}
             gl.ylabel_style = {"size": fontsize}
 
-            # Positionnement des étiquettes
+            # Label positioning
             if top_right:
                 gl.top_labels = True
                 gl.right_labels = True
@@ -2650,12 +2647,12 @@ class Map:
             gl.bottom_labels = True
             gl.left_labels = True
 
-            # Formatage des coordonnées
+            # Coordinate formatting
             if not dms:
                 gl.xformatter = LONGITUDE_FORMATTER
                 gl.yformatter = LATITUDE_FORMATTER
 
-        # Configuration des positions de la grille
+        # Configure the grid line positions
         if xlocs is not None:
             gl.xlocator = mticker.FixedLocator(xlocs)
 
@@ -2668,23 +2665,24 @@ class Map:
 
     def set_extent(self, bounds, crs=None):
         """
-        Définit les limites de la carte.
+        Sets the map's bounds.
 
-        Paramètres:
+        Parameters:
         -----------
         bounds : list or tuple
-            Limites au format cartopy ``[x0, x1, y0, y1]`` (ouest, est, sud,
-            nord), comme ``GeoAxes.set_extent``.
+            Bounds in cartopy format ``[x0, x1, y0, y1]`` (west, east, south,
+            north), like ``GeoAxes.set_extent``.
         crs : cartopy.crs
-            Système de coordonnées des limites (par défaut PlateCarree)
+            Coordinate system of the bounds (defaults to PlateCarree)
         """
         if crs is None:
             crs = ccrs.PlateCarree()
 
         self.ax.set_extent(bounds, crs=crs)
-        # `self.bounds` est toujours mémorisé au format [minx, miny, maxx, maxy]
-        # (le reste du code — _apply_smart_centering, add_background_image… — le
-        # lit dans cet ordre), quel que soit l'ordre passé ici.
+        # `self.bounds` is always stored in [minx, miny, maxx, maxy] format
+        # (the rest of the code — _apply_smart_centering,
+        # add_background_image… — reads it in this order), regardless of
+        # the order passed in here.
         x0, x1, y0, y1 = bounds
         self.bounds = [min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)]
 
@@ -2692,42 +2690,42 @@ class Map:
 
     def set_projection(self, projection):
         """
-        Change la projection de la carte (nécessite de recréer l'axe).
+        Changes the map's projection (requires recreating the axes).
 
-        Paramètres:
+        Parameters:
         -----------
         projection : cartopy.crs
-            Nouvelle projection
+            New projection
         """
-        # Sauvegarde des paramètres actuels
+        # Save the current parameters
         title = self.title
         figsize = self.figsize
 
-        # Recréation de l'axe avec la nouvelle projection
+        # Recreate the axes with the new projection
         self.fig.clear()
         self.ax = self.fig.add_subplot(111, projection=projection)
         self.projection = projection
         self.ax.set_title(title, fontsize=16, fontweight="bold")
 
-        # Remise en place des caractéristiques par défaut
+        # Restore the default features
         if self.basemap:
             self.ax.coastlines(resolution="50m", color="black", linewidth=0.5)
             self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 
-        # fig.clear() détruit tous les artistes de la figure (grille,
-        # flèche du Nord, scale bar, inset, colorbar) : les références
-        # existantes sont désormais obsolètes.
+        # fig.clear() destroys every artist of the figure (grid, north
+        # arrow, scale bar, inset, colorbar): the existing references are
+        # now stale.
         self.gridlines = None
         self._north_arrow_artist = None
         self._scale_bar_artist = None
         self._inset_ax = None
         self._colorbar = None
 
-        # Recrée grille et flèche du Nord pour la nouvelle projection
+        # Recreate the grid and north arrow for the new projection
         self._reapply_persistent_artists()
 
-        # Marquer les couches pour re-rendu (dont la scale bar, qui est
-        # gérée comme un layer et sera redessinée par _render())
+        # Flag the layers for re-rendering (including the scale bar, which
+        # is handled as a layer and will be redrawn by _render())
         for layer in self.layers:
             layer["rendered"] = False
 
@@ -2735,27 +2733,27 @@ class Map:
     
     def hide_gridline(self):
         """
-        Masque toutes les bordures, ticks et labels de l'axe.
+        Hides every border, tick, and label of the axes.
 
-        Exemple :
+        Example:
             m = Map()
             m.hide_gridline()
             m.show()
         """
         ax=self.ax
-        # Cacher les spines (bordures)
+        # Hide the spines (borders)
         for spine in ax.spines.values():
             spine.set_visible(False)
 
-        # Cacher les ticks
+        # Hide the ticks
         ax.set_xticks([])
         ax.set_yticks([])
 
-        # Cacher les labels de ticks
+        # Hide the tick labels
         ax.set_xticklabels([])
         ax.set_yticklabels([])
 
-        # Cacher la grille si activée
+        # Hide the grid if enabled
         ax.grid(False)
 
     def add_annotation(
@@ -2768,19 +2766,19 @@ class Map:
         text_kwargs: dict = None
     ):
         """
-        Ajoute une annotation avec ou sans flèche sur un axe matplotlib.
+        Adds an annotation with or without an arrow to a matplotlib axes.
 
         Args:
-            ax: objet matplotlib.axes.Axes
-            text (str): Texte de l'annotation.
-            xy (tuple): Coordonnées du point à annoter (x, y).
-            xytext (tuple, optionnel): Position du texte. Si None, utilise xy.
-            arrow (bool): Si True, ajoute une flèche.
-            arrow_kwargs (dict, optionnel): Dictionnaire des options de la flèche.
-            text_kwargs (dict, optionnel): Dictionnaire des options du texte.
+            ax: matplotlib.axes.Axes object
+            text (str): Annotation text.
+            xy (tuple): Coordinates of the point to annotate (x, y).
+            xytext (tuple, optional): Text position. If None, uses xy.
+            arrow (bool): If True, adds an arrow.
+            arrow_kwargs (dict, optional): Dictionary of arrow options.
+            text_kwargs (dict, optional): Dictionary of text options.
 
-        Exemple:
-            add_annotation(ax, "Ici", (3, 3), xytext=(2, 4))
+        Example:
+            add_annotation(ax, "Here", (3, 3), xytext=(2, 4))
         """
         ax=self.ax
         if arrow_kwargs is None and arrow:
@@ -2820,56 +2818,56 @@ class Map:
         **text_kwargs,
     ):
         """
-        Ajoute des étiquettes de texte au centroïde des polygones OU à la position des points d'un GeoDataFrame.
+        Adds text labels at the centroid of polygons OR at the position of points of a GeoDataFrame.
 
         Parameters
         ----------
         gdf : gpd.GeoDataFrame
-            Le GeoDataFrame contenant les entités.
+            The GeoDataFrame containing the features.
         label_column : str, optional
-            La colonne à afficher comme texte (inutile si label_func est fourni).
+            The column to display as text (unnecessary if label_func is provided).
         custom_label : callable, optional
-            Fonction qui prend une ligne (row) et retourne le texte de l'étiquette.
-            Exemple : lambda row: f"{row['nom']}\n{row['pop']:,d}"
+            Function that takes a row and returns the label text.
+            Example: lambda row: f"{row['nom']}\n{row['pop']:,d}"
         filter_column : str, optional
-            Nom de la colonne pour filtrer les entités à étiqueter.
+            Column name used to filter the features to label.
         filter_values : list, optional
-            Valeurs acceptées pour le filtre.
+            Accepted values for the filter.
         fontsize : int
-            Taille du texte.
+            Text size.
         color : str
-            Couleur du texte.
+            Text color.
         outline_width : int or float
-            Largeur du contour du texte.
+            Text outline width.
         outline_color : str
-            Couleur du contour du texte.
+            Text outline color.
         format_str : str, optional
-            Chaîne de format pour afficher la valeur (ex: '{:,d}' pour nombre entier).
-        **text_kwargs : autres options de texte Matplotlib.
+            Format string to display the value (e.g.: '{:,d}' for an integer).
+        **text_kwargs : other Matplotlib text options.
         """
 
-        # Filtrage si demandé
+        # Filter if requested
         if filter_column and filter_values is not None:
             gdf = gdf[gdf[filter_column].isin(filter_values)]
 
         for idx, row in gdf.iterrows():
             geom = row.geometry
 
-            # Pour Points/MultiPoints
+            # For Points/MultiPoints
             if geom.geom_type == "Point":
                 coords = [(geom.x, geom.y)]
             elif geom.geom_type == "MultiPoint":
                 coords = [(pt.x, pt.y) for pt in geom.geoms]
-            # Pour Polygones/MultiPolygones
+            # For Polygons/MultiPolygons
             elif geom.geom_type == "Polygon":
                 coords = [(geom.centroid.x, geom.centroid.y)]
             elif geom.geom_type == "MultiPolygon":
                 coords = [(poly.centroid.x, poly.centroid.y) for poly in geom.geoms]
             else:
-                # Ignorer les LineString/GeometryCollection/etc.
+                # Ignore LineString/GeometryCollection/etc.
                 continue
 
-            # Génération du label
+            # Generate the label
             if custom_label is not None:
                 if callable(custom_label):
                     label = custom_label(row)
@@ -2887,7 +2885,7 @@ class Map:
             else:
                 raise ValueError("Vous devez fournir label_column OU custom_label.")
 
-            # Affichage du texte à chaque coordonnée trouvée
+            # Display the text at each coordinate found
             for x, y in coords:
                 self.ax.text(
                     x,
@@ -2908,16 +2906,16 @@ class Map:
 
     def add_title(self, title, fontsize=16, pad=20):
         """
-        Ajoute un titre à la carte.
+        Adds a title to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         title : str
-            Titre de la carte
+            Map title
         fontsize : int
-            Taille de la police
+            Font size
         pad : int
-            Espacement
+            Padding
         """
         self.ax.set_title(title, fontsize=fontsize, pad=pad)
 
@@ -2932,59 +2930,59 @@ class Map:
         **kwargs
     ):
         """
-        Ajoute du texte personnalisé à la carte.
+        Adds custom text to the map.
 
-        Paramètres:
+        Parameters:
         -----------
         text : str
-            Le texte à afficher
+            The text to display
         xy : tuple
-            Position du texte (x, y) en coordonnées géographiques
+            Text position (x, y) in geographic coordinates
         fontsize : int
-            Taille de la police (défaut: 12)
+            Font size (default: 12)
         color : str
-            Couleur du texte (défaut: "black")
+            Text color (default: "black")
         outline_width : float
-            Largeur du contour du texte (défaut: 0 = pas de contour)
+            Text outline width (default: 0 = no outline)
         outline_color : str
-            Couleur du contour du texte (défaut: "white")
+            Text outline color (default: "white")
         **kwargs : dict
-            Autres paramètres pour matplotlib.text()
+            Other parameters for matplotlib.text()
             (ha, va, rotation, alpha, weight, style, etc.)
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
-        >>> map_obj.add_text("Paris", (2.3522, 48.8566), 
-        ...                   fontsize=14, color="red", 
+        >>> map_obj.add_text("Paris", (2.3522, 48.8566),
+        ...                   fontsize=14, color="red",
         ...                   ha="center", va="center")
         """
-        # Paramètres par défaut pour le texte
+        # Default text parameters
         text_params = {
             'fontsize': fontsize,
             'color': color,
-            'ha': 'left',  # alignement horizontal par défaut
-            'va': 'bottom',  # alignement vertical par défaut
-            'transform': ccrs.PlateCarree(),  # utilise les coordonnées géographiques
+            'ha': 'left',  # default horizontal alignment
+            'va': 'bottom',  # default vertical alignment
+            'transform': ccrs.PlateCarree(),  # use geographic coordinates
         }
-        
-        # Mise à jour avec les paramètres personnalisés
+
+        # Update with the custom parameters
         text_params.update(kwargs)
-        
-        # Ajout du contour si spécifié
+
+        # Add the outline if specified
         if outline_width > 0:
             from matplotlib import patheffects
             text_params['path_effects'] = [
                 patheffects.withStroke(
-                    linewidth=outline_width, 
+                    linewidth=outline_width,
                     foreground=outline_color
                 )
             ]
-        
-        # Ajout du texte à la carte
+
+        # Add the text to the map
         self.ax.text(xy[0], xy[1], text, **text_params)
 
         return self
@@ -2999,30 +2997,30 @@ class Map:
         **kwargs
     ):
         """
-        Ajoute du texte avec des segments <mis en évidence> (police/couleur
-        différente, ex. gras) via la librairie `highlight_text`.
+        Adds text with <highlighted> segments (different font/color, e.g.
+        bold) via the `highlight_text` library.
 
-        Paramètres:
+        Parameters:
         -----------
         text : str
-            Texte à afficher. Les segments à mettre en évidence sont
-            entourés de `<...>` (ex: "<Paris>: 48.85").
+            Text to display. The segments to highlight are surrounded by
+            `<...>` (e.g.: "<Paris>: 48.85").
         xy : tuple
-            Position du texte (x, y) en coordonnées géographiques.
+            Text position (x, y) in geographic coordinates.
         fontsize : int
-            Taille de police par défaut (défaut: 12).
+            Default font size (default: 12).
         color : str
-            Couleur par défaut (défaut: "black").
+            Default color (default: "black").
         highlight_textprops : list of dict, optional
-            Un dict de propriétés matplotlib.text par segment `<...>`,
-            dans l'ordre d'apparition (ex: [{"font": bold_font}]).
+            A dict of matplotlib.text properties per `<...>` segment, in
+            order of appearance (e.g.: [{"font": bold_font}]).
         **kwargs : dict
-            Autres paramètres pour highlight_text.ax_text()
+            Other parameters for highlight_text.ax_text()
             (ha, va, font, transform, etc.)
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
@@ -3063,31 +3061,31 @@ class Map:
         **kwargs
     ):
         """
-        Ajoute du texte hors-carte (titre, sous-titre) avec des segments
-        <mis en évidence>, positionné en coordonnées figure (0-1), via la
-        librairie `highlight_text`.
+        Adds off-map text (title, subtitle) with <highlighted> segments,
+        positioned in figure coordinates (0-1), via the `highlight_text`
+        library.
 
-        Paramètres:
+        Parameters:
         -----------
         text : str
-            Texte à afficher. Les segments à mettre en évidence sont
-            entourés de `<...>` (ex: "<Unit>: metric tons").
+            Text to display. The segments to highlight are surrounded by
+            `<...>` (e.g.: "<Unit>: metric tons").
         x, y : float
-            Position en coordonnées figure (0-1, comme fig.text()).
+            Position in figure coordinates (0-1, like fig.text()).
         fontsize : int
-            Taille de police par défaut (défaut: 12).
+            Default font size (default: 12).
         color : str
-            Couleur par défaut (défaut: "black").
+            Default color (default: "black").
         highlight_textprops : list of dict, optional
-            Un dict de propriétés matplotlib.text par segment `<...>`,
-            dans l'ordre d'apparition (ex: [{"font": bold_font}]).
+            A dict of matplotlib.text properties per `<...>` segment, in
+            order of appearance (e.g.: [{"font": bold_font}]).
         **kwargs : dict
-            Autres paramètres pour highlight_text.fig_text()
+            Other parameters for highlight_text.fig_text()
             (ha, va, font, etc.)
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
@@ -3118,28 +3116,28 @@ class Map:
 
     def add_custom_text(self, text: str, xy: tuple, to: str = "ax", **kwargs):
         """
-        Ajoute du texte avec segments <mis en évidence>, sur la carte
-        (``to="ax"``, coordonnées géographiques) ou hors-carte
-        (``to="fig"``, coordonnées figure 0-1). Dispatch vers
-        `add_highlight_text()` / `add_highlight_fig_text()` — voir leur
-        docstring pour le détail des paramètres.
+        Adds text with <highlighted> segments, on the map (``to="ax"``,
+        geographic coordinates) or off-map (``to="fig"``, figure
+        coordinates 0-1). Dispatches to `add_highlight_text()` /
+        `add_highlight_fig_text()` — see their docstring for parameter
+        details.
 
-        Paramètres:
+        Parameters:
         -----------
         text : str
-            Texte à afficher, segments `<...>` mis en évidence.
+            Text to display, `<...>` segments highlighted.
         xy : tuple
             Position (x, y).
         to : str
-            ``"ax"`` (défaut, coordonnées carte) ou ``"fig"`` (coordonnées
-            figure 0-1, pour titre/sous-titre).
+            ``"ax"`` (default, map coordinates) or ``"fig"`` (figure
+            coordinates 0-1, for title/subtitle).
         **kwargs : dict
-            Transmis à la méthode ciblée (fontsize, color,
+            Passed to the target method (fontsize, color,
             highlight_textprops, ha, va, font, etc.)
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
         """
         if to == "ax":
             return self.add_highlight_text(text, xy, **kwargs)
@@ -3158,55 +3156,55 @@ class Map:
         **kwargs,
     ):
         """
-        Étiquette en lot chaque entité d'un GeoDataFrame avec un texte
-        composé à partir de ses colonnes — version « par entité » de
-        `add_custom_text()`, avec le même support des segments `<mis en
-        évidence>` (`highlight_textprops`).
+        Batch-labels each feature of a GeoDataFrame with text composed
+        from its columns — "per feature" version of `add_custom_text()`,
+        with the same support for `<highlighted>` segments
+        (`highlight_textprops`).
 
-        Le texte de chaque étiquette est produit par `template.format(**row)` :
-        les `{...}` de `template` sont des noms de colonnes du GeoDataFrame
-        (spécificateurs de format autorisés, ex. `{densite:.0f}`). Les
-        segments entourés de `<...>` sont mis en évidence.
+        The text of each label is produced by `template.format(**row)`:
+        the `{...}` in `template` are GeoDataFrame column names (format
+        specifiers allowed, e.g. `{densite:.0f}`). Segments surrounded by
+        `<...>` are highlighted.
 
-        L'ancre de l'étiquette est :
+        The label anchor is:
 
-        - la position du point si la géométrie est un `Point`/`MultiPoint` ;
-        - le `representative_point()` (point garanti à l'intérieur) pour un
-          `Polygon`/`MultiPolygon` — un seul point par entité, y compris pour
-          les multipolygones (contrairement à `add_labels`).
+        - the point position if the geometry is a `Point`/`MultiPoint`;
+        - the `representative_point()` (point guaranteed to be inside) for
+          a `Polygon`/`MultiPolygon` — a single point per feature, including
+          for multipolygons (unlike `add_labels`).
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : geopandas.GeoDataFrame
-            Entités à étiqueter (reprojeté en EPSG:4326 si besoin, comme les
-            autres couches de `Map`).
+            Features to label (reprojected to EPSG:4326 if needed, like
+            other `Map` layers).
         template : str
-            Gabarit façon f-string, ex. `"<{NAME_1}>\\n{densite:.0f} hab/km²"`.
+            f-string-style template, e.g. `"<{NAME_1}>\\n{densite:.0f} hab/km²"`.
         dx, dy : float
-            Décalage appliqué à l'ancre, dans l'unité de l'axe (degrés pour
-            `Map`). Positif = vers l'est / le nord.
-        except_ : tuple (str, list), optionnel
-            `(nom_colonne, valeurs)` : les entités dont `row[nom_colonne]` est
-            dans `valeurs` ne reçoivent pas d'étiquette
-            (ex. `except_=("shapeName", ["Côte d'Ivoire", "Guinée"])`).
-        highlight_textprops : list[dict], optionnel
-            Un dict de propriétés par segment `<...>` du gabarit, dans l'ordre
-            (ex. `[{"font": font_bold}]`) — appliqué à chaque étiquette.
+            Offset applied to the anchor, in axis units (degrees for
+            `Map`). Positive = towards the east / north.
+        except_ : tuple (str, list), optional
+            `(column_name, values)`: features whose `row[column_name]` is
+            in `values` do not receive a label
+            (e.g. `except_=("shapeName", ["Côte d'Ivoire", "Guinée"])`).
+        highlight_textprops : list[dict], optional
+            A properties dict per `<...>` segment of the template, in order
+            (e.g. `[{"font": font_bold}]`) — applied to each label.
         **kwargs :
-            Transmis à `add_highlight_text()` pour chaque étiquette
-            (`fontsize`, `color`, `font`, `ha`, `va`…). `ha`/`va` valent
-            `"center"` par défaut ici.
+            Passed to `add_highlight_text()` for each label
+            (`fontsize`, `color`, `font`, `ha`, `va`…). `ha`/`va` default
+            to `"center"` here.
 
-        Retourne:
-        ---------
-        Map : self (chaînable).
+        Returns:
+        --------
+        Map : self (chainable).
 
         Raises:
         -------
-            KeyError : si `template` référence une colonne absente.
-            ValueError : si `except_` n'est pas un couple `(str, list)`.
+            KeyError: if `template` references a missing column.
+            ValueError: if `except_` is not a `(str, list)` pair.
 
-        Exemples:
+        Examples:
         ---------
             >>> m.add_custom_labels(
             ...     regions, "<{NAME_1}> : {densite:.0f}",
@@ -3245,8 +3243,8 @@ class Map:
                     f"GeoDataFrame. Colonnes disponibles : {list(geodf.columns)}"
                 ) from None
 
-            # highlight_text exige autant de dicts que de segments <...> ;
-            # si l'appelant n'en fournit pas, on neutralise chaque segment.
+            # highlight_text requires as many dicts as <...> segments;
+            # if the caller doesn't provide any, neutralize each segment.
             props = highlight_textprops
             if props is None:
                 n_seg = label.count("<")
@@ -3284,28 +3282,28 @@ class Map:
         **kwargs
     ):
         """
-        Ajoute une flèche hors-carte en coordonnées figure (0-1), via la
-        librairie `drawarrow`. Utile pour pointer une entité trop petite
-        pour être annotée directement dessus (ex: micro-état).
+        Adds an off-map arrow in figure coordinates (0-1), via the
+        `drawarrow` library. Useful for pointing at a feature too small
+        to be annotated directly on it (e.g. micro-state).
 
-        Paramètres:
+        Parameters:
         -----------
         tail_position, head_position : tuple
-            Positions (x, y) en coordonnées figure (0-1) du départ et de
-            la pointe de la flèche.
+            (x, y) positions in figure coordinates (0-1) of the tail and
+            head of the arrow.
         radius : float
-            Courbure de la flèche (0 = droite).
+            Arrow curvature (0 = straight).
         color : str
-            Couleur de la flèche (défaut: "black").
+            Arrow color (default: "black").
         width, head_width, head_length : float
-            Épaisseur du trait / largeur et longueur de la pointe.
+            Line thickness / head width and length.
         **kwargs : dict
-            Autres paramètres pour drawarrow.fig_arrow()
+            Other parameters for drawarrow.fig_arrow()
             (double_headed, fill_head, invert, shadow_style, etc.)
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
@@ -3335,7 +3333,7 @@ class Map:
         color: str = "black",
         pad: float = 20,
     ) -> "Map":
-        """Définit le titre de la carte avec des options de personnalisation."""
+        """Sets the map title with customization options."""
         self.ax.set_title(
             title, fontsize=fontsize, fontweight=fontweight, color=color, pad=pad
         )
@@ -3369,7 +3367,7 @@ class Map:
                         if os.path.isfile(fpath):
                             files.append(fpath)
             except Exception as e:
-                self._log(f"❌ Impossible de retrouver le dossier : {e}")
+                logger.error(f"Impossible de retrouver le dossier : {e}")
         return files
 
     def add_image(
@@ -3385,38 +3383,37 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute une image (logo, photo, illustration) à un endroit précis de
-        la carte, via `OffsetImage` + `AnnotationBbox`.
+        Adds an image (logo, photo, illustration) at a precise location on
+        the map, via `OffsetImage` + `AnnotationBbox`.
 
-        Paramètres:
+        Parameters:
         -----------
-        image : str, array-like ou PIL.Image
-            Chemin vers un fichier image (png, jpg, svg...) ou image déjà
-            chargée (tableau numpy / `PIL.Image`).
+        image : str, array-like or PIL.Image
+            Path to an image file (png, jpg, svg...) or already-loaded
+            image (numpy array / `PIL.Image`).
         xy : tuple
             Position (x, y).
         to : str
-            ``"fig"`` (défaut, coordonnées figure 0-1 — pour un logo/watermark
-            hors-carte) ou ``"ax"`` (coordonnées géographiques de la carte).
-            Même convention que `add_custom_text`.
+            ``"fig"`` (default, figure coordinates 0-1 — for an off-map
+            logo/watermark) or ``"ax"`` (map geographic coordinates).
+            Same convention as `add_custom_text`.
         zoom : float
-            Facteur d'échelle de l'image (défaut 1).
+            Image scale factor (default 1).
         alpha : float
-            Transparence (0-1).
+            Transparency (0-1).
         zorder : int
-            Ordre d'empilement (défaut 100, au-dessus des couches).
+            Stacking order (default 100, above the layers).
         frameon : bool
-            Afficher un cadre autour de l'image.
+            Show a frame around the image.
         color : str, optional
-            Recolore les SVG (voir `read_image`), ignoré pour les autres
-            formats.
+            Recolors SVGs (see `read_image`), ignored for other formats.
         **kwargs : dict
-            Autres paramètres pour `AnnotationBbox` (pad, box_alignment,
+            Other parameters for `AnnotationBbox` (pad, box_alignment,
             bboxprops, etc.)
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
@@ -3454,53 +3451,51 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute une image de fond (texture, fond de carte statique, etc.)
-        derrière toutes les couches, sur l'étendue de la carte.
+        Adds a background image (texture, static base map, etc.) behind
+        all layers, over the map extent.
 
-        Paramètres:
+        Parameters:
         -----------
-        image : str, array-like ou PIL.Image
-            Chemin vers un fichier image ou image déjà chargée.
+        image : str, array-like or PIL.Image
+            Path to an image file or already-loaded image.
         extent : tuple, optional
-            ``(minx, miny, maxx, maxy)`` couverts par l'image (coordonnées
-            géographiques). Par défaut, utilise l'étendue actuelle de la
-            carte (`self.bounds`, mis à jour par les couches déjà ajoutées
-            ou par `set_extent()`).
+            ``(minx, miny, maxx, maxy)`` covered by the image (geographic
+            coordinates). Defaults to the map's current extent
+            (`self.bounds`, updated by layers already added or by
+            `set_extent()`).
         zoom : float
-            Facteur d'échelle (> 0) appliqué à l'image autour du centre de
-            `extent` (défaut 1 = pas de changement). > 1 agrandit l'image
-            (elle couvre une zone plus grande) ; < 1 la réduit.
+            Scale factor (> 0) applied to the image around the center of
+            `extent` (default 1 = no change). > 1 enlarges the image
+            (it covers a larger area); < 1 shrinks it.
         aspect : str
-            ``"equal"`` (défaut) : les unités géographiques x/y restent à
-            échelle égale, cohérent avec le reste de la carte — l'image
-            n'est pas déformée par un axe étiré. ``"auto"`` : étire l'image
-            pour remplir tout `extent` (peut la déformer).
+            ``"equal"`` (default): x/y geographic units stay at equal
+            scale, consistent with the rest of the map — the image is not
+            distorted by a stretched axis. ``"auto"``: stretches the image
+            to fill the whole `extent` (may distort it).
         alpha : float
-            Transparence (0-1).
+            Transparency (0-1).
         zorder : int
-            Ordre d'empilement (défaut -100, sous toutes les autres
-            couches).
+            Stacking order (default -100, below all other layers).
         color : str, optional
-            Recolore les SVG (voir `read_image`), ignoré pour les autres
-            formats.
+            Recolors SVGs (see `read_image`), ignored for other formats.
         **kwargs : dict
-            Autres paramètres pour `Axes.imshow()`.
+            Other parameters for `Axes.imshow()`.
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
         >>> map_obj.set_extent([-11, 32, 41, 73])
         >>> map_obj.add_background_image("texture.jpg")
         """
-        # Mémorise les arguments d'origine : ils servent à re-dessiner
-        # l'image après un ax.clear() (set_paper/set_projection) et à
-        # fusionner les modifications de set_background_image().
+        # Stores the original arguments: used to redraw the image after
+        # an ax.clear() (set_paper/set_projection) and to merge
+        # set_background_image() modifications.
         extent_arg = tuple(extent) if extent is not None else None
 
-        # Une seule image de fond à la fois : on retire la précédente.
+        # Only one background image at a time: remove the previous one.
         if getattr(self, "_background_image_artist", None) is not None:
             try:
                 self._background_image_artist.remove()
@@ -3517,8 +3512,8 @@ class Map:
                     "Aucune étendue disponible : passez extent=... ou "
                     "appelez set_extent() / ajoutez une couche d'abord."
                 )
-            # self.bounds est au format [minx, miny, maxx, maxy] ;
-            # imshow() attend (left, right, bottom, top).
+            # self.bounds is in [minx, miny, maxx, maxy] format;
+            # imshow() expects (left, right, bottom, top).
             minx, miny, maxx, maxy = self.bounds
             extent = (minx, maxx, miny, maxy)
         else:
@@ -3534,11 +3529,11 @@ class Map:
             half_h = (extent[3] - extent[2]) / 2 * zoom
             extent = (cx - half_w, cx + half_w, cy - half_h, cy + half_h)
 
-        # `aspect="equal"` seul ne suffit pas : imshow() étire toujours le
-        # contenu de l'image pour remplir exactement `extent`, quel que
-        # soit `aspect`. Pour ne pas déformer l'image, on réduit `extent`
-        # (centré) à son propre ratio largeur/hauteur en pixels — le reste
-        # de la boîte reste vide plutôt que d'étirer l'image.
+        # `aspect="equal"` alone is not enough: imshow() always stretches
+        # the image content to exactly fill `extent`, regardless of
+        # `aspect`. To avoid distorting the image, `extent` is shrunk
+        # (centered) to its own width/height ratio in pixels — the rest
+        # of the box stays empty rather than stretching the image.
         img_h, img_w = img_arr.shape[0], img_arr.shape[1]
         img_ratio = img_w / img_h
         x0, x1, y0, y1 = extent
@@ -3551,9 +3546,9 @@ class Map:
             new_w = box_h * img_ratio
             extent = (cx - new_w / 2, cx + new_w / 2, y0, y1)
 
-        # imshow() peut ré-ajuster automatiquement la vue de l'axe à son
-        # propre extent : on restaure explicitement l'étendue courante
-        # pour que l'appelant ne la voie pas changer.
+        # imshow() may automatically readjust the axis view to its own
+        # extent: the current extent is explicitly restored so the
+        # caller doesn't see it change.
         try:
             current_view = self.ax.get_extent(crs=ccrs.PlateCarree())
         except Exception:
@@ -3576,30 +3571,31 @@ class Map:
 
     def set_background_image(self, **kwargs) -> "Map":
         """
-        Modifie l'image de fond existante créée par ``add_background_image``.
+        Modifies the existing background image created by
+        ``add_background_image``.
 
-        Chaque paramètre passé remplace celui mémorisé lors du dernier
-        ``add_background_image()`` / ``set_background_image()`` ; les autres
-        sont conservés. L'ancienne image est retirée et une nouvelle est
-        dessinée avec les paramètres fusionnés.
+        Each parameter passed replaces the one stored from the last
+        ``add_background_image()`` / ``set_background_image()`` call; the
+        others are kept. The old image is removed and a new one is drawn
+        with the merged parameters.
 
         Parameters
         ----------
-        image : str, array-like ou PIL.Image, optional
-            Nouvelle image.
+        image : str, array-like or PIL.Image, optional
+            New image.
         extent, zoom, aspect, alpha, zorder, color : optional
-            Voir ``add_background_image``.
+            See ``add_background_image``.
         **kwargs :
-            Autres paramètres transmis à ``Axes.imshow()``.
+            Other parameters passed to ``Axes.imshow()``.
 
         Returns
         -------
-        Map : self pour le chaînage de méthodes.
+        Map : self for method chaining.
 
         Example
         -------
         >>> m.add_background_image("notebooks/bg_image.jpg", alpha=0.5)
-        >>> m.set_background_image(alpha=0.25, zoom=1.2)   # ajuste sans tout ré-écrire
+        >>> m.set_background_image(alpha=0.25, zoom=1.2)   # adjusts without rewriting everything
         """
         if self._background_image_kwargs is None:
             raise RuntimeError(
@@ -3630,77 +3626,78 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute une flèche du Nord sur la carte.
+        Adds a North arrow to the map.
 
-        Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
-        rendu professionnel (NorthArrow), sinon les SVG embarquées.
+        Automatically uses ``matplotlib-map-utils`` if installed for a
+        professional rendering (NorthArrow), otherwise the embedded SVGs.
 
         Parameters
         ----------
         arrow : int
-            Numéro de la flèche SVG (mode svg, 1-based).
+            SVG arrow number (svg mode, 1-based).
         position : tuple (x, y)
-            Position en coordonnées axes fraction 0-1 (mode svg).
+            Position in axes fraction 0-1 coordinates (svg mode).
         zoom : float
-            Facteur de zoom (mode svg), appliqué après une normalisation
-            automatique qui ramène chaque icône à une taille de référence
-            commune — les 17 SVG embarquées ont des résolutions natives
-            très différentes (de 5x16 à 580x580 px), sans quoi `zoom=1`
-            produirait des tailles incohérentes d'une flèche à l'autre.
+            Zoom factor (svg mode), applied after an automatic
+            normalization that brings each icon to a common reference
+            size — the 17 embedded SVGs have very different native
+            resolutions (from 5x16 to 580x580 px), without which
+            `zoom=1` would produce inconsistent sizes from one arrow to
+            another.
         color : str
-            Couleur de la flèche.
+            Arrow color.
         style : str
-            Mode de rendu :
-            - ``"auto"`` : matplotlib-map-utils si disponible, sinon SVG.
-            - ``"svg"`` : flèches vectorielles embarquées.
-            - ``"fancy"`` : flèche 3D avec ombre (matplotlib-map-utils).
-            - ``"simple"`` : flèche plate (matplotlib-map-utils).
+            Rendering mode:
+            - ``"auto"``: matplotlib-map-utils if available, otherwise SVG.
+            - ``"svg"``: embedded vector arrows.
+            - ``"fancy"``: 3D arrow with shadow (matplotlib-map-utils).
+            - ``"simple"``: flat arrow (matplotlib-map-utils).
         location : str
-            Position ("upper left", "upper right", etc.) — mode map-utils.
+            Position ("upper left", "upper right", etc.) — map-utils mode.
         scale : float, optional
-            Hauteur en pouces (mode map-utils). Auto si None.
-        rotation : float, dict ou "auto"
-            - ``"auto"`` : calculée d'après la projection.
-            - ``float`` : degrés manuels.
-            - ``dict`` : passé directement (ex. {"crs": ..., "reference": ...}).
+            Height in inches (map-utils mode). Auto if None.
+        rotation : float, dict or "auto"
+            - ``"auto"``: computed from the projection.
+            - ``float``: manual degrees.
+            - ``dict``: passed directly (e.g. {"crs": ..., "reference": ...}).
         label : str or dict
-            Texte de la flèche (défaut "N"). Peut être un dict complet :
+            Arrow text (default "N"). Can be a full dict:
             ``{"text": "N", "fontsize": 14, "color": "black"}``.
         fancy : bool or dict
-            Style fancy avec ombre (mode map-utils). Peut être un dict pour
-            configurer les couleurs : ``{"facecolor": "black", "edgecolor": "k"}``.
+            Fancy style with shadow (map-utils mode). Can be a dict to
+            configure colors: ``{"facecolor": "black", "edgecolor": "k"}``.
         shadow : bool or dict
-            Ombre portée (mode map-utils). Peut être un dict :
+            Drop shadow (map-utils mode). Can be a dict:
             ``{"facecolor": "gray", "alpha": 0.5}``.
         size : str, optional
-            Taille prédéfinie ("xs", "sm", "md", "lg", "xl") — mode map-utils.
-            Appelle ``NorthArrow.set_size()`` pour ajuster les défauts globaux
-            **avant** la création de l'artiste.
+            Predefined size ("xs", "sm", "md", "lg", "xl") — map-utils mode.
+            Calls ``NorthArrow.set_size()`` to adjust the global defaults
+            **before** the artist is created.
         base : dict, optional
-            Configuration de la base de la flèche (mode map-utils).
+            Arrow base configuration (map-utils mode).
         pack : dict, optional
-            Configuration du packing (mode map-utils).
+            Packing configuration (map-utils mode).
         aob : dict, optional
-            Configuration de l'AnnotationBbox (mode map-utils).
+            AnnotationBbox configuration (map-utils mode).
         zorder : int
-            Z-order de l'artiste (défaut 99).
+            Artist z-order (default 99).
         to : str
-            ``"ax"`` (défaut, ``location``/``position`` relatifs à l'axe
-            carte) ou ``"fig"`` (relatifs à la figure entière — utilise
-            alors ``position`` comme point d'ancrage, dans les deux modes
-            de rendu). Même convention que `add_custom_text`.
+            ``"ax"`` (default, ``location``/``position`` relative to the
+            map axis) or ``"fig"`` (relative to the whole figure — then
+            uses ``position`` as the anchor point, in both rendering
+            modes). Same convention as `add_custom_text`.
         **kwargs
-            Paramètres supplémentaires pour ``NorthArrow``.
+            Additional parameters for ``NorthArrow``.
 
         Returns
         -------
-        Map : Instance de la carte pour chaînage.
+        Map : Map instance for chaining.
         """
         if to not in ("ax", "fig"):
             raise ValueError(f"to doit être 'ax' ou 'fig', reçu: {to!r}")
 
-        # Mémorisation des paramètres pour pouvoir recréer la flèche après
-        # un ax.clear() (remove_layer/clear_layers/set_projection).
+        # Stores the parameters so the arrow can be recreated after an
+        # ax.clear() (remove_layer/clear_layers/set_projection).
         self._north_arrow_kwargs = dict(
             arrow=arrow, position=position, zoom=zoom, color=color,
             style=style, location=location, scale=scale, rotation=rotation,
@@ -3721,7 +3718,7 @@ class Map:
                 )
                 style = "svg"
             else:
-                # Appliquer set_size() sur les défauts globaux AVANT création
+                # Apply set_size() to the global defaults BEFORE creation
                 if size is not None:
                     MmuNorthArrow.set_size(size)
 
@@ -3736,7 +3733,7 @@ class Map:
                 if scale is not None:
                     na_kwargs["scale"] = scale
 
-                # fancy / shadow : accepte bool ou dict
+                # fancy / shadow: accepts bool or dict
                 if style == "simple":
                     na_kwargs["fancy"] = False
                     na_kwargs["shadow"] = False
@@ -3744,23 +3741,23 @@ class Map:
                     na_kwargs["fancy"] = fancy
                     na_kwargs["shadow"] = shadow
 
-                # label : accepte str ou dict
+                # label: accepts str or dict
                 if isinstance(label, dict):
                     na_kwargs["label"] = label
                 elif label:
                     na_kwargs["label"] = {"text": label}
 
-                # `color` pilote le remplissage/contour de la flèche (mode
-                # map-utils) via `base` — sans ça le paramètre `color` était
-                # ignoré, la flèche restait toujours noire.
+                # `color` drives the arrow's fill/outline (map-utils mode)
+                # via `base` — without this the `color` parameter was
+                # ignored, the arrow always stayed black.
                 base_style = {"facecolor": color, "edgecolor": color}
                 if base is not None:
                     base_style.update(base)
                 na_kwargs["base"] = base_style
                 if pack is not None:
                     na_kwargs["pack"] = pack
-                # to="fig" : ancre la flèche sur la figure entière plutôt
-                # que sur l'axe carte, via bbox_to_anchor/bbox_transform.
+                # to="fig": anchors the arrow on the whole figure rather
+                # than on the map axis, via bbox_to_anchor/bbox_transform.
                 aob_style = {}
                 if to == "fig":
                     aob_style = {
@@ -3779,15 +3776,15 @@ class Map:
                 self._log("🧭 Flèche du Nord ajoutée (map-utils)")
                 return self
 
-        # Mode SVG (ancien comportement)
+        # SVG mode (legacy behavior)
         arrow_path = self.get_north_arrows()[arrow - 1]
         img = read_image(arrow_path, color)
-        # Les SVG embarquées ont des dimensions natives très hétérogènes une
-        # fois rastérisées (de 5x16 à 580x580 px selon l'icône) : sans
-        # normalisation, un même zoom=1 produit des flèches de tailles
-        # radicalement différentes selon l'icône choisie. On ramène le plus
-        # grand côté de chaque image à une taille de référence commune avant
-        # d'appliquer le zoom demandé par l'utilisateur.
+        # The embedded SVGs have very heterogeneous native dimensions once
+        # rasterized (from 5x16 to 580x580 px depending on the icon):
+        # without normalization, the same zoom=1 produces radically
+        # different arrow sizes depending on the chosen icon. The largest
+        # side of each image is brought to a common reference size before
+        # applying the zoom requested by the user.
         _REFERENCE_ARROW_PX = 120
         largest_side = max(img.size)
         auto_scale = _REFERENCE_ARROW_PX / largest_side if largest_side else 1
@@ -3801,47 +3798,47 @@ class Map:
         self._log("🧭 Flèche du Nord ajoutée (SVG)")
         return self
 
-    # Alias pour compatibilité
+    # Alias for compatibility
     add_arrow = add_north_arrow
 
     def set_north_arrow(self, **kwargs) -> "Map":
         """
-        Modifie la flèche du Nord existante créée par ``add_north_arrow``.
+        Modifies the existing North arrow created by ``add_north_arrow``.
 
-        Fonctionne uniquement si la flèche a été créée avec le mode
-        ``map-utils`` (objet ``NorthArrow``). Chaque paramètre passé est
-        directement appliqué via les property-setters de ``NorthArrow``.
+        Only works if the arrow was created with ``map-utils`` mode
+        (``NorthArrow`` object). Each parameter passed is applied
+        directly via ``NorthArrow``'s property setters.
 
         Parameters
         ----------
         location : str, optional
-            Nouvelle position ("upper left", "lower right", …).
+            New position ("upper left", "lower right", …).
         scale : float, optional
-            Nouvelle hauteur en pouces.
+            New height in inches.
         rotation : dict or float, optional
-            Nouvelle rotation (dict ou degrés).
+            New rotation (dict or degrees).
         fancy : bool or dict, optional
-            Activer/configurer le style fancy.
+            Enable/configure the fancy style.
         shadow : bool or dict, optional
-            Activer/configurer l'ombre.
+            Enable/configure the shadow.
         label : dict, optional
-            Configuration du texte (ex. {"text": "N", "fontsize": 14}).
+            Text configuration (e.g. {"text": "N", "fontsize": 14}).
         base : dict, optional
-            Configuration de la base de la flèche.
+            Arrow base configuration.
         pack : dict, optional
-            Configuration du packing.
+            Packing configuration.
         aob : dict, optional
-            Configuration de l'AnnotationBbox.
+            AnnotationBbox configuration.
         zorder : int, optional
             Z-order.
         size : str, optional
-            Taille prédéfinie ("xs", "sm", "md", "lg", "xl").
-            Applique ``NorthArrow.set_size()`` sur les défauts globaux,
-            supprime l'ancienne flèche et en recrée une nouvelle.
+            Predefined size ("xs", "sm", "md", "lg", "xl").
+            Applies ``NorthArrow.set_size()`` to the global defaults,
+            removes the old arrow and recreates a new one.
 
         Returns
         -------
-        Map : Instance de la carte pour chaînage.
+        Map : Map instance for chaining.
         """
         if self._north_arrow_artist is None:
             raise RuntimeError(
@@ -3859,7 +3856,7 @@ class Map:
         na = self._north_arrow_artist
 
         if "size" in kwargs:
-            # set_size modifie les défauts globaux, il faut recréer l'artiste
+            # set_size modifies the global defaults, the artist must be recreated
             MmuNorthArrow.set_size(kwargs.pop("size"))
             na.remove()
             new_na = MmuNorthArrow(
@@ -3875,45 +3872,45 @@ class Map:
             if hasattr(na, key):
                 setattr(na, key, value)
             else:
-                self._log(f"⚠️  Propriété inconnue : {key}")
+                logger.warning(f"Propriété inconnue : {key}")
 
         self._log("🧭 Flèche du Nord mise à jour")
         return self
 
     def set_scale_bar(self, **kwargs) -> "Map":
         """
-        Modifie la barre d'échelle existante créée par ``add_scale_bar``.
+        Modifies the existing scale bar created by ``add_scale_bar``.
 
-        Fonctionne avec les artistes ``MmuScaleBar`` ou ``MplScaleBar``.
-        Pour ``MmuScaleBar``, chaque paramètre est appliqué via ses
-        property-setters.
+        Works with ``MmuScaleBar`` or ``MplScaleBar`` artists. For
+        ``MmuScaleBar``, each parameter is applied via its property
+        setters.
 
         Parameters
         ----------
         style : str, optional
-            Style de barre ("ticks" ou "boxes") — MmuScaleBar seulement.
+            Bar style ("ticks" or "boxes") — MmuScaleBar only.
         location : str, optional
-            Nouvelle position.
+            New position.
         bar : dict, optional
-            Paramètres de barre (projection, unit, length, major_div, etc.).
+            Bar parameters (projection, unit, length, major_div, etc.).
         labels : dict, optional
-            Paramètres d'étiquettes (style, loc, fontsize, etc.).
+            Label parameters (style, loc, fontsize, etc.).
         units : dict, optional
-            Paramètres d'unités (loc, label, fontsize, etc.).
+            Unit parameters (loc, label, fontsize, etc.).
         text : dict, optional
-            Paramètres de texte.
+            Text parameters.
         aob : dict, optional
-            Configuration de l'AnnotationBbox.
+            AnnotationBbox configuration.
         zorder : int, optional
             Z-order.
         size : str, optional
-            Taille prédéfinie ("xs", "sm", "md", "lg", "xl").
-            Applique ``ScaleBar.set_size()`` sur les défauts globaux,
-            supprime l'ancienne barre et en recrée une nouvelle.
+            Predefined size ("xs", "sm", "md", "lg", "xl").
+            Applies ``ScaleBar.set_size()`` to the global defaults,
+            removes the old bar and recreates a new one.
 
         Returns
         -------
-        Map : Instance de la carte pour chaînage.
+        Map : Map instance for chaining.
         """
         if self._scale_bar_artist is None:
             raise RuntimeError(
@@ -3925,7 +3922,7 @@ class Map:
 
         if HAS_MAP_UTILS and isinstance(sb, MmuScaleBar):
             if "size" in kwargs:
-                # set_size modifie les défauts globaux, il faut recréer
+                # set_size modifies the global defaults, it must be recreated
                 MmuScaleBar.set_size(kwargs.pop("size"))
                 sb.remove()
                 new_sb = MmuScaleBar(
@@ -3942,13 +3939,13 @@ class Map:
                 if hasattr(sb, key):
                     setattr(sb, key, value)
                 else:
-                    self._log(f"⚠️  Propriété inconnue : {key}")
+                    logger.warning(f"Propriété inconnue : {key}")
         elif HAS_MPL_SCALEBAR and isinstance(sb, MplScaleBar):
             for key, value in kwargs.items():
                 if hasattr(sb, key):
                     setattr(sb, key, value)
                 else:
-                    self._log(f"⚠️  Propriété inconnue : {key}")
+                    logger.warning(f"Propriété inconnue : {key}")
         else:
             raise RuntimeError(
                 "set_scale_bar() nécessite une barre d'échelle créée avec "
@@ -3960,30 +3957,30 @@ class Map:
 
     def set_inset(self, **kwargs) -> "Map":
         """
-        Modifie la mini-carte de situation (inset map) existante.
+        Modifies the existing situation mini-map (inset map).
 
-        Paramètres:
+        Parameters:
         -----------
         facecolor : str, optional
-            Nouvelle couleur de fond.
+            New background color.
         edgecolor : str, optional
-            Nouvelle couleur de bordure.
+            New border color.
         linewidth : float, optional
-            Nouvelle épaisseur de bordure.
+            New border thickness.
         alpha : float, optional
-            Nouvelle transparence.
+            New transparency.
         land_color : str, optional
-            Nouvelle couleur des terres (re-dessine la feature).
+            New land color (redraws the feature).
         ocean_color : str, optional
-            Nouvelle couleur des océans (re-dessine la feature).
+            New ocean color (redraws the feature).
         global_view : bool, optional
-            Si True, affiche la carte globale via set_global().
+            If True, shows the global map via set_global().
         extent : list, optional
-            [x0, x1, y0, y1] pour restreindre l'étendue de l'inset.
+            [x0, x1, y0, y1] to restrict the inset extent.
 
-        Retourne:
-        ---------
-        Map : Instance de la carte pour chaînage.
+        Returns:
+        --------
+        Map : Map instance for chaining.
         """
         if not hasattr(self, "_inset_ax") or self._inset_ax is None:
             raise RuntimeError(
@@ -4023,25 +4020,25 @@ class Map:
         self, name: str, colors: List[str], save_palette: bool = True
     ) -> "Map":
         """
-        Crée une palette de couleurs personnalisée.
+        Creates a custom color palette.
 
-        Paramètres:
+        Parameters:
         -----------
         name : str
-            Nom de la palette personnalisée
+            Name of the custom palette
         colors : List[str]
-            Liste de valeurs de couleurs (codes hex, noms de couleurs, etc.)
+            List of color values (hex codes, color names, etc.)
         save_palette : bool
-            Sauvegarder la palette pour une utilisation future
+            Save the palette for future use
 
-        Retourne:
-        ---------
-        Map : self pour le chaînage de méthodes
+        Returns:
+        --------
+        Map : self for method chaining
 
-        Exemple:
-            carte.create_custom_palette(name='ma_palette',
-                                        colors=['#FF5733', 'blue', 'green'],
-                                        save_palette=True)
+        Example:
+            map.create_custom_palette(name='my_palette',
+                                       colors=['#FF5733', 'blue', 'green'],
+                                       save_palette=True)
         """
         # Validate colors
         valid_colors = []
@@ -4051,10 +4048,10 @@ class Map:
                 mcolors.to_rgba(color)
                 valid_colors.append(color)
             except ValueError:
-                self._log(f"Warning: Invalid color '{color}' ignored")
+                logger.warning(f"Invalid color '{color}' ignored")
 
         if not valid_colors:
-            self._log("Error: No valid colors provided")
+            logger.error("No valid colors provided")
             return self
 
         if save_palette:
@@ -4073,9 +4070,9 @@ class Map:
         include_matplotlib: bool = True,
     ) -> Dict[str, List[str]]:
         """
-        Récupère toutes les palettes de couleurs disponibles.
-        Délègue à styling.get_available_palettes() et y ajoute
-        les palettes personnalisées de cette instance.
+        Retrieves all available color palettes.
+        Delegates to styling.get_available_palettes() and adds
+        this instance's custom palettes.
         """
         palettes = get_available_palettes(
             include_custom=include_custom,
@@ -4092,19 +4089,19 @@ class Map:
     @staticmethod
     def print_available_palettes(category: str = "all", limit: int = None) -> None:
         """
-        Affiche les palettes de couleurs disponibles de manière formatée.
+        Displays the available color palettes in a formatted way.
 
-        Paramètres:
+        Parameters:
         -----------
         category : str
-            Catégorie à afficher ('all', 'custom', 'seaborn', 'matplotlib', ou une catégorie spécifique)
+            Category to display ('all', 'custom', 'seaborn', 'matplotlib', or a specific category)
         limit : int
-            Limite le nombre de palettes par catégorie
+            Limits the number of palettes per category
 
-        Exemple:
+        Example:
             Map.print_available_palettes(category='seaborn', limit=5)
         """
-        # Récupération directe des palettes sans créer une instance Map
+        # Direct palette retrieval without creating a Map instance
         palettes = get_available_palettes()
 
         categories_to_show = []
@@ -4119,8 +4116,7 @@ class Map:
         elif category in palettes:
             categories_to_show = [category]
         else:
-            logger.info(f"Unknown category: {category}")
-            logger.info("Available categories:", list(palettes.keys()))
+            logger.warning(f"Unknown category: {category}. Available categories: {list(palettes.keys())}")
             return
 
         logger.info("Available Color Palettes:")
@@ -4142,21 +4138,21 @@ class Map:
 
     def preview_palette(self, palette_name: str, n_colors: int = 8) -> "Map":
         """
-        Prévisualise une palette de couleurs sous forme de barre colorée.
+        Previews a color palette as a colored bar.
 
-        Paramètres:
+        Parameters:
         -----------
         palette_name : str
-            Nom de la palette à prévisualiser
+            Name of the palette to preview
         n_colors : int
-            Nombre de couleurs à afficher
+            Number of colors to display
 
-        Retourne:
-        ---------
-        Map : self pour le chaînage de méthodes
+        Returns:
+        --------
+        Map : self for method chaining
 
-        Exemple:
-            carte.preview_palette('Set1', n_colors=5)
+        Example:
+            map.preview_palette('Set1', n_colors=5)
         """
         # Clear current plot
         self.ax.clear()
@@ -4175,7 +4171,7 @@ class Map:
                     cmap = load_cmap(palette_name)
                     colors = [cmap(i / (n_colors - 1)) for i in range(n_colors)]
                 except Exception:
-                    self._log(f"Palette '{palette_name}' not found")
+                    logger.warning(f"Palette '{palette_name}' not found")
                     return self
 
         # Create color preview
@@ -4222,31 +4218,31 @@ class Map:
         save_palette: bool = True,
     ) -> "Map":
         """
-        Génère une palette en dégradé entre deux couleurs.
+        Generates a gradient palette between two colors.
 
-        Paramètres:
+        Parameters:
         -----------
         name : str
-            Nom de la palette
+            Palette name
         start_color : str
-            Couleur de départ
+            Starting color
         end_color : str
-            Couleur d'arrivée
+            Ending color
         n_colors : int
-            Nombre de couleurs dans le dégradé
+            Number of colors in the gradient
         save_palette : bool
-            Sauvegarder la palette
+            Save the palette
 
-        Retourne:
-        ---------
-        Map : self pour le chaînage de méthodes
+        Returns:
+        --------
+        Map : self for method chaining
 
-        Exemple:
-            carte.generate_gradient_palette(name='mon_degrade',
-                                             start_color='blue',
-                                             end_color='red',
-                                             n_colors=5,
-                                             save_palette=True)
+        Example:
+            map.generate_gradient_palette(name='my_gradient',
+                                           start_color='blue',
+                                           end_color='red',
+                                           n_colors=5,
+                                           save_palette=True)
         """
         try:
             # Create gradient
@@ -4273,7 +4269,7 @@ class Map:
             return self
 
         except ValueError as e:
-            self._log(f"Error creating gradient: {e}")
+            logger.error(f"Error creating gradient: {e}")
             return self
 
     # ----------------------------------------------------------------------
@@ -4282,21 +4278,21 @@ class Map:
 
     def get_available_fonts(self, pattern: str = None, sort: bool = True) -> List[str]:
         """
-        Récupère la liste des polices disponibles sur le système.
+        Retrieves the list of fonts available on the system.
 
-        Paramètres:
+        Parameters:
         -----------
         pattern : str, optional
-            Filtre les polices contenant ce motif (insensible à la casse)
+            Filters fonts containing this pattern (case-insensitive)
         sort : bool
-            Trier les noms par ordre alphabétique
+            Sort the names alphabetically
 
-        Retourne:
-        ---------
-        List[str] : Liste des noms de polices disponibles
+        Returns:
+        --------
+        List[str] : List of available font names
 
-        Exemple:
-            carte.get_available_fonts(pattern='Arial', sort=True)
+        Example:
+            map.get_available_fonts(pattern='Arial', sort=True)
         """
         # Get all font properties
         fonts = [f.name for f in fm.fontManager.ttflist]
@@ -4317,19 +4313,19 @@ class Map:
     @staticmethod
     def print_available_fonts(pattern: str = None, limit: int = None) -> None:
         """
-        Affiche les polices disponibles dans la console de manière formatée.
+        Displays the available fonts in the console in a formatted way.
 
-        Paramètres:
+        Parameters:
         -----------
         pattern : str, optional
-            Filtre les polices contenant ce motif
+            Filters fonts containing this pattern
         limit : int, optional
-            Limite le nombre de polices affichées
+            Limits the number of fonts displayed
 
-        Exemple:
+        Example:
             Map.print_available_fonts(pattern='Arial', limit=10)
         """
-        # Récupération directe des polices sans créer une instance Map
+        # Direct font retrieval without creating a Map instance
         all_fonts = sorted(set(f.name for f in fm.fontManager.ttflist))
         if pattern:
             all_fonts = [f for f in all_fonts if pattern.lower() in f.lower()]
@@ -4351,19 +4347,19 @@ class Map:
         self, family: str = "sans-serif", size: int = 10, weight: str = "normal"
     ) -> "Map":
         """
-        Définit les propriétés globales de la police.
+        Sets the global font properties.
 
-        Paramètres:
+        Parameters:
         -----------
         family : str
-            Nom de la famille de police (utiliser get_available_fonts() pour voir les options)
+            Font family name (use get_available_fonts() to see options)
         size : int
-            Taille de la police
+            Font size
         weight : str
-            Poids de la police ('normal', 'bold', 'light', etc.)
+            Font weight ('normal', 'bold', 'light', etc.)
 
-        Exemple:
-            carte.set_font(family='Arial', size=12, weight='bold')
+        Example:
+            map.set_font(family='Arial', size=12, weight='bold')
         """
         # Validate font exists
         available_fonts = self.get_available_fonts()
@@ -4387,7 +4383,7 @@ class Map:
     # ----------------------------------------------------------------------
 
     def _update_bounds(self, gdf):
-        """Mise à jour automatique des limites basée sur les données ajoutées."""
+        """Automatic bounds update based on the added data."""
         bounds = gdf.total_bounds
         if self._first_layer:
             self.bounds = [
@@ -4402,75 +4398,75 @@ class Map:
 
     def _apply_smart_centering(self):
         """
-        Applique un centrage intelligent basé sur les dimensions du papier et les données.
+        Applies smart centering based on the paper dimensions and the data.
         """
-        # Calcul des dimensions des données
+        # Compute data dimensions
         data_width = self.bounds[2] - self.bounds[0]
         data_height = self.bounds[3] - self.bounds[1]
         data_center_x = (self.bounds[0] + self.bounds[2]) / 2
         data_center_y = (self.bounds[1] + self.bounds[3]) / 2
 
-        # Cas dégénéré : un point unique (ou des entités parfaitement
-        # alignées horizontalement/verticalement) donne une largeur et/ou
-        # une hauteur nulles. Sans ce garde-fou, set_extent() reçoit un
-        # extent de taille nulle sur cet axe ; cartopy élargit alors tout
-        # seul avec un UserWarning, mais le centrage "intelligent" ne fait
-        # plus rien d'intelligent. Vue de repli arbitraire d'1° autour du
-        # centre — l'utilisateur peut toujours affiner via set_extent().
-        _fallback_span = 1.0  # degrés
+        # Degenerate case: a single point (or features perfectly aligned
+        # horizontally/vertically) gives a zero width and/or height.
+        # Without this guard, set_extent() receives a zero-size extent on
+        # that axis; cartopy then widens it on its own with a
+        # UserWarning, but the "smart" centering no longer does anything
+        # smart. Arbitrary 1° fallback view around the center — the user
+        # can still refine it via set_extent().
+        _fallback_span = 1.0  # degrees
         if data_width == 0:
             data_width = _fallback_span
         if data_height == 0:
             data_height = _fallback_span
 
-        # Récupération des dimensions de la figure
+        # Retrieve figure dimensions
         fig_width_inches, fig_height_inches = self.figsize
 
-        # Calcul du ratio d'aspect de la figure
+        # Compute the figure's aspect ratio
         fig_aspect_ratio = fig_width_inches / fig_height_inches
 
-        # Calcul du ratio d'aspect des données
+        # Compute the data's aspect ratio
         data_aspect_ratio = data_width / data_height if data_height > 0 else 1
 
-        # Détermination de la marge adaptée au format de papier
+        # Determine the margin suited to the paper format
         if self.paper_info:
             paper_format = self.paper_info["format"]
             orientation = self.paper_info["orientation"]
 
-            # Marges adaptées selon le format
+            # Margins adapted to the format
             if paper_format in ["A4", "A5"]:
-                base_margin = 0.1  # Marge plus importante pour petits formats
+                base_margin = 0.1  # Larger margin for small formats
             elif paper_format in ["A3", "A2"]:
-                base_margin = 0.08  # Marge moyenne pour formats moyens
+                base_margin = 0.08  # Medium margin for medium formats
             elif paper_format in ["A1", "A0"]:
-                base_margin = 0.05  # Marge réduite pour grands formats
+                base_margin = 0.05  # Reduced margin for large formats
             else:
-                base_margin = 0.07  # Marge par défaut
+                base_margin = 0.07  # Default margin
 
-            # Ajustement selon l'orientation
+            # Adjustment based on orientation
             if orientation == "portrait":
                 margin_x = base_margin
-                margin_y = base_margin * 0.8  # Marge verticale réduite en portrait
+                margin_y = base_margin * 0.8  # Reduced vertical margin in portrait
             else:  # landscape
-                margin_x = base_margin * 0.8  # Marge horizontale réduite en paysage
+                margin_x = base_margin * 0.8  # Reduced horizontal margin in landscape
                 margin_y = base_margin
         else:
-            # Valeurs par défaut si pas d'info papier
+            # Default values if no paper info
             margin_x = margin_y = 0.07
 
-        # Calcul des dimensions d'affichage optimales
+        # Compute optimal display dimensions
         if fig_aspect_ratio > data_aspect_ratio:
-            # La figure est plus large que les données
-            # On ajuste la hauteur d'abord
+            # The figure is wider than the data
+            # Adjust height first
             display_height = data_height * (1 + 2 * margin_y)
             display_width = display_height * fig_aspect_ratio
         else:
-            # La figure est plus haute que les données
-            # On ajuste la largeur d'abord
+            # The figure is taller than the data
+            # Adjust width first
             display_width = data_width * (1 + 2 * margin_x)
             display_height = display_width / fig_aspect_ratio
 
-        # Calcul de l'étendue finale centrée
+        # Compute the final centered extent
         extent = [
             data_center_x - display_width / 2,
             data_center_x + display_width / 2,
@@ -4478,10 +4474,10 @@ class Map:
             data_center_y + display_height / 2,
         ]
 
-        # Application de l'étendue
+        # Apply the extent
         self.ax.set_extent(extent, crs=ccrs.PlateCarree())
 
-        # Affichage d'informations de débogage
+        # Display debug information
         self._log(f"📊 Centrage intelligent appliqué:")
         self._log(
             f"   Format: {self.paper_info['format'] if self.paper_info else 'Personnalisé'} "
@@ -4495,28 +4491,28 @@ class Map:
 
     def center_on_bounds(self, bounds, margin="auto"):
         """
-        Centre la carte sur des limites spécifiques avec marges adaptées.
+        Centers the map on specific bounds with adapted margins.
 
-        Paramètres:
+        Parameters:
         -----------
         bounds : list or tuple
-            Limites [minx, miny, maxx, maxy] sur lesquelles centrer
+            Bounds [minx, miny, maxx, maxy] to center on
         margin : str, float, or dict
-            'auto' pour marge automatique, float pour marge uniforme,
-            ou dict {'x': float, 'y': float} pour marges différenciées
+            'auto' for automatic margin, float for uniform margin,
+            or dict {'x': float, 'y': float} for differentiated margins
         """
-        # Mise à jour des limites des données
+        # Update the data bounds
         self.bounds = bounds
 
-        # Calcul des dimensions
+        # Compute dimensions
         data_width = bounds[2] - bounds[0]
         data_height = bounds[3] - bounds[1]
         data_center_x = (bounds[0] + bounds[2]) / 2
         data_center_y = (bounds[1] + bounds[3]) / 2
 
-        # Gestion des marges
+        # Margin handling
         if margin == "auto":
-            # Marge automatique basée sur le format papier
+            # Automatic margin based on the paper format
             if self.paper_info:
                 paper_format = self.paper_info["format"]
                 if paper_format in ["A4", "A5"]:
@@ -4535,7 +4531,7 @@ class Map:
         else:
             margin_x = margin_y = float(margin)
 
-        # Calcul de l'étendue avec marges
+        # Compute the extent with margins
         fig_width_inches, fig_height_inches = self.figsize
         fig_aspect_ratio = fig_width_inches / fig_height_inches
         data_aspect_ratio = data_width / data_height if data_height > 0 else 1
@@ -4560,11 +4556,11 @@ class Map:
 
     def get_optimal_margins(self):
         """
-        Retourne les marges optimales pour le format de papier actuel.
+        Returns the optimal margins for the current paper format.
 
         Returns:
         --------
-        dict: Marges recommandées {'x': float, 'y': float}
+        dict: Recommended margins {'x': float, 'y': float}
         """
         if self.paper_info:
             paper_format = self.paper_info["format"]
@@ -4617,65 +4613,65 @@ class Map:
         **kwargs,
     ):
         """
-        Crée une légende personnalisée avec contrôle total sur l'apparence.
+        Creates a custom legend with full control over appearance.
 
-        Paramètres:
+        Parameters:
         -----------
         elements : list, optional
-            Liste d'éléments de légende personnalisés. Si None, utilise self.legend_elements
+            List of custom legend elements. If None, uses self.legend_elements
         title : str, optional
-            Titre de la légende
+            Legend title
         loc : str or int
-            Position de la légende ('best', 'upper right', 'lower left', etc.)
+            Legend position ('best', 'upper right', 'lower left', etc.)
         bbox_to_anchor : tuple, optional
-            Position absolue (x, y) ou (x, y, width, height)
+            Absolute position (x, y) or (x, y, width, height)
         ncol : int
-            Nombre de colonnes dans la légende
+            Number of columns in the legend
         fontsize : int or str
-            Taille de police du texte
+            Text font size
         title_fontsize : int or str
-            Taille de police du titre
+            Title font size
         frameon : bool
-            Afficher le cadre de la légende
+            Show the legend frame
         fancybox : bool
-            Coins arrondis pour le cadre
+            Rounded corners for the frame
         shadow : bool
-            Ombre portée
+            Drop shadow
         framealpha : float
-            Transparence du cadre (0-1)
+            Frame transparency (0-1)
         facecolor : str
-            Couleur de fond du cadre
+            Frame background color
         edgecolor : str
-            Couleur du contour du cadre
+            Frame border color
         linewidth : float
-            Épaisseur du contour
+            Border thickness
         columnspacing : float
-            Espacement entre les colonnes
+            Spacing between columns
         handlelength : float
-            Longueur des symboles
+            Symbol length
         handletextpad : float
-            Espacement entre symbole et texte
+            Spacing between symbol and text
         borderpad : float
-            Espacement interne du cadre
+            Internal frame padding
         markerscale : float
-            Échelle des marqueurs
+            Marker scale
         markerfirst : bool
-            Marqueur avant ou après le texte
+            Marker before or after the text
         numpoints : int
-            Nombre de points pour les lignes
+            Number of points for lines
         scatterpoints : int
-            Nombre de points pour les scatter
+            Number of points for scatter
         replace : bool
-            Remplacer la légende existante ou ajouter
+            Replace the existing legend or add to it
         **kwargs : dict
-            Autres paramètres pour matplotlib.legend()
+            Other parameters for matplotlib.legend()
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         self._log("🛑Element de légende ajouté", elements)
-        # Utilisation des éléments fournis ou de ceux stockés
+        # Use the provided elements or the stored ones
         if elements is None:
             self.legend_elements = self.legend_elements
         else:
@@ -4683,10 +4679,10 @@ class Map:
         legend_elements = self.legend_elements
 
         if not legend_elements:
-            self._log("⚠️  Aucun élément de légende disponible")
+            logger.warning("Aucun élément de légende disponible")
             return self
 
-        # Préparation des paramètres de la légende
+        # Prepare the legend parameters
         legend_params = {
             "handles": legend_elements,
             "loc": loc,
@@ -4709,25 +4705,25 @@ class Map:
         }
         self.legend_params = {**self.legend_params, **legend_params, **kwargs}
         legend_params = self.legend_params
-        # Ajout du titre si fourni
+        # Add the title if provided
         if title:
             legend_params["title"] = title
             legend_params["title_fontsize"] = title_fontsize
 
-        # Ajout de bbox_to_anchor si fourni
+        # Add bbox_to_anchor if provided
         if bbox_to_anchor:
             legend_params["bbox_to_anchor"] = bbox_to_anchor
 
         legend_params.pop("linewidth", None)
 
-        # Suppression ou remplacement de la légende existante
+        # Remove or replace the existing legend
         if replace and hasattr(self.ax, "legend_") and self.ax.legend_:
             self.ax.legend_.remove()
 
-        # Création de la légende
+        # Create the legend
         legend = self.ax.legend(**legend_params)
 
-        # Stockage de la référence pour modifications ultérieures
+        # Store the reference for later modifications
         self.current_legend = legend
 
         self._log(f"✅ Légende personnalisée créée avec {len(legend_elements)} éléments")
@@ -4747,32 +4743,32 @@ class Map:
         **kwargs,
     ):
         """
-        Ajoute un élément personnalisé à la légende.
+        Adds a custom element to the legend.
 
-        Paramètres:
+        Parameters:
         -----------
         element_type : str
-            Type d'élément ('point', 'line', 'patch', 'text')
+            Element type ('point', 'line', 'patch', 'text')
         label : str
-            Texte de l'élément
+            Element text
         color : str
-            Couleur de l'élément
+            Element color
         marker : str
-            Type de marqueur pour les points
+            Marker type for points
         linestyle : str
-            Style de ligne ('-', '--', '-.', ':')
+            Line style ('-', '--', '-.', ':')
         linewidth : float
-            Épaisseur de ligne
+            Line thickness
         markersize : float
-            Taille du marqueur
+            Marker size
         alpha : float
-            Transparence (0-1)
+            Transparency (0-1)
         **kwargs : dict
-            Autres paramètres spécifiques au type d'élément
+            Other parameters specific to the element type
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
 
         if element_type == "point":
@@ -4804,7 +4800,7 @@ class Map:
             element = mpatches.Patch(color=color, alpha=alpha, label=label, **kwargs)
 
         elif element_type == "text":
-            # Élément texte simple (utilise un patch transparent)
+            # Simple text element (uses a transparent patch)
             element = mpatches.Patch(color="none", label=label, **kwargs)
 
         else:
@@ -4828,40 +4824,40 @@ class Map:
         **legend_kwargs,
     ):
         """
-        Crée automatiquement une légende basée sur une colonne d'un GeoDataFrame.
+        Automatically creates a legend based on a GeoDataFrame column.
 
-        Paramètres:
+        Parameters:
         -----------
         gdf : gpd.GeoDataFrame
-            GeoDataFrame source
+            Source GeoDataFrame
         column : str
-            Nom de la colonne pour la légende
+            Column name for the legend
         element_type : str
-            Type d'élément de légende ('patch', 'point', 'line')
+            Legend element type ('patch', 'point', 'line')
         color_scheme : str or list
-            Schéma de couleurs ou liste de couleurs
+            Color scheme or list of colors
         title : str
-            Titre de la légende (utilise le nom de colonne par défaut)
+            Legend title (uses the column name by default)
         max_items : int
-            Nombre maximum d'éléments dans la légende
+            Maximum number of items in the legend
         sort_by : str
-            Tri par 'value', 'alphabetical', ou 'frequency'
+            Sort by 'value', 'alphabetical', or 'frequency'
         **legend_kwargs : dict
-            Paramètres pour custom_legend()
+            Parameters for custom_legend()
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         if cmap is not None:
             color_scheme = cmap
         if column not in gdf.columns:
             raise ValueError(f"Colonne '{column}' non trouvée dans le GeoDataFrame")
 
-        # Extraction des valeurs uniques
+        # Extract unique values
         unique_values = gdf[column].dropna().unique()
 
-        # Tri selon la méthode spécifiée
+        # Sort according to the specified method
         if sort_by == "alphabetical":
             unique_values = sorted(unique_values)
         elif sort_by == "frequency":
@@ -4873,7 +4869,7 @@ class Map:
             except TypeError:
                 unique_values = sorted(unique_values, key=str)
 
-        # Limitation du nombre d'éléments
+        # Limit the number of items
         if len(unique_values) > max_items:
             self._log(
                 f"Il y a plus de 25 éléments uniques dans la colonne {column} ({len(unique_values)} valeurs exactement). Modifiez la valeur de max_items à {len(unique_values)} pour afficher tous les éléments."
@@ -4883,26 +4879,26 @@ class Map:
         else:
             show_others = False
 
-        # Génération des couleurs
+        # Generate colors
         if isinstance(color_scheme, str):
-            # Utilisation d'une palette matplotlib
+            # Use a matplotlib palette
             cmap = load_cmap(color_scheme)
             colors = [cmap(i / len(unique_values)) for i in range(len(unique_values))]
         elif isinstance(color_scheme, list):
-            # Liste de couleurs fournie
+            # Provided list of colors
             colors = color_scheme[: len(unique_values)]
             if len(colors) < len(unique_values):
-                # Répétition des couleurs si nécessaire
+                # Repeat colors if necessary
                 colors = (colors * (len(unique_values) // len(colors) + 1))[
                     : len(unique_values)
                 ]
         else:
             raise ValueError("color_scheme doit être une chaîne ou une liste")
 
-        # Création des éléments de légende
+        # Create legend elements
         legend_elements = []
         for value, color in zip(unique_values, colors):
-            # Conversion de la couleur si nécessaire
+            # Convert the color if necessary
             if isinstance(color, tuple) and len(color) == 4:
                 color = mcolors.to_hex(color)
 
@@ -4925,7 +4921,7 @@ class Map:
 
             legend_elements.append(element)
 
-        # Ajout d'un élément "Autres" si nécessaire
+        # Add an "Others" element if necessary
         if show_others:
             if element_type == "patch":
                 element = mpatches.Patch(color="lightgray", label="Autres...")
@@ -4945,7 +4941,7 @@ class Map:
                 )
             legend_elements.append(element)
 
-        # Création de la légende
+        # Create the legend
         legend_title = title if title else column.replace("_", " ").title()
 
         self.custom_legend(
@@ -4977,39 +4973,39 @@ class Map:
         to="ax",
     ):
         """
-        Ajoute une légende "faite main" : rectangles de couleur empilés
-        verticalement à une position donnée (comme sur une carte
-        imprimée), au lieu d'un coin d'axe via `custom_legend()`.
+        Adds a "hand-made" legend: color rectangles stacked vertically at
+        a given position (like on a printed map), instead of an axis
+        corner via `custom_legend()`.
 
-        Paramètres:
+        Parameters:
         -----------
         items : list of (label, color)
-            Paires (texte, couleur) à afficher, du haut vers le bas.
+            (text, color) pairs to display, top to bottom.
         xy : tuple
-            Position (x, y) du coin supérieur gauche du premier rectangle.
+            Position (x, y) of the top-left corner of the first rectangle.
         rect_width, rect_height : float
-            Dimensions des rectangles (mêmes unités que xy).
+            Rectangle dimensions (same units as xy).
         y_step : float
-            Espacement vertical entre rectangles successifs.
+            Vertical spacing between successive rectangles.
         label_dx, label_dy : float
-            Décalage du texte par rapport au coin du rectangle.
+            Text offset relative to the rectangle corner.
         fontsize : int
-            Taille du texte.
+            Text size.
         color : str
-            Couleur du texte.
+            Text color.
         edge_color, linewidth :
-            Contour des rectangles.
+            Rectangle outline.
         font : FontProperties, optional
-            Police du texte (via google_font/local_font/path_font).
+            Text font (via google_font/local_font/path_font).
         ha, va : str
-            Alignement du texte.
+            Text alignment.
         to : str
-            ``"ax"`` (défaut, coordonnées géographiques) ou ``"fig"``
-            (coordonnées figure 0-1, comme avec `add_custom_text`).
+            ``"ax"`` (default, geographic coordinates) or ``"fig"``
+            (figure coordinates 0-1, as with `add_custom_text`).
 
         Returns:
         --------
-        Map : self pour le chaînage de méthodes
+        Map : self for method chaining
 
         Example:
         --------
@@ -5048,18 +5044,18 @@ class Map:
 
     def legend_presets(self, preset="default", **override_kwargs):
         """
-        Applique des préréglages de légende.
+        Applies legend presets.
 
-        Paramètres:
+        Parameters:
         -----------
         preset : str
-            Nom du préréglage ('default', 'minimal', 'fancy', 'academic', 'poster,'simple')
+            Preset name ('default', 'minimal', 'fancy', 'academic', 'poster,'simple')
         **override_kwargs : dict
-            Paramètres pour surcharger le préréglage
+            Parameters to override the preset
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         presets = {
             "simple": {
@@ -5141,7 +5137,7 @@ class Map:
                 f"Préréglages disponibles: {available_presets}"
             )
 
-        # Fusion des paramètres du préréglage avec les surcharges
+        # Merge the preset parameters with the overrides
         params = {**presets[preset], **override_kwargs}
         self._log(params)
 
@@ -5153,27 +5149,27 @@ class Map:
 
     def remove_legend(self):
         """
-        Supprime la légende actuelle.
+        Removes the current legend.
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         if hasattr(self.ax, "legend_") and self.ax.legend_:
             self.ax.legend_.remove()
             self._log("🗑️  Légende supprimée")
         else:
-            self._log("⚠️  Aucune légende à supprimer")
+            logger.warning("Aucune légende à supprimer")
 
         return self
 
     def clear_legend_elements(self):
         """
-        Vide la liste des éléments de légende.
+        Clears the list of legend elements.
 
         Returns:
         --------
-        Map: Instance de la carte pour chaînage
+        Map: Map instance for chaining
         """
         self.legend_elements = []
         self._log("🧹 Éléments de légende effacés")
@@ -5186,11 +5182,11 @@ class Map:
 
     def list_layers(self) -> List[Dict[str, Any]]:
         """
-        Liste toutes les couches ajoutées à la carte.
+        Lists all layers added to the map.
 
-        Retourne:
-        ---------
-        List[Dict]: Liste de dictionnaires avec les infos de chaque couche
+        Returns:
+        --------
+        List[Dict]: List of dictionaries with each layer's info
             (index, type, label, rendered)
         """
         summary = []
@@ -5212,27 +5208,27 @@ class Map:
 
     def remove_layer(self, index: int = None, label: str = None) -> "Map":
         """
-        Supprime une couche par son index ou son label.
+        Removes a layer by its index or label.
 
-        Paramètres:
+        Parameters:
         -----------
         index : int, optional
-            Index de la couche à supprimer (voir list_layers())
+            Index of the layer to remove (see list_layers())
         label : str, optional
-            Label de la couche à supprimer. Si plusieurs couches ont le même
-            label, seule la première trouvée est supprimée.
+            Label of the layer to remove. If several layers share the
+            same label, only the first one found is removed.
 
-        Retourne:
-        ---------
-        Map: Instance de la carte pour chaînage
+        Returns:
+        --------
+        Map: Map instance for chaining
 
-        Exemple:
+        Example:
         --------
         >>> m = Map()
         >>> m.add_polygons(gdf, label="Régions")
         >>> m.list_layers()
-        >>> m.remove_layer(label="Régions")   # par label
-        >>> m.remove_layer(index=0)            # par index
+        >>> m.remove_layer(label="Régions")   # by label
+        >>> m.remove_layer(index=0)            # by index
         """
         if index is None and label is None:
             raise ValueError("Fournir index ou label pour identifier la couche à supprimer.")
@@ -5251,18 +5247,18 @@ class Map:
                     self._log(f"🗑️  Couche [{i}] label='{label}' ({removed.get('type')}) supprimée")
                     break
             else:
-                self._log(f"⚠️  Aucune couche avec le label '{label}' trouvée")
+                logger.warning(f"Aucune couche avec le label '{label}' trouvée")
 
         self._invalidate_render()
         return self
 
     def clear_layers(self) -> "Map":
         """
-        Supprime toutes les couches de la carte.
+        Removes all layers from the map.
 
-        Retourne:
-        ---------
-        Map: Instance de la carte pour chaînage
+        Returns:
+        --------
+        Map: Map instance for chaining
         """
         count = len(self.layers)
         self.layers.clear()
@@ -5288,96 +5284,96 @@ class Map:
                       font=None,
                       **kwargs):
         """
-        Ajoute une barre d'échelle sur la carte.
+        Adds a scale bar to the map.
 
-        Sélectionne automatiquement le meilleur moteur disponible :
-        ``matplotlib-map-utils`` > ``matplotlib-scalebar`` > tracé manuel.
+        Automatically selects the best available engine:
+        ``matplotlib-map-utils`` > ``matplotlib-scalebar`` > manual drawing.
 
         Parameters
         ----------
         length : float, optional
-            Longueur souhaitée (en *units*). Auto-calculée si None.
+            Desired length (in *units*). Auto-computed if None.
         location : str or tuple
-            Position : chaîne matplotlib ("lower left", "upper right", …)
-            ou tuple (x, y) en coordonnées relatives 0-1 (mode manuel).
+            Position: matplotlib string ("lower left", "upper right", …)
+            or tuple (x, y) in relative coordinates 0-1 (manual mode).
         linewidth : float
-            Épaisseur du trait.
+            Line thickness.
         units : str
-            Unité d'affichage : "km", "m", "mi", "ft", "nmi".
+            Display unit: "km", "m", "mi", "ft", "nmi".
         color : str
-            Couleur principale.
+            Main color.
         fontsize : int
-            Taille de police.
+            Font size.
         pad : float
-            Espacement texte / barre (mode manuel uniquement).
+            Text / bar spacing (manual mode only).
         alpha : float
-            Transparence.
+            Transparency.
         label : str, optional
-            Étiquette personnalisée.
+            Custom label.
         style : str
-            Mode de rendu :
-            - ``"auto"`` : meilleure bibliothèque disponible
+            Rendering mode:
+            - ``"auto"``: best available library
               (map-utils > scalebar > manual).
-            - ``"map-utils"`` / ``"ticks"`` / ``"boxes"`` :
-              force matplotlib-map-utils.
-            - ``"scalebar"`` : force matplotlib-scalebar.
-            - ``"manual"`` : tracé à la main (ancien comportement).
+            - ``"map-utils"`` / ``"ticks"`` / ``"boxes"``:
+              forces matplotlib-map-utils.
+            - ``"scalebar"``: forces matplotlib-scalebar.
+            - ``"manual"``: hand-drawn (legacy behavior).
         box_color : str
-            Couleur de fond (mode scalebar).
+            Background color (scalebar mode).
         box_alpha : float
-            Transparence du fond (mode scalebar).
+            Background transparency (scalebar mode).
         scale_loc : str
-            Position du trait ("top", "bottom") — mode scalebar.
+            Bar position ("top", "bottom") — scalebar mode.
         label_loc : str
-            Position du texte ("top", "bottom", "left", "right") —
-            mode scalebar.
+            Text position ("top", "bottom", "left", "right") —
+            scalebar mode.
         add_as_layer : bool
-            Si True, rendu différé lors de show()/save().
+            If True, deferred rendering on show()/save().
         bar_style : str
-            Style de barre pour map-utils : "boxes" ou "ticks".
+            Bar style for map-utils: "boxes" or "ticks".
         major_div : int, optional
-            Nombre de divisions majeures (mode map-utils). Auto-calculé si
-            None (comportement par défaut de matplotlib-map-utils).
+            Number of major divisions (map-utils mode). Auto-computed if
+            None (matplotlib-map-utils default behavior).
         minor_div : int, optional
-            Nombre de divisions mineures (mode map-utils). Auto-calculé si
-            None (comportement par défaut de matplotlib-map-utils).
+            Number of minor divisions (map-utils mode). Auto-computed if
+            None (matplotlib-map-utils default behavior).
         size : str, optional
-            Taille prédéfinie ("sm", "md", "lg", "xl") — mode map-utils.
+            Predefined size ("sm", "md", "lg", "xl") — map-utils mode.
         bar : dict, optional
-            Dictionnaire de paramètres de barre (mode map-utils).
-            Clés : projection, unit, max, length, major_div, minor_div, etc.
+            Bar parameters dictionary (map-utils mode).
+            Keys: projection, unit, max, length, major_div, minor_div, etc.
         labels : dict, optional
-            Dictionnaire de paramètres d'étiquettes (mode map-utils).
-            Clés : style, loc, format, fontsize, textcolors, etc.
+            Label parameters dictionary (map-utils mode).
+            Keys: style, loc, format, fontsize, textcolors, etc.
         text : dict, optional
-            Dictionnaire de paramètres de texte (mode map-utils).
+            Text parameters dictionary (map-utils mode).
         to : str
-            ``"ax"`` (défaut, ``location`` relatif à l'axe de la carte
-            principale) ou ``"fig"`` (relatif à la figure entière — ex.
-            placer la barre d'échelle dans la marge, hors de l'axe). Même
-            convention que ``add_north_arrow``. Modes ``"map-utils"`` et
-            ``"scalebar"`` uniquement — sans effet (avec avertissement) en
-            mode ``"manual"``, intrinsèquement ancré aux coordonnées
-            géographiques de l'axe.
+            ``"ax"`` (default, ``location`` relative to the main map
+            axis) or ``"fig"`` (relative to the whole figure — e.g. to
+            place the scale bar in the margin, outside the axis). Same
+            convention as ``add_north_arrow``. ``"map-utils"`` and
+            ``"scalebar"`` modes only — no effect (with a warning) in
+            ``"manual"`` mode, which is intrinsically anchored to the
+            axis's geographic coordinates.
         position : tuple (x, y)
-            Point d'ancrage exact en coordonnées figure (0-1), utilisé
-            uniquement si ``to="fig"`` (ignoré sinon). ``location`` reste
-            utilisé pour déterminer quel coin de la barre touche ce point.
+            Exact anchor point in figure coordinates (0-1), used only if
+            ``to="fig"`` (ignored otherwise). ``location`` is still used
+            to determine which corner of the bar touches that point.
         aob : dict, optional
-            Configuration de l'AnchoredOffsetBox sous-jacent (mode
-            map-utils) — fusionné avec, et prioritaire sur, celle déduite
-            de ``to``.
+            Configuration of the underlying AnchoredOffsetBox (map-utils
+            mode) — merged with, and taking priority over, the one
+            derived from ``to``.
         font : matplotlib.font_manager.FontProperties, optional
-            Police précise pour le texte (ex. via ``google_font()``).
-            matplotlib-map-utils ne supporte qu'une famille CSS générique
-            (``fontfamily`` dans ``labels``/``text`` : "serif",
-            "sans-serif", "cursive", "fantasy", "monospace") — si ce style
-            est actif et ``font`` est fourni, bascule automatiquement vers
-            ``style="scalebar"`` (avec avertissement) pour l'appliquer
-            réellement. Fonctionne nativement en modes ``"scalebar"`` et
-            ``"manual"``.
+            Precise font for the text (e.g. via ``google_font()``).
+            matplotlib-map-utils only supports a generic CSS family
+            (``fontfamily`` in ``labels``/``text``: "serif",
+            "sans-serif", "cursive", "fantasy", "monospace") — if this
+            style is active and ``font`` is provided, automatically
+            switches to ``style="scalebar"`` (with a warning) to actually
+            apply it. Works natively in ``"scalebar"`` and ``"manual"``
+            modes.
         **kwargs
-            Paramètres supplémentaires passés à la bibliothèque.
+            Additional parameters passed to the library.
         """
         scale_bar_info = {
             "length": length,
@@ -5422,7 +5418,7 @@ class Map:
         return self
 
     def _compute_scalebar_dx(self):
-        """Calcule *dx* (mètres par unité d'axe) pour matplotlib-scalebar."""
+        """Computes *dx* (meters per axis unit) for matplotlib-scalebar."""
         is_geographic = isinstance(
             self.projection, (ccrs.PlateCarree, ccrs.Geodetic)
         )
@@ -5446,11 +5442,11 @@ class Map:
                         to="ax", position=(0.05, 0.05), aob=None,
                         font=None,
                         kwargs=None):
-        """Trace la barre d'échelle sur self.ax."""
+        """Draws the scale bar on self.ax."""
         if kwargs is None:
             kwargs = {}
 
-        # ------- résolution du style -------
+        # ------- style resolution -------
         if style == "auto":
             if HAS_MAP_UTILS:
                 style = "map-utils"
@@ -5464,13 +5460,12 @@ class Map:
             bar_style = style
             style = "map-utils"
 
-        # matplotlib-map-utils ne peut pas appliquer une police précise
-        # (FontProperties) : son paramètre fontfamily n'accepte que les 5
-        # familles CSS génériques ("serif", "sans-serif", "cursive",
-        # "fantasy", "monospace"), pas un nom de police ni un objet
-        # FontProperties. Si l'appelant demande explicitement `font`, on
-        # bascule vers matplotlib-scalebar (qui l'accepte nativement) plutôt
-        # que de l'ignorer silencieusement.
+        # matplotlib-map-utils cannot apply a precise font (FontProperties):
+        # its fontfamily parameter only accepts the 5 generic CSS families
+        # ("serif", "sans-serif", "cursive", "fantasy", "monospace"), not a
+        # font name or a FontProperties object. If the caller explicitly
+        # requests `font`, switch to matplotlib-scalebar (which accepts it
+        # natively) rather than silently ignoring it.
         if font is not None and style == "map-utils":
             if HAS_MPL_SCALEBAR:
                 warnings.warn(
@@ -5501,26 +5496,27 @@ class Map:
                 )
                 style = "scalebar" if HAS_MPL_SCALEBAR else "manual"
             else:
-                # Appliquer set_size() sur les défauts globaux AVANT création
+                # Apply set_size() to the global defaults BEFORE creation
                 if size is not None:
                     MmuScaleBar.set_size(size)
 
                 loc = location if isinstance(location, str) else "lower left"
-                # matplotlib-map-utils résout les unités d'axe via
-                # pyproj.CRS(projection).axis_info[...].unit_name ; les CRS
-                # géographiques de cartopy (PlateCarree, Geodetic) ne portent
-                # pas les métadonnées pyproj reconnaît comme "degree" (elles
-                # ressortent "unknown"), ce qui fait planter le calcul auto
-                # de la barre. On substitue EPSG:4326, équivalent en degrés.
+                # matplotlib-map-utils resolves axis units via
+                # pyproj.CRS(projection).axis_info[...].unit_name; cartopy's
+                # geographic CRS (PlateCarree, Geodetic) do not carry the
+                # metadata pyproj recognizes as "degree" (they come out as
+                # "unknown"), which breaks the bar's auto calculation.
+                # EPSG:4326 is substituted, equivalent in degrees.
                 bar_projection = (
                     "EPSG:4326"
                     if isinstance(self.projection, (ccrs.PlateCarree, ccrs.Geodetic))
                     else self.projection
                 )
                 bar_dict = dict(projection=bar_projection)
-                # major_div nécessite major_mult pour être valide côté
-                # matplotlib-map-utils ; sans major_mult (non exposé ici),
-                # le passer seul fait échouer le calcul auto de la barre.
+                # major_div requires major_mult to be valid on
+                # matplotlib-map-utils's side; without major_mult (not
+                # exposed here), passing it alone breaks the bar's auto
+                # calculation.
                 if major_div is not None:
                     bar_dict["major_div"] = major_div
                 if minor_div is not None:
@@ -5543,9 +5539,9 @@ class Map:
                 )
                 if text is not None:
                     sb_kwargs["text"] = text
-                # to="fig" : ancre la barre à un point de la figure entière
-                # plutôt qu'à l'axe carte, via bbox_to_anchor/bbox_transform
-                # — même convention que add_north_arrow(..., to="fig").
+                # to="fig": anchors the bar to a point of the whole figure
+                # rather than the map axis, via bbox_to_anchor/bbox_transform
+                # — same convention as add_north_arrow(..., to="fig").
                 aob_style = {}
                 if to == "fig":
                     aob_style = {
@@ -5580,10 +5576,10 @@ class Map:
                     "imperial-length" if units in ("mi", "ft", "yd")
                     else "si-length"
                 )
-                # matplotlib-scalebar valide font_properties comme un dict
-                # (kwargs de FontProperties) ou une chaîne fontconfig — pas
-                # un objet FontProperties malgré ce que suggère sa docstring
-                # (vérifié sur la version installée : lève ValueError sinon).
+                # matplotlib-scalebar validates font_properties as a dict
+                # (FontProperties kwargs) or a fontconfig string — not a
+                # FontProperties object despite what its docstring suggests
+                # (verified on the installed version: raises ValueError otherwise).
                 if font is not None:
                     if font.get_file():
                         font_properties = {"fname": font.get_file(), "size": fontsize}
@@ -5609,8 +5605,8 @@ class Map:
                 if length is not None:
                     sb_kwargs["fixed_value"] = length
                     sb_kwargs["fixed_units"] = units
-                # to="fig" : matplotlib-scalebar accepte bbox_to_anchor/
-                # bbox_transform directement (pas de dict "aob" imbriqué).
+                # to="fig": matplotlib-scalebar accepts bbox_to_anchor/
+                # bbox_transform directly (no nested "aob" dict).
                 if to == "fig":
                     sb_kwargs["bbox_to_anchor"] = position
                     sb_kwargs["bbox_transform"] = self.fig.transFigure
@@ -5623,7 +5619,7 @@ class Map:
                 self._scale_bar_artist = sb
                 return
 
-        # ------- mode manuel (fallback) -------
+        # ------- manual mode (fallback) -------
         if to == "fig":
             warnings.warn(
                 "to='fig' n'est pas supporté en mode 'manual' (barre "
@@ -5640,7 +5636,7 @@ class Map:
             map_width_m, _, _ = geod.inv(x0, mid_lat, x1, mid_lat)
             map_width_km = abs(map_width_m) / 1000
         except Exception as e:
-            self._log(f"Erreur calcul géodésique : {e}")
+            logger.error(f"Erreur calcul géodésique : {e}")
             map_width_km = 100
 
         if length is None:
@@ -5676,9 +5672,9 @@ class Map:
                 length * 1000 / (111320 * np.cos(np.radians(start_y)))
             )
 
-        # **kwargs ne sert qu'à styler le texte du label (ex. font=,
-        # fontstyle=) — la ligne elle-même n'a pas de kwargs libres, ses
-        # seules options sont color/linewidth/alpha (déjà explicites).
+        # **kwargs is only used to style the label text (e.g. font=,
+        # fontstyle=) — the line itself has no free kwargs, its only
+        # options are color/linewidth/alpha (already explicit).
         self.ax.plot(
             [start_x, start_x + bar_length_deg],
             [start_y, start_y],
@@ -5693,8 +5689,8 @@ class Map:
             k: v for k, v in kwargs.items()
             if k not in ("solid_capstyle",)
         }
-        # Le poids "bold" par défaut n'est appliqué que si aucune police
-        # spécifique n'est fournie (celle-ci porte son propre poids, ex.
+        # The default "bold" weight is only applied if no specific font is
+        # provided (that font carries its own weight, e.g.
         # google_font("Fira Sans", weight="light")).
         if font is not None:
             text_kwargs["fontproperties"] = font
@@ -5724,20 +5720,20 @@ class Map:
         **kwargs,
     ):
         """
-        Affiche la carte avec tous les layers ajoutés.
+        Displays the map with all added layers.
 
-        Paramètres:
+        Parameters:
         -----------
         legend : bool
-            Afficher la légende
+            Show the legend
         auto_extent : bool
-            Ajuster automatiquement l'étendue aux données
+            Automatically fit the extent to the data
         tight_layout : bool
-            Ajuster automatiquement la mise en page
+            Automatically adjust the layout
         smart_centering : bool
-            Centrage intelligent adapté aux dimensions du papier
+            Smart centering adapted to the paper dimensions
         title : str
-            Titre de la carte
+            Map title
         """
         self._render(legend=legend, auto_extent=auto_extent, tight_layout=tight_layout, smart_centering=smart_centering, title=title, **kwargs)
         plt.show()
@@ -5746,12 +5742,12 @@ class Map:
 
     def _render(self, legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs):
         """
-        Rendu interne de la carte (layers, extent, légende) sans appeler plt.show().
-        Utilisé par show() et save() pour éviter le double rendu.
+        Internal map rendering (layers, extent, legend) without calling plt.show().
+        Used by show() and save() to avoid double rendering.
         """
-        # Rendu de tous les layers
+        # Render all layers
         for layer in self.layers:
-            # Ignorer les layers déjà rendus (choroplèthe, raster)
+            # Skip layers already rendered (choropleth, raster)
             if layer.get("rendered"):
                 continue
 
@@ -5762,7 +5758,7 @@ class Map:
                 style = layer["style"].copy()
                 style.pop("ax", None)
                 style.pop("transform", None)
-                # Ré-rendu des couches choroplèthes avec column_to_plot
+                # Re-render choropleth layers with column_to_plot
                 column_to_plot = layer.get("column_to_plot")
                 if column_to_plot:
                     style["column"] = column_to_plot
@@ -5774,18 +5770,18 @@ class Map:
                 self.ax.imshow(layer["data"], transform=data_transform, **rstyle)
                 layer["rendered"] = True
             elif layer.get("_replay") is not None:
-                # bivarié / hexbin : dessinés directement à l'ajout, rejoués
-                # via leur closure après un ax.clear() (set_paper, etc.).
-                # ponytail: la légende bivariée est ré-ajoutée en add_axes à
-                # chaque rejeu ; sans fig.clear() (set_paper) elles se
-                # superposent au même endroit — acceptable, la dernière prime.
+                # bivariate / hexbin: drawn directly when added, replayed
+                # via their closure after an ax.clear() (set_paper, etc.).
+                # ponytail: the bivariate legend is re-added via add_axes on
+                # each replay; without fig.clear() (set_paper) they stack on
+                # top of each other at the same spot — acceptable, the last one wins.
                 layer["_replay"]()
                 layer["rendered"] = True
 
         if title is not None:
             self.ax.set_title(title)
 
-        # Ajustement automatique de l'étendue
+        # Automatic extent adjustment
         if auto_extent and hasattr(self, "_first_layer"):
             if smart_centering:
                 self._apply_smart_centering()
@@ -5815,13 +5811,13 @@ class Map:
 
     def _resolve_bbox_inches(self, bbox_inches):
         """
-        Corrige `bbox_inches="tight"` quand une flèche du Nord ancrée à la
-        figure (`add_north_arrow(..., to="fig")`) est présente : l'artiste
-        `NorthArrow` de `matplotlib-map-utils` ne rapporte pas correctement
-        son étendue via `get_window_extent()` (bbox toujours nul), donc le
-        calcul "tight" standard peut la rogner si elle sort de l'axe carte
-        (ex: position dans la marge de la figure). On étend manuellement le
-        bbox calculé pour couvrir sa position connue.
+        Fixes `bbox_inches="tight"` when a North arrow anchored to the
+        figure (`add_north_arrow(..., to="fig")`) is present:
+        `matplotlib-map-utils`'s `NorthArrow` artist does not correctly
+        report its extent via `get_window_extent()` (always a null bbox),
+        so the standard "tight" calculation can crop it if it falls
+        outside the map axis (e.g. position in the figure margin). The
+        computed bbox is manually extended to cover its known position.
         """
         na_kwargs = self._north_arrow_kwargs
         if bbox_inches != "tight" or not na_kwargs or na_kwargs.get("to") != "fig":
@@ -5831,7 +5827,7 @@ class Map:
         tight_bbox = self.fig.get_tightbbox(renderer)
         x, y = na_kwargs["position"]
         fig_w, fig_h = self.fig.get_size_inches()
-        pad = 0.6  # pouces, marge généreuse pour couvrir flèche + label "N"
+        pad = 0.6  # inches, generous margin to cover the arrow + "N" label
         arrow_bbox = Bbox.from_extents(
             x * fig_w - pad, y * fig_h - pad,
             x * fig_w + pad, y * fig_h + pad,
@@ -5840,26 +5836,26 @@ class Map:
 
     def save(self, filename, dpi=300, bbox_inches="tight", legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs):
         """
-        Sauvegarde la carte dans un fichier.
+        Saves the map to a file.
 
-        Paramètres:
+        Parameters:
         -----------
         filename : str
-            Nom du fichier (avec extension)
+            File name (with extension)
         dpi : int
-            Résolution
+            Resolution
         bbox_inches : str
-            Ajustement des marges
+            Margin adjustment
         legend : bool
-            Afficher la légende
+            Show the legend
         auto_extent : bool
-            Ajuster automatiquement l'étendue
+            Automatically fit the extent
         tight_layout : bool
-            Ajuster automatiquement la mise en page
+            Automatically adjust the layout
         smart_centering : bool
-            Centrage intelligent
+            Smart centering
         title : str
-            Titre de la carte
+            Map title
         """
         self._render(legend=legend, auto_extent=auto_extent, tight_layout=tight_layout, smart_centering=smart_centering, title=title, **kwargs)
         self.fig.savefig(filename, dpi=dpi, bbox_inches=self._resolve_bbox_inches(bbox_inches))
@@ -5872,28 +5868,28 @@ class Map:
                  tight_layout: bool = True, smart_centering: bool = True,
                  title: str = None, **kwargs) -> Image.Image:
         """
-        Exporte la carte en objet PIL.Image (en mémoire, sans fichier).
+        Exports the map as a PIL.Image object (in memory, no file).
 
-        Paramètres:
+        Parameters:
         -----------
         format : str
-            Format d'image ('png', 'jpeg', etc.)
+            Image format ('png', 'jpeg', etc.)
         dpi : int
-            Résolution
+            Resolution
         legend : bool
-            Afficher la légende
+            Show the legend
         auto_extent : bool
-            Ajuster l'étendue
+            Fit the extent
         tight_layout : bool
-            Ajuster la mise en page
+            Adjust the layout
         smart_centering : bool
-            Centrage intelligent
+            Smart centering
         title : str
-            Titre de la carte
+            Map title
 
-        Retourne:
-        ---------
-        PIL.Image.Image : Image en mémoire
+        Returns:
+        --------
+        PIL.Image.Image : In-memory image
         """
         buf = self.to_bytes(format=format, dpi=dpi, legend=legend,
                             auto_extent=auto_extent, tight_layout=tight_layout,
@@ -5907,31 +5903,31 @@ class Map:
                  tight_layout: bool = True, smart_centering: bool = True,
                  title: str = None, **kwargs) -> BytesIO:
         """
-        Exporte la carte en BytesIO (en mémoire, sans fichier).
-        Utile pour les notebooks Jupyter, applications web, etc.
+        Exports the map as BytesIO (in memory, no file).
+        Useful for Jupyter notebooks, web applications, etc.
 
-        Paramètres:
+        Parameters:
         -----------
         format : str
-            Format d'image ('png', 'jpeg', 'svg', 'pdf')
+            Image format ('png', 'jpeg', 'svg', 'pdf')
         dpi : int
-            Résolution
+            Resolution
         bbox_inches : str
-            Ajustement des marges
+            Margin adjustment
         legend : bool
-            Afficher la légende
+            Show the legend
         auto_extent : bool
-            Ajuster l'étendue
+            Fit the extent
         tight_layout : bool
-            Ajuster la mise en page
+            Adjust the layout
         smart_centering : bool
-            Centrage intelligent
+            Smart centering
         title : str
-            Titre de la carte
+            Map title
 
-        Retourne:
-        ---------
-        BytesIO : Buffer contenant l'image
+        Returns:
+        --------
+        BytesIO : Buffer containing the image
         """
         self._render(
             legend=legend, auto_extent=auto_extent,

@@ -16,39 +16,39 @@ logger = logging.getLogger(__name__)
 
 class Geocoder:
     """
-    Un objet Python pour géocoder une ou plusieurs localités en utilisant geopy
-    et renvoyer les résultats dans une GeoDataFrame.
+    A Python object to geocode one or more places using geopy
+    and return the results in a GeoDataFrame.
 
     Attributes:
-        geolocator (Nominatim): L'instance du géocodeur Nominatim.
-        user_agent (str): L'agent utilisateur pour les requêtes Nominatim.
-        delay (float): Délai en secondes entre les requêtes pour éviter de surcharger l'API.
+        geolocator (Nominatim): The Nominatim geocoder instance.
+        user_agent (str): The user agent for Nominatim requests.
+        delay (float): Delay in seconds between requests to avoid overloading the API.
     """
 
     def __init__(self, user_agent="mon_geocoder_geopandas_cartograpy", delay=1.0):
         """
-        Initialise l'objet Geocoder.
+        Initializes the Geocoder object.
 
         Args:
-            user_agent (str): Un identifiant unique pour votre application lors de l'utilisation
-                              de Nominatim. Fortement recommandé.
-            delay (float): Le délai en secondes entre chaque requête de géocodage.
-                           Ajustez-le en fonction des limites du service.
+            user_agent (str): A unique identifier for your application when using
+                              Nominatim. Strongly recommended.
+            delay (float): The delay in seconds between each geocoding request.
+                           Adjust it based on the service's rate limits.
         """
         self.user_agent = user_agent
         self.geolocator = Nominatim(user_agent=self.user_agent)
         self.delay = delay
 
     def _geocode_single(self, location_str):
-        """ 
-        Méthode interne pour géocoder une seule localité.
+        """
+        Internal method to geocode a single place.
 
         Args:
-            location_str (str): La localité à géocoder.
+            location_str (str): The place to geocode.
 
         Returns:
-            tuple: Un tuple contenant (location_info, None) si réussi,
-                   ou (None, location_str) si la localité n'est pas trouvée ou en cas d'erreur.
+            tuple: A tuple containing (location_info, None) on success,
+                   or (None, location_str) if the place isn't found or on error.
         """
         try:
             time.sleep(self.delay)
@@ -66,28 +66,28 @@ class Geocoder:
             else:
                 return None, location_str
         except GeocoderTimedOut:
-            logger.info(f"Avertissement : Délai d'attente dépassé pour '{location_str}'.")
+            logger.warning(f"Délai d'attente dépassé pour '{location_str}'.")
             return None, location_str
         except GeocoderServiceError as e:
-            logger.info(f"Erreur du service de géocodage pour '{location_str}': {e}")
+            logger.error(f"Erreur du service de géocodage pour '{location_str}': {e}")
             return None, location_str
         except Exception as e:
-            logger.info(f"Une erreur inattendue est survenue lors du géocodage de '{location_str}': {e}")
+            logger.error(f"Une erreur inattendue est survenue lors du géocodage de '{location_str}': {e}")
             return None, location_str
 
     def geocode(self, places):
         """
-        Géocode une ou plusieurs localités et renvoie une GeoDataFrame.
+        Geocodes one or more places and returns a GeoDataFrame.
 
         Args:
-            places (str or list): Une seule chaîne de caractères représentant une localité,
-                                      ou une liste de chaînes de caractères de localités.
+            places (str or list): A single string representing a place,
+                                      or a list of place strings.
 
         Returns:
-            tuple: Un tuple contenant :
-                   - geopandas.GeoDataFrame: Une GeoDataFrame avec les informations des localités trouvées
-                                            et une colonne 'geometry' contenant des objets Point.
-                   - list: Une liste de chaînes de caractères des localités non trouvées.
+            tuple: A tuple containing:
+                   - geopandas.GeoDataFrame: A GeoDataFrame with the information of the places found
+                                            and a 'geometry' column containing Point objects.
+                   - list: A list of strings of the places that weren't found.
         """
         if isinstance(places, str):
             places = [places]
@@ -95,27 +95,23 @@ class Geocoder:
         found_locations_data = []
         not_found_places = []
 
-        logger.info(f"Début du géocodage de {len(places)} localité(s)...")
-
         for place in places:
             location_info, not_found_place = self._geocode_single(place)
             if location_info:
                 found_locations_data.append(location_info)
             else:
                 not_found_places.append(not_found_place)
-            
-        logger.info("Géocodage terminé.")
 
-        # Crée une GeoDataFrame
+        # Build a GeoDataFrame
         if found_locations_data:
-            # Crée un DataFrame pandas initial
+            # Build an initial pandas DataFrame
             df = pd.DataFrame(found_locations_data)
-            # Crée la colonne 'geometry' à partir des longitudes et latitudes
+            # Build the 'geometry' column from the longitudes and latitudes
             geometry = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]
-            # Convertit en GeoDataFrame, en spécifiant la colonne de géométrie et le CRS
-            geodataframe = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326") # EPSG:4326 est le CRS pour les lat/lon (WGS84)
+            # Convert to a GeoDataFrame, specifying the geometry column and CRS
+            geodataframe = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326") # EPSG:4326 is the CRS for lat/lon (WGS84)
         else:
-            # Crée une GeoDataFrame vide avec les colonnes attendues
+            # Build an empty GeoDataFrame with the expected columns
             geodataframe = gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'altitude', 'raw', 'geometry'], geometry=[], crs="EPSG:4326")
 
         return geodataframe, not_found_places
@@ -123,17 +119,17 @@ class Geocoder:
 
     def _reverse_geocode_single(self, coordinates_tuple):
         """
-        Méthode interne pour géocoder inversement un seul ensemble de coordonnées.
+        Internal method to reverse-geocode a single set of coordinates.
 
         Args:
-            coordinates_tuple (tuple): Un tuple de (latitude, longitude).
+            coordinates_tuple (tuple): A (latitude, longitude) tuple.
 
         Returns:
-            tuple: Un tuple contenant (location_info, None) si réussi,
-                   ou (None, coordinates_tuple) si l'adresse n'est pas trouvée ou en cas d'erreur.
+            tuple: A tuple containing (location_info, None) on success,
+                   or (None, coordinates_tuple) if the address isn't found or on error.
         """
         lat, lon = coordinates_tuple
-        query_str = f"{lat}, {lon}" # Pour affichage et enregistrement dans 'query'
+        query_str = f"{lat}, {lon}" # For display and storage in 'query'
 
         try:
             time.sleep(self.delay)
@@ -151,37 +147,35 @@ class Geocoder:
             else:
                 return None, coordinates_tuple
         except GeocoderTimedOut:
-            logger.info(f"Avertissement : Délai d'attente dépassé pour les coordonnées '{query_str}'.")
+            logger.warning(f"Délai d'attente dépassé pour les coordonnées '{query_str}'.")
             return None, coordinates_tuple
         except GeocoderServiceError as e:
-            logger.info(f"Erreur du service de géocodage inverse pour les coordonnées '{query_str}': {e}")
+            logger.error(f"Erreur du service de géocodage inverse pour les coordonnées '{query_str}': {e}")
             return None, coordinates_tuple
         except Exception as e:
-            logger.info(f"Une erreur inattendue est survenue lors du géocodage inverse de '{query_str}': {e}")
+            logger.error(f"Une erreur inattendue est survenue lors du géocodage inverse de '{query_str}': {e}")
             return None, coordinates_tuple
 
 
     def reverse_geocode(self, coordinates):
         """
-        Géocode inversement une ou plusieurs coordonnées (coordonnées -> adresse) et renvoie une GeoDataFrame.
+        Reverse-geocodes one or more coordinates (coordinates -> address) and returns a GeoDataFrame.
 
         Args:
-            coordinates (tuple or list): Un tuple (latitude, longitude) unique,
-                                         ou une liste de tuples (latitude, longitude).
+            coordinates (tuple or list): A single (latitude, longitude) tuple,
+                                         or a list of (latitude, longitude) tuples.
 
         Returns:
-            tuple: Un tuple contenant :
-                   - geopandas.GeoDataFrame: Une GeoDataFrame avec les informations des adresses trouvées
-                                            et une colonne 'geometry' contenant des objets Point.
-                   - list: Une liste de tuples (latitude, longitude) des coordonnées non trouvées.
+            tuple: A tuple containing:
+                   - geopandas.GeoDataFrame: A GeoDataFrame with the information of the addresses found
+                                            and a 'geometry' column containing Point objects.
+                   - list: A list of (latitude, longitude) tuples for coordinates not found.
         """
         if isinstance(coordinates, tuple) and len(coordinates) == 2:
-            coordinates = [coordinates] # Convertit un tuple unique en liste
+            coordinates = [coordinates] # Convert a single tuple into a list
 
         found_locations_data = []
         not_found_coordinates = []
-
-        logger.info(f"Début du géocodage inverse (coordonnées -> adresse) de {len(coordinates)} point(s)...")
 
         for coord_tuple in coordinates:
             location_info, not_found_coord = self._reverse_geocode_single(coord_tuple)
@@ -189,14 +183,12 @@ class Geocoder:
                 found_locations_data.append(location_info)
             else:
                 not_found_coordinates.append(not_found_coord)
-            
-        logger.info("Géocodage inverse (coordonnées -> adresse) terminé.")
 
         if found_locations_data:
             df = pd.DataFrame(found_locations_data)
-            # Pour le géocodage inversé, les coordonnées d'entrée sont déjà lat/lon,
-            # et les résultats retournés par geopy sont également lat/lon.
-            # On utilise les latitude/longitude des résultats pour la géométrie.
+            # For reverse geocoding, the input coordinates are already lat/lon,
+            # and the results returned by geopy are also lat/lon.
+            # We use the results' latitude/longitude for the geometry.
             geometry = [Point(xy) for xy in zip(df['longitude'], df['latitude'])]
             geodataframe = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
         else:
@@ -215,18 +207,18 @@ class Geocoder:
                viewbox: Optional[tuple] = None,
                bounded: bool = False) -> gpd.GeoDataFrame:
         """
-        Recherche plusieurs candidats pour un lieu et retourne une GeoDataFrame.
+        Searches for several candidates for a place and returns a GeoDataFrame.
 
         Args:
-            place: Nom du lieu à rechercher.
-            limit: Nombre maximum de résultats (défaut : 5).
-            country_codes: Code(s) pays ISO alpha-2 pour limiter la recherche.
-                           Exemples : "fr", ["fr", "de"]
-            viewbox: Tuple (west, south, east, north) pour limiter la zone de recherche.
-            bounded: Si True et viewbox fourni, restreint strictement la recherche à la viewbox.
+            place: Name of the place to search for.
+            limit: Maximum number of results (default: 5).
+            country_codes: ISO alpha-2 country code(s) to restrict the search.
+                           Examples: "fr", ["fr", "de"]
+            viewbox: Tuple (west, south, east, north) to restrict the search area.
+            bounded: If True and viewbox is provided, strictly restricts the search to the viewbox.
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame des candidats trouvés.
+            gpd.GeoDataFrame: GeoDataFrame of the candidates found.
         """
         try:
             time.sleep(self.delay)
@@ -239,14 +231,13 @@ class Geocoder:
                 bounded=bounded,
             )
         except GeocoderTimedOut:
-            logger.info(f"Avertissement : Délai d'attente dépassé pour '{place}'.")
+            logger.warning(f"Délai d'attente dépassé pour '{place}'.")
             return gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'geometry'], crs="EPSG:4326")
         except GeocoderServiceError as e:
-            logger.info(f"Erreur du service de géocodage pour '{place}': {e}")
+            logger.error(f"Erreur du service de géocodage pour '{place}': {e}")
             return gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'geometry'], crs="EPSG:4326")
 
         if not locations:
-            logger.info(f"Aucun résultat pour '{place}'.")
             return gpd.GeoDataFrame(columns=['query', 'address', 'latitude', 'longitude', 'geometry'], crs="EPSG:4326")
 
         rows = []
@@ -266,14 +257,14 @@ class Geocoder:
     def geocode_in_country(self, places: Union[str, List[str]],
                            country_codes: Union[str, List[str]]) -> tuple:
         """
-        Géocode en contraignant la recherche à un ou plusieurs pays.
+        Geocodes while restricting the search to one or more countries.
 
         Args:
-            places: Localité ou liste de localités.
-            country_codes: Code(s) pays ISO alpha-2. Exemples : "ci", ["fr", "de"]
+            places: A place or a list of places.
+            country_codes: ISO alpha-2 country code(s). Examples: "ci", ["fr", "de"]
 
         Returns:
-            tuple: (GeoDataFrame des résultats, liste des localités non trouvées).
+            tuple: (GeoDataFrame of results, list of places not found).
         """
         if isinstance(places, str):
             places = [places]
@@ -297,7 +288,7 @@ class Geocoder:
                 else:
                     not_found.append(place)
             except (GeocoderTimedOut, GeocoderServiceError, Exception) as e:
-                logger.info(f"Erreur pour '{place}': {e}")
+                logger.error(f"Erreur pour '{place}': {e}")
                 not_found.append(place)
 
         if found_data:
@@ -312,15 +303,15 @@ class Geocoder:
                         bbox: tuple,
                         bounded: bool = True) -> tuple:
         """
-        Géocode en contraignant la recherche à une bounding box.
+        Geocodes while restricting the search to a bounding box.
 
         Args:
-            places: Localité ou liste de localités.
-            bbox: Tuple (west, south, east, north) définissant la zone.
-            bounded: Si True (défaut), restreint strictement à la bbox.
+            places: A place or a list of places.
+            bbox: Tuple (west, south, east, north) defining the area.
+            bounded: If True (default), strictly restricts to the bbox.
 
         Returns:
-            tuple: (GeoDataFrame des résultats, liste des localités non trouvées).
+            tuple: (GeoDataFrame of results, list of places not found).
         """
         if isinstance(places, str):
             places = [places]
@@ -344,7 +335,7 @@ class Geocoder:
                 else:
                     not_found.append(place)
             except (GeocoderTimedOut, GeocoderServiceError, Exception) as e:
-                logger.info(f"Erreur pour '{place}': {e}")
+                logger.error(f"Erreur pour '{place}': {e}")
                 not_found.append(place)
 
         if found_data:
@@ -357,31 +348,31 @@ class Geocoder:
 
     def boundary(self, place: str) -> gpd.GeoDataFrame:
         """
-        Retourne la géométrie polygonale (contour) d'un lieu via osmnx.
+        Returns the polygonal geometry (outline) of a place via osmnx.
 
         Args:
-            place: Nom du lieu (ville, commune, pays, région…).
+            place: Name of the place (city, town, country, region...).
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame avec la géométrie du lieu.
+            gpd.GeoDataFrame: GeoDataFrame with the place's geometry.
         """
         ox = _require_osmnx()
         return ox.geocode_to_gdf(place)
 
     def geocode_dataframe(self, df: pd.DataFrame, column: str) -> gpd.GeoDataFrame:
         """
-        Enrichit un DataFrame pandas avec les coordonnées géocodées d'une colonne de noms de lieux.
+        Enriches a pandas DataFrame with the geocoded coordinates of a column of place names.
 
         Args:
-            df: DataFrame pandas contenant une colonne de noms de lieux.
-            column: Nom de la colonne contenant les lieux à géocoder.
+            df: pandas DataFrame containing a column of place names.
+            column: Name of the column containing the places to geocode.
 
         Returns:
-            gpd.GeoDataFrame: GeoDataFrame avec les colonnes latitude, longitude et geometry ajoutées.
-                             Les lignes non trouvées ont des valeurs NaN pour ces colonnes.
+            gpd.GeoDataFrame: GeoDataFrame with latitude, longitude, and geometry columns added.
+                             Rows not found have NaN values for these columns.
 
         Raises:
-            ValueError: Si la colonne spécifiée n'existe pas dans le DataFrame.
+            ValueError: If the specified column doesn't exist in the DataFrame.
         """
         if column not in df.columns:
             raise ValueError(f"La colonne '{column}' n'existe pas dans le DataFrame.")
@@ -389,7 +380,6 @@ class Geocoder:
         result = df.copy()
         latitudes = []
         longitudes = []
-        logger.info(f"Géocodage de {len(result)} ligne(s) depuis la colonne '{column}'...")
         for place in result[column]:
             loc_info, _ = self._geocode_single(str(place))
             if loc_info:
@@ -409,14 +399,14 @@ class Geocoder:
 
     def components(self, place: str) -> dict:
         """
-        Extrait les composants d'adresse (pays, région, ville, code postal…) d'un lieu.
+        Extracts the address components (country, region, city, postal code...) of a place.
 
         Args:
-            place: Nom du lieu ou adresse à analyser.
+            place: Name of the place or address to analyze.
 
         Returns:
-            dict: Dictionnaire des composants d'adresse (country, state, city, postcode, road, etc.).
-                  Retourne un dict vide si le lieu n'est pas trouvé.
+            dict: Dictionary of address components (country, state, city, postcode, road, etc.).
+                  Returns an empty dict if the place isn't found.
         """
         loc_info, _ = self._geocode_single(place)
         if loc_info is None:
@@ -426,18 +416,18 @@ class Geocoder:
 
     def distance(self, place_a: str, place_b: str, unit: str = "km") -> float:
         """
-        Calcule la distance géodésique entre deux lieux géocodés.
+        Computes the geodesic distance between two geocoded places.
 
         Args:
-            place_a: Premier lieu.
-            place_b: Deuxième lieu.
-            unit: Unité de distance : "km" (défaut), "m", "mi".
+            place_a: First place.
+            place_b: Second place.
+            unit: Distance unit: "km" (default), "m", "mi".
 
         Returns:
-            float: Distance géodésique entre les deux lieux.
+            float: Geodesic distance between the two places.
 
         Raises:
-            ValueError: Si l'un des lieux n'est pas trouvé ou si l'unité est invalide.
+            ValueError: If one of the places isn't found or the unit is invalid.
         """
         from geopy.distance import geodesic
 
@@ -462,19 +452,39 @@ class Geocoder:
         else:
             return dist.miles
 
-    def within(self, place: str, point: Union[tuple, list]) -> bool:
+    def sources(self) -> pd.DataFrame:
         """
-        Vérifie si un point (latitude, longitude) est à l'intérieur du polygone d'un lieu.
-
-        Args:
-            place: Nom du lieu (ville, pays, région…).
-            point: Tuple ou liste (latitude, longitude).
+        Returns a table of the data sources used by this class.
 
         Returns:
-            bool: True si le point est dans le polygone du lieu.
+            pd.DataFrame: Columns 'name', 'url', 'description'.
+        """
+        return pd.DataFrame([
+            {
+                "name": "OpenStreetMap Nominatim",
+                "url": "https://nominatim.openstreetmap.org/",
+                "description": "Geocoding and reverse geocoding (geocode, search, reverse_geocode...).",
+            },
+            {
+                "name": "OpenStreetMap (via osmnx)",
+                "url": "https://www.openstreetmap.org/",
+                "description": "Place outlines (used by bbox() and boundary()).",
+            },
+        ])
+
+    def within(self, place: str, point: Union[tuple, list]) -> bool:
+        """
+        Checks whether a point (latitude, longitude) lies within a place's polygon.
+
+        Args:
+            place: Name of the place (city, country, region...).
+            point: Tuple or list (latitude, longitude).
+
+        Returns:
+            bool: True if the point is inside the place's polygon.
 
         Raises:
-            ImportError: Si osmnx n'est pas installé.
+            ImportError: If osmnx is not installed.
         """
         ox = _require_osmnx()
         gdf = ox.geocode_to_gdf(place)

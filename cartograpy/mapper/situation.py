@@ -13,42 +13,42 @@ logger = logging.getLogger(__name__)
 
 class SituationMap:
     """
-    Crée une figure composite avec une carte principale et une mini-carte
-    de situation (inset map) montrant où se situe la zone d'étude dans un
-    contexte géographique plus large.
+    Creates a composite figure with a main map and a small situation
+    (inset) map showing where the study area sits within a wider
+    geographic context.
 
-    Utilise automatiquement ``matplotlib-map-utils`` si installé pour un
-    positionnement intelligent et des indicateurs d'étendue/détail, sinon
-    revient au placement manuel classique.
+    Automatically uses ``matplotlib-map-utils`` if installed for smart
+    placement and extent/detail indicators, otherwise falls back to
+    classic manual placement.
 
-    Paramètres:
+    Parameters:
     -----------
     figsize : tuple
-        Taille de la figure
+        Figure size
     title : str
-        Titre de la carte principale
+        Main map title
     projection : cartopy.crs
-        Projection de la carte principale
+        Main map projection
     inset_position : tuple (x, y, w, h)
-        Position et taille de la mini-carte (coordonnées relatives 0-1,
-        mode classique uniquement).
+        Position and size of the inset map (relative 0-1 coordinates,
+        classic mode only).
     inset_projection : cartopy.crs, optional
-        Projection de la mini-carte (par défaut PlateCarree)
+        Inset map projection (defaults to PlateCarree)
     inset_location : str
-        Position de l'inset (mode map-utils) : "upper left", "upper right",
+        Inset position (map-utils mode): "upper left", "upper right",
         "lower left", "lower right", etc.
     inset_size : float or tuple, optional
-        Taille de l'inset en pouces (mode map-utils).
+        Inset size in inches (map-utils mode).
     inset_pad : float or tuple, optional
-        Espacement en pouces (mode map-utils).
+        Padding in inches (map-utils mode).
     style : str
-        Mode de rendu : "auto", "map-utils", "classic".
+        Rendering mode: "auto", "map-utils", "classic".
     dpi : int
-        Résolution
+        Resolution
     verbose : bool
-        Afficher les messages d'information
+        Display information messages
 
-    Exemple:
+    Example:
     --------
     >>> sm = SituationMap(title="Côte d'Ivoire")
     >>> sm.add_main_layer(gdf_civ, facecolor="khaki")
@@ -68,7 +68,7 @@ class SituationMap:
         inset_pad=None,
         style="auto",
         dpi=200,
-        verbose=True,
+        verbose=False,
     ):
         if projection is None:
             projection = ccrs.PlateCarree()
@@ -82,14 +82,14 @@ class SituationMap:
         self.inset_projection = inset_projection
         self._style = style
 
-        # carte principale
+        # main map
         self.fig = plt.figure(figsize=figsize, dpi=dpi)
         self.ax = self.fig.add_subplot(111, projection=projection)
         self.ax.set_title(title, fontsize=16, fontweight="bold")
         self.ax.coastlines(resolution="50m", linewidth=0.5)
         self.ax.add_feature(cfeature.BORDERS, linewidth=0.5)
 
-        # Résolution du style
+        # Style resolution
         resolved = style
         if resolved == "auto":
             resolved = "map-utils" if HAS_MAP_UTILS else "classic"
@@ -98,9 +98,9 @@ class SituationMap:
         self._box_patch = None
 
         if resolved == "map-utils" and HAS_MAP_UTILS:
-            # Création différée : l'inset sera créé après le premier
-            # add_main_layer pour que l'axe principal soit correctement
-            # dimensionné. On stocke les paramètres.
+            # Deferred creation: the inset will be created after the
+            # first add_main_layer so the main axes are correctly
+            # sized. We store the parameters for now.
             self._inset_params = dict(
                 location=inset_location,
                 projection=inset_projection,
@@ -112,7 +112,7 @@ class SituationMap:
             self.inset_ax = None
             self._resolved_style = "map-utils"
         else:
-            # mode classique : créer l'inset immédiatement
+            # classic mode: create the inset immediately
             self.inset_ax = self.fig.add_axes(
                 inset_position, projection=inset_projection, frameon=True,
             )
@@ -125,7 +125,7 @@ class SituationMap:
             self._resolved_style = "classic"
 
     def _ensure_inset_ax(self):
-        """Crée l'axe inset map-utils s'il n'existe pas encore."""
+        """Creates the map-utils inset axes if it doesn't exist yet."""
         if self.inset_ax is not None:
             return
         if self._inset_params is None:
@@ -144,10 +144,6 @@ class SituationMap:
         self.inset_ax.coastlines(resolution="110m", linewidth=0.4)
         self._inset_map_obj = im
 
-    def _log(self, *args, **kwargs):
-        if self.verbose:
-            logger.info(*args, **kwargs)
-
     def __enter__(self):
         return self
 
@@ -155,13 +151,13 @@ class SituationMap:
         plt.close(self.fig)
         return False
 
-    # -- couche principale -------------------------------------------------
+    # -- main layer -------------------------------------------------------
 
     def add_main_layer(self, gdf, facecolor="green", edgecolor="black",
                        linewidth=0.5, alpha=0.7, column=None, cmap="viridis",
                        **kwargs):
         """
-        Ajoute un GeoDataFrame à la carte principale.
+        Adds a GeoDataFrame to the main map.
         """
         plot_kwargs = dict(
             ax=self.ax, transform=ccrs.PlateCarree(),
@@ -176,7 +172,7 @@ class SituationMap:
 
         gdf.plot(**plot_kwargs)
 
-        # auto-zoom sur la couche
+        # auto-zoom on the layer
         bounds = gdf.total_bounds
         margin = 0.05
         w = bounds[2] - bounds[0]
@@ -187,41 +183,41 @@ class SituationMap:
             crs=ccrs.PlateCarree(),
         )
 
-        # Créer l'inset si mode map-utils (différé)
+        # Create the inset if in map-utils mode (deferred)
         self._ensure_inset_ax()
 
         return self
 
-    # -- rectangle de situation --------------------------------------------
+    # -- situation rectangle ------------------------------------------------
 
     def set_inset_box(self, bounds, box_color="red", box_linewidth=2,
                       indicator="extent", indicator_facecolor="red",
                       indicator_linecolor="red", indicator_alpha=0.5,
                       indicator_linewidth=1):
         """
-        Dessine un rectangle sur la mini-carte délimitant la zone d'étude.
+        Draws a rectangle on the inset map outlining the study area.
 
-        En mode map-utils, utilise ``indicate_extent`` pour un indicateur
-        automatique et précis. Sinon, dessine un rectangle manuellement.
+        In map-utils mode, uses ``indicate_extent`` for an automatic,
+        precise indicator. Otherwise, draws a rectangle manually.
 
-        Paramètres:
+        Parameters:
         -----------
         bounds : list
-            [minx, miny, maxx, maxy] en coordonnées géographiques
+            [minx, miny, maxx, maxy] in geographic coordinates
         box_color : str
-            Couleur du rectangle (mode classique)
+            Rectangle color (classic mode)
         box_linewidth : float
-            Épaisseur du trait (mode classique)
+            Line width (classic mode)
         indicator : str
-            Type d'indicateur : "extent", "detail", ou "none" (mode map-utils)
+            Indicator type: "extent", "detail", or "none" (map-utils mode)
         indicator_facecolor : str
-            Couleur de remplissage de l'indicateur
+            Indicator fill color
         indicator_linecolor : str
-            Couleur de bordure de l'indicateur
+            Indicator border color
         indicator_alpha : float
-            Transparence de l'indicateur
+            Indicator transparency
         indicator_linewidth : float
-            Épaisseur de trait de l'indicateur
+            Indicator line width
         """
         self._ensure_inset_ax()
 
@@ -254,10 +250,10 @@ class SituationMap:
                     )
                 return self
             except (ValueError, TypeError) as e:
-                self._log(f"⚠️  Indicateur {indicator} échoué : {e}, "
-                          "utilisation du rectangle classique")
+                logger.warning(f"Indicateur {indicator} échoué : {e}, "
+                                "utilisation du rectangle classique")
 
-        # Fallback : rectangle classique
+        # Fallback: classic rectangle
         minx, miny, maxx, maxy = bounds
         rect = mpatches.Rectangle(
             (minx, miny), maxx - minx, maxy - miny,
@@ -270,18 +266,18 @@ class SituationMap:
 
     def set_inset_box_from_gdf(self, gdf, **kwargs):
         """
-        Place le rectangle de situation à partir de l'étendue d'un GeoDataFrame.
+        Places the situation rectangle from a GeoDataFrame's extent.
         """
         bounds = gdf.total_bounds.tolist()
         return self.set_inset_box(bounds, **kwargs)
 
-    # -- flèche du Nord & barre d'échelle ---------------------------------
+    # -- north arrow & scale bar --------------------------------------------
 
     def add_north_arrow(self, style="auto", location="upper right", **kwargs):
         """
-        Ajoute une flèche du Nord à la carte principale.
+        Adds a north arrow to the main map.
 
-        Utilise ``matplotlib-map-utils`` si disponible.
+        Uses ``matplotlib-map-utils`` if available.
         """
         resolved = style
         if resolved == "auto":
@@ -304,9 +300,9 @@ class SituationMap:
             self.ax.add_artist(na)
             return self
 
-        # Fallback simplifié : pas de SVG dans SituationMap
-        self._log("⚠️  Flèche du Nord nécessite matplotlib-map-utils "
-                  "ou utilisez Map.add_north_arrow() pour les SVG")
+        # Simplified fallback: no SVG in SituationMap
+        logger.warning("Flèche du Nord nécessite matplotlib-map-utils "
+                        "ou utilisez Map.add_north_arrow() pour les SVG")
         return self
 
     def add_scale_bar(self, length=None, location="lower left", units="km",
@@ -316,9 +312,9 @@ class SituationMap:
                       box_color="white", box_alpha=0.8,
                       scale_loc="bottom", label_loc="top", **kwargs):
         """
-        Ajoute une barre d'échelle à la carte principale.
+        Adds a scale bar to the main map.
 
-        Utilise ``matplotlib-map-utils`` > ``matplotlib-scalebar`` > manuel.
+        Uses ``matplotlib-map-utils`` > ``matplotlib-scalebar`` > manual.
         """
         resolved = style
         if resolved == "auto":
@@ -333,10 +329,10 @@ class SituationMap:
             if resolved in ("ticks", "boxes"):
                 bar_style = resolved
             loc = location if isinstance(location, str) else "lower left"
-            # Voir Map._draw_scale_bar pour le détail de ces deux points :
-            # major_div nécessite major_mult (non exposé ici) pour être
-            # valide côté matplotlib-map-utils, et PlateCarree/Geodetic ne
-            # sont pas résolues en unités "degree" par pyproj.
+            # See Map._draw_scale_bar for details on these two points:
+            # major_div requires major_mult (not exposed here) to be
+            # valid on the matplotlib-map-utils side, and PlateCarree/
+            # Geodetic aren't resolved to "degree" units by pyproj.
             bar_projection = (
                 "EPSG:4326"
                 if isinstance(self.projection, (ccrs.PlateCarree, ccrs.Geodetic))
@@ -361,8 +357,8 @@ class SituationMap:
                 self.ax.add_artist(sb)
                 return self
             except (TypeError, ValueError) as e:
-                self._log(f"⚠️  ScaleBar map-utils échoué : {e}, "
-                          "utilisation de la méthode alternative")
+                logger.warning(f"ScaleBar map-utils échoué : {e}, "
+                                "utilisation de la méthode alternative")
                 resolved = "scalebar" if HAS_MPL_SCALEBAR else "manual"
 
         if resolved == "scalebar" and HAS_MPL_SCALEBAR:
@@ -397,7 +393,7 @@ class SituationMap:
             self.ax.add_artist(sb)
             return self
 
-        # ------- mode manuel (fallback) -------
+        # ------- manual mode (fallback) -------
         x0, x1 = self.ax.get_xlim()
         y0, y1 = self.ax.get_ylim()
         geod = Geod(ellps="WGS84")
@@ -445,17 +441,17 @@ class SituationMap:
         )
         return self
 
-    # -- grille et apparence -----------------------------------------------
+    # -- gridlines and appearance --------------------------------------------
 
     def add_gridlines(self, **kwargs):
-        """Ajoute des lignes de grille à la carte principale."""
+        """Adds gridlines to the main map."""
         defaults = dict(draw_labels=True, dms=True, x_inline=False, y_inline=False,
                         color="gray", linestyle="--", linewidth=0.5, alpha=0.7)
         defaults.update(kwargs)
         self.ax.gridlines(**defaults)
         return self
 
-    # -- sortie ------------------------------------------------------------
+    # -- output ------------------------------------------------------------
 
     def show(self):
         self.fig.tight_layout()
@@ -465,7 +461,6 @@ class SituationMap:
     def save(self, filename, dpi=300, bbox_inches="tight"):
         self.fig.tight_layout()
         self.fig.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
-        self._log(f"Carte sauvegardée : {filename}")
         return self
 
     def to_bytes(self, format="png", dpi=300) -> BytesIO:

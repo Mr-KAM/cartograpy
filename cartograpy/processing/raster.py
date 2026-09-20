@@ -11,39 +11,38 @@ logger = logging.getLogger(__name__)
 
 class RasterTools:
     """
-    Boîte à outils pour le traitement de données raster.
+    Toolbox for raster data processing.
 
-    Encapsule un fichier raster (via rasterio) et fournit des méthodes
-    chaînables pour :
-    1. Prétraitements (validation, harmonisation CRS/résolution,
-       découpage, nettoyage radiométrique, prétraitements satellitaires)
-    2. Traitements / analyses (calcul de bandes, reclassement,
-       statistiques, voisinage, terrain, classification, détection
-       de changement, analyse multicritère)
-    3. Post-traitements (nettoyage résultats, conversion raster-vecteur,
-       cartographie, export)
+    Wraps a raster file (via rasterio) and provides chainable methods for:
+    1. Preprocessing (validation, CRS/resolution harmonization,
+       clipping, radiometric cleanup, satellite preprocessing)
+    2. Processing / analysis (band math, reclassification,
+       statistics, neighborhood analysis, terrain, classification,
+       change detection, multi-criteria analysis)
+    3. Post-processing (result cleanup, raster-to-vector conversion,
+       mapping, export)
 
     Usage::
 
-        rt = RasterTools("chemin/vers/raster.tif")
+        rt = RasterTools("path/to/raster.tif")
         info = rt.get_raster_info()
 
-        # Chaînable via résultat en mémoire
+        # Chainable via in-memory result
         rt2 = (rt
             .reproject_raster("EPSG:32630")
             .resample_raster(10)
             .clip_raster(geodf))
-        rt2.export_geotiff("resultat.tif")
+        rt2.export_geotiff("result.tif")
     """
 
     def __init__(self, source):
         """
-        Initialise RasterTools.
+        Initializes RasterTools.
 
         Args:
-            source: Chemin vers un fichier raster (str / Path),
-                    ou un tuple (data, profile) où data est un np.ndarray
-                    et profile un dict rasterio-compatible.
+            source: Path to a raster file (str / Path),
+                    or a tuple (data, profile) where data is a np.ndarray
+                    and profile a rasterio-compatible dict.
         """
         if isinstance(source, (str, os.PathLike)):
             self.path = str(source)
@@ -59,7 +58,7 @@ class RasterTools:
             )
 
     def _wrap(self, data, profile=None):
-        """Construit un nouveau RasterTools à partir de données en mémoire."""
+        """Builds a new RasterTools from in-memory data."""
         p = dict(profile) if profile else dict(self.profile)
         if data.ndim == 2:
             data = data[np.newaxis, ...]
@@ -67,7 +66,7 @@ class RasterTools:
         return RasterTools((data, p))
 
     def _write_tmp(self, data=None, profile=None):
-        """Écrit dans un fichier temporaire et renvoie le chemin."""
+        """Writes to a temporary file and returns its path."""
         import tempfile
         d = data if data is not None else self.data
         p = profile if profile is not None else self.profile
@@ -82,13 +81,13 @@ class RasterTools:
         return tmp.name
 
     # ────────────────────────────────────────────────────────────────
-    #  1. PRÉTRAITEMENTS
+    #  1. PREPROCESSING
     # ────────────────────────────────────────────────────────────────
 
-    # --- Contrôle et validation ----------------------------------- #
+    # --- Checks and validation -------------------------------------- #
 
     def get_raster_info(self) -> dict:
-        """Retourne les métadonnées essentielles du raster."""
+        """Returns the raster's essential metadata."""
         p = self.profile
         return {
             "driver": p.get("driver"),
@@ -107,7 +106,7 @@ class RasterTools:
         }
 
     def check_raster_metadata(self) -> dict:
-        """Vérifie les métadonnées critiques et signale les anomalies."""
+        """Checks the critical metadata and flags any anomalies."""
         info = self.get_raster_info()
         issues = []
         if info["crs"] is None or info["crs"] == "None":
@@ -121,11 +120,11 @@ class RasterTools:
         return {"info": info, "issues": issues, "valid": len(issues) == 0}
 
     def validate_raster(self) -> bool:
-        """Retourne True si le raster n'a aucun problème critique."""
+        """Returns True if the raster has no critical issue."""
         return self.check_raster_metadata()["valid"]
 
     def check_nodata(self) -> dict:
-        """Analyse les valeurs NoData du raster."""
+        """Analyzes the raster's NoData values."""
         nodata = self.profile.get("nodata")
         total = int(self.data.size)
         if nodata is not None:
@@ -140,18 +139,18 @@ class RasterTools:
         }
 
     def check_band_count(self) -> int:
-        """Retourne le nombre de bandes."""
+        """Returns the number of bands."""
         return self.data.shape[0]
 
     def check_resolution(self) -> tuple:
-        """Retourne la résolution (pixel_x, pixel_y)."""
+        """Returns the resolution (pixel_x, pixel_y)."""
         t = self.profile.get("transform")
         if t:
             return (t.a, abs(t.e))
         return (None, None)
 
     def check_alignment(self, other) -> dict:
-        """Vérifie la compatibilité (CRS, résolution, grille) avec un autre raster."""
+        """Checks compatibility (CRS, resolution, grid) with another raster."""
         if isinstance(other, RasterTools):
             other_profile = other.profile
         else:
@@ -174,17 +173,17 @@ class RasterTools:
             "compatible": crs_match and res_match and grid_aligned,
         }
 
-    # --- Harmonisation spatiale ----------------------------------- #
+    # --- Spatial harmonization ---------------------------------------- #
 
     def set_crs(self, crs):
-        """Attribue un CRS au raster (sans reprojection)."""
+        """Assigns a CRS to the raster (without reprojecting)."""
         from rasterio.crs import CRS
         profile = dict(self.profile)
         profile["crs"] = CRS.from_user_input(crs)
         return self._wrap(self.data, profile)
 
     def reproject_raster(self, target_crs, resampling="nearest"):
-        """Reprojette le raster vers un autre CRS."""
+        """Reprojects the raster to another CRS."""
         from rasterio.warp import calculate_default_transform, reproject
         from rasterio.enums import Resampling
 
@@ -214,7 +213,7 @@ class RasterTools:
         return self._wrap(dst_data, profile)
 
     def resample_raster(self, target_resolution, resampling="nearest"):
-        """Rééchantillonne le raster à une résolution cible (en unités du CRS)."""
+        """Resamples the raster to a target resolution (in CRS units)."""
         from rasterio.enums import Resampling as Resamp
         resamp = getattr(Resamp, resampling, Resamp.nearest)
         t = self.profile["transform"]
@@ -247,7 +246,7 @@ class RasterTools:
         return self._wrap(dst, profile)
 
     def align_rasters(self, reference):
-        """Aligne ce raster sur la grille d'un raster de référence."""
+        """Aligns this raster to a reference raster's grid."""
         if isinstance(reference, RasterTools):
             ref_profile = reference.profile
         else:
@@ -274,13 +273,13 @@ class RasterTools:
         return self._wrap(dst, profile)
 
     def snap_raster_grid(self, reference):
-        """Alias de align_rasters – accroche la grille sur une référence."""
+        """Alias for align_rasters - snaps the grid onto a reference."""
         return self.align_rasters(reference)
 
-    # --- Découpage et réduction de l'emprise ---------------------- #
+    # --- Clipping and extent reduction -------------------------------- #
 
     def clip_raster(self, geodf, crop=True, all_touched=False):
-        """Découpe le raster par un GeoDataFrame (ou géométrie shapely)."""
+        """Clips the raster by a GeoDataFrame (or shapely geometry)."""
         from rasterio.mask import mask as rio_mask
         if isinstance(geodf, gpd.GeoDataFrame):
             shapes = geodf.geometry.values
@@ -306,12 +305,12 @@ class RasterTools:
                 os.remove(tmp)
 
     def crop_raster(self, bbox):
-        """Découpe le raster par une emprise (xmin, ymin, xmax, ymax)."""
+        """Clips the raster by an extent (xmin, ymin, xmax, ymax)."""
         clip_geom = box(*bbox)
         return self.clip_raster(clip_geom)
 
     def mask_raster(self, geodf, invert=False):
-        """Masque les pixels hors du GeoDataFrame (met NoData)."""
+        """Masks pixels outside the GeoDataFrame (sets NoData)."""
         from rasterio.mask import mask as rio_mask
         if isinstance(geodf, gpd.GeoDataFrame):
             shapes = geodf.geometry.values
@@ -333,13 +332,13 @@ class RasterTools:
                 os.remove(tmp)
 
     def extract_by_extent(self, bbox):
-        """Alias de crop_raster."""
+        """Alias for crop_raster."""
         return self.crop_raster(bbox)
 
-    # --- Nettoyage radiométrique et numérique --------------------- #
+    # --- Radiometric and numeric cleanup ------------------------------ #
 
     def replace_nodata(self, old_nodata, new_nodata):
-        """Remplace une valeur NoData par une autre."""
+        """Replaces one NoData value with another."""
         data = self.data.copy()
         if old_nodata is not None:
             data[data == old_nodata] = new_nodata
@@ -348,7 +347,7 @@ class RasterTools:
         return self._wrap(data, profile)
 
     def fill_nodata(self, max_search_distance=100, smoothing_iterations=0):
-        """Interpole les pixels NoData à partir des voisins valides."""
+        """Interpolates NoData pixels from valid neighbors."""
         from rasterio.fill import fillnodata
         data = self.data.copy().astype("float32")
         nodata = self.profile.get("nodata")
@@ -367,19 +366,19 @@ class RasterTools:
         return self._wrap(data, profile)
 
     def scale_raster_values(self, factor=1.0, offset=0.0):
-        """Applique une transformation linéaire : pixel = pixel * factor + offset."""
+        """Applies a linear transform: pixel = pixel * factor + offset."""
         data = self.data.astype("float64") * factor + offset
         return self._wrap(data.astype(self.data.dtype))
 
     def convert_dtype(self, target_dtype):
-        """Convertit le type de données du raster."""
+        """Converts the raster's data type."""
         data = self.data.astype(target_dtype)
         profile = dict(self.profile)
         profile["dtype"] = str(np.dtype(target_dtype))
         return self._wrap(data, profile)
 
     def normalize_raster(self, band_index=None, vmin=0.0, vmax=1.0):
-        """Normalise les valeurs entre vmin et vmax (min-max scaling)."""
+        """Normalizes the values between vmin and vmax (min-max scaling)."""
         data = self.data.astype("float64").copy()
         nodata = self.profile.get("nodata")
         bands = [band_index] if band_index is not None else range(data.shape[0])
@@ -401,16 +400,16 @@ class RasterTools:
         profile["dtype"] = "float64"
         return self._wrap(data, profile)
 
-    # --- Prétraitements d'images satellitaires -------------------- #
+    # --- Satellite image preprocessing --------------------------------- #
 
     def cloud_masking(self, cloud_band_index, cloud_values, replace_with=None):
         """
-        Masque les pixels nuageux.
+        Masks cloudy pixels.
 
         Args:
-            cloud_band_index: Index de la bande de masque nuage (QA).
-            cloud_values: Liste des valeurs considérées comme nuages.
-            replace_with: Valeur de remplacement (défaut: nodata).
+            cloud_band_index: Index of the cloud mask (QA) band.
+            cloud_values: List of values considered clouds.
+            replace_with: Replacement value (default: nodata).
         """
         data = self.data.copy().astype("float64")
         nodata = self.profile.get("nodata", np.nan)
@@ -425,12 +424,12 @@ class RasterTools:
 
     def shadow_masking(self, nir_band, threshold=0.1, replace_with=None):
         """
-        Masque les ombres via un seuil sur la bande proche infrarouge.
+        Masks shadows via a threshold on the near-infrared band.
 
         Args:
-            nir_band: Index de la bande NIR.
-            threshold: Seuil en dessous duquel un pixel est considéré ombre.
-            replace_with: Valeur de remplacement (défaut: nodata).
+            nir_band: Index of the NIR band.
+            threshold: Threshold below which a pixel is considered shadow.
+            replace_with: Replacement value (default: nodata).
         """
         data = self.data.copy().astype("float64")
         nodata = self.profile.get("nodata", np.nan)
@@ -443,14 +442,14 @@ class RasterTools:
         return self._wrap(data, profile)
 
     def band_selection(self, band_indices):
-        """Sélectionne un sous-ensemble de bandes."""
+        """Selects a subset of bands."""
         data = self.data[band_indices]
         if data.ndim == 2:
             data = data[np.newaxis, ...]
         return self._wrap(data)
 
     def band_stacking(self, others):
-        """Empile les bandes de plusieurs rasters."""
+        """Stacks the bands of several rasters."""
         all_data = [self.data]
         for other in others:
             if isinstance(other, RasterTools):
@@ -463,10 +462,10 @@ class RasterTools:
 
     def mosaic_rasters(self, others, method="first"):
         """
-        Mosaïque de plusieurs rasters.
+        Mosaics several rasters together.
 
         Args:
-            others: Liste de RasterTools ou chemins.
+            others: List of RasterTools or paths.
             method: 'first', 'last', 'min', 'max', 'mean'.
         """
         from rasterio.merge import merge
@@ -494,19 +493,19 @@ class RasterTools:
                     os.remove(p)
 
     # ────────────────────────────────────────────────────────────────
-    #  2. TRAITEMENTS ET ANALYSES
+    #  2. PROCESSING AND ANALYSIS
     # ────────────────────────────────────────────────────────────────
 
-    # --- Calculs raster ------------------------------------------- #
+    # --- Raster computations ------------------------------------------ #
 
     def raster_calculator(self, expression, band_vars=None):
         """
-        Applique une expression mathématique sur les bandes.
+        Applies a mathematical expression across the bands.
 
         Args:
-            expression: Expression NumPy, ex. "(B4 - B3) / (B4 + B3)".
-            band_vars: Dict {nom_de_variable: index_de_bande}.
-                       Défaut: B1=bande 0, B2=bande 1, etc.
+            expression: NumPy expression, e.g. "(B4 - B3) / (B4 + B3)".
+            band_vars: Dict {variable_name: band_index}.
+                       Default: B1=band 0, B2=band 1, etc.
         """
         if band_vars is None:
             band_vars = {f"B{i+1}": i for i in range(self.data.shape[0])}
@@ -525,15 +524,15 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def apply_formula(self, expression, band_vars=None):
-        """Alias de raster_calculator."""
+        """Alias for raster_calculator."""
         return self.raster_calculator(expression, band_vars)
 
     def band_math(self, expression, band_vars=None):
-        """Alias de raster_calculator."""
+        """Alias for raster_calculator."""
         return self.raster_calculator(expression, band_vars)
 
     def ndvi(self, red_band=0, nir_band=1):
-        """Calcule le NDVI = (NIR - Red) / (NIR + Red)."""
+        """Computes NDVI = (NIR - Red) / (NIR + Red)."""
         red = self.data[red_band].astype("float64")
         nir = self.data[nir_band].astype("float64")
         with warnings.catch_warnings():
@@ -546,7 +545,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def ndwi(self, green_band=0, nir_band=1):
-        """Calcule le NDWI = (Green - NIR) / (Green + NIR)."""
+        """Computes NDWI = (Green - NIR) / (Green + NIR)."""
         green = self.data[green_band].astype("float64")
         nir = self.data[nir_band].astype("float64")
         with warnings.catch_warnings():
@@ -559,7 +558,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def ndbi(self, swir_band=0, nir_band=1):
-        """Calcule le NDBI = (SWIR - NIR) / (SWIR + NIR)."""
+        """Computes NDBI = (SWIR - NIR) / (SWIR + NIR)."""
         swir = self.data[swir_band].astype("float64")
         nir = self.data[nir_band].astype("float64")
         with warnings.catch_warnings():
@@ -572,7 +571,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def spectral_index(self, band_a, band_b):
-        """Calcule un indice spectral normalisé générique = (A - B) / (A + B)."""
+        """Computes a generic normalized spectral index = (A - B) / (A + B)."""
         a = self.data[band_a].astype("float64")
         b = self.data[band_b].astype("float64")
         with warnings.catch_warnings():
@@ -582,15 +581,15 @@ class RasterTools:
         profile["dtype"] = "float64"
         return self._wrap(result[np.newaxis, ...], profile)
 
-    # --- Reclassement --------------------------------------------- #
+    # --- Reclassification ---------------------------------------------- #
 
     def reclassify_raster(self, rules, band_index=0):
         """
-        Reclasse un raster selon des règles.
+        Reclassifies a raster according to rules.
 
         Args:
-            rules: Liste de tuples (min, max, nouvelle_valeur) ou dict {ancienne: nouvelle}.
-            band_index: Index de la bande à reclasser.
+            rules: List of (min, max, new_value) tuples or dict {old: new}.
+            band_index: Index of the band to reclassify.
         """
         band = self.data[band_index].copy().astype("float64")
         result = np.full_like(band, self.profile.get("nodata", 0), dtype="float64")
@@ -605,21 +604,21 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def remap_values(self, mapping, band_index=0):
-        """Remappe les valeurs via un dictionnaire {ancien: nouveau}."""
+        """Remaps values via a {old: new} dictionary."""
         return self.reclassify_raster(mapping, band_index=band_index)
 
     def threshold_raster(self, threshold, band_index=0, above=1, below=0):
-        """Binarise un raster autour d'un seuil."""
+        """Binarizes a raster around a threshold."""
         band = self.data[band_index].astype("float64")
         result = np.where(band >= threshold, above, below).astype("float64")
         profile = dict(self.profile)
         profile["dtype"] = "float64"
         return self._wrap(result[np.newaxis, ...], profile)
 
-    # --- Statistiques raster -------------------------------------- #
+    # --- Raster statistics ---------------------------------------------- #
 
     def raster_statistics(self, band_index=0) -> dict:
-        """Statistiques descriptives d'une bande."""
+        """Descriptive statistics for a band."""
         band = self.data[band_index].astype("float64")
         nodata = self.profile.get("nodata")
         if nodata is not None:
@@ -640,11 +639,11 @@ class RasterTools:
         }
 
     def band_statistics(self) -> list:
-        """Statistiques pour chaque bande."""
+        """Statistics for each band."""
         return [self.raster_statistics(i) for i in range(self.data.shape[0])]
 
     def histogram_raster(self, band_index=0, bins=256) -> dict:
-        """Histogramme d'une bande."""
+        """Histogram of a band."""
         band = self.data[band_index].astype("float64").ravel()
         nodata = self.profile.get("nodata")
         if nodata is not None:
@@ -656,19 +655,18 @@ class RasterTools:
 
     def class_areas(self, band_index=0, unit="ha", crs=None):
         """
-        Surface de chaque classe d'un raster catégoriel (occupation du sol…).
+        Area of each class in a categorical raster (land cover, etc.).
 
         Args:
-            band_index: Bande à analyser.
-            unit: 'pixel', 'm2', 'ha' ou 'km2'. Les unités métriques
-                exigent un CRS projeté ; passe ``crs`` pour reprojeter.
-            crs: CRS projeté cible (ex. 'EPSG:32630'). Si None et que le
-                raster est géographique, une erreur est levée pour les
-                unités métriques.
+            band_index: Band to analyze.
+            unit: 'pixel', 'm2', 'ha', or 'km2'. Metric units require a
+                projected CRS; pass ``crs`` to reproject.
+            crs: Target projected CRS (e.g. 'EPSG:32630'). If None and the
+                raster is geographic, an error is raised for metric units.
 
         Returns:
-            pandas.DataFrame trié par classe, colonnes ``class``,
-            ``pixel_count``, ``area`` (dans ``unit``), ``percent``.
+            pandas.DataFrame sorted by class, with columns ``class``,
+            ``pixel_count``, ``area`` (in ``unit``), ``percent``.
         """
         import pandas as pd
 
@@ -695,7 +693,7 @@ class RasterTools:
                     "Passe crs='EPSG:32630' (ou un autre CRS projeté)."
                 )
             t = src.profile["transform"]
-            px_area = abs(t.a * t.e - t.b * t.d)  # unités du CRS, au carré
+            px_area = abs(t.a * t.e - t.b * t.d)  # CRS units, squared
             factor = px_area / per_unit[unit]
 
         areas = counts * factor
@@ -709,12 +707,12 @@ class RasterTools:
 
     def zonal_statistics(self, geodf, stats=None, band_index=0) -> gpd.GeoDataFrame:
         """
-        Statistiques zonales par polygone.
+        Zonal statistics per polygon.
 
         Args:
-            geodf: GeoDataFrame de polygones.
-            stats: Liste de statistiques ('min','max','mean','std','median','sum','count').
-            band_index: Index de la bande.
+            geodf: GeoDataFrame of polygons.
+            stats: List of statistics ('min','max','mean','std','median','sum','count').
+            band_index: Band index.
         """
         if stats is None:
             stats = ["min", "max", "mean", "std", "count"]
@@ -759,10 +757,10 @@ class RasterTools:
             result_gdf[s] = [r[s] for r in results]
         return result_gdf
 
-    # --- Analyse de voisinage ------------------------------------- #
+    # --- Neighborhood analysis ------------------------------------------- #
 
     def _focal(self, func, size=3, band_index=0):
-        """Applique un filtre focal générique."""
+        """Applies a generic focal filter."""
         from scipy.ndimage import generic_filter
         band = self.data[band_index].astype("float64")
         result = generic_filter(band, func, size=size)
@@ -771,7 +769,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def focal_mean(self, size=3, band_index=0):
-        """Filtre moyen (moyenne mobile)."""
+        """Mean filter (moving average)."""
         from scipy.ndimage import uniform_filter
         band = self.data[band_index].astype("float64")
         result = uniform_filter(band, size=size)
@@ -780,7 +778,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def focal_median(self, size=3, band_index=0):
-        """Filtre médian."""
+        """Median filter."""
         from scipy.ndimage import median_filter
         band = self.data[band_index].astype("float64")
         result = median_filter(band, size=size)
@@ -789,7 +787,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def focal_max(self, size=3, band_index=0):
-        """Filtre maximum."""
+        """Maximum filter."""
         from scipy.ndimage import maximum_filter
         band = self.data[band_index].astype("float64")
         result = maximum_filter(band, size=size)
@@ -798,7 +796,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def focal_min(self, size=3, band_index=0):
-        """Filtre minimum."""
+        """Minimum filter."""
         from scipy.ndimage import minimum_filter
         band = self.data[band_index].astype("float64")
         result = minimum_filter(band, size=size)
@@ -807,13 +805,13 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def moving_window_analysis(self, func, size=3, band_index=0):
-        """Applique une fonction personnalisée via fenêtre glissante."""
+        """Applies a custom function via a sliding window."""
         return self._focal(func, size=size, band_index=band_index)
 
-    # --- Analyse morphologique et terrain ------------------------- #
+    # --- Morphological and terrain analysis ------------------------------ #
 
     def compute_slope(self, band_index=0, degrees=True):
-        """Calcule la pente à partir d'un MNT."""
+        """Computes the slope from a DEM."""
         dem = self.data[band_index].astype("float64")
         res_x, res_y = self.check_resolution()
         dy, dx = np.gradient(dem, res_y, res_x)
@@ -824,7 +822,7 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def compute_aspect(self, band_index=0, degrees=True):
-        """Calcule l'exposition (aspect) à partir d'un MNT."""
+        """Computes the aspect (exposure) from a DEM."""
         dem = self.data[band_index].astype("float64")
         res_x, res_y = self.check_resolution()
         dy, dx = np.gradient(dem, res_y, res_x)
@@ -837,7 +835,7 @@ class RasterTools:
         return self._wrap(aspect[np.newaxis, ...], profile)
 
     def compute_hillshade(self, band_index=0, azimuth=315, altitude=45):
-        """Calcule l'ombrage du relief (hillshade)."""
+        """Computes the terrain hillshade."""
         dem = self.data[band_index].astype("float64")
         res_x, res_y = self.check_resolution()
         dy, dx = np.gradient(dem, res_y, res_x)
@@ -855,7 +853,7 @@ class RasterTools:
         return self._wrap(hillshade[np.newaxis, ...], profile)
 
     def compute_curvature(self, band_index=0):
-        """Calcule la courbure du terrain."""
+        """Computes the terrain curvature."""
         dem = self.data[band_index].astype("float64")
         res_x, res_y = self.check_resolution()
         dy, dx = np.gradient(dem, res_y, res_x)
@@ -868,8 +866,8 @@ class RasterTools:
 
     def compute_tpi(self, size=3, band_index=0):
         """
-        Calcule le Topographic Position Index.
-        TPI = élévation – moyenne locale.
+        Computes the Topographic Position Index.
+        TPI = elevation - local mean.
         """
         from scipy.ndimage import uniform_filter
         dem = self.data[band_index].astype("float64")
@@ -881,8 +879,8 @@ class RasterTools:
 
     def compute_tri(self, size=3, band_index=0):
         """
-        Calcule le Terrain Ruggedness Index.
-        TRI = moyenne des différences absolues avec les voisins.
+        Computes the Terrain Ruggedness Index.
+        TRI = mean of the absolute differences with the neighbors.
         """
         from scipy.ndimage import generic_filter
         dem = self.data[band_index].astype("float64")
@@ -896,8 +894,8 @@ class RasterTools:
 
     def flow_direction(self, band_index=0):
         """
-        Calcule la direction d'écoulement (D8).
-        Convention : 1=E, 2=SE, 4=S, 8=SW, 16=W, 32=NW, 64=N, 128=NE.
+        Computes the flow direction (D8).
+        Convention: 1=E, 2=SE, 4=S, 8=SW, 16=W, 32=NW, 64=N, 128=NE.
         """
         dem = self.data[band_index].astype("float64")
         h, w = dem.shape
@@ -926,7 +924,7 @@ class RasterTools:
         return self._wrap(directions[np.newaxis, ...], profile)
 
     def flow_accumulation(self, band_index=0):
-        """Calcule l'accumulation de flux à partir d'un MNT."""
+        """Computes the flow accumulation from a DEM."""
         fdir = self.flow_direction(band_index)
         fdir_data = fdir.data[0]
         h, w = fdir_data.shape
@@ -991,11 +989,11 @@ class RasterTools:
 
     def watershed_analysis(self, band_index=0, threshold=100):
         """
-        Délimite les bassins versants simplifiés.
+        Delineates simplified watersheds.
 
         Args:
-            band_index: Bande du MNT.
-            threshold: Seuil d'accumulation pour définir le réseau.
+            band_index: DEM band.
+            threshold: Accumulation threshold used to define the network.
         """
         accum = self.flow_accumulation(band_index)
         from scipy.ndimage import label
@@ -1006,16 +1004,16 @@ class RasterTools:
         profile["dtype"] = "int32"
         return self._wrap(basins[np.newaxis, ...], profile)
 
-    # --- Classification raster ------------------------------------ #
+    # --- Raster classification -------------------------------------------- #
 
     def unsupervised_classification(self, n_classes=5, band_indices=None, method="kmeans"):
         """
-        Classification non supervisée (KMeans / MiniBatchKMeans).
+        Unsupervised classification (KMeans / MiniBatchKMeans).
 
         Args:
-            n_classes: Nombre de classes.
-            band_indices: Bandes à utiliser (défaut: toutes).
-            method: 'kmeans' ou 'minibatch'.
+            n_classes: Number of classes.
+            band_indices: Bands to use (default: all).
+            method: 'kmeans' or 'minibatch'.
         """
         try:
             from sklearn.cluster import KMeans, MiniBatchKMeans
@@ -1046,12 +1044,12 @@ class RasterTools:
 
     def supervised_classification(self, training_data, label_column, band_indices=None, method="random_forest", **kwargs):
         """
-        Classification supervisée.
+        Supervised classification.
 
         Args:
-            training_data: GeoDataFrame avec les échantillons d'entraînement.
-            label_column: Colonne contenant les classes.
-            band_indices: Bandes à utiliser (défaut: toutes).
+            training_data: GeoDataFrame with the training samples.
+            label_column: Column containing the classes.
+            band_indices: Bands to use (default: all).
             method: 'random_forest', 'svm', 'gradient_boosting'.
         """
         try:
@@ -1103,10 +1101,10 @@ class RasterTools:
 
     def train_classifier(self, training_data, label_column, band_indices=None, method="random_forest", **kwargs):
         """
-        Entraîne un classificateur et le retourne (sans prédire sur le raster).
+        Trains a classifier and returns it (without predicting on the raster).
 
         Returns:
-            Modèle scikit-learn entraîné.
+            Trained scikit-learn model.
         """
         try:
             from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -1143,7 +1141,7 @@ class RasterTools:
         return clf
 
     def predict_raster_classes(self, classifier, band_indices=None):
-        """Prédit les classes sur tout le raster avec un classificateur entraîné."""
+        """Predicts classes over the whole raster with a trained classifier."""
         indices = band_indices if band_indices is not None else list(range(self.data.shape[0]))
         bands = np.stack([self.data[i].astype("float64") for i in indices], axis=-1)
         h, w, nb = bands.shape
@@ -1164,13 +1162,13 @@ class RasterTools:
 
     def accuracy_assessment(self, classified, reference_data, label_column, band_index=0):
         """
-        Évaluation de la précision d'une classification.
+        Assesses the accuracy of a classification.
 
         Args:
-            classified: RasterTools classifié (ou self).
-            reference_data: GeoDataFrame de points de validation.
-            label_column: Colonne des classes de référence.
-            band_index: Bande du raster classifié.
+            classified: Classified RasterTools (or self).
+            reference_data: GeoDataFrame of validation points.
+            label_column: Column of reference classes.
+            band_index: Band of the classified raster.
 
         Returns:
             dict: overall_accuracy, kappa, confusion_matrix, per_class_accuracy
@@ -1211,10 +1209,10 @@ class RasterTools:
             "per_class_accuracy": per_class,
         }
 
-    # --- Détection de changement ---------------------------------- #
+    # --- Change detection --------------------------------------------- #
 
     def change_detection(self, other, band_index=0):
-        """Détection de changement par différence de rasters."""
+        """Change detection via raster difference."""
         if isinstance(other, RasterTools):
             other_data = other.data
         else:
@@ -1226,15 +1224,15 @@ class RasterTools:
         return self._wrap(diff[np.newaxis, ...], profile)
 
     def raster_difference(self, other, band_index=0):
-        """Alias de change_detection."""
+        """Alias for change_detection."""
         return self.change_detection(other, band_index)
 
     def post_classification_comparison(self, other, band_index=0):
         """
-        Comparaison post-classification entre deux rasters classifiés.
+        Post-classification comparison between two classified rasters.
 
         Returns:
-            RasterTools avec le code de transition (class_t1 * 100 + class_t2).
+            RasterTools with the transition code (class_t1 * 100 + class_t2).
         """
         if isinstance(other, RasterTools):
             other_data = other.data
@@ -1250,11 +1248,11 @@ class RasterTools:
 
     def time_series_analysis(self, others, band_index=0, stat="mean"):
         """
-        Analyse de série temporelle sur plusieurs rasters.
+        Time-series analysis over several rasters.
 
         Args:
-            others: Liste de RasterTools ou chemins.
-            band_index: Bande à analyser.
+            others: List of RasterTools or paths.
+            band_index: Band to analyze.
             stat: 'mean', 'std', 'min', 'max', 'trend'.
         """
         all_bands = [self.data[band_index].astype("float64")]
@@ -1294,15 +1292,15 @@ class RasterTools:
         profile["dtype"] = "float64"
         return self._wrap(result[np.newaxis, ...], profile)
 
-    # --- Analyse multicritère ------------------------------------- #
+    # --- Multi-criteria analysis ---------------------------------------- #
 
     def weighted_overlay(self, others, weights):
         """
-        Superposition pondérée de plusieurs rasters critères.
+        Weighted overlay of several criteria rasters.
 
         Args:
-            others: Liste de RasterTools ou chemins.
-            weights: Liste de poids (même longueur que [self] + others).
+            others: List of RasterTools or paths.
+            weights: List of weights (same length as [self] + others).
         """
         all_rasters = [self]
         for other in others:
@@ -1321,12 +1319,12 @@ class RasterTools:
 
     def suitability_analysis(self, criteria_rasters, weights, thresholds=None):
         """
-        Analyse d'aptitude multicritère.
+        Multi-criteria suitability analysis.
 
         Args:
-            criteria_rasters: Liste de RasterTools (critères).
-            weights: Liste de poids pour chaque critère.
-            thresholds: Dict optionnel {index: (min, max)} pour filtrage.
+            criteria_rasters: List of RasterTools (criteria).
+            weights: List of weights for each criterion.
+            thresholds: Optional dict {index: (min, max)} for filtering.
         """
         all_rasters = criteria_rasters
         if len(weights) != len(all_rasters):
@@ -1352,11 +1350,11 @@ class RasterTools:
 
     def normalize_criteria(self, band_index=0, method="minmax"):
         """
-        Normalise un critère pour l'analyse multicritère.
+        Normalizes a criterion for multi-criteria analysis.
 
         Args:
-            band_index: Bande à normaliser.
-            method: 'minmax' ou 'zscore'.
+            band_index: Band to normalize.
+            method: 'minmax' or 'zscore'.
         """
         band = self.data[band_index].astype("float64")
         nodata = self.profile.get("nodata")
@@ -1385,17 +1383,17 @@ class RasterTools:
         return self._wrap(result[np.newaxis, ...], profile)
 
     def combine_weighted_layers(self, others, weights):
-        """Alias de weighted_overlay."""
+        """Alias for weighted_overlay."""
         return self.weighted_overlay(others, weights)
 
     # ────────────────────────────────────────────────────────────────
-    #  3. POST-TRAITEMENTS
+    #  3. POST-PROCESSING
     # ────────────────────────────────────────────────────────────────
 
-    # --- Nettoyage des résultats ---------------------------------- #
+    # --- Result cleanup -------------------------------------------------- #
 
     def remove_small_patches(self, min_size, band_index=0, connectivity=1):
-        """Supprime les petites taches (< min_size pixels)."""
+        """Removes small patches (< min_size pixels)."""
         from scipy.ndimage import label as ndlabel
         band = self.data[band_index].copy()
         unique_vals = np.unique(band)
@@ -1411,7 +1409,7 @@ class RasterTools:
         return self._wrap(band[np.newaxis, ...])
 
     def majority_filter(self, size=3, band_index=0):
-        """Filtre majoritaire (remplace chaque pixel par la valeur la plus fréquente dans le voisinage)."""
+        """Majority filter (replaces each pixel with the most frequent value in the neighborhood)."""
         from scipy.ndimage import generic_filter
         from scipy.stats import mode as scipy_mode
         band = self.data[band_index].astype("float64")
@@ -1423,8 +1421,8 @@ class RasterTools:
 
     def sieve_raster(self, threshold, band_index=0, connectivity=4):
         """
-        Filtre de tamisage (sieve) – supprime les groupes < threshold pixels.
-        Utilise rasterio.features.sieve.
+        Sieve filter - removes groups smaller than threshold pixels.
+        Uses rasterio.features.sieve.
         """
         from rasterio.features import sieve
         band = self.data[band_index].astype("int32").copy()
@@ -1432,13 +1430,13 @@ class RasterTools:
         return self._wrap(sieved[np.newaxis, ...])
 
     def smooth_classes(self, size=3, band_index=0):
-        """Alias de majority_filter pour lisser une classification."""
+        """Alias for majority_filter to smooth a classification."""
         return self.majority_filter(size=size, band_index=band_index)
 
-    # --- Conversion raster-vecteur -------------------------------- #
+    # --- Raster-vector conversion ---------------------------------------- #
 
     def polygonize_raster(self, band_index=0) -> gpd.GeoDataFrame:
-        """Convertit un raster classifié en polygones."""
+        """Converts a classified raster into polygons."""
         from rasterio.features import shapes
         band = self.data[band_index].astype("int32")
         t = self.profile["transform"]
@@ -1452,7 +1450,7 @@ class RasterTools:
         return gpd.GeoDataFrame(columns=["geometry", "value"], crs=crs)
 
     def raster_to_points(self, band_index=0, skip_nodata=True) -> gpd.GeoDataFrame:
-        """Convertit chaque pixel en point."""
+        """Converts each pixel to a point."""
         band = self.data[band_index]
         t = self.profile["transform"]
         nodata = self.profile.get("nodata")
@@ -1472,7 +1470,7 @@ class RasterTools:
         return gpd.GeoDataFrame(columns=["geometry", "value"], crs=crs)
 
     def contours_from_raster(self, band_index=0, levels=10) -> gpd.GeoDataFrame:
-        """Extrait des courbes de niveau à partir d'un raster."""
+        """Extracts contour lines from a raster."""
         import matplotlib.pyplot as plt
         band = self.data[band_index].astype("float64")
         t = self.profile["transform"]
@@ -1497,15 +1495,15 @@ class RasterTools:
             return gpd.GeoDataFrame(features, crs=crs)
         return gpd.GeoDataFrame(columns=["level", "geometry"], crs=crs)
 
-    # --- Généralisation et cartographie --------------------------- #
+    # --- Generalization and mapping --------------------------------------- #
 
     def apply_colormap(self, colormap="viridis", band_index=0):
         """
-        Applique une colormap matplotlib et retourne un raster RGB (3 bandes, uint8).
+        Applies a matplotlib colormap and returns an RGB raster (3 bands, uint8).
 
         Args:
-            colormap: Nom de la colormap matplotlib.
-            band_index: Bande source.
+            colormap: Name of the matplotlib colormap.
+            band_index: Source band.
         """
         import matplotlib.pyplot as plt
         band = self.data[band_index].astype("float64")
@@ -1529,7 +1527,7 @@ class RasterTools:
         return self._wrap(rgb_data, profile)
 
     def stretch_contrast(self, band_index=0, percentile_low=2, percentile_high=98):
-        """Étirement de contraste par percentiles."""
+        """Contrast stretching by percentiles."""
         band = self.data[band_index].astype("float64")
         nodata = self.profile.get("nodata")
         if nodata is not None:
@@ -1549,11 +1547,11 @@ class RasterTools:
 
     def build_pyramids(self, factors=None):
         """
-        Construit des pyramides (overviews) pour l'affichage rapide.
-        Nécessite un fichier sur disque.
+        Builds pyramids (overviews) for fast display.
+        Requires a file on disk.
 
         Args:
-            factors: Liste de facteurs de réduction. Défaut: [2, 4, 8, 16].
+            factors: List of reduction factors. Default: [2, 4, 8, 16].
         """
         if factors is None:
             factors = [2, 4, 8, 16]
@@ -1564,7 +1562,7 @@ class RasterTools:
         return path
 
     def create_overview(self, factor=4):
-        """Crée un raster à résolution réduite (aperçu)."""
+        """Creates a reduced-resolution raster (preview)."""
         from rasterio.enums import Resampling
         from rasterio.warp import reproject
         new_h = max(1, self.profile["height"] // factor)
@@ -1591,10 +1589,10 @@ class RasterTools:
         profile.update(height=new_h, width=new_w, transform=new_t)
         return self._wrap(dst, profile)
 
-    # --- Export --------------------------------------------------- #
+    # --- Export --------------------------------------------------------- #
 
     def export_geotiff(self, path, compress="lzw"):
-        """Exporte en GeoTIFF."""
+        """Exports to GeoTIFF."""
         profile = dict(self.profile)
         profile.update(driver="GTiff", compress=compress)
         data = self.data
@@ -1606,7 +1604,7 @@ class RasterTools:
         return path
 
     def export_cog(self, path):
-        """Exporte en Cloud Optimized GeoTIFF (COG)."""
+        """Exports to Cloud Optimized GeoTIFF (COG)."""
         profile = dict(self.profile)
         profile.update(driver="GTiff", tiled=True, blockxsize=256, blockysize=256, compress="deflate")
         data = self.data
@@ -1620,7 +1618,7 @@ class RasterTools:
         return path
 
     def export_ascii_grid(self, path, band_index=0):
-        """Exporte en ASCII Grid (.asc)."""
+        """Exports to ASCII Grid (.asc)."""
         band = self.data[band_index]
         t = self.profile["transform"]
         nodata = self.profile.get("nodata", -9999)
@@ -1638,7 +1636,7 @@ class RasterTools:
         return path
 
     def export_png_map(self, path, colormap="viridis", band_index=0, dpi=150):
-        """Exporte une image PNG colorisée."""
+        """Exports a colorized PNG image."""
         import matplotlib.pyplot as plt
         band = self.data[band_index].astype("float64")
         nodata = self.profile.get("nodata")
@@ -1652,7 +1650,7 @@ class RasterTools:
         plt.close(fig)
         return path
 
-    # --- Représentation ------------------------------------------- #
+    # --- Representation --------------------------------------------------- #
 
     def __repr__(self):
         shape = self.data.shape if self.data is not None else "N/A"

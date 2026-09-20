@@ -14,42 +14,42 @@ logger = logging.getLogger(__name__)
 
 def load(filepath,layer=None):
     """
-    Charge un fichier vectoriel ou raster selon son extension.
+    Loads a vector or raster file based on its extension.
 
-    Paramètres :
+    Parameters:
         filepath : str
-            Chemin complet vers le fichier à charger. L'extension détermine le type de données.
-        layer : str, optionnel
-            Pour les fichiers multi-couches (.gpkg, GPX), spécifie la couche à charger
-            (ex: "zones", "tracks", "waypoints"). Par défaut None = couche par défaut.
+            Full path to the file to load. The extension determines the data type.
+        layer : str, optional
+            For multi-layer files (.gpkg, GPX), specifies the layer to load
+            (e.g.: "zones", "tracks", "waypoints"). Defaults to None = default layer.
 
-    Retourne :
-        - geopandas.GeoDataFrame : Pour les fichiers vectoriels (.shp, .geojson, .gpkg, .kml, .gpx)
-        - pandas.DataFrame : Pour les fichiers tabulaires (.csv, .parquet)
-        - rasterio.io.DatasetReader : Pour les fichiers raster (.tif, .tiff).
-          Accès aux données : .read(1), métadonnées : .meta, CRS : .crs,
-          transformation : .transform, emprise : .bounds.
-          Penser à fermer le fichier après usage avec .close() ou utiliser un context manager.
+    Returns:
+        - geopandas.GeoDataFrame: For vector files (.shp, .geojson, .gpkg, .kml, .gpx)
+        - pandas.DataFrame: For tabular files (.csv, .parquet)
+        - rasterio.io.DatasetReader: For raster files (.tif, .tiff).
+          Data access: .read(1), metadata: .meta, CRS: .crs,
+          transform: .transform, extent: .bounds.
+          Remember to close the file after use with .close() or use a context manager.
 
-    Formats supportés :
-        Vectoriels : shp, geojson, gpkg, kml, gpx, csv, parquet
-        Rasters : tif, tiff
+    Supported formats:
+        Vector: shp, geojson, gpkg, kml, gpx, csv, parquet
+        Raster: tif, tiff
 
-    Exemples :
-        >>> # Charger un fichier shapefile
+    Examples:
+        >>> # Load a shapefile
         >>> gdf = load("data/ma_carte.shp")
-        
-        >>> # Charger un fichier GeoJSON
+
+        >>> # Load a GeoJSON file
         >>> gdf = load("data/ma_carte.geojson")
-        
-        >>> # Charger un fichier raster
+
+        >>> # Load a raster file
         >>> raster = load("data/elevation.tif")
 
-    Raises :
-        ValueError : Si le format de fichier n'est pas supporté
-        RuntimeError : Si une erreur survient lors de la lecture du fichier
+    Raises:
+        ValueError: If the file format is not supported
+        RuntimeError: If an error occurs while reading the file
     """
-    # Convertir filepath en string s'il s'agit d'un objet Path
+    # Convert filepath to a string in case it's a Path object
     filepath_str = str(filepath)
     ext = filepath_str.split('.')[-1].lower()
 
@@ -59,8 +59,8 @@ def load(filepath,layer=None):
 
     if ext in vector_exts:
         if ext in ['shp', 'geojson', 'gpkg']:
-            # `layer` ne concerne que les conteneurs multi-couches (.gpkg) ;
-            # gpd l'ignore pour shp/geojson, None = couche par défaut.
+            # `layer` only matters for multi-layer containers (.gpkg);
+            # gpd ignores it for shp/geojson, None = default layer.
             return gpd.read_file(filepath, layer=layer) if layer else gpd.read_file(filepath)
         elif ext == 'kml':
             try:
@@ -76,7 +76,7 @@ def load(filepath,layer=None):
             return pd.read_csv(filepath)
         elif ext == 'parquet':
             return pd.read_parquet(filepath)
-    # Chargement de données raster
+    # Loading raster data
     elif ext in raster_exts:
         try:
             return rasterio.open(filepath)
@@ -87,20 +87,20 @@ def load(filepath,layer=None):
 
 def describe(filepath) -> dict:
     """
-    Affiche un résumé des couches et métadonnées d'un fichier géospatial.
+    Displays a summary of the layers and metadata of a geospatial file.
 
-    Paramètres :
-        filepath : str ou Path
-            Chemin vers le fichier à décrire.
+    Parameters:
+        filepath : str or Path
+            Path to the file to describe.
 
-    Retourne :
-        dict : Dictionnaire contenant les métadonnées du fichier :
-            - type : "vector", "raster" ou "tabular"
-            - format : extension du fichier
-            - layers : liste de dicts décrivant chaque couche
-            - nb_layers : nombre de couches
+    Returns:
+        dict: Dictionary containing the file's metadata:
+            - type: "vector", "raster" or "tabular"
+            - format: file extension
+            - layers: list of dicts describing each layer
+            - nb_layers: number of layers
 
-    Exemples :
+    Examples:
         >>> describe("data/gadm41_CIV.gpkg")
         >>> describe("data/elevation.tif")
     """
@@ -201,7 +201,7 @@ def describe(filepath) -> dict:
                      f"Formats acceptés : {vector_exts + raster_exts + tabular_exts}")
 
 def _print_describe(info: dict):
-    """Affiche le résumé de describe() de manière lisible."""
+    """Displays the describe() summary in a readable way."""
     sep = "=" * 60
     dash = "-" * 56
     logger.info(sep)
@@ -254,34 +254,34 @@ def _print_describe(info: dict):
 
 def save(data, file_extension, filename="output", timestamp=False, raster_meta=None):
     """
-    Sauvegarde un fichier raster ou vectoriel selon le type.
+    Saves a raster or vector file depending on the data type.
 
-    Paramètres :
-        data : Données à sauvegarder.
-            - Pour les données vectorielles : GeoDataFrame ou DataFrame pandas.
-            - Pour les données raster : DatasetReader rasterio ou tableau numpy.
+    Parameters:
+        data : Data to save.
+            - For vector data: GeoDataFrame or pandas DataFrame.
+            - For raster data: rasterio DatasetReader or numpy array.
         file_extension : str
-            Extension du fichier de sortie (ex: 'geojson', 'shp', 'tif').
-        filename : str, optionnel
-            Nom de base du fichier (sans extension). Par défaut "output".
-        timestamp : bool, optionnel
-            Si True, ajoute un horodatage au nom du fichier. Par défaut False.
-        raster_meta : dict, optionnel
-            Métadonnées raster nécessaires si `data` est un tableau numpy.
-            Doit contenir au minimum : crs, transform, width, height, dtype, count.
+            Output file extension (e.g.: 'geojson', 'shp', 'tif').
+        filename : str, optional
+            Base file name (without extension). Defaults to "output".
+        timestamp : bool, optional
+            If True, adds a timestamp to the file name. Defaults to False.
+        raster_meta : dict, optional
+            Raster metadata required if `data` is a numpy array.
+            Must contain at least: crs, transform, width, height, dtype, count.
 
-    Retour :
-        str : Chemin absolu vers le fichier sauvegardé.
+    Returns:
+        str: Absolute path to the saved file.
 
-    Raises :
-        ValueError : Si le format n'est pas supporté ou si raster_meta est manquant/incomplet.
-        TypeError  : Si le type de données n'est pas pris en charge.
+    Raises:
+        ValueError: If the format is not supported or raster_meta is missing/incomplete.
+        TypeError : If the data type is not supported.
 
-    Exemples :
+    Examples:
         >>> save(gdf, 'geojson', 'ma_carte')
         >>> save(array, 'tif', 'mon_raster', raster_meta=meta)
     """
-    # -- Mapping des formats supportés ----------------------------------------
+    # -- Mapping of supported formats ----------------------------------------
     _VECTOR_DRIVERS = {
         'geojson': 'GeoJSON',
         'shp': 'ESRI Shapefile',
@@ -292,7 +292,7 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
     _RASTER_EXTS = {'tif', 'tiff'}
     _ALL_SUPPORTED = set(_VECTOR_DRIVERS) | _TABULAR_EXTS | _RASTER_EXTS
 
-    # -- Normalisation / validation -------------------------------------------
+    # -- Normalization / validation -------------------------------------------
     file_extension = file_extension.lower().lstrip('.')
     if file_extension not in _ALL_SUPPORTED:
         raise ValueError(
@@ -300,7 +300,7 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
             f"Formats acceptés : {sorted(_ALL_SUPPORTED)}"
         )
 
-    # S1 : empêcher le path traversal (interdire ".." dans le chemin)
+    # S1: prevent path traversal (disallow ".." in the path)
     filename = str(filename)
     if ".." in filename:
         raise ValueError("Le chemin ne doit pas contenir '..' (path traversal interdit).")
@@ -310,14 +310,14 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
         filename = f"{filename}_{now}"
     output_path = f"{filename}.{file_extension}"
 
-    # R1 : créer le répertoire parent si nécessaire
+    # R1: create the parent directory if needed
     parent = os.path.dirname(output_path)
     if parent:
         os.makedirs(parent, exist_ok=True)
 
     # ── VECTOR / TABULAR ────────────────────────────────────────────────────
     if isinstance(data, (gpd.GeoDataFrame, pd.DataFrame)):
-        # Formats vectoriels natifs (via fiona/GDAL)
+        # Native vector formats (via fiona/GDAL)
         if file_extension in _VECTOR_DRIVERS:
             if not isinstance(data, gpd.GeoDataFrame):
                 raise TypeError(
@@ -327,9 +327,9 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
                 )
             data.to_file(output_path, driver=_VECTOR_DRIVERS[file_extension])  # type: ignore[call-overload]
 
-        # Formats tabulaires (géométrie retirée sauf geoparquet)
+        # Tabular formats (geometry dropped except for geoparquet)
         elif file_extension in _TABULAR_EXTS:
-            # GeoParquet conserve la géométrie
+            # GeoParquet keeps the geometry
             if file_extension == 'geoparquet':
                 if isinstance(data, gpd.GeoDataFrame):
                     data.to_parquet(output_path, index=False)
@@ -338,7 +338,7 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
                         "geoparquet nécessite un GeoDataFrame (pas un DataFrame)."
                     )
             else:
-                # Retirer la géométrie une seule fois
+                # Drop the geometry, once
                 if isinstance(data, gpd.GeoDataFrame):
                     data = data.drop(columns='geometry', errors='ignore')
                 if file_extension == 'csv':
@@ -379,7 +379,7 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
             raise ValueError(
                 f"Clés manquantes dans raster_meta : {sorted(missing)}"
             )
-        # B4 : ndarray 2D → 3D automatiquement
+        # B4: 2D ndarray → 3D automatically
         if data.ndim == 2:
             data = data[np.newaxis, :, :]
         with rasterio.open(output_path, 'w', **raster_meta) as dst:
@@ -392,12 +392,11 @@ def save(data, file_extension, filename="output", timestamp=False, raster_meta=N
         )
 
     abs_path = os.path.abspath(output_path)
-    logger.info(f"✅ Fichier sauvegardé : {abs_path}")
     return abs_path
 
 def list_geofiles(folder_path):
     """
-    Liste tous les fichiers géospatiaux (vecteurs et rasters) dans un dossier.
+    Lists every geospatial file (vector and raster) in a folder.
     """
     geospatial_extensions = ['.shp', '.geojson', '.gpkg', '.kml', '.csv', '.parquet', '.gpx', '.tif', '.tiff']
 

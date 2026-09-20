@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Union, List, Optional, Tuple
+import pandas as pd
 import os
 from pathlib import Path
 import datetime
@@ -16,65 +17,65 @@ logger = logging.getLogger(__name__)
 
 class Gee:
     """
-    Interface haut niveau pour Google Earth Engine.
- 
-    Exemple rapide
+    High-level interface for Google Earth Engine.
+
+    Quick example
     --------------
     >>> gee = Gee()
     >>> bbox = [2.2, 48.8, 2.5, 49.0]           # Paris
     >>> s2  = gee.get_sentinel2(bbox, "2024-05-01", "2024-06-01")
     >>> gee.download(s2, bbox, filename="paris_s2.tif")
     """
- 
+
     # ------------------------------------------------------------------ #
-    # Constantes de configuration                                        #
+    # Configuration constants                                            #
     # ------------------------------------------------------------------ #
- 
+
     SENTINEL2_COLLECTION   = "COPERNICUS/S2_SR_HARMONIZED"
     LANDSAT9_COLLECTION    = "LANDSAT/LC09/C02/T1_L2"
     MODIS_NDVI_COLLECTION  = "MODIS/061/MOD13A2"
     SENTINEL1_COLLECTION   = "COPERNICUS/S1_GRD"
- 
-    # Bandes RGB + NIR par défaut
+
+    # Default RGB + NIR bands
     S2_BANDS    = ["B2", "B3", "B4", "B8"]          # Blue, Green, Red, NIR
     S2_VIS      = {"bands": ["B4", "B3", "B2"], "min": 0, "max": 3000}
- 
+
     L9_BANDS    = ["SR_B2", "SR_B3", "SR_B4", "SR_B5"]  # Blue, Green, Red, NIR
     L9_VIS      = {"bands": ["SR_B4", "SR_B3", "SR_B2"], "min": 0, "max": 30000}
- 
+
     # ------------------------------------------------------------------ #
-    # Constructeur                                                       #
+    # Constructor                                                        #
     # ------------------------------------------------------------------ #
- 
+
     def __init__(self, project: Optional[str] = None, service_account: Optional[str] = None,
                  key_file: Optional[str] = None):
         """
-        Initialise la connexion à Earth Engine.
- 
+        Initializes the connection to Earth Engine.
+
         Parameters
         ----------
         project : str, optional
-            ID du projet GCP (ex. "my-gee-project").
-            Peut aussi être fourni via la variable d'environnement GEE_PROJECT.
+            GCP project ID (e.g. "my-gee-project").
+            Can also be provided via the GEE_PROJECT environment variable.
         service_account : str, optional
-            Adresse e-mail du compte de service (authentification non-interactive).
+            Service account email address (non-interactive authentication).
         key_file : str, optional
-            Chemin vers le fichier JSON de clé du compte de service.
+            Path to the service account's JSON key file.
         """
         self._ee = _require_ee()
         self._geemap = _require_geemap()
         self.project = project or os.environ.get("GEE_PROJECT")
-        self._map = None   # carte lazy-init
+        self._map = None   # lazy-init map
         self._last_collection = None
- 
+
         self._authenticate(service_account, key_file)
- 
+
     # ------------------------------------------------------------------ #
-    # Authentification                                                   #
+    # Authentication                                                     #
     # ------------------------------------------------------------------ #
- 
+
     def _authenticate(self, service_account: Optional[str], key_file: Optional[str]) -> None:
-        """Authentifie et initialise Earth Engine."""
+        """Authenticates and initializes Earth Engine."""
         ee = self._ee
         try:
             if service_account and key_file:
@@ -82,41 +83,38 @@ class Gee:
                 ee.Initialize(credentials=credentials, project=self.project)
             else:
                 ee.Initialize(project=self.project)
-            logger.info("✅ Google Earth Engine initialisé avec succès.")
         except ee.EEException:
-            logger.info("⚠️  Authentification requise. Lancement de ee.Authenticate()…")
             ee.Authenticate()
             ee.Initialize(project=self.project)
-            logger.info("✅ Google Earth Engine initialisé avec succès.")
- 
+
     # ------------------------------------------------------------------ #
-    # Utilitaires géométrie                                              #
+    # Geometry utilities                                                 #
     # ------------------------------------------------------------------ #
- 
+
     @staticmethod
     def bbox_to_geometry(bbox: BBox) -> ee.Geometry.Rectangle:
-        """Convertit une bbox [xmin, ymin, xmax, ymax] en ee.Geometry."""
+        """Converts a bbox [xmin, ymin, xmax, ymax] to an ee.Geometry."""
         ee = _require_ee()
         xmin, ymin, xmax, ymax = bbox
         return ee.Geometry.Rectangle([xmin, ymin, xmax, ymax])
- 
+
     # ------------------------------------------------------------------ #
-    # Masques nuageux                                                    #
+    # Cloud masks                                                        #
     # ------------------------------------------------------------------ #
- 
+
     @staticmethod
     def _mask_s2_clouds(image: ee.Image) -> ee.Image:
-        """Masque les nuages Sentinel-2 via la bande QA60."""
+        """Masks Sentinel-2 clouds using the QA60 band."""
         qa = image.select("QA60")
         cloud_bit_mask   = 1 << 10
         cirrus_bit_mask  = 1 << 11
         mask = qa.bitwiseAnd(cloud_bit_mask).eq(0).And(
                qa.bitwiseAnd(cirrus_bit_mask).eq(0))
         return image.updateMask(mask).divide(10000)
- 
+
     @staticmethod
     def _mask_l9_clouds(image: ee.Image) -> ee.Image:
-        """Masque les nuages Landsat-9 via la bande QA_PIXEL."""
+        """Masks Landsat-9 clouds using the QA_PIXEL band."""
         qa = image.select("QA_PIXEL")
         dilated  = 1 << 1
         clouds   = 1 << 3
@@ -124,14 +122,14 @@ class Gee:
         mask = (qa.bitwiseAnd(dilated).eq(0)
                   .And(qa.bitwiseAnd(clouds).eq(0))
                   .And(qa.bitwiseAnd(shadows).eq(0)))
-        # Facteur de réflectance Landsat C2 L2
+        # Landsat C2 L2 reflectance factor
         optical = image.select("SR_B.").multiply(0.0000275).add(-0.2)
         return image.addBands(optical, overwrite=True).updateMask(mask)
- 
+
     # ------------------------------------------------------------------ #
     # Sentinel-2                                                         #
     # ------------------------------------------------------------------ #
- 
+
     def get_sentinel2(
         self,
         bbox: BBox,
@@ -143,51 +141,49 @@ class Gee:
         bands: Optional[list[str]] = None,
     ) -> ee.Image | ee.ImageCollection:
         """
-        Récupère des images Sentinel-2 SR harmonisées.
- 
+        Retrieves harmonized Sentinel-2 SR images.
+
         Parameters
         ----------
         bbox  : [xmin, ymin, xmax, ymax]
-        start : date de début, format "YYYY-MM-DD"
-        end   : date de fin,   format "YYYY-MM-DD"
-        mosaic: si True, retourne une mosaïque mediane (ee.Image)
-        clip  : si True, découpe sur la bbox
-        cloud : filtre sur CLOUDY_PIXEL_PERCENTAGE (fraction, ex. 0.2 = 20 %)
-        bands : liste de bandes à sélectionner (défaut : S2_BANDS)
- 
+        start : start date, format "YYYY-MM-DD"
+        end   : end date,   format "YYYY-MM-DD"
+        mosaic: if True, returns a median mosaic (ee.Image)
+        clip  : if True, clips to the bbox
+        cloud : filter on CLOUDY_PIXEL_PERCENTAGE (fraction, e.g. 0.2 = 20%)
+        bands : list of bands to select (default: S2_BANDS)
+
         Returns
         -------
-        ee.Image si mosaic=True, sinon ee.ImageCollection
+        ee.Image if mosaic=True, otherwise ee.ImageCollection
         """
         ee = self._ee
         geom  = self.bbox_to_geometry(bbox)
         bands = bands or self.S2_BANDS
- 
+
         col = (ee.ImageCollection(self.SENTINEL2_COLLECTION)
                .filterBounds(geom)
                .filterDate(start, end)
                .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", cloud * 100))
                .map(self._mask_s2_clouds)
                .select(bands))
- 
+
         self._last_collection = col
-        size = col.size().getInfo()
-        logger.info(f"📡 Sentinel-2 : {size} image(s) trouvée(s) [{start} → {end}]")
- 
+
         if mosaic:
             result = col.median()
             if clip:
                 result = result.clip(geom)
             return result
- 
+
         if clip:
             col = col.map(lambda img: img.clip(geom))
         return col
-    
+
     # ------------------------------------------------------------------ #
     # Landsat-9                                                          #
     # ------------------------------------------------------------------ #
- 
+
     def get_landsat9(
         self,
         bbox: BBox,
@@ -199,42 +195,40 @@ class Gee:
         bands: Optional[list[str]] = None,
     ) -> ee.Image | ee.ImageCollection:
         """
-        Récupère des images Landsat-9 Collection 2 Tier 1 L2.
- 
+        Retrieves Landsat-9 Collection 2 Tier 1 L2 images.
+
         Parameters
         ----------
-        Identiques à get_sentinel2.
-        cloud : filtre sur CLOUD_COVER (fraction)
+        Same as get_sentinel2.
+        cloud : filter on CLOUD_COVER (fraction)
         """
         ee = self._ee
         geom  = self.bbox_to_geometry(bbox)
         bands = bands or self.L9_BANDS
- 
+
         col = (ee.ImageCollection(self.LANDSAT9_COLLECTION)
                .filterBounds(geom)
                .filterDate(start, end)
                .filter(ee.Filter.lt("CLOUD_COVER", cloud * 100))
                .map(self._mask_l9_clouds)
                .select(bands))
- 
+
         self._last_collection = col
-        size = col.size().getInfo()
-        logger.info(f"🛰️  Landsat-9 : {size} image(s) trouvée(s) [{start} → {end}]")
- 
+
         if mosaic:
             result = col.median()
             if clip:
                 result = result.clip(geom)
             return result
- 
+
         if clip:
             col = col.map(lambda img: img.clip(geom))
         return col
- 
+
     # ------------------------------------------------------------------ #
     # Sentinel-1 SAR                                                     #
     # ------------------------------------------------------------------ #
- 
+
     def get_sentinel1(
         self,
         bbox: BBox,
@@ -246,17 +240,17 @@ class Gee:
         pass_direction: str = "DESCENDING",
     ) -> ee.Image | ee.ImageCollection:
         """
-        Récupère des images SAR Sentinel-1 GRD.
- 
+        Retrieves Sentinel-1 GRD SAR images.
+
         Parameters
         ----------
-        polarization    : "VV", "VH" ou les deux ["VV","VH"]
+        polarization    : "VV", "VH" or both ["VV","VH"]
         pass_direction  : "ASCENDING" | "DESCENDING"
         """
         ee = self._ee
         geom = self.bbox_to_geometry(bbox)
         bands = [polarization] if isinstance(polarization, str) else polarization
- 
+
         col = (ee.ImageCollection(self.SENTINEL1_COLLECTION)
                .filterBounds(geom)
                .filterDate(start, end)
@@ -264,39 +258,37 @@ class Gee:
                .filter(ee.Filter.eq("orbitProperties_pass", pass_direction))
                .filter(ee.Filter.listContains("transmitterReceiverPolarisation", polarization))
                .select(bands))
- 
+
         self._last_collection = col
-        size = col.size().getInfo()
-        logger.info(f"📻 Sentinel-1 : {size} image(s) trouvée(s) [{start} → {end}]")
- 
+
         if mosaic:
             result = col.mean()
             if clip:
                 result = result.clip(geom)
             return result
- 
+
         if clip:
             col = col.map(lambda img: img.clip(geom))
         return col
- 
+
     # ------------------------------------------------------------------ #
     # NDVI                                                               #
     # ------------------------------------------------------------------ #
- 
+
     def compute_ndvi(self, image: ee.Image, nir_band: str = "B8",
                      red_band: str = "B4", name: str = "NDVI") -> ee.Image:
-        """Calcule et ajoute une bande NDVI à l'image."""
+        """Computes and adds an NDVI band to the image."""
         ndvi = image.normalizedDifference([nir_band, red_band]).rename(name)
         return image.addBands(ndvi)
- 
+
     def compute_ndvi_l9(self, image: ee.Image, name: str = "NDVI") -> ee.Image:
-        """NDVI pour Landsat-9 (NIR=SR_B5, Red=SR_B4)."""
+        """NDVI for Landsat-9 (NIR=SR_B5, Red=SR_B4)."""
         return self.compute_ndvi(image, nir_band="SR_B5", red_band="SR_B4", name=name)
- 
+
     # ------------------------------------------------------------------ #
-    # Inspection de collection                                           #
+    # Collection inspection                                              #
     # ------------------------------------------------------------------ #
- 
+
     def collection(
         self,
         collection_id: str,
@@ -306,22 +298,22 @@ class Gee:
         properties: Optional[dict] = None,
     ) -> ee.ImageCollection:
         """
-        Accède à n'importe quelle collection GEE avec des filtres optionnels.
- 
+        Accesses any GEE collection with optional filters.
+
         Parameters
         ----------
-        collection_id : identifiant GEE (ex. "COPERNICUS/S2_SR_HARMONIZED")
-        bbox          : filtre spatial optionnel
-        start, end    : filtre temporel optionnel ("YYYY-MM-DD")
-        properties    : dict {propriété: valeur} pour des filtres supplémentaires
- 
+        collection_id : GEE identifier (e.g. "COPERNICUS/S2_SR_HARMONIZED")
+        bbox          : optional spatial filter
+        start, end    : optional temporal filter ("YYYY-MM-DD")
+        properties    : dict {property: value} for additional filters
+
         Returns
         -------
-        ee.ImageCollection filtrée
+        Filtered ee.ImageCollection
         """
         ee = self._ee
         col = ee.ImageCollection(collection_id)
- 
+
         if bbox is not None:
             col = col.filterBounds(self.bbox_to_geometry(bbox))
         if start and end:
@@ -329,25 +321,23 @@ class Gee:
         if properties:
             for prop, value in properties.items():
                 col = col.filter(ee.Filter.eq(prop, value))
- 
+
         self._last_collection = col
-        size = col.size().getInfo()
-        logger.info(f"📂 Collection «{collection_id}» : {size} image(s)")
         return col
- 
+
     def info(self, data: Union[ee.Image, ee.ImageCollection]) -> dict:
-        """Retourne les métadonnées (dict) d'une image ou collection."""
+        """Returns the metadata (dict) of an image or collection."""
         return data.getInfo()
- 
+
     def count(self, col: Optional[ee.ImageCollection] = None) -> int:
-        """Nombre d'images dans une collection (dernière par défaut)."""
+        """Number of images in a collection (last one by default)."""
         col = col or self._last_collection
         if col is None:
             raise ValueError("Aucune collection disponible.")
         return col.size().getInfo()
- 
+
     def dates(self, col: Optional[ee.ImageCollection] = None) -> list[str]:
-        """Liste des dates d'acquisition d'une collection."""
+        """List of acquisition dates for a collection."""
         col = col or self._last_collection
         if col is None:
             raise ValueError("Aucune collection disponible.")
@@ -357,11 +347,11 @@ class Gee:
             datetime.datetime.utcfromtimestamp(d / 1000).strftime("%Y-%m-%d")
             for d in dates
         ]
- 
+
     # ------------------------------------------------------------------ #
-    # Export / Téléchargement                                            #
+    # Export / Download                                                  #
     # ------------------------------------------------------------------ #
- 
+
     def download(
         self,
         data: Union[ee.Image, ee.ImageCollection],
@@ -374,43 +364,41 @@ class Gee:
         mosaic_col: bool = True,
     ) -> Path:
         """
-        Télécharge une ee.Image (ou ee.ImageCollection) localement via geemap.
- 
+        Downloads an ee.Image (or ee.ImageCollection) locally via geemap.
+
         Parameters
         ----------
-        data        : image ou collection à télécharger
-        bbox        : zone d'export [xmin, ymin, xmax, ymax] (obligatoire si image non clippée)
-        filename    : nom du fichier de sortie (.tif)
-        scale       : résolution en mètres (10 m pour S2, 30 m pour L9)
-        crs         : système de coordonnées de sortie
-        bands       : sous-ensemble de bandes à exporter
-        output_dir  : dossier de destination
-        mosaic_col  : si data est une collection, faire une médiane avant export
- 
+        data        : image or collection to download
+        bbox        : export area [xmin, ymin, xmax, ymax] (required if the image isn't clipped)
+        filename    : output file name (.tif)
+        scale       : resolution in meters (10 m for S2, 30 m for L9)
+        crs         : output coordinate system
+        bands       : subset of bands to export
+        output_dir  : destination folder
+        mosaic_col  : if data is a collection, take the median before exporting
+
         Returns
         -------
-        Path vers le fichier téléchargé
+        Path to the downloaded file
         """
         ee = self._ee
         geemap = self._geemap
-        # Résolution d'une éventuelle collection
+        # Resolve a possible collection
         if isinstance(data, ee.ImageCollection):
-            logger.info("ℹ️  Collection détectée → médiane appliquée avant export.")
             data = data.median() if mosaic_col else data.mosaic()
- 
-        # Sélection de bandes
+
+        # Band selection
         if bands:
             data = data.select(bands)
- 
-        # Région d'export
+
+        # Export region
         region = None
         if bbox is not None:
             region = self.bbox_to_geometry(bbox)
- 
+
         output_path = Path(output_dir) / filename
         output_path.parent.mkdir(parents=True, exist_ok=True)
- 
-        logger.info(f"⬇️  Téléchargement vers «{output_path}» (scale={scale}m, crs={crs})…")
+
         geemap.ee_export_image(
             data,
             filename=str(output_path),
@@ -419,9 +407,8 @@ class Gee:
             crs=crs,
             file_per_band=False,
         )
-        logger.info(f"✅ Fichier sauvegardé : {output_path}")
         return output_path
- 
+
     def export_to_drive(
         self,
         data: Union[ee.Image, ee.ImageCollection],
@@ -433,19 +420,19 @@ class Gee:
         max_pixels: int = int(1e13),
     ) -> None:
         """
-        Lance une tâche d'export vers Google Drive (asynchrone).
- 
+        Starts an export task to Google Drive (asynchronous).
+
         Parameters
         ----------
-        description : nom de la tâche et du fichier dans Drive
-        folder      : dossier Drive de destination
+        description : task and file name in Drive
+        folder      : destination Drive folder
         """
         ee = self._ee
         if isinstance(data, ee.ImageCollection):
             data = data.median()
- 
+
         region = self.bbox_to_geometry(bbox) if bbox else None
- 
+
         task = ee.batch.Export.image.toDrive(
             image=data,
             description=description,
@@ -456,21 +443,19 @@ class Gee:
             maxPixels=max_pixels,
         )
         task.start()
-        logger.info(f"🚀 Tâche Drive lancée : «{description}» → dossier «{folder}»")
-        logger.info("   Suivre avec : ee.batch.Task.list()")
- 
+
     # ------------------------------------------------------------------ #
-    # Visualisation                                                      #
+    # Visualization                                                      #
     # ------------------------------------------------------------------ #
- 
+
     def map(self, center: Optional[list[float]] = None, zoom: int = 8) -> geemap.Map:
         """
-        Retourne (ou crée) une carte geemap interactive.
- 
+        Returns (or creates) an interactive geemap map.
+
         Parameters
         ----------
-        center : [lat, lon] du centre de la carte
-        zoom   : niveau de zoom initial
+        center : [lat, lon] of the map's center
+        zoom   : initial zoom level
         """
         geemap = self._geemap
         if self._map is None:
@@ -478,7 +463,7 @@ class Gee:
         if center:
             self._map.setCenter(center[1], center[0], zoom)
         return self._map
- 
+
     def add_layer(
         self,
         data: Union[ee.Image, ee.ImageCollection],
@@ -487,29 +472,28 @@ class Gee:
         bbox: Optional[BBox] = None,
     ) -> geemap.Map:
         """
-        Ajoute une image (ou collection) à la carte interactive.
- 
+        Adds an image (or collection) to the interactive map.
+
         Parameters
         ----------
-        vis_params : dict de visualisation GEE (bands, min, max, palette…)
-        name       : nom du layer dans la carte
-        bbox       : si fourni, centre la carte sur la bbox
+        vis_params : GEE visualization dict (bands, min, max, palette...)
+        name       : layer name on the map
+        bbox       : if provided, centers the map on the bbox
         """
         ee = self._ee
         m = self.map()
- 
+
         if isinstance(data, ee.ImageCollection):
             data = data.median()
- 
+
         m.addLayer(data, vis_params or {}, name)
- 
+
         if bbox is not None:
             xmin, ymin, xmax, ymax = bbox
             m.centerObject(self.bbox_to_geometry(bbox))
- 
-        logger.info(f"🗺️  Layer «{name}» ajouté à la carte.")
+
         return m
- 
+
     def show_map(
         self,
         data: Union[ee.Image, ee.ImageCollection],
@@ -517,13 +501,13 @@ class Gee:
         vis_params: Optional[dict] = None,
         name: str = "Layer",
     ) -> geemap.Map:
-        """Raccourci : crée la carte, ajoute le layer et l'affiche."""
+        """Shortcut: creates the map, adds the layer, and displays it."""
         return self.add_layer(data, vis_params=vis_params, name=name, bbox=bbox)
- 
+
     # ------------------------------------------------------------------ #
-    # Statistiques zonales                                               #
+    # Zonal statistics                                                   #
     # ------------------------------------------------------------------ #
- 
+
     def zonal_stats(
         self,
         image: ee.Image,
@@ -532,15 +516,15 @@ class Gee:
         reducer: str = "mean",
     ) -> dict:
         """
-        Calcule des statistiques zonales sur une bbox.
- 
+        Computes zonal statistics over a bbox.
+
         Parameters
         ----------
         reducer : "mean" | "median" | "min" | "max" | "sum"
- 
+
         Returns
         -------
-        dict {band: valeur}
+        dict {band: value}
         """
         ee = self._ee
         reducers = {
@@ -554,11 +538,40 @@ class Gee:
         geom = self.bbox_to_geometry(bbox)
         stats = image.reduceRegion(reducer=r, geometry=geom, scale=scale, maxPixels=int(1e10))
         return stats.getInfo()
- 
+
     # ------------------------------------------------------------------ #
-    # Représentation textuelle                                             #
+    # Sources                                                            #
     # ------------------------------------------------------------------ #
- 
+
+    def sources(self) -> pd.DataFrame:
+        """Returns a table of the data sources (GEE collections) used by this class."""
+        return pd.DataFrame([
+            {
+                "name": f"Sentinel-2 ({self.SENTINEL2_COLLECTION})",
+                "url": f"https://developers.google.com/earth-engine/datasets/catalog/{self.SENTINEL2_COLLECTION.replace('/', '_')}",
+                "description": "Sentinel-2 optical imagery, surface reflectance (get_sentinel2).",
+            },
+            {
+                "name": f"Landsat 9 ({self.LANDSAT9_COLLECTION})",
+                "url": f"https://developers.google.com/earth-engine/datasets/catalog/{self.LANDSAT9_COLLECTION.replace('/', '_')}",
+                "description": "Landsat 9 optical imagery, level 2 (get_landsat9).",
+            },
+            {
+                "name": f"MODIS NDVI ({self.MODIS_NDVI_COLLECTION})",
+                "url": f"https://developers.google.com/earth-engine/datasets/catalog/{self.MODIS_NDVI_COLLECTION.replace('/', '_')}",
+                "description": "NDVI vegetation index, 1 km, 16 days (via collection()).",
+            },
+            {
+                "name": f"Sentinel-1 ({self.SENTINEL1_COLLECTION})",
+                "url": f"https://developers.google.com/earth-engine/datasets/catalog/{self.SENTINEL1_COLLECTION.replace('/', '_')}",
+                "description": "Sentinel-1 radar imagery, GRD (get_sentinel1).",
+            },
+        ])
+
+    # ------------------------------------------------------------------ #
+    # String representation                                              #
+    # ------------------------------------------------------------------ #
+
     def __repr__(self) -> str:
         project_str = f"project={self.project!r}" if self.project else "project=default"
         return f"Gee({project_str})"

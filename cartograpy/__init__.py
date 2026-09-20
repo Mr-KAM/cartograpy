@@ -7,12 +7,12 @@ from importlib.metadata import version as _pkg_version, PackageNotFoundError
 
 try:
     __version__ = _pkg_version("cartograpy")
-except PackageNotFoundError:  # exécuté depuis les sources, paquet non installé
+except PackageNotFoundError:  # running from source, package not installed
     __version__ = "0.0.0+unknown"
 
-# Messages visibles par défaut (comme print()), sans configuration requise.
-# `logging.getLogger("cartograpy").setLevel(logging.WARNING)` (ou plus haut)
-# pour les couper ; retirer le handler pour les rediriger ailleurs.
+# Messages visible by default (like print()), no configuration required.
+# `logging.getLogger("cartograpy").setLevel(logging.WARNING)` (or higher)
+# to silence them; remove the handler to redirect them elsewhere.
 _logger = logging.getLogger(__name__)
 if not _logger.handlers:
     _handler = logging.StreamHandler(stream=sys.stdout)
