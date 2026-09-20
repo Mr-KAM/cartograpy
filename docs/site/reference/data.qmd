@@ -170,6 +170,7 @@ communes_sen = b.get_admin("SEN", adm=-1)   # plus petit niveau disponible
 | `contains(territory, point)` | `bool` : le point `(lat, lon)` est-il dans le territoire. |
 | `search_country(keyword)` | Recherche floue : liste de `(nom, iso3)` contenant le mot-clé. |
 | `get_area(territory, unit="km2")` | Superficie (`"km2"`, `"m2"` ou `"ha"`). `float` pour un seul territoire, `GeoDataFrame` avec colonne `area` pour une liste. Lève `ValueError` si l'unité est invalide. |
+| `sources()` | `DataFrame` (`name`, `url`, `description`) des sources de données utilisées (geoBoundaries). |
 :::
 
 ::: {.callout-note}
@@ -223,6 +224,7 @@ print(introuvables)  # ex. ["Bamak"] si mal orthographié
 | `distance(place_a, place_b, unit="km")` | Distance géodésique entre deux lieux géocodés (`"km"`, `"m"`, `"mi"`). Lève `ValueError` si un lieu est introuvable ou l'unité invalide. |
 | `within(place, point)` | `bool` : le point `(lat, lon)` est-il dans le polygone du lieu. Requiert `osmnx`. |
 | `bbox(place)` | Bounding box `(west, south, east, north)` du lieu via `osmnx`. Requiert `osmnx`. |
+| `sources()` | `DataFrame` (`name`, `url`, `description`) des sources de données utilisées (Nominatim, OpenStreetMap). |
 :::
 
 ## `OSM`
@@ -270,9 +272,11 @@ Les erreurs réseau ou de requête Overpass ne sont **pas** propagées : elles s
 | `get_common_tag()` | Combinaisons de tags prêtes à l'emploi (`"restaurants"`, `"schools"`, `"rivers"`, `"parking"`…). |
 :::
 
+`osm.sources()` retourne un `DataFrame` (`name`, `url`, `description`) listant la source de données utilisée (OpenStreetMap).
+
 ## `Hydro`
 
-Télécharge le réseau hydrographique [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers) par grande région continentale.
+Télécharge des données hydrographiques HydroSHEDS par grande région continentale : réseau [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers), bassins de l'archive HydroSHEDS v1, et bassins versants hiérarchiques [HydroBASINS](https://www.hydrosheds.org/products/hydrobasins).
 
 ```python
 from cartograpy.data import Hydro
@@ -280,7 +284,7 @@ from cartograpy.data import Hydro
 hydro = Hydro(output_dir="data/hydro")
 ```
 
-- **`output_dir`** (`str`, défaut `"data/hydro"`) : dossier de destination par défaut (peut être redéfini à l'appel de `download`).
+- **`output_dir`** (`str`, défaut `"data/hydro"`) : dossier de destination par défaut (peut être redéfini à l'appel de `download`/`rivers`/`basins`).
 
 ### `download(region, output_dir="hydrorivers_data")`
 
@@ -302,7 +306,47 @@ rivieres_afrique = hydro.download("af")
 Si `output_dir/region` existe déjà, le téléchargement est sauté : pas de re-téléchargement automatique même si les données ont changé côté source. Supprimez le dossier pour forcer une mise à jour.
 :::
 
-`hydro.describe_variables()` retourne une description texte (table Markdown) des colonnes du jeu de données (`HYRIV_ID`, `LENGTH_KM`, `DIS_AV_CMS`, `ORD_STRA`…), pratique pour l'affichage dans un notebook.
+### `rivers(region, resolution=15, output_dir="hydrorivers_data")`
+
+```python
+rivers(region: str, resolution: int = 15, output_dir: str = "hydrorivers_data") -> gpd.GeoDataFrame
+```
+
+- **`region`** (`str`, requis) : code de région parmi `"af"`, `"as"`, `"au"`, `"eu"`, `"na"`, `"sa"`.
+- **`resolution`** (`int`, défaut `15`) : résolution en secondes d'arc, `15` ou `30`.
+- **`output_dir`** (`str`, défaut `"hydrorivers_data"`) : dossier local d'extraction du zip téléchargé.
+- **Retour** (`GeoDataFrame`) : bassins de l'archive HydroSHEDS v1 pour la région/résolution demandée (résultat aussi accessible via `hydro.basins_data`).
+- **Erreurs** : `ValueError` si `region` ou `resolution` est invalide ; `RuntimeError` si le téléchargement échoue ; `FileNotFoundError` si aucun `.shp` n'est trouvé après extraction.
+
+```python
+hydro = Hydro()
+bassins_af_15s = hydro.rivers("af", resolution=15)
+```
+
+::: {.callout-note}
+Malgré son nom, `rivers()` télécharge des **bassins** (`bas_{resolution}s_shp/...`), pas un réseau linéaire de rivières — c'est la source HydroSHEDS demandée pour cette méthode. Pour un réseau de rivières, utilisez `download()` (HydroRIVERS).
+:::
+
+### `basins(region, level="01", output_dir="hydrorivers_data")`
+
+```python
+basins(region: str, level: str = "01", output_dir: str = "hydrorivers_data") -> gpd.GeoDataFrame
+```
+
+- **`region`** (`str`, requis) : code de région parmi `"af"`, `"as"`, `"au"`, `"eu"`, `"na"`, `"sa"`.
+- **`level`** (`str`, défaut `"01"`) : niveau HydroBASINS, de `"01"` à `"12"` (accepte aussi un `int`, ex. `1`).
+- **`output_dir`** (`str`, défaut `"hydrorivers_data"`) : dossier local d'extraction du zip téléchargé.
+- **Retour** (`GeoDataFrame`) : bassins versants HydroBASINS du niveau demandé (résultat aussi accessible via `hydro.hydrobasins_data`).
+- **Erreurs** : `ValueError` si `region` ou `level` est invalide (hors `01`–`12`) ; `RuntimeError` si le téléchargement échoue ; `FileNotFoundError` si aucun `.shp` n'est trouvé après extraction.
+
+```python
+hydro = Hydro()
+bassins_af_lev1 = hydro.basins("af", level="01")
+```
+
+`hydro.describe_variables()` retourne une description texte (table Markdown) des colonnes du jeu de données HydroRIVERS (`HYRIV_ID`, `LENGTH_KM`, `DIS_AV_CMS`, `ORD_STRA`…), pratique pour l'affichage dans un notebook.
+
+`hydro.sources()` retourne un `DataFrame` (colonnes `name`, `url`, `description`) listant les sources de données utilisées par `download()`, `rivers()` et `basins()`.
 
 ## `DEM`
 
@@ -360,6 +404,8 @@ Une bbox traversant l'antiméridien (`west > east`) est automatiquement découp�
 
 Toutes ces méthodes sont statiques : `DEM.info(...)`, `DEM.hillshade(...)`, etc. fonctionnent sans instancier `DEM`.
 
+`dem.sources()` retourne un `DataFrame` (`name`, `url`, `description`) listant la source de données utilisée (AWS Terrain Tiles / SRTM).
+
 ## `WorldBank`
 
 Interroge l'API Banque mondiale (indicateurs de développement) via le paquet `wbdata`.
@@ -398,6 +444,7 @@ pop = wb.get_data({"SP.POP.TOTL": "population"}, country=["CIV", "SEN", "MLI"])
 | `get_sources()` | Liste des sources de données disponibles sur l'API Banque mondiale. |
 | `get_indicators(source=1, query=None)` | Indicateurs disponibles pour une source (`1` = World Development Indicators par défaut). |
 | `get_countries(query)` | Recherche de pays reconnus par l'API Banque mondiale. |
+| `sources()` | `DataFrame` (`name`, `url`, `description`) : source de données (World Bank Open Data). À ne pas confondre avec `get_sources()`, qui liste les catalogues internes de l'API (WDI, Doing Business…). |
 :::
 
 ::: {.callout-warning}
@@ -437,6 +484,7 @@ gdf = clim.get_region(
 |---|---|
 | `get_point(longitude, latitude, start, end, parameters=None, community="ag", temporal="daily")` | Série temporelle en un point → `geopandas.GeoDataFrame` (EPSG:4326) indexé par date, géométrie constante. |
 | `get_region(bbox, start, end, parameters=None, community="ag", temporal="daily")` | Grille de points sur `[xmin, ymin, xmax, ymax]` → `geopandas.GeoDataFrame` au format long. |
+| `sources()` | `DataFrame` (`name`, `url`, `description`) : source de données (NASA POWER). |
 
 - **`parameters`** : codes NASA POWER (voir la [liste complète](https://power.larc.nasa.gov/parameters/)). `None` ou `[]` → `Climate.DEFAULT_PARAMETERS` (`T2M`, `T2M_MIN`, `T2M_MAX`, `T2MDEW`, `PRECTOTCORR`, `WS2M`, `ALLSKY_SFC_SW_DWN`, `RH2M`).
 - **`start`/`end`** : `datetime.date`, `"YYYY-MM-DD"` / `"YYYYMMDD"` pour `daily`/`hourly` ; une année (`int` ou `"YYYY"`) pour `monthly`/`climatology`.
@@ -531,6 +579,7 @@ gee.download(s2, bbox=bbox_abidjan, filename="abidjan_s2.tif", scale=10)
 | `show_map(data, bbox=None, vis_params=None, name="Layer")` | Raccourci : crée la carte, ajoute la couche, la retourne. |
 | `zonal_stats(image, bbox, scale=30, reducer="mean")` | Statistiques zonales (`"mean"`, `"median"`, `"min"`, `"max"`, `"sum"`) sur une bbox. |
 | `bbox_to_geometry(bbox)` | Convertit `[xmin, ymin, xmax, ymax]` en `ee.Geometry.Rectangle`. |
+| `sources()` | `DataFrame` (`name`, `url`, `description`) des collections GEE utilisées (Sentinel-2, Landsat 9, MODIS NDVI, Sentinel-1), avec lien vers leur fiche dans le catalogue GEE. |
 :::
 
 ## Organisation
