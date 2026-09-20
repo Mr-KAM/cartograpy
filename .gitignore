@@ -1,33 +1,53 @@
-# Base de données cache
-http_cache.sqlite
-*.sqlite
-/data/
-/data/QGIS-Training-Data/
+# === Python bytecode & caches ===
+__pycache__/
+cartograpy/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# === Build / packaging ===
+build/
 dist/
 dist_old/
-hydrorivers_data/
-temp_countries/
-cache/
-_extensions/
-*.tif
+*.egg-info/
+.eggs/
+*.whl
 
-# === Dossiers de données volumineuses à ignorer ===
+# === Editors / IDE ===
+.vscode/
+.idea/
+.github/instructions/
 
-__pycache__/
-country-flag-icons/
-cartograpy/__pycache__/
+# === Virtual environments ===
+.venv/
 
-# === Quarto : caches (docs/site/docs/ EST le site déployé, ne pas ignorer) ===
+# === Test & tooling caches ===
+.pytest_cache/
+.mypy_cache/
+
+# === Quarto (docs/site/docs/ IS the deployed site, do not ignore) ===
 _site/
 .quarto/
 **/*_files/
+
+# === Data & cache directories ===
+/data/
+/data/QGIS-Training-Data/
+hydrorivers_data/
+temp_countries/
+cache/
+country-flag-icons/
+_extensions/
+*.tif
+*.sqlite
 
 # === Notebooks ===
 .ipynb_checkpoints/
 notebooks/__marimo__/
 notebooks/web-map-with-custom-legend.png
 
-# Ignore tout nouveau sous-dossier de notebooks/ (les sous-dossiers déjà suivis restent versionnés)
+# Ignore any new subfolder under notebooks/ (already-tracked subfolders stay versioned)
 notebooks/*/
 notebooks/*.png
 notebooks/*.jpg
@@ -37,52 +57,7 @@ notebooks/*.svg
 notebooks/*.csv
 notebooks/*.geojson
 
-# === Cache d'outils dev ===
-.mypy_cache/
-
-# === Build / packaging / configuration ===
-*.egg-info/
-build/
-.eggs/
-*.whl
-.vscode/
-.idea/
-.pytest_cache/
-.venv/
-.github/instructions/
-
-# === Fichiers compilés Python ===
-*.pyc
-*.pyo
-*.pyd
-*.so
-
-
-# === Fichiers bash (cmd) ===
-*.cmd
-*.bat
-
-
-# === Sauvegardes et fichiers temporaires ===
-*.swp
-*.swo
-*.bak
-*.tmp
-*~
-
-
-# === Fichiers de logs ===
-*.log
-
-# === Fichiers de configuration perso ===
-.env
-.DS_Store
-Thumbs.db
-.pypirc
-*.env
-.claude/settings.json
-
-# === Caches et sorties de notebooks (jamais versionnés) ===
+# Notebook-specific caches and outputs (never versioned)
 notebooks/_hydro_cache/
 notebooks/_dem_cache/
 notebooks/_raster_cache/
@@ -90,14 +65,37 @@ notebooks/_vector_cache/
 notebooks/_cartes/
 notebooks/output_galerie/
 notebooks/HFHI_resilience_cotiere_SIG/
+notebooks/HFHI_SIG_TELEDETECTION_master (1).ipynb
 notebooks/00-Demonstration global.ipynb
 notebooks/README.ipynb
 notebooks/13-Projet drnouf - occupation et topographie.ipynb
 notebooks/01-Lecture de fichier.ipynb
 notebooks/02-galerie demo.ipynb
+notebooks/test.ipynb
 notebooks/mon_projet/data/sites_cartographie_jacqueville_grand_bassam.geojson
 notebooks/mon_projet/data/sites_cartographie_jacqueville_grand_bassam_carres_4ha.geojson
-notebooks/HFHI_SIG_TELEDETECTION_master (1).ipynb
+
+# === Editor / OS temp & backup files ===
+*.swp
+*.swo
+*.bak
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# === Shell / batch scripts ===
+*.cmd
+*.bat
+
+# === Logs ===
+*.log
+
+# === Secrets & local config ===
+.env
+*.env
+.pypirc
+
+# === Claude Code ===
 .claude/
 CLAUDE.md
-notebooks/test.ipynb
