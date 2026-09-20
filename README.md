@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/Mr-KAM/cartograpy/master/assets/img/logo.png" alt="Logo cartograpy" width="220">
+<img src="https://raw.githubusercontent.com/Mr-KAM/cartograpy/master/assets/img/logo.png" alt="cartograpy logo" width="220">
 
 # cartograpy
 
@@ -9,31 +9,28 @@
 
 **Mapping in Python, the way it was always meant to be.**
 
-Cartograpy est un package Python pour charger, traiter et cartographier des
-données géographiques en quelques lignes de code : des frontières
-administratives d'un pays jusqu'à la carte statique finale, prête à exporter,
-partout dans le monde.
+Cartograpy is a Python package for loading, processing, and mapping
+geographic data in a few lines of code: from a country's administrative
+boundaries to the final static map, ready to export, anywhere in the world.
 
-![Exemple de carte produite avec cartograpy](https://raw.githubusercontent.com/Mr-KAM/cartograpy/master/assets/img/create_python_maps.py.png)
+![Example map produced with cartograpy](https://raw.githubusercontent.com/Mr-KAM/cartograpy/master/assets/img/create_python_maps.py.png)
 
-## Fonctionnalités
+## Features
 
-- **Données** : téléchargez en une ligne des frontières administratives
-  (`GeoBoundaries`), des données OpenStreetMap, hydrographiques, de géocodage,
-  d'altitude (SRTM), des indicateurs World Bank, des séries météo/climat
-  (NASA POWER) ou de l'imagerie Google Earth Engine ; résultats renvoyés en
-  `GeoDataFrame`/`DataFrame`.
-- **Traitement** : importez/exportez tous les formats courants (Shapefile,
-  GeoJSON, KML, GPX, GPKG, CSV, Parquet…), reprojetez, découpez, fusionnez,
-  calculez centroïdes, jointures et attributs dynamiques (`VectorTools`,
-  `RasterTools`).
-- **Cartographie** : cartes choroplèthes, points, polygones, raster, bivariées
-  ou hexbin avec la classe `Map` : flèche du nord, barre d'échelle, mini-carte
-  de situation, légendes, graticule, export PNG/SVG.
-- **Style** : polices Google Fonts, 16 palettes intégrées + seaborn/matplotlib,
-  styles graphiques (`scienceplots`, `mplcyberpunk`).
-- **Projet** : `Project` structure dossiers et sorties, garde une trace du CRS
-  et valide l'intégrité des jeux de données.
+- **Data**: download administrative boundaries (`GeoBoundaries`),
+  OpenStreetMap data, hydrography, geocoding, elevation (SRTM), World Bank
+  indicators, weather/climate series (NASA POWER), or Google Earth Engine
+  imagery in one line; results returned as `GeoDataFrame`/`DataFrame`.
+- **Processing**: import/export all common formats (Shapefile, GeoJSON, KML,
+  GPX, GPKG, CSV, Parquet…), reproject, clip, merge, compute centroids,
+  joins, and dynamic attributes (`VectorTools`, `RasterTools`).
+- **Mapping**: choropleth, point, polygon, raster, bivariate, or hexbin maps
+  with the `Map` class: north arrow, scale bar, situation inset map,
+  legends, graticule, PNG/SVG export.
+- **Styling**: Google Fonts, 16 built-in palettes + seaborn/matplotlib,
+  graphic styles (`scienceplots`, `mplcyberpunk`).
+- **Project**: `Project` structures folders and outputs, tracks the CRS,
+  and validates dataset integrity.
 
 ## Installation
 
@@ -42,36 +39,36 @@ pip install cartograpy
 ```
 
 > [!NOTE]
-> Python 3.11+. Utilisez un environnement virtuel pour éviter les conflits de
-> dépendances (`venv`, `conda`, `uv`…). Sur Windows, si l'installation de
-> GDAL/GEOS/PROJ échoue, installez `geopandas rasterio cartopy fiona` via
-> `conda-forge` avant `pip install cartograpy`.
+> Python 3.11+. Use a virtual environment to avoid dependency conflicts
+> (`venv`, `conda`, `uv`…). On Windows, if the GDAL/GEOS/PROJ installation
+> fails, install `geopandas rasterio cartopy fiona` via `conda-forge` before
+> `pip install cartograpy`.
 
-## Comment ça marche
+## How it works
 
-![Flux : sources → data → processing → mapper → carte finale](https://mermaid.ink/svg/Zmxvd2NoYXJ0IExSCiAgICBTWyJTb3VyY2VzPGJyLz5maWNoaWVycyBsb2NhdXggwrcgR2VvQm91bmRhcmllcyDCtyBPU008YnIvPkh5ZHJvIMK3IFNSVE0gwrcgV29ybGQgQmFuayDCtyBHRUUiXSAtLT4gRFsiY2FydG9ncmFweS5kYXRhIl0KICAgIEQgLS0-fCJHZW9EYXRhRnJhbWUgLyBEYXRhRnJhbWUifCBQWyJjYXJ0b2dyYXB5LnByb2Nlc3NpbmciXQogICAgUCAtLT4gTVsiY2FydG9ncmFweS5tYXBwZXIiXQogICAgU1RbImNhcnRvZ3JhcHkuc3R5bGluZyJdIC0uLT4gTQogICAgTSAtLT4gT1siQ2FydGUgZmluYWxlPGJyLz5QTkcgwrcgU1ZHIMK3IEhUTUwiXQ==)
+![Flow: sources → data → processing → mapper → final map](https://mermaid.ink/svg/Zmxvd2NoYXJ0IExSCiAgICBTWyJTb3VyY2VzPGJyLz5sb2NhbCBmaWxlcyDCtyBHZW9Cb3VuZGFyaWVzIMK3IE9TTTxici8-SHlkcm8gwrcgU1JUTSDCtyBXb3JsZCBCYW5rIMK3IEdFRSJdIC0tPiBEWyJjYXJ0b2dyYXB5LmRhdGEiXQogICAgRCAtLT58Ikdlb0RhdGFGcmFtZSAvIERhdGFGcmFtZSJ8IFBbImNhcnRvZ3JhcHkucHJvY2Vzc2luZyJdCiAgICBQIC0tPiBNWyJjYXJ0b2dyYXB5Lm1hcHBlciJdCiAgICBTVFsiY2FydG9ncmFweS5zdHlsaW5nIl0gLS4tPiBNCiAgICBNIC0tPiBPWyJGaW5hbCBtYXA8YnIvPlBORyDCtyBTVkcgwrcgSFRNTCJd)
 
-<details><summary>Source Mermaid du diagramme</summary>
+<details><summary>Mermaid diagram source</summary>
 
 ```mermaid
 flowchart LR
-    S["Sources<br/>fichiers locaux · GeoBoundaries · OSM<br/>Hydro · SRTM · World Bank · GEE"] --> D["cartograpy.data"]
+    S["Sources<br/>local files · GeoBoundaries · OSM<br/>Hydro · SRTM · World Bank · GEE"] --> D["cartograpy.data"]
     D -->|"GeoDataFrame / DataFrame"| P["cartograpy.processing"]
     P --> M["cartograpy.mapper"]
     ST["cartograpy.styling"] -.-> M
-    M --> O["Carte finale<br/>PNG · SVG · HTML"]
+    M --> O["Final map<br/>PNG · SVG · HTML"]
 ```
 
 </details>
 
-## Démarrage rapide
+## Quick start
 
 ```python
 from cartograpy.data import Bound
 from cartograpy.mapper import Map
 
 bound = Bound()
-civ = bound.get_admin("CIV", adm=0)          # frontières nationales, via GeoBoundaries
+civ = bound.get_admin("CIV", adm=0)          # national boundaries, via GeoBoundaries
 
 m = Map(title="Côte d'Ivoire")
 m.add_polygons(civ, facecolor="lightyellow", edge_color="black", alpha=1)
@@ -79,37 +76,37 @@ m.add_north_arrow()
 m.add_scale_bar()
 m.show()
 
-m.save("cote-divoire.png", dpi=300)          # export prêt à imprimer
+m.save("cote-divoire.png", dpi=300)          # print-ready export
 ```
 
-## Les modules
+## The modules
 
-![Les modules : data, processing, mapper, styling, project](https://mermaid.ink/svg/Z3JhcGggVEQKICAgIEFbImNhcnRvZ3JhcHkiXSAtLT4gRFsiZGF0YTxici8-PGk-Y2hhcmdlbWVudC9zYXV2ZWdhcmRlLCBzb3VyY2VzIGVuIGxpZ25lPC9pPiJdCiAgICBBIC0tPiBQWyJwcm9jZXNzaW5nPGJyLz48aT50cmFpdGVtZW50IHZlY3RvcmllbCBldCByYXN0ZXI8L2k-Il0KICAgIEEgLS0-IE1bIm1hcHBlcjxici8-PGk-cmVuZHUgY2FydG9ncmFwaGlxdWUgc3RhdGlxdWUgZXQgd2ViPC9pPiJdCiAgICBBIC0tPiBTWyJzdHlsaW5nPGJyLz48aT5wb2xpY2VzLCBwYWxldHRlcywgc3R5bGVzIGdyYXBoaXF1ZXM8L2k-Il0KICAgIEEgLS0-IFBSWyJwcm9qZWN0PGJyLz48aT5vcmdhbmlzYXRpb24gZCd1biBwcm9qZXQgY2FydG9ncmFwaGlxdWU8L2k-Il0=)
+![The modules: data, processing, mapper, styling, project](https://mermaid.ink/svg/Z3JhcGggVEQKICAgIEFbImNhcnRvZ3JhcHkiXSAtLT4gRFsiZGF0YTxici8-PGk-bG9hZC9zYXZlLCBvbmxpbmUgc291cmNlczwvaT4iXQogICAgQSAtLT4gUFsicHJvY2Vzc2luZzxici8-PGk-dmVjdG9yIGFuZCByYXN0ZXIgcHJvY2Vzc2luZzwvaT4iXQogICAgQSAtLT4gTVsibWFwcGVyPGJyLz48aT5zdGF0aWMgYW5kIHdlYiBtYXAgcmVuZGVyaW5nPC9pPiJdCiAgICBBIC0tPiBTWyJzdHlsaW5nPGJyLz48aT5mb250cywgcGFsZXR0ZXMsIGdyYXBoaWMgc3R5bGVzPC9pPiJdCiAgICBBIC0tPiBQUlsicHJvamVjdDxici8-PGk-Y2FydG9ncmFwaGljIHByb2plY3Qgb3JnYW5pemF0aW9uPC9pPiJd)
 
-<details><summary>Source Mermaid du diagramme</summary>
+<details><summary>Mermaid diagram source</summary>
 
 ```mermaid
 graph TD
-    A["cartograpy"] --> D["data<br/><i>chargement/sauvegarde, sources en ligne</i>"]
-    A --> P["processing<br/><i>traitement vectoriel et raster</i>"]
-    A --> M["mapper<br/><i>rendu cartographique statique et web</i>"]
-    A --> S["styling<br/><i>polices, palettes, styles graphiques</i>"]
-    A --> PR["project<br/><i>organisation d'un projet cartographique</i>"]
+    A["cartograpy"] --> D["data<br/><i>load/save, online sources</i>"]
+    A --> P["processing<br/><i>vector and raster processing</i>"]
+    A --> M["mapper<br/><i>static and web map rendering</i>"]
+    A --> S["styling<br/><i>fonts, palettes, graphic styles</i>"]
+    A --> PR["project<br/><i>cartographic project organization</i>"]
 ```
 
 </details>
 
-Tout est importable depuis la racine (`from cartograpy import Map, Bound,
-Project`) ou depuis chaque sous-module.
+Everything is importable from the root (`from cartograpy import Map, Bound,
+Project`) or from each submodule.
 
-## Aller plus loin
+## Going further
 
-La documentation complète (référence de l'API, guides pas-à-pas, galerie) est
-disponible sur **[mr-kam.github.io/cartograpy](https://mr-kam.github.io/cartograpy/)**.
+Full documentation (API reference, step-by-step guides, gallery) is
+available at **[mr-kam.github.io/cartograpy](https://mr-kam.github.io/cartograpy/)**.
 
-Pour une visite guidée interactive de toutes les fonctionnalités, voir le
-notebook [`notebooks/README.ipynb`](https://github.com/Mr-KAM/cartograpy/blob/master/notebooks/README.ipynb).
+For an interactive tour of all the features, see the notebook
+[`notebooks/README.ipynb`](https://github.com/Mr-KAM/cartograpy/blob/master/notebooks/README.ipynb).
 
-## Licence
+## License
 
-MIT : voir [`LICENSE`](https://github.com/Mr-KAM/cartograpy/blob/master/LICENSE).
+MIT: see [`LICENSE`](https://github.com/Mr-KAM/cartograpy/blob/master/LICENSE).
