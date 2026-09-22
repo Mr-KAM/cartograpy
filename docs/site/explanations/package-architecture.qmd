@@ -31,14 +31,16 @@ lignes et mélangé plusieurs responsabilités indépendantes dans un seul fichi
 - `cartograpy/data/` : un fichier par source de données : `io.py` (lecture/écriture
   générique), `boundaries.py` (`GeoBoundaries`, `Bound`), `geocoding.py` (`Geocoder`),
   `osm.py` (`OSM`), `hydro.py` (`Hydro`), `dem.py` (`DEM`), `worldbank.py` (`WorldBank`),
-  `climate.py` (`Climate`, NASA POWER), `gee.py` (`Gee`), plus `_optional.py`/`_types.py`
+  `climate.py` (`Climate`, NASA POWER), `gee.py` (`Gee`), `stac.py` (`STAC`,
+  `STACResults` : catalogues STAC), plus `_optional.py`/`_types.py`
   pour le code partagé en interne.
 - `cartograpy/processing/` : `vector.py` (fonctions vectorielles + `VectorTools`) et
   `raster.py` (`RasterTools`).
 - `cartograpy/mapper/` : `helpers.py` (`read_image`, `plot_choropleth`), `map.py`
-  (`Map`), `map2d.py` (`Map2D`), `webmap.py` (`WebMap`), `situation.py`
-  (`SituationMap`), `bivariate.py` (choroplèthes bivariées), `hexgrid.py`
-  (grilles hexagonales / hexbin, via `geohexgrid`), plus `_optional_deps.py` pour les dépendances graphiques
+  (`Map`), `map2d.py` (`Map2D`), `webmap.py` (`WebMap` : moteurs Folium/lonboard/kepler.gl),
+  `situation.py` (`SituationMap`), `bivariate.py` (choroplèthes bivariées), `hexgrid.py`
+  (grilles hexagonales / hexbin, via `geohexgrid`), `layout.py` (`Layout` : planches
+  multi-panneaux), plus `_optional_deps.py` pour les dépendances graphiques
   optionnelles (`contextily`, `matplotlib-scalebar`, `matplotlib-map-utils`) partagées
   entre `Map` et `SituationMap`.
 

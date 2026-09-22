@@ -33,9 +33,18 @@ class RasterTools:
             .resample_raster(10)
             .clip_raster(geodf))
         rt2.export_geotiff("result.tif")
+
+    For a large raster (e.g. a Sentinel scene), open with `lazy=True` to
+    defer reading pixel data until it's actually needed. `clip_raster`
+    reads straight from the file, so clipping to a small area of
+    interest never loads the full array into memory::
+
+        rt = RasterTools("sentinel.tif", lazy=True)
+        aoi_only = rt.clip_raster(aoi_gdf)   # rt.data is never loaded
+        ndvi = aoi_only.ndvi()               # now operates on the small clip
     """
 
-    def __init__(self, source):
+    def __init__(self, source, lazy: bool = False):
         """
         Initializes RasterTools.
 
@@ -43,19 +52,41 @@ class RasterTools:
             source: Path to a raster file (str / Path),
                     or a tuple (data, profile) where data is a np.ndarray
                     and profile a rasterio-compatible dict.
+            lazy: When True and `source` is a file path, only the
+                  metadata (`profile`) is read upfront; pixel data is
+                  loaded from disk on first access to `.data`. This
+                  avoids pulling a large raster (e.g. a Sentinel scene)
+                  fully into memory just to open it. `clip_raster` /
+                  `mask_raster` / `crop_raster` read straight from the
+                  file through rasterio, so clipping to a small AOI
+                  never triggers a full load.
         """
+        self._data = None
         if isinstance(source, (str, os.PathLike)):
             self.path = str(source)
             with rasterio.open(self.path) as src:
-                self.data = src.read()
                 self.profile = dict(src.profile)
+                if not lazy:
+                    self._data = src.read()
         elif isinstance(source, tuple) and len(source) == 2:
-            self.data, self.profile = source[0].copy(), dict(source[1])
+            self._data, self.profile = source[0].copy(), dict(source[1])
             self.path = None
         else:
             raise TypeError(
                 "source doit être un chemin ou un tuple (ndarray, profile)"
             )
+
+    @property
+    def data(self):
+        """
+        Pixel data as a np.ndarray. If opened with `lazy=True` and not
+        yet loaded, this reads the full raster from `path` on first
+        access.
+        """
+        if self._data is None:
+            with rasterio.open(self.path) as src:
+                self._data = src.read()
+        return self._data
 
     def _wrap(self, data, profile=None):
         """Builds a new RasterTools from in-memory data."""
@@ -279,7 +310,15 @@ class RasterTools:
     # --- Clipping and extent reduction -------------------------------- #
 
     def clip_raster(self, geodf, crop=True, all_touched=False):
-        """Clips the raster by a GeoDataFrame (or shapely geometry)."""
+        """
+        Clips the raster by a GeoDataFrame (or shapely geometry).
+
+        When this instance still points at its source file (fresh from
+        `RasterTools(path)`, including `lazy=True` and not yet loaded),
+        the clip reads directly from that file instead of materializing
+        `.data` first — so clipping a large raster to a small AOI never
+        loads the full array into memory.
+        """
         from rasterio.mask import mask as rio_mask
         if isinstance(geodf, gpd.GeoDataFrame):
             shapes = geodf.geometry.values
@@ -287,9 +326,9 @@ class RasterTools:
             shapes = [geodf]
         else:
             shapes = list(geodf)
-        tmp = self._write_tmp()
+        path = self.path or self._write_tmp()
         try:
-            with rasterio.open(tmp) as src:
+            with rasterio.open(path) as src:
                 out_data, out_transform = rio_mask(
                     src, shapes, crop=crop, all_touched=all_touched,
                 )
@@ -301,8 +340,8 @@ class RasterTools:
             )
             return self._wrap(out_data, profile)
         finally:
-            if os.path.exists(tmp):
-                os.remove(tmp)
+            if path != self.path and os.path.exists(path):
+                os.remove(path)
 
     def crop_raster(self, bbox):
         """Clips the raster by an extent (xmin, ymin, xmax, ymax)."""
@@ -310,7 +349,13 @@ class RasterTools:
         return self.clip_raster(clip_geom)
 
     def mask_raster(self, geodf, invert=False):
-        """Masks pixels outside the GeoDataFrame (sets NoData)."""
+        """
+        Masks pixels outside the GeoDataFrame (sets NoData).
+
+        Reads directly from `path` when this instance still points at
+        its source file, without first loading `.data` into memory
+        (see `clip_raster`).
+        """
         from rasterio.mask import mask as rio_mask
         if isinstance(geodf, gpd.GeoDataFrame):
             shapes = geodf.geometry.values
@@ -318,9 +363,9 @@ class RasterTools:
             shapes = [geodf]
         else:
             shapes = list(geodf)
-        tmp = self._write_tmp()
+        path = self.path or self._write_tmp()
         try:
-            with rasterio.open(tmp) as src:
+            with rasterio.open(path) as src:
                 out_data, out_transform = rio_mask(
                     src, shapes, crop=False, invert=invert,
                 )
@@ -328,8 +373,8 @@ class RasterTools:
             profile.update(transform=out_transform)
             return self._wrap(out_data, profile)
         finally:
-            if os.path.exists(tmp):
-                os.remove(tmp)
+            if path != self.path and os.path.exists(path):
+                os.remove(path)
 
     def extract_by_extent(self, bbox):
         """Alias for crop_raster."""
@@ -1653,9 +1698,14 @@ class RasterTools:
     # --- Representation --------------------------------------------------- #
 
     def __repr__(self):
-        shape = self.data.shape if self.data is not None else "N/A"
+        shape = (
+            self.profile.get("count"),
+            self.profile.get("height"),
+            self.profile.get("width"),
+        )
         crs = self.profile.get("crs", "N/A")
-        return f"RasterTools(shape={shape}, CRS={crs})"
+        loaded = "loaded" if self._data is not None else "not loaded (lazy)"
+        return f"RasterTools(shape={shape}, CRS={crs}, data={loaded})"
 
     def __len__(self):
-        return self.data.shape[0] if self.data is not None else 0
+        return self.profile.get("count", 0)

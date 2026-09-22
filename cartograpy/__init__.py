@@ -28,6 +28,7 @@ from .data import (
     GeoBoundaries, Bound, Geocoder,
     OSM, Hydro, DEM, DEMDownloadError,
     WorldBank, Climate, Gee,
+    STAC, STACResults,
 )
 
 from .processing import (
@@ -45,6 +46,7 @@ from .mapper import (
     Map2D,
     WebMap,
     SituationMap,
+    Layout,
     plot_choropleth,
     read_image,
     plot_bivariate_choropleth,
@@ -88,10 +90,11 @@ __all__ = [
     # data
     "load", "save", "describe", "list_geofiles", "GeoBoundaries", "Bound",
     "Geocoder", "OSM", "Hydro", "DEM", "DEMDownloadError", "WorldBank", "Climate", "Gee",
+    "STAC", "STACResults",
     # processing
     "centroids", "join", "fusion", "add_column", "split_multipolygon", "VectorTools", "RasterTools",
     # mapper
-    "Map", "Map2D", "WebMap", "SituationMap",
+    "Map", "Map2D", "WebMap", "SituationMap", "Layout",
     "plot_choropleth", "read_image",
     "plot_bivariate_choropleth", "plot_bivariate_legend",
     "assign_bivariate_classes", "classify_variable", "get_bivariate_palette",

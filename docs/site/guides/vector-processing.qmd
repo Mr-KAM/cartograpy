@@ -111,6 +111,24 @@ par_region = (
 ```
 :::
 ::: {.callout-note collapse="true"}
+## Mesurer en mètres sur une couche en degrés (Smart CRS)
+
+```python
+vt = VectorTools(gdf)              # gdf en EPSG:4326 (degrés)
+vt.crs_info()                      # {"is_geographic": True, ...}
+
+zone_tampon = vt.buffer(1000, unit="m").gdf     # vrai tampon de 1000 m, pas 1000°
+surfaces_ha = vt.area(unit="ha").gdf["area"]    # surface en hectares
+distances_km = vt.distance_to_nearest(routes, unit="km").gdf["dist_nearest"]
+```
+
+`buffer()`, `area()` et `distance_to_nearest()` reprojettent automatiquement
+vers l'UTM estimé (`estimate_utm()`) quand le CRS est géographique, pour que
+`distance`/`unit` soient interprétés en mètres réels et non en degrés.
+Passez `auto_project=False` pour retrouver le calcul direct dans les unités
+du CRS courant.
+:::
+::: {.callout-note collapse="true"}
 ## Analyse de proximité et clustering
 
 ```python

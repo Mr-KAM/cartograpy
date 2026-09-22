@@ -14,11 +14,26 @@ from cartograpy.processing import RasterTools
 
 rt = RasterTools("data/elevation.tif")        # depuis un fichier
 rt = RasterTools((array, profile))            # depuis un ndarray + profile rasterio
+rt = RasterTools("sentinel.tif", lazy=True)   # grand raster : pixels chargés à la demande
 ```
 
 ::: {.callout-note}
 Comme `VectorTools`, chaque méthode de transformation renvoie une **nouvelle**
 instance : le raster d'origine n'est jamais modifié, on chaîne les appels.
+:::
+
+::: {.callout-note collapse="true"}
+## Grand raster : découper sans tout charger en mémoire (`lazy=True`)
+
+```python
+rt = RasterTools("sentinel.tif", lazy=True)     # ne lit que les métadonnées
+zone_etude = rt.clip_raster(aoi_gdf)             # lit uniquement la fenêtre utile
+ndvi = zone_etude.ndvi()
+```
+
+`clip_raster()`/`mask_raster()`/`crop_raster()` lisent directement depuis le
+fichier via une fenêtre rasterio : sur une scène Sentinel de plusieurs
+centaines de Mo, seule la zone d'intérêt est réellement chargée en mémoire.
 :::
 
 ## Par tâche

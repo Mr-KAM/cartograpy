@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -671,8 +677,28 @@ Note
 </div>
 </div>
 <p>Certaines méthodes chargent une dépendance optionnelle à l’appel et lèvent une erreur explicite si elle manque : <code>networkx</code> (réseau/accessibilité), <code>scikit-learn</code> (<code>spatial_clustering</code>), <code>libpysal</code>/<code>esda</code> (statistiques spatiales), <code>pykrige</code> (<code>kriging</code>).</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Astuce</span>CRS géographique vs projeté : le piège classique
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Sur une couche en <code>EPSG:4326</code> (degrés), <code>vt.buffer(1000)</code> produit un tampon de 1000 <strong>degrés</strong>, pas 1000 mètres. <code>buffer()</code>, <code>area()</code> et <code>distance_to_nearest()</code> détectent ce cas automatiquement : si le CRS est géographique, elles reprojettent temporairement vers l’UTM estimé (<code>estimate_utm()</code>) avant de calculer, puis reviennent au CRS d’origine.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vt <span class="op">=</span> VectorTools(gdf)          <span class="co"># gdf en EPSG:4326</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>vt.crs_info()                  <span class="co"># {"epsg": 4326, "is_geographic": True, ...}</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>vt.<span class="bu">buffer</span>(<span class="dv">1000</span>, unit<span class="op">=</span><span class="st">"m"</span>)      <span class="co"># vrai tampon de 1000 m (auto_project=True par défaut)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>vt.area(unit<span class="op">=</span><span class="st">"ha"</span>).gdf[<span class="st">"area"</span>] <span class="co"># surface en hectares, pas en degrés²</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>vt.distance_to_nearest(routes, unit<span class="op">=</span><span class="st">"km"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>auto_project=False</code> retrouve le comportement historique (calcul direct dans les unités du CRS courant), utile si la couche est déjà dans un CRS projeté adapté.</p>
+</div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -681,7 +707,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -745,7 +771,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -754,7 +780,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -781,26 +807,38 @@ Note
 <td>Reprojette la couche (<code>to_crs</code>).</td>
 </tr>
 <tr class="even">
+<td><code>crs_info()</code></td>
+<td><code>dict</code> (<code>epsg</code>, <code>name</code>, <code>is_geographic</code>, <code>unit</code>) : le CRS courant est-il en degrés ou dans une unité métrique.</td>
+</tr>
+<tr class="odd">
+<td><code>estimate_utm()</code></td>
+<td>CRS UTM estimé à partir du centroïde de l’étendue de la couche (délègue à <code>GeoDataFrame.estimate_utm_crs()</code>).</td>
+</tr>
+<tr class="even">
+<td><code>to_local_crs()</code></td>
+<td>Reprojette vers le CRS UTM estimé (<code>estimate_utm()</code> + <code>reproject_layer()</code>).</td>
+</tr>
+<tr class="odd">
 <td><code>rename_fields(mapping)</code></td>
 <td>Renomme des colonnes (<code>{ancien: nouveau}</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>select_fields(columns)</code></td>
 <td>Ne garde que les colonnes listées (+ géométrie).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>drop_fields(columns)</code></td>
 <td>Supprime les colonnes listées.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>cast_field_types(type_mapping)</code></td>
 <td>Convertit les types (<code>{"col": float, ...}</code>).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>fill_missing_values(value=None, method=None, columns=None)</code></td>
 <td>Remplit les valeurs manquantes (<code>value</code>, <code>"ffill"</code> ou <code>"bfill"</code>).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>normalize_text_fields(columns=None)</code></td>
 <td>Normalise les champs texte (<code>strip</code> + Title Case).</td>
 </tr>
@@ -810,7 +848,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -819,7 +857,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -867,7 +905,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -876,7 +914,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -915,8 +953,8 @@ Note
 <td>Convertit des polygones en lignes de contour (<code>boundary</code>).</td>
 </tr>
 <tr class="odd">
-<td><code>buffer(distance)</code></td>
-<td>Zone tampon autour de chaque géométrie.</td>
+<td><code>buffer(distance, unit="m", auto_project=True)</code></td>
+<td>Zone tampon autour de chaque géométrie. Si le CRS est géographique (degrés) et <code>auto_project=True</code> (défaut), reprojette temporairement vers l’UTM estimé pour interpréter <code>distance</code> en <code>unit</code> (<code>"m"</code> ou <code>"km"</code>) plutôt qu’en degrés, puis revient au CRS d’origine. <code>auto_project=False</code> retrouve l’ancien comportement (tampon dans les unités brutes du CRS).</td>
 </tr>
 <tr class="even">
 <td><code>centroid()</code></td>
@@ -948,7 +986,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -957,7 +995,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -972,8 +1010,8 @@ Note
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>area(column_name="area")</code></td>
-<td>Ajoute une colonne de surface.</td>
+<td><code>area(column_name="area", unit="m2", auto_project=True)</code></td>
+<td>Ajoute une colonne de surface. Si le CRS est géographique et <code>auto_project=True</code> (défaut), la surface est calculée après reprojection temporaire vers l’UTM estimé, en <code>unit</code> (<code>"m2"</code>, <code>"ha"</code> ou <code>"km2"</code>) plutôt qu’en degrés². <code>auto_project=False</code> retrouve l’ancien comportement.</td>
 </tr>
 <tr class="even">
 <td><code>perimeter(column_name="perimeter")</code></td>
@@ -997,7 +1035,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1006,7 +1044,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1046,7 +1084,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1055,7 +1093,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1119,7 +1157,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1128,7 +1166,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Certaines méthodes nécessitent <code>networkx</code> ou <code>scikit-learn</code> (import différé, erreur explicite si absent).</p>
 <table class="caption-top table">
@@ -1144,8 +1182,8 @@ Note
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>distance_to_nearest(other, column_name="dist_nearest")</code></td>
-<td>Distance de chaque entité au plus proche élément d’une autre couche.</td>
+<td><code>distance_to_nearest(other, column_name="dist_nearest", unit="m", auto_project=True)</code></td>
+<td>Distance de chaque entité au plus proche élément d’une autre couche. Si le CRS est géographique et <code>auto_project=True</code> (défaut), calculée après reprojection temporaire vers l’UTM estimé, en <code>unit</code> (<code>"m"</code> ou <code>"km"</code>) plutôt qu’en degrés.</td>
 </tr>
 <tr class="even">
 <td><code>nearest_neighbor_analysis()</code></td>
@@ -1197,7 +1235,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1206,7 +1244,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Nécessitent <code>libpysal</code> (<code>spatial_weights</code>) et <code>esda</code> (les indices eux-mêmes).</p>
 <table class="caption-top table">
@@ -1247,7 +1285,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1256,7 +1294,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1312,7 +1350,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1321,7 +1359,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1361,7 +1399,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1370,7 +1408,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1410,7 +1448,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1419,7 +1457,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>

@@ -262,3 +262,62 @@ class TestVectorTools:
         vt = VectorTools(gdf)
         dups = vt.duplicates()
         assert len(dups) == 6  # all are duplicates
+
+
+class TestSmartCRS:
+    """Tests for CRS-aware measurements (crs_info, estimate_utm, unit-aware buffer/area/distance)."""
+
+    def test_crs_info_geographic(self, sample_gdf):
+        info = VectorTools(sample_gdf).crs_info()
+        assert info["is_geographic"] is True
+        assert info["epsg"] == 4326
+
+    def test_crs_info_no_crs(self, sample_gdf):
+        gdf = sample_gdf.copy()
+        gdf.crs = None
+        info = VectorTools(gdf).crs_info()
+        assert info == {"epsg": None, "name": None, "is_geographic": None, "unit": None}
+
+    def test_estimate_utm_is_projected(self, sample_gdf):
+        utm_crs = VectorTools(sample_gdf).estimate_utm()
+        assert not utm_crs.is_geographic
+
+    def test_to_local_crs_reprojects(self, sample_gdf):
+        result = VectorTools(sample_gdf).to_local_crs()
+        assert not result.gdf.crs.is_geographic
+
+    def test_buffer_invalid_unit(self, sample_gdf):
+        with pytest.raises(ValueError):
+            VectorTools(sample_gdf).buffer(10, unit="miles")
+
+    def test_buffer_auto_project_vs_raw_degrees(self, sample_gdf):
+        vt = VectorTools(sample_gdf)
+        original_area = sample_gdf.geometry.iloc[0].area
+        raw_area = vt.buffer(0.1, auto_project=False).gdf.geometry.iloc[0].area
+        meter_buffered_area = vt.buffer(
+            0.1, unit="m", auto_project=True
+        ).gdf.geometry.iloc[0].area
+        # A 0.1-degree buffer (~11 km) inflates the area far more than a
+        # 0.1-meter one, once both are measured back in the same (degree) CRS.
+        assert (raw_area - original_area) > (meter_buffered_area - original_area)
+        assert meter_buffered_area == pytest.approx(original_area, rel=1e-2)
+        assert vt.buffer(1, auto_project=True).gdf.crs == sample_gdf.crs
+
+    def test_area_unit_conversion(self, sample_gdf):
+        vt = VectorTools(sample_gdf)
+        area_m2 = vt.area(unit="m2").gdf["area"].iloc[0]
+        area_ha = vt.area(unit="ha").gdf["area"].iloc[0]
+        assert area_ha == pytest.approx(area_m2 / 10_000)
+
+    def test_area_invalid_unit(self, sample_gdf):
+        with pytest.raises(ValueError):
+            VectorTools(sample_gdf).area(unit="acres")
+
+    def test_distance_to_nearest_unit_conversion(self):
+        pts_a = gpd.GeoDataFrame(geometry=[Point(0, 0)], crs="EPSG:4326")
+        pts_b = gpd.GeoDataFrame(geometry=[Point(0.01, 0)], crs="EPSG:4326")
+        vt = VectorTools(pts_a)
+        meters = vt.distance_to_nearest(pts_b, unit="m").gdf["dist_nearest"].iloc[0]
+        km = vt.distance_to_nearest(pts_b, unit="km").gdf["dist_nearest"].iloc[0]
+        assert meters > 0
+        assert km * 1000 == pytest.approx(meters)

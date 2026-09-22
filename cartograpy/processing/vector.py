@@ -12,6 +12,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Conversion factors to reach the base unit (meters, square meters).
+_LENGTH_UNITS = {"m": 1.0, "km": 1000.0}
+_AREA_UNITS = {"m2": 1.0, "ha": 10_000.0, "km2": 1_000_000.0}
+
 
 def centroids(geodf):
     """
@@ -498,6 +502,53 @@ class VectorTools:
         gdf = self.gdf.to_crs(target_crs)
         return self._wrap(gdf)
 
+    def crs_info(self) -> dict:
+        """
+        Returns a summary of the current CRS: EPSG code, name, whether it
+        is geographic (degrees, e.g. EPSG:4326) or projected (typically
+        meters), and the axis unit name. Useful to check, before a
+        distance/area computation, whether the values will actually be in
+        meters/m² or in degrees.
+        """
+        crs = self.gdf.crs
+        if crs is None:
+            return {"epsg": None, "name": None, "is_geographic": None, "unit": None}
+        return {
+            "epsg": crs.to_epsg(),
+            "name": crs.name,
+            "is_geographic": crs.is_geographic,
+            "unit": crs.axis_info[0].unit_name if crs.axis_info else None,
+        }
+
+    def estimate_utm(self):
+        """
+        Estimates the UTM CRS best suited to this layer's extent, based on
+        its centroid (delegates to GeoPandas/pyproj's `estimate_utm_crs`).
+        """
+        return self.gdf.estimate_utm_crs()
+
+    def to_local_crs(self):
+        """Reprojects the layer to its estimated local UTM CRS (metric)."""
+        return self.reproject_layer(self.estimate_utm())
+
+    def _metric_gdf(self, auto_project: bool):
+        """
+        Returns (gdf, was_reprojected, original_crs) where `gdf` is
+        guaranteed to be in a metric CRS when `auto_project` is True and
+        the current CRS is geographic (degrees). Falls back to the
+        original GeoDataFrame unchanged when there is no CRS to estimate
+        UTM from.
+        """
+        crs = self.gdf.crs
+        if auto_project and crs is not None and crs.is_geographic:
+            return self.gdf.to_crs(self.estimate_utm()), True, crs
+        if auto_project and crs is None:
+            warnings.warn(
+                "Aucun CRS défini : impossible d'estimer une projection UTM, "
+                "les valeurs restent dans les unités brutes des coordonnées."
+            )
+        return self.gdf, False, crs
+
     # --- Attribute cleanup ---------------------------------------------- #
 
     def rename_fields(self, mapping: dict):
@@ -712,10 +763,27 @@ class VectorTools:
 
     # --- Geometric operations ---------------------------------------------- #
 
-    def buffer(self, distance: float):
-        """Creates a buffer zone around each geometry."""
-        gdf = self.gdf.copy()
-        gdf["geometry"] = gdf.geometry.buffer(distance)
+    def buffer(self, distance: float, unit: str = "m", auto_project: bool = True):
+        """
+        Creates a buffer zone around each geometry.
+
+        If the layer's CRS is geographic (e.g. EPSG:4326, in degrees) and
+        `auto_project` is True (default), the layer is temporarily
+        reprojected to its estimated UTM CRS so `distance` is interpreted
+        in `unit` ("m" or "km") rather than degrees, then reprojected back
+        to the original CRS. Set `auto_project=False` to buffer directly
+        in the layer's native CRS units (previous behavior).
+        """
+        if unit not in _LENGTH_UNITS:
+            raise ValueError(
+                f"unit doit être parmi {list(_LENGTH_UNITS)}, reçu: {unit!r}"
+            )
+        metric_gdf, reprojected, original_crs = self._metric_gdf(auto_project)
+        distance_m = distance * _LENGTH_UNITS[unit]
+        gdf = metric_gdf.copy()
+        gdf["geometry"] = gdf.geometry.buffer(distance_m)
+        if reprojected:
+            gdf = gdf.to_crs(original_crs)
         return self._wrap(gdf)
 
     def centroid(self):
@@ -752,10 +820,24 @@ class VectorTools:
 
     # --- Geometric measurements --------------------------------------------- #
 
-    def area(self, column_name="area"):
-        """Adds an area column."""
+    def area(self, column_name="area", unit: str = "m2", auto_project: bool = True):
+        """
+        Adds an area column.
+
+        If the layer's CRS is geographic (e.g. EPSG:4326, in degrees) and
+        `auto_project` is True (default), the area is computed after a
+        temporary reprojection to the estimated UTM CRS, so the result is
+        expressed in `unit` ("m2", "ha", or "km2") instead of degrees².
+        Set `auto_project=False` to use the layer's native CRS units
+        (previous behavior).
+        """
+        if unit not in _AREA_UNITS:
+            raise ValueError(
+                f"unit doit être parmi {list(_AREA_UNITS)}, reçu: {unit!r}"
+            )
+        metric_gdf, _, _ = self._metric_gdf(auto_project)
         gdf = self.gdf.copy()
-        gdf[column_name] = gdf.geometry.area
+        gdf[column_name] = metric_gdf.geometry.area.values / _AREA_UNITS[unit]
         return self._wrap(gdf)
 
     def perimeter(self, column_name="perimeter"):
@@ -869,13 +951,31 @@ class VectorTools:
 
     # --- Proximity analysis -------------------------------------------------- #
 
-    def distance_to_nearest(self, other, column_name="dist_nearest"):
-        """Computes the distance to the nearest feature of another layer."""
+    def distance_to_nearest(
+        self, other, column_name="dist_nearest", unit: str = "m", auto_project: bool = True
+    ):
+        """
+        Computes the distance to the nearest feature of another layer.
+
+        If the layer's CRS is geographic (e.g. EPSG:4326, in degrees) and
+        `auto_project` is True (default), both layers are temporarily
+        reprojected to this layer's estimated UTM CRS so the result is
+        expressed in `unit` ("m" or "km") instead of degrees. Set
+        `auto_project=False` to compute directly in the layer's native
+        CRS units (previous behavior).
+        """
         from scipy.spatial import cKDTree
 
+        if unit not in _LENGTH_UNITS:
+            raise ValueError(
+                f"unit doit être parmi {list(_LENGTH_UNITS)}, reçu: {unit!r}"
+            )
         other_gdf = other.gdf if isinstance(other, VectorTools) else other
+        metric_gdf, reprojected, _ = self._metric_gdf(auto_project)
+        if reprojected:
+            other_gdf = other_gdf.to_crs(metric_gdf.crs)
         src = np.array(
-            list(self.gdf.geometry.centroid.apply(lambda g: (g.x, g.y)))
+            list(metric_gdf.geometry.centroid.apply(lambda g: (g.x, g.y)))
         )
         tgt = np.array(
             list(other_gdf.geometry.centroid.apply(lambda g: (g.x, g.y)))
@@ -883,7 +983,7 @@ class VectorTools:
         tree = cKDTree(tgt)
         distances, _ = tree.query(src)
         gdf = self.gdf.copy()
-        gdf[column_name] = distances
+        gdf[column_name] = distances / _LENGTH_UNITS[unit]
         return self._wrap(gdf)
 
     def nearest_neighbor_analysis(self):

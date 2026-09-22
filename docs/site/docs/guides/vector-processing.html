@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -798,16 +804,19 @@ Note
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Analyse de proximité et clustering
+<span class="screen-reader-only">Note</span>Mesurer en mètres sur une couche en degrés (Smart CRS)
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>distances <span class="op">=</span> VectorTools(ecoles_gdf).distance_to_nearest(hopitaux_gdf).gdf</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>clusters <span class="op">=</span> VectorTools(points_gdf).spatial_clustering(eps<span class="op">=</span><span class="dv">500</span>, min_samples<span class="op">=</span><span class="dv">5</span>).gdf</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># nécessite scikit-learn installé séparément</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>vt <span class="op">=</span> VectorTools(gdf)              <span class="co"># gdf en EPSG:4326 (degrés)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>vt.crs_info()                      <span class="co"># {"is_geographic": True, ...}</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>zone_tampon <span class="op">=</span> vt.<span class="bu">buffer</span>(<span class="dv">1000</span>, unit<span class="op">=</span><span class="st">"m"</span>).gdf     <span class="co"># vrai tampon de 1000 m, pas 1000°</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>surfaces_ha <span class="op">=</span> vt.area(unit<span class="op">=</span><span class="st">"ha"</span>).gdf[<span class="st">"area"</span>]    <span class="co"># surface en hectares</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>distances_km <span class="op">=</span> vt.distance_to_nearest(routes, unit<span class="op">=</span><span class="st">"km"</span>).gdf[<span class="st">"dist_nearest"</span>]</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>buffer()</code>, <code>area()</code> et <code>distance_to_nearest()</code> reprojettent automatiquement vers l’UTM estimé (<code>estimate_utm()</code>) quand le CRS est géographique, pour que <code>distance</code>/<code>unit</code> soient interprétés en mètres réels et non en degrés. Passez <code>auto_project=False</code> pour retrouver le calcul direct dans les unités du CRS courant.</p>
 </div>
 </div>
 </div>
@@ -817,14 +826,16 @@ Note
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Statistiques spatiales et autocorrélation
+<span class="screen-reader-only">Note</span>Analyse de proximité et clustering
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rapport <span class="op">=</span> VectorTools(regions_gdf).spatial_autocorrelation_report(<span class="st">"taux_pauvrete"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># nécessite libpysal + esda installés séparément</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>distances <span class="op">=</span> VectorTools(ecoles_gdf).distance_to_nearest(hopitaux_gdf).gdf</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>clusters <span class="op">=</span> VectorTools(points_gdf).spatial_clustering(eps<span class="op">=</span><span class="dv">500</span>, min_samples<span class="op">=</span><span class="dv">5</span>).gdf</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># nécessite scikit-learn installé séparément</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
@@ -834,14 +845,31 @@ Note
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Exporter le résultat
+<span class="screen-reader-only">Note</span>Statistiques spatiales et autocorrélation
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>VectorTools(gdf).fix_invalid().to_gpkg(<span class="st">"resultat.gpkg"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>VectorTools(gdf).to_csv(<span class="st">"resultat.csv"</span>, include_geometry<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rapport <span class="op">=</span> VectorTools(regions_gdf).spatial_autocorrelation_report(<span class="st">"taux_pauvrete"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># nécessite libpysal + esda installés séparément</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Exporter le résultat
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>VectorTools(gdf).fix_invalid().to_gpkg(<span class="st">"resultat.gpkg"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>VectorTools(gdf).to_csv(<span class="st">"resultat.csv"</span>, include_geometry<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>

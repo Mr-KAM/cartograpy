@@ -58,6 +58,14 @@ Imagerie satellite et analyses à grande échelle. Utilisé par `Gee` : nécessi
 en plus un compte Google Earth Engine et une authentification (`ee.Authenticate()`),
 au-delà de l'installation des paquets Python.
 
+#### Catalogues STAC
+
+Recherche et chargement d'imagerie satellite via le standard STAC
+(SpatioTemporal Asset Catalog) : Microsoft Planetary Computer, AWS Earth
+Search, Digital Earth Africa, Copernicus Data Space. Utilisé par `STAC`. Les
+bandes sont lues directement via `rasterio` (jamais de téléchargement complet
+du fichier).
+
 ## Ce qui a besoin du réseau : et ce qui n'en a pas besoin
 
 | Fonctionnalité | Réseau requis ? |
@@ -74,9 +82,11 @@ au-delà de l'installation des paquets Python.
 | `WorldBank` | Oui (API World Bank) |
 | `Climate` | Oui (API NASA POWER) : mis en cache après le premier appel |
 | `Gee` | Oui, + authentification Google Earth Engine préalable |
+| `STAC` | Oui (catalogue STAC + hrefs des assets), sauf `sources()` |
 | `google_font()` (styling) | Oui (Google Fonts) : `path_font()`/`local_font()` sont locaux |
 | `Map.add_basemap()` | Oui (tuiles web via `contextily`) |
-| `WebMap` | Non pour la génération de la carte (tuiles chargées côté navigateur au moment de l'affichage, pas au moment de l'appel Python) |
+| `WebMap` (`engine="folium"`) | Non pour la génération de la carte (tuiles chargées côté navigateur), sauf `add_wms`/`add_cog`/`add_raster` sur une URL distante (lues au moment de l'appel Python via `rio-tiler`) |
+| `WebMap` (`engine="lonboard"`/`"kepler.gl"`) | Non : rendu local, sauf source de données distante |
 
 ::: {.callout-tip}
 `GeoBoundaries` utilise `requests_cache` : une fois une requête effectuée, les
@@ -95,7 +105,8 @@ Toutes déclarées dans `pyproject.toml`, installées automatiquement avec
 `pypalettes`, `pyproj`, `rasterio`, `reportlab`, `requests`, `requests-cache`,
 `seaborn`, `shapely`, `svglib`, `tabulate`, `tqdm`, `wbdata`, `fiona`,
 `matplotlib-map-utils`, `jupyter`, `geemap`, `pyfonts`, `marimo`,
-`scienceplots`, `mplcyberpunk`, `geohexgrid`.
+`scienceplots`, `mplcyberpunk`, `geohexgrid`, `pystac-client`,
+`planetary-computer`.
 
 `scienceplots` et `mplcyberpunk` alimentent `styling.set_style()` /
 `list_all_styles()` ; `geohexgrid` alimente les grilles hexagonales de
@@ -120,6 +131,10 @@ n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
 | `contextily` | `Map.add_basemap()` (fonds de carte tuilés) | Non |
 | `matplotlib-scalebar` | Barre d'échelle alternative sur `Map`/`SituationMap` | Non |
 | `earthengine-api` (`ee`) | `Gee` (toutes les méthodes) | **Non** : écart à corriger, voir ci-dessous |
+| `folium` | `WebMap` avec `engine="folium"` (moteur par défaut) | Oui, extra `webmap` |
+| `lonboard` | `WebMap` avec `engine="lonboard"` (rendu GPU deck.gl) | Oui, extra `webmap` |
+| `keplergl` | `WebMap` avec `engine="kepler.gl"` | Oui, extra `webmap` |
+| `rio-tiler` | `WebMap.add_raster()`/`.add_cog()` | Oui, extra `webmap` |
 
 ::: {.callout-warning}
 Écart connu : `Gee` importe le paquet `ee` (`earthengine-api`) via
@@ -128,4 +143,11 @@ n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
 n'est en réalité utilisé qu'à travers ce même mécanisme optionnel). Installer
 cartograpy seul ne suffit donc pas à faire fonctionner `Gee` : il faut ajouter
 manuellement `pip install earthengine-api`.
+:::
+
+::: {.callout-tip}
+`folium`, `lonboard`, `keplergl` et `rio-tiler` sont regroupés dans l'extra
+`webmap` de `pyproject.toml` (contrairement à `contextily`/`matplotlib-scalebar`,
+totalement absents des métadonnées) : `pip install cartograpy[webmap]` les
+installe tous les quatre d'un coup, plutôt que de les ajouter un par un.
 :::

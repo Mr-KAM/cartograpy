@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -642,6 +648,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#hydro" id="toc-hydro" class="nav-link" data-scroll-target="#hydro"><code>Hydro</code></a>
   <ul class="collapse">
   <li><a href="#downloadregion-output_dirhydrorivers_data" id="toc-downloadregion-output_dirhydrorivers_data" class="nav-link" data-scroll-target="#downloadregion-output_dirhydrorivers_data"><code>download(region, output_dir="hydrorivers_data")</code></a></li>
+  <li><a href="#riversregion-resolution15-output_dirhydrorivers_data" id="toc-riversregion-resolution15-output_dirhydrorivers_data" class="nav-link" data-scroll-target="#riversregion-resolution15-output_dirhydrorivers_data"><code>rivers(region, resolution=15, output_dir="hydrorivers_data")</code></a></li>
+  <li><a href="#basinsregion-level01-output_dirhydrorivers_data" id="toc-basinsregion-level01-output_dirhydrorivers_data" class="nav-link" data-scroll-target="#basinsregion-level01-output_dirhydrorivers_data"><code>basins(region, level="01", output_dir="hydrorivers_data")</code></a></li>
   </ul></li>
   <li><a href="#dem" id="toc-dem" class="nav-link" data-scroll-target="#dem"><code>DEM</code></a>
   <ul class="collapse">
@@ -656,6 +664,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" id="toc-get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="nav-link" data-scroll-target="#get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone"><code>get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></a></li>
   <li><a href="#downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" id="toc-downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" class="nav-link" data-scroll-target="#downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue"><code>download(data, bbox=None, filename="image.tif", scale=10, crs="EPSG:4326", bands=None, output_dir=".", mosaic_col=True)</code></a></li>
+  </ul></li>
+  <li><a href="#stac-et-stacresults" id="toc-stac-et-stacresults" class="nav-link" data-scroll-target="#stac-et-stacresults"><code>STAC</code> et <code>STACResults</code></a>
+  <ul class="collapse">
+  <li><a href="#searchcollection-bbox-start-end-cloud_covernone-limit100-kwargs" id="toc-searchcollection-bbox-start-end-cloud_covernone-limit100-kwargs" class="nav-link" data-scroll-target="#searchcollection-bbox-start-end-cloud_covernone-limit100-kwargs"><code>search(collection, bbox, start, end, cloud_cover=None, limit=100, **kwargs)</code></a></li>
+  <li><a href="#méthodes-de-stacresults" id="toc-méthodes-de-stacresults" class="nav-link" data-scroll-target="#méthodes-de-stacresults">Méthodes de <code>STACResults</code></a></li>
   </ul></li>
   <li><a href="#organisation" id="toc-organisation" class="nav-link" data-scroll-target="#organisation">Organisation</a></li>
   </ul>
@@ -689,7 +702,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>cartograpy.data</code> regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale et Google Earth Engine. La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément : chaque section ci-dessous précise les erreurs et pièges réels du code source.</p>
+<p><code>cartograpy.data</code> regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale, Google Earth Engine et catalogues STAC (Planetary Computer, AWS Earth Search, Digital Earth Africa, Copernicus Data Space). La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément : chaque section ci-dessous précise les erreurs et pièges réels du code source.</p>
 <section id="io-chargement-sauvegarde-et-inspection-de-fichiers" class="level2">
 <h2 class="anchored" data-anchor-id="io-chargement-sauvegarde-et-inspection-de-fichiers"><code>io</code> : chargement, sauvegarde et inspection de fichiers</h2>
 <p>Quatre fonctions autonomes définies dans <code>cartograpy/data/io.py</code>. Ce sont elles que <code>Project.add_data</code>, <code>Project.load_data</code> et <code>Project.save_output</code> utilisent en interne.</p>
@@ -945,6 +958,10 @@ Astuce
 <td><code>get_area(territory, unit="km2")</code></td>
 <td>Superficie (<code>"km2"</code>, <code>"m2"</code> ou <code>"ha"</code>). <code>float</code> pour un seul territoire, <code>GeoDataFrame</code> avec colonne <code>area</code> pour une liste. Lève <code>ValueError</code> si l’unité est invalide.</td>
 </tr>
+<tr class="odd">
+<td><code>sources()</code></td>
+<td><code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) des sources de données utilisées (geoBoundaries).</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1062,6 +1079,10 @@ Avertissement
 <td><code>bbox(place)</code></td>
 <td>Bounding box <code>(west, south, east, north)</code> du lieu via <code>osmnx</code>. Requiert <code>osmnx</code>.</td>
 </tr>
+<tr class="odd">
+<td><code>sources()</code></td>
+<td><code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) des sources de données utilisées (Nominatim, OpenStreetMap).</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1154,16 +1175,17 @@ Note
 </div>
 </div>
 </div>
+<p><code>osm.sources()</code> retourne un <code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) listant la source de données utilisée (OpenStreetMap).</p>
 </section>
 </section>
 <section id="hydro" class="level2">
 <h2 class="anchored" data-anchor-id="hydro"><code>Hydro</code></h2>
-<p>Télécharge le réseau hydrographique <a href="https://www.hydrosheds.org/products/hydrorivers">HydroRIVERS</a> par grande région continentale.</p>
+<p>Télécharge des données hydrographiques HydroSHEDS par grande région continentale : réseau <a href="https://www.hydrosheds.org/products/hydrorivers">HydroRIVERS</a>, bassins de l’archive HydroSHEDS v1, et bassins versants hiérarchiques <a href="https://www.hydrosheds.org/products/hydrobasins">HydroBASINS</a>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Hydro</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>hydro <span class="op">=</span> Hydro(output_dir<span class="op">=</span><span class="st">"data/hydro"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li><strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"data/hydro"</code>) : dossier de destination par défaut (peut être redéfini à l’appel de <code>download</code>).</li>
+<li><strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"data/hydro"</code>) : dossier de destination par défaut (peut être redéfini à l’appel de <code>download</code>/<code>rivers</code>/<code>basins</code>).</li>
 </ul>
 <section id="downloadregion-output_dirhydrorivers_data" class="level3">
 <h3 class="anchored" data-anchor-id="downloadregion-output_dirhydrorivers_data"><code>download(region, output_dir="hydrorivers_data")</code></h3>
@@ -1189,15 +1211,55 @@ Note
 <p>Si <code>output_dir/region</code> existe déjà, le téléchargement est sauté : pas de re-téléchargement automatique même si les données ont changé côté source. Supprimez le dossier pour forcer une mise à jour.</p>
 </div>
 </div>
-<p><code>hydro.describe_variables()</code> retourne une description texte (table Markdown) des colonnes du jeu de données (<code>HYRIV_ID</code>, <code>LENGTH_KM</code>, <code>DIS_AV_CMS</code>, <code>ORD_STRA</code>…), pratique pour l’affichage dans un notebook.</p>
+</section>
+<section id="riversregion-resolution15-output_dirhydrorivers_data" class="level3">
+<h3 class="anchored" data-anchor-id="riversregion-resolution15-output_dirhydrorivers_data"><code>rivers(region, resolution=15, output_dir="hydrorivers_data")</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>rivers(region: <span class="bu">str</span>, resolution: <span class="bu">int</span> <span class="op">=</span> <span class="dv">15</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"hydrorivers_data"</span>) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>region</code></strong> (<code>str</code>, requis) : code de région parmi <code>"af"</code>, <code>"as"</code>, <code>"au"</code>, <code>"eu"</code>, <code>"na"</code>, <code>"sa"</code>.</li>
+<li><strong><code>resolution</code></strong> (<code>int</code>, défaut <code>15</code>) : résolution en secondes d’arc, <code>15</code> ou <code>30</code>.</li>
+<li><strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"hydrorivers_data"</code>) : dossier local d’extraction du zip téléchargé.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : bassins de l’archive HydroSHEDS v1 pour la région/résolution demandée (résultat aussi accessible via <code>hydro.basins_data</code>).</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si <code>region</code> ou <code>resolution</code> est invalide ; <code>RuntimeError</code> si le téléchargement échoue ; <code>FileNotFoundError</code> si aucun <code>.shp</code> n’est trouvé après extraction.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>hydro <span class="op">=</span> Hydro()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>bassins_af_15s <span class="op">=</span> hydro.rivers(<span class="st">"af"</span>, resolution<span class="op">=</span><span class="dv">15</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Malgré son nom, <code>rivers()</code> télécharge des <strong>bassins</strong> (<code>bas_{resolution}s_shp/...</code>), pas un réseau linéaire de rivières — c’est la source HydroSHEDS demandée pour cette méthode. Pour un réseau de rivières, utilisez <code>download()</code> (HydroRIVERS).</p>
+</div>
+</div>
+</section>
+<section id="basinsregion-level01-output_dirhydrorivers_data" class="level3">
+<h3 class="anchored" data-anchor-id="basinsregion-level01-output_dirhydrorivers_data"><code>basins(region, level="01", output_dir="hydrorivers_data")</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>basins(region: <span class="bu">str</span>, level: <span class="bu">str</span> <span class="op">=</span> <span class="st">"01"</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"hydrorivers_data"</span>) <span class="op">-&gt;</span> gpd.GeoDataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>region</code></strong> (<code>str</code>, requis) : code de région parmi <code>"af"</code>, <code>"as"</code>, <code>"au"</code>, <code>"eu"</code>, <code>"na"</code>, <code>"sa"</code>.</li>
+<li><strong><code>level</code></strong> (<code>str</code>, défaut <code>"01"</code>) : niveau HydroBASINS, de <code>"01"</code> à <code>"12"</code> (accepte aussi un <code>int</code>, ex. <code>1</code>).</li>
+<li><strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"hydrorivers_data"</code>) : dossier local d’extraction du zip téléchargé.</li>
+<li><strong>Retour</strong> (<code>GeoDataFrame</code>) : bassins versants HydroBASINS du niveau demandé (résultat aussi accessible via <code>hydro.hydrobasins_data</code>).</li>
+<li><strong>Erreurs</strong> : <code>ValueError</code> si <code>region</code> ou <code>level</code> est invalide (hors <code>01</code>–<code>12</code>) ; <code>RuntimeError</code> si le téléchargement échoue ; <code>FileNotFoundError</code> si aucun <code>.shp</code> n’est trouvé après extraction.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>hydro <span class="op">=</span> Hydro()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>bassins_af_lev1 <span class="op">=</span> hydro.basins(<span class="st">"af"</span>, level<span class="op">=</span><span class="st">"01"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>hydro.describe_variables()</code> retourne une description texte (table Markdown) des colonnes du jeu de données HydroRIVERS (<code>HYRIV_ID</code>, <code>LENGTH_KM</code>, <code>DIS_AV_CMS</code>, <code>ORD_STRA</code>…), pratique pour l’affichage dans un notebook.</p>
+<p><code>hydro.sources()</code> retourne un <code>DataFrame</code> (colonnes <code>name</code>, <code>url</code>, <code>description</code>) listant les sources de données utilisées par <code>download()</code>, <code>rivers()</code> et <code>basins()</code>.</p>
 </section>
 </section>
 <section id="dem" class="level2">
 <h2 class="anchored" data-anchor-id="dem"><code>DEM</code></h2>
 <p>Télécharge un modèle numérique de terrain SRTM (~30 m) sans clé API via les tuiles Skadi hébergées sur AWS, puis mosaïque et découpe selon une emprise.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> DEM</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> DEM(work_dir<span class="op">=</span><span class="st">"_dem_tiles"</span>, timeout<span class="op">=</span><span class="dv">180</span>, keep_intermediate<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> DEM</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> DEM(work_dir<span class="op">=</span><span class="st">"_dem_tiles"</span>, timeout<span class="op">=</span><span class="dv">180</span>, keep_intermediate<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>work_dir</code></strong> (<code>str</code>/<code>Path</code>, défaut <code>"_dem_tiles"</code>) : dossier de travail pour les tuiles intermédiaires.</li>
 <li><strong><code>timeout</code></strong> (<code>int</code>, défaut <code>180</code>) : délai HTTP maximal par requête, en secondes.</li>
@@ -1219,7 +1281,7 @@ Note
 </div>
 <section id="downloadbbox-out_tif-verbosetrue-max_workers4" class="level3">
 <h3 class="anchored" data-anchor-id="downloadbbox-out_tif-verbosetrue-max_workers4"><code>download(bbox, out_tif, verbose=True, max_workers=4)</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>download(bbox: <span class="bu">tuple</span> <span class="op">|</span> gpd.GeoDataFrame, out_tif: <span class="bu">str</span> <span class="op">|</span> Path, verbose: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, max_workers: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>download(bbox: <span class="bu">tuple</span> <span class="op">|</span> gpd.GeoDataFrame, out_tif: <span class="bu">str</span> <span class="op">|</span> Path, verbose: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, max_workers: <span class="bu">int</span> <span class="op">=</span> <span class="dv">4</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>bbox</code></strong> (<code>tuple</code> <code>(west, south, east, north)</code> ou <code>GeoDataFrame</code>, requis) : emprise en EPSG:4326.</li>
 <li><strong><code>out_tif</code></strong> (<code>str</code>/<code>Path</code>, requis) : chemin du GeoTIFF final (mosaïque + découpe).</li>
@@ -1228,8 +1290,8 @@ Note
 <li><strong>Retour</strong> (<code>Path</code>) : chemin du GeoTIFF SRTM final.</li>
 <li><strong>Erreurs</strong> : <code>ValueError</code> si la bbox est hors limites (longitude hors <code>[-180, 180]</code>, latitude hors <code>[-90, 90]</code>, ou <code>south &gt;= north</code>) ; <code>DEMDownloadError</code> en cas d’échec de téléchargement, de tuile corrompue, ou de fenêtre de découpe invalide.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> DEM(work_dir<span class="op">=</span><span class="st">"_dem_tiles"</span>)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>chemin <span class="op">=</span> dem.download(bbox<span class="op">=</span>(<span class="op">-</span><span class="fl">8.6</span>, <span class="fl">4.3</span>, <span class="op">-</span><span class="fl">2.5</span>, <span class="fl">10.8</span>), out_tif<span class="op">=</span><span class="st">"srtm_civ.tif"</span>)  <span class="co"># emprise CIV</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dem <span class="op">=</span> DEM(work_dir<span class="op">=</span><span class="st">"_dem_tiles"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>chemin <span class="op">=</span> dem.download(bbox<span class="op">=</span>(<span class="op">-</span><span class="fl">8.6</span>, <span class="fl">4.3</span>, <span class="op">-</span><span class="fl">2.5</span>, <span class="fl">10.8</span>), out_tif<span class="op">=</span><span class="st">"srtm_civ.tif"</span>)  <span class="co"># emprise CIV</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1244,7 +1306,7 @@ Astuce
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1253,7 +1315,7 @@ Astuce
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1297,14 +1359,15 @@ Astuce
 </div>
 </div>
 <p>Toutes ces méthodes sont statiques : <code>DEM.info(...)</code>, <code>DEM.hillshade(...)</code>, etc. fonctionnent sans instancier <code>DEM</code>.</p>
+<p><code>dem.sources()</code> retourne un <code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) listant la source de données utilisée (AWS Terrain Tiles / SRTM).</p>
 </section>
 </section>
 <section id="worldbank" class="level2">
 <h2 class="anchored" data-anchor-id="worldbank"><code>WorldBank</code></h2>
 <p>Interroge l’API Banque mondiale (indicateurs de développement) via le paquet <code>wbdata</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> WorldBank</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> WorldBank()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> WorldBank</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> WorldBank()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1320,17 +1383,17 @@ Avertissement
 </div>
 <section id="get_dataindicators-countryall-kwargs" class="level3">
 <h3 class="anchored" data-anchor-id="get_dataindicators-countryall-kwargs"><code>get_data(indicators, country='all', **kwargs)</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>get_data(indicators, country<span class="op">=</span><span class="st">"all"</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> pandas.DataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>get_data(indicators, country<span class="op">=</span><span class="st">"all"</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> pandas.DataFrame</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>indicators</code></strong> (requis) : indicateur(s) Banque mondiale, tel qu’attendu par <code>wbdata.get_dataframe</code> : typiquement un <code>dict</code> <code>{code: alias}</code>, ex. <code>{"SP.POP.TOTL": "population"}</code>.</li>
 <li><strong><code>country</code></strong> (<code>str</code> ou liste, défaut <code>"all"</code>) : code(s) pays ISO2/ISO3, ou <code>"all"</code>.</li>
 <li><strong><code>**kwargs</code></strong> : transmis tels quels à <code>wbdata.get_dataframe</code> (ex. <code>date</code>, <code>freq</code>, <code>source</code>).</li>
 <li><strong>Retour</strong> (<code>DataFrame</code>) : indexé par pays/date, une colonne par indicateur.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> WorldBank()</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>pop <span class="op">=</span> wb.get_data({<span class="st">"SP.POP.TOTL"</span>: <span class="st">"population"</span>}, country<span class="op">=</span>[<span class="st">"CIV"</span>, <span class="st">"SEN"</span>, <span class="st">"MLI"</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> WorldBank()</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>pop <span class="op">=</span> wb.get_data({<span class="st">"SP.POP.TOTL"</span>: <span class="st">"population"</span>}, country<span class="op">=</span>[<span class="st">"CIV"</span>, <span class="st">"SEN"</span>, <span class="st">"MLI"</span>])</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1339,7 +1402,7 @@ Avertissement
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1364,6 +1427,10 @@ Avertissement
 <tr class="odd">
 <td><code>get_countries(query)</code></td>
 <td>Recherche de pays reconnus par l’API Banque mondiale.</td>
+</tr>
+<tr class="even">
+<td><code>sources()</code></td>
+<td><code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) : source de données (World Bank Open Data). À ne pas confondre avec <code>get_sources()</code>, qui liste les catalogues internes de l’API (WDI, Doing Business…).</td>
 </tr>
 </tbody>
 </table>
@@ -1393,24 +1460,24 @@ Avertissement
 <strong>sans clé API</strong>. Ré-analyses MERRA-2 + produits satellite : température, précipitations, vent, rayonnement, humidité… en résolution journalière, horaire, mensuelle ou climatologique. Réponses mises en cache localement (<code>requests_cache</code>, 7 jours par défaut).
 </dd>
 </dl>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Climate</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>clim <span class="op">=</span> Climate()  <span class="co"># cache_expire_seconds=604800, timeout=60</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Série journalière en un point (Abidjan)</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>gdf_pt <span class="op">=</span> clim.get_point(</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span><span class="fl">3.99</span>, <span class="fl">5.35</span>, <span class="st">"2023-01-01"</span>, <span class="st">"2023-12-31"</span>,</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>[<span class="st">"T2M"</span>, <span class="st">"T2M_MIN"</span>, <span class="st">"T2M_MAX"</span>, <span class="st">"PRECTOTCORR"</span>],</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    community<span class="op">=</span><span class="st">"ag"</span>, temporal<span class="op">=</span><span class="st">"daily"</span>,</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; GeoDataFrame (EPSG:4326) indexé par date, une colonne par paramètre + geometry</span></span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Grille de points sur une emprise, en mensuel</span></span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> clim.get_region(</span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="dv">6</span>, <span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>, <span class="dv">8</span>), <span class="dv">2020</span>, <span class="dv">2022</span>,</span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>[<span class="st">"T2M"</span>, <span class="st">"PRECTOTCORR"</span>], temporal<span class="op">=</span><span class="st">"monthly"</span>,</span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; GeoDataFrame long : parameter, date, value, geometry (grille ~0.5°)</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Climate</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>clim <span class="op">=</span> Climate()  <span class="co"># cache_expire_seconds=604800, timeout=60</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Série journalière en un point (Abidjan)</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>gdf_pt <span class="op">=</span> clim.get_point(</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span><span class="fl">3.99</span>, <span class="fl">5.35</span>, <span class="st">"2023-01-01"</span>, <span class="st">"2023-12-31"</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>[<span class="st">"T2M"</span>, <span class="st">"T2M_MIN"</span>, <span class="st">"T2M_MAX"</span>, <span class="st">"PRECTOTCORR"</span>],</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    community<span class="op">=</span><span class="st">"ag"</span>, temporal<span class="op">=</span><span class="st">"daily"</span>,</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; GeoDataFrame (EPSG:4326) indexé par date, une colonne par paramètre + geometry</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Grille de points sur une emprise, en mensuel</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> clim.get_region(</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span><span class="dv">6</span>, <span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>, <span class="dv">8</span>), <span class="dv">2020</span>, <span class="dv">2022</span>,</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">=</span>[<span class="st">"T2M"</span>, <span class="st">"PRECTOTCORR"</span>], temporal<span class="op">=</span><span class="st">"monthly"</span>,</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; GeoDataFrame long : parameter, date, value, geometry (grille ~0.5°)</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -1430,6 +1497,10 @@ Avertissement
 <tr class="even">
 <td><code>get_region(bbox, start, end, parameters=None, community="ag", temporal="daily")</code></td>
 <td>Grille de points sur <code>[xmin, ymin, xmax, ymax]</code> → <code>geopandas.GeoDataFrame</code> au format long.</td>
+</tr>
+<tr class="odd">
+<td><code>sources()</code></td>
+<td><code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) : source de données (NASA POWER).</td>
 </tr>
 </tbody>
 </table>
@@ -1470,9 +1541,9 @@ Note
 <p><code>Gee</code> est réexportée à la racine du package (<code>from cartograpy import Gee</code>) comme les autres classes de <code>data</code>. L’import ne tire pas <code>earthengine-api</code> : le paquet <code>ee</code> n’est requis qu’à l’instanciation de <code>Gee()</code>.</p>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Gee</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Gee</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>project</code></strong> (<code>str</code>, optionnel) : ID du projet GCP Earth Engine ; sinon lu depuis la variable d’environnement <code>GEE_PROJECT</code>.</li>
 <li><strong><code>service_account</code></strong> / <strong><code>key_file</code></strong> (<code>str</code>, optionnels) : authentification non interactive par compte de service (les deux doivent être fournis ensemble).</li>
@@ -1492,7 +1563,7 @@ Avertissement
 </div>
 <section id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="level3">
 <h3 class="anchored" data-anchor-id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone"><code>get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>get_sentinel2(bbox, start: <span class="bu">str</span>, end: <span class="bu">str</span>, mosaic: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, clip: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, cloud: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.2</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> ee.Image <span class="op">|</span> ee.ImageCollection</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>get_sentinel2(bbox, start: <span class="bu">str</span>, end: <span class="bu">str</span>, mosaic: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, clip: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>, cloud: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.2</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> ee.Image <span class="op">|</span> ee.ImageCollection</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>bbox</code></strong> (<code>[xmin, ymin, xmax, ymax]</code>, requis) : emprise en WGS-84.</li>
 <li><strong><code>start</code></strong>, <strong><code>end</code></strong> (<code>str</code>, requis) : dates au format <code>"YYYY-MM-DD"</code>.</li>
@@ -1502,13 +1573,13 @@ Avertissement
 <li><strong><code>bands</code></strong> (<code>list[str]</code>, optionnel) : bandes à sélectionner (défaut : Blue/Green/Red/NIR : <code>B2</code>, <code>B3</code>, <code>B4</code>, <code>B8</code>).</li>
 <li><strong>Retour</strong> : <code>ee.Image</code> si <code>mosaic=True</code>, sinon <code>ee.ImageCollection</code>. Un masque de nuages (bande <code>QA60</code>) est appliqué automatiquement à chaque image.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>bbox_abidjan <span class="op">=</span> [<span class="op">-</span><span class="fl">4.10</span>, <span class="fl">5.25</span>, <span class="op">-</span><span class="fl">3.85</span>, <span class="fl">5.40</span>]</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> gee.get_sentinel2(bbox_abidjan, <span class="st">"2024-01-01"</span>, <span class="st">"2024-03-01"</span>, cloud<span class="op">=</span><span class="fl">0.15</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>gee <span class="op">=</span> Gee(project<span class="op">=</span><span class="st">"mon-projet-gcp"</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>bbox_abidjan <span class="op">=</span> [<span class="op">-</span><span class="fl">4.10</span>, <span class="fl">5.25</span>, <span class="op">-</span><span class="fl">3.85</span>, <span class="fl">5.40</span>]</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> gee.get_sentinel2(bbox_abidjan, <span class="st">"2024-01-01"</span>, <span class="st">"2024-03-01"</span>, cloud<span class="op">=</span><span class="fl">0.15</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue" class="level3">
 <h3 class="anchored" data-anchor-id="downloaddata-bboxnone-filenameimage.tif-scale10-crsepsg4326-bandsnone-output_dir.-mosaic_coltrue"><code>download(data, bbox=None, filename="image.tif", scale=10, crs="EPSG:4326", bands=None, output_dir=".", mosaic_col=True)</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>download(data, bbox<span class="op">=</span><span class="va">None</span>, filename: <span class="bu">str</span> <span class="op">=</span> <span class="st">"image.tif"</span>, scale: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, crs: <span class="bu">str</span> <span class="op">=</span> <span class="st">"EPSG:4326"</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"."</span>, mosaic_col: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>download(data, bbox<span class="op">=</span><span class="va">None</span>, filename: <span class="bu">str</span> <span class="op">=</span> <span class="st">"image.tif"</span>, scale: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, crs: <span class="bu">str</span> <span class="op">=</span> <span class="st">"EPSG:4326"</span>, bands: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>, output_dir: <span class="bu">str</span> <span class="op">=</span> <span class="st">"."</span>, mosaic_col: <span class="bu">bool</span> <span class="op">=</span> <span class="va">True</span>) <span class="op">-&gt;</span> Path</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
 <li><strong><code>data</code></strong> (<code>ee.Image</code> ou <code>ee.ImageCollection</code>, requis) : à exporter : une collection est réduite en médiane (ou mosaïquée si <code>mosaic_col=False</code>) avant export.</li>
 <li><strong><code>bbox</code></strong> (optionnel) : région d’export : nécessaire si <code>data</code> n’est pas déjà découpée sur une zone.</li>
@@ -1517,7 +1588,7 @@ Avertissement
 <li><strong><code>crs</code></strong> (<code>str</code>, défaut <code>"EPSG:4326"</code>), <strong><code>bands</code></strong> (optionnel), <strong><code>output_dir</code></strong> (<code>str</code>, défaut <code>"."</code>).</li>
 <li><strong>Retour</strong> (<code>Path</code>) : chemin du fichier téléchargé localement (via <code>geemap.ee_export_image</code>).</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gee.download(s2, bbox<span class="op">=</span>bbox_abidjan, filename<span class="op">=</span><span class="st">"abidjan_s2.tif"</span>, scale<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>gee.download(s2, bbox<span class="op">=</span>bbox_abidjan, filename<span class="op">=</span><span class="st">"abidjan_s2.tif"</span>, scale<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1532,7 +1603,7 @@ Note
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1541,7 +1612,7 @@ Note
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-24" class="callout-24-contents callout-collapse collapse">
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <table class="caption-top table">
 <colgroup>
@@ -1611,11 +1682,139 @@ Note
 <td><code>bbox_to_geometry(bbox)</code></td>
 <td>Convertit <code>[xmin, ymin, xmax, ymax]</code> en <code>ee.Geometry.Rectangle</code>.</td>
 </tr>
+<tr class="odd">
+<td><code>sources()</code></td>
+<td><code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) des collections GEE utilisées (Sentinel-2, Landsat 9, MODIS NDVI, Sentinel-1), avec lien vers leur fiche dans le catalogue GEE.</td>
+</tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
+</section>
+</section>
+<section id="stac-et-stacresults" class="level2">
+<h2 class="anchored" data-anchor-id="stac-et-stacresults"><code>STAC</code> et <code>STACResults</code></h2>
+<p>Interroge des catalogues STAC (SpatioTemporal Asset Catalog) et charge l’imagerie trouvée. S’appuie sur <code>pystac-client</code> (mécanique de recherche/pagination du standard STAC) et lit les bandes directement via <code>rasterio</code> (jamais de téléchargement complet du fichier).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> STAC</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>stac <span class="op">=</span> STAC(<span class="st">"planetary-computer"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>catalog</code></strong> (<code>str</code>, défaut <code>"planetary-computer"</code>) : nom d’un catalogue prédéfini (voir <code>STAC.CATALOGS</code>) ou une URL racine STAC directe. <code>"planetary-computer"</code> signe automatiquement les hrefs des assets (requis pour lire les données Planetary Computer) via le paquet <code>planetary-computer</code>.</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Catalogue prédéfini</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"planetary-computer"</code></td>
+<td>Microsoft Planetary Computer (signature automatique)</td>
+</tr>
+<tr class="even">
+<td><code>"earth-search"</code> / <code>"aws-earth-search"</code> / <code>"element84"</code></td>
+<td>AWS Earth Search (Element 84)</td>
+</tr>
+<tr class="odd">
+<td><code>"digital-earth-africa"</code></td>
+<td>Digital Earth Africa</td>
+</tr>
+<tr class="even">
+<td><code>"copernicus-dataspace"</code></td>
+<td>Copernicus Data Space Ecosystem</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>STAC()</code> nécessite le paquet optionnel <code>pystac-client</code> (et <code>planetary-computer</code> pour le catalogue du même nom) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents.</p>
+</div>
+</div>
+<section id="searchcollection-bbox-start-end-cloud_covernone-limit100-kwargs" class="level3">
+<h3 class="anchored" data-anchor-id="searchcollection-bbox-start-end-cloud_covernone-limit100-kwargs"><code>search(collection, bbox, start, end, cloud_cover=None, limit=100, **kwargs)</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>search(collection: <span class="bu">str</span> <span class="op">|</span> <span class="bu">list</span>[<span class="bu">str</span>], bbox, start: <span class="bu">str</span>, end: <span class="bu">str</span>,</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>       cloud_cover: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>, limit: <span class="bu">int</span> <span class="op">=</span> <span class="dv">100</span>, <span class="op">**</span>kwargs) <span class="op">-&gt;</span> STACResults</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><strong><code>collection</code></strong> (<code>str</code> ou liste, requis) : identifiant(s) de collection (ex. <code>"sentinel-2-l2a"</code>).</li>
+<li><strong><code>bbox</code></strong> (<code>[xmin, ymin, xmax, ymax]</code>, requis) : emprise en EPSG:4326.</li>
+<li><strong><code>start</code></strong>, <strong><code>end</code></strong> (<code>str</code>, requis) : bornes <code>"YYYY-MM-DD"</code> de la recherche.</li>
+<li><strong><code>cloud_cover</code></strong> (<code>float</code>, optionnel) : couverture nuageuse maximale (<code>eo:cloud_cover</code>), si la collection publie cette propriété.</li>
+<li><strong><code>limit</code></strong> (<code>int</code>, défaut <code>100</code>) : nombre maximal d’éléments récupérés.</li>
+<li><strong><code>**kwargs</code></strong> : transmis à <code>pystac_client.Client.search</code> (ex. <code>query</code> pour des filtres additionnels, <code>sortby</code>).</li>
+<li><strong>Retour</strong> (<code>STACResults</code>) : résultats de la recherche.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>images <span class="op">=</span> stac.search(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">=</span><span class="st">"sentinel-2-l2a"</span>,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    bbox<span class="op">=</span>[<span class="op">-</span><span class="fl">4.05</span>, <span class="fl">5.28</span>, <span class="op">-</span><span class="fl">3.95</span>, <span class="fl">5.38</span>],</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    start<span class="op">=</span><span class="st">"2025-01-01"</span>, end<span class="op">=</span><span class="st">"2025-12-31"</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    cloud_cover<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="méthodes-de-stacresults" class="level3">
+<h3 class="anchored" data-anchor-id="méthodes-de-stacresults">Méthodes de <code>STACResults</code></h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Méthode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>best(sort_by="eo:cloud_cover")</code></td>
+<td>Nouveau <code>STACResults</code> ne contenant que l’élément avec la plus petite valeur de <code>sort_by</code> (les éléments sans cette propriété sont classés derniers).</td>
+</tr>
+<tr class="even">
+<td><code>assets()</code></td>
+<td><code>DataFrame</code> (<code>key</code>, <code>common_name</code>, <code>media_type</code>, <code>href</code>) des assets disponibles sur le premier élément.</td>
+</tr>
+<tr class="odd">
+<td><code>to_dataframe()</code></td>
+<td>Résumé des éléments trouvés (<code>id</code>, <code>datetime</code>, <code>cloud_cover</code>, <code>collection</code>).</td>
+</tr>
+<tr class="even">
+<td><code>load(bands, bbox=None)</code></td>
+<td>Charge les bandes demandées en <code>RasterTools</code>, empilées dans l’ordre. <code>bands</code> accepte des clés d’asset exactes (<code>"B04"</code>) ou des noms communs de l’extension STAC <code>eo</code> (<code>"red"</code>, <code>"nir"</code>). Nécessite un seul élément (<code>.best()</code> d’abord). <code>bbox</code> restreint optionnellement la lecture à une fenêtre (au lieu de la scène entière).</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>best <span class="op">=</span> images.best()</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>best.assets()                       <span class="co"># bandes disponibles</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> best.load([<span class="st">"red"</span>, <span class="st">"nir"</span>])      <span class="co"># -&gt; RasterTools</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>ndvi <span class="op">=</span> rt.ndvi()                    <span class="co"># méthode RasterTools existante, réutilisée</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>load()</code> ne mélange pas de résolutions natives différentes : les bandes doivent partager la même grille (même transform/dimensions). Pour combiner des bandes de résolutions différentes (ex. 10 m et 20 m), reprojetez/rééchantillonnez au préalable.</p>
+</div>
+</div>
+<p><code>stac.sources()</code> retourne un <code>DataFrame</code> (<code>name</code>, <code>url</code>, <code>description</code>) listant les 4 catalogues prédéfinis.</p>
 </section>
 </section>
 <section id="organisation" class="level2">
@@ -1664,6 +1863,10 @@ Note
 <tr class="odd">
 <td><code>gee.py</code></td>
 <td><code>Gee</code></td>
+</tr>
+<tr class="even">
+<td><code>stac.py</code></td>
+<td><code>STAC</code>, <code>STACResults</code></td>
 </tr>
 </tbody>
 </table>

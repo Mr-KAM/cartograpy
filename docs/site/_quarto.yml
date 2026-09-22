@@ -73,6 +73,7 @@ website:
           - reference/mapper.qmd
           - reference/styling.qmd
           - reference/project.qmd
+          - reference/cli.qmd
       - section: "Explications"
         contents:
           - explanations/package-architecture.qmd

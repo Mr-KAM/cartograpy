@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -620,9 +626,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#créer-une-carte" id="toc-créer-une-carte" class="nav-link active" data-scroll-target="#créer-une-carte">Créer une carte</a></li>
+  <li><a href="#millions-dentités-lonboard-et-kepler.gl" id="toc-millions-dentités-lonboard-et-kepler.gl" class="nav-link" data-scroll-target="#millions-dentités-lonboard-et-kepler.gl">Millions d’entités : lonboard et kepler.gl</a></li>
   <li><a href="#ajouter-une-couche-vectorielle" id="toc-ajouter-une-couche-vectorielle" class="nav-link" data-scroll-target="#ajouter-une-couche-vectorielle">Ajouter une couche vectorielle</a></li>
-  <li><a href="#marqueurs" id="toc-marqueurs" class="nav-link" data-scroll-target="#marqueurs">Marqueurs</a></li>
-  <li><a href="#contrôles-et-cadrage" id="toc-contrôles-et-cadrage" class="nav-link" data-scroll-target="#contrôles-et-cadrage">Contrôles et cadrage</a></li>
+  <li><a href="#marqueurs-clusters-et-chaleur-folium" id="toc-marqueurs-clusters-et-chaleur-folium" class="nav-link" data-scroll-target="#marqueurs-clusters-et-chaleur-folium">Marqueurs, clusters et chaleur (folium)</a></li>
+  <li><a href="#fonds-de-carte-wms-et-raster-add_cog" id="toc-fonds-de-carte-wms-et-raster-add_cog" class="nav-link" data-scroll-target="#fonds-de-carte-wms-et-raster-add_cog">Fonds de carte, WMS et raster (add_cog)</a></li>
+  <li><a href="#légende-colorbar-et-contrôles-folium" id="toc-légende-colorbar-et-contrôles-folium" class="nav-link" data-scroll-target="#légende-colorbar-et-contrôles-folium">Légende, colorbar et contrôles (folium)</a></li>
+  <li><a href="#comparaison-côte-à-côte-et-animation-temporelle-folium" id="toc-comparaison-côte-à-côte-et-animation-temporelle-folium" class="nav-link" data-scroll-target="#comparaison-côte-à-côte-et-animation-temporelle-folium">Comparaison côte à côte et animation temporelle (folium)</a></li>
   <li><a href="#toutes-les-méthodes-se-chaînent" id="toc-toutes-les-méthodes-se-chaînent" class="nav-link" data-scroll-target="#toutes-les-méthodes-se-chaînent">Toutes les méthodes se chaînent</a></li>
   <li><a href="#afficher-et-exporter" id="toc-afficher-et-exporter" class="nav-link" data-scroll-target="#afficher-et-exporter">Afficher et exporter</a></li>
   <li><a href="#limites-face-à-map" id="toc-limites-face-à-map" class="nav-link" data-scroll-target="#limites-face-à-map">Limites face à <code>Map</code></a></li>
@@ -658,7 +667,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>WebMap</code> (dans <code>cartograpy.mapper</code>) couvre les usages interactifs légers à partir d’un <code>GeoDataFrame</code>, par-dessus Folium/Leaflet.</p>
+<p><code>WebMap</code> (dans <code>cartograpy.mapper</code>) couvre les usages interactifs à partir d’un <code>GeoDataFrame</code>. Trois moteurs au choix : Folium/Leaflet par défaut (jeu de fonctionnalités complet), ou deux moteurs GPU (deck.gl) pour les gros volumes : lonboard et kepler.gl.</p>
 <section id="créer-une-carte" class="level2">
 <h2 class="anchored" data-anchor-id="créer-une-carte">Créer une carte</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> WebMap</span>
@@ -677,16 +686,41 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>WebMap</code> nécessite <code>folium</code>, qui n’est pas dans les dépendances cœur de cartograpy : <code>pip install folium</code> si l’import échoue.</p>
+<p><code>WebMap</code> nécessite <code>folium</code>, <code>lonboard</code> et <code>keplergl</code>, qui ne sont pas dans les dépendances cœur de cartograpy : <code>pip install cartograpy[webmap]</code> installe les trois d’un coup (avec <code>rio-tiler</code>, requis par <code>add_cog</code>/<code>add_raster</code>). Un moteur non installé lève une <code>ImportError</code> explicite à la construction de <code>WebMap(engine=...)</code>.</p>
+</div>
+</div>
+</section>
+<section id="millions-dentités-lonboard-et-kepler.gl" class="level2">
+<h2 class="anchored" data-anchor-id="millions-dentités-lonboard-et-kepler.gl">Millions d’entités : lonboard et kepler.gl</h2>
+<p>Folium/Leaflet ralentit nettement au-delà de quelques dizaines de milliers d’entités (rendu DOM/SVG côté navigateur). Pour de gros volumes vectoriels, <code>engine="lonboard"</code> délègue le rendu au GPU via deck.gl/GeoArrow :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wm <span class="op">=</span> WebMap(engine<span class="op">=</span><span class="st">"lonboard"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>wm.add_layer(gros_gdf)          <span class="co"># des millions de points/polygones, rendu GPU</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>wm.add_basemap(<span class="st">"positron"</span>)      <span class="co"># style lonboard.basemap.CartoStyle</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>wm.save(<span class="st">"carte_gpu.html"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>engine="kepler.gl"</code> (aussi deck.gl) apporte en plus une interface intégrée type « studio » (filtres, styles, détection automatique des colonnes temporelles) :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wm <span class="op">=</span> WebMap(engine<span class="op">=</span><span class="st">"kepler.gl"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>wm.add_layer(gros_gdf, name<span class="op">=</span><span class="st">"Points"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>wm.save(<span class="st">"carte_kepler.html"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Les deux moteurs GPU ne couvrent que <code>add_layer</code>/<code>add_geojson</code>/<code>fit_bounds</code> (<code>add_basemap</code> en plus pour lonboard) : les contrôles Leaflet (mesure, dessin, légende statique, plein écran…), <code>add_heatmap</code>, <code>add_cluster</code>, <code>split()</code> et <code>time_slider()</code> restent spécifiques à <code>engine="folium"</code> et lèvent un <code>NotImplementedError</code> explicite sur les deux autres moteurs.</p>
 </div>
 </div>
 </section>
 <section id="ajouter-une-couche-vectorielle" class="level2">
 <h2 class="anchored" data-anchor-id="ajouter-une-couche-vectorielle">Ajouter une couche vectorielle</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wm.add_layer(regions_gdf, column<span class="op">=</span><span class="st">"densite"</span>, cmap<span class="op">=</span><span class="st">"YlOrRd"</span>,</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>             tooltip_columns<span class="op">=</span>[<span class="st">"nom"</span>, <span class="st">"densite"</span>], name<span class="op">=</span><span class="st">"Densité"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>wm.add_layer(regions_gdf, column<span class="op">=</span><span class="st">"densite"</span>, cmap<span class="op">=</span><span class="st">"YlOrRd"</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>             tooltip_columns<span class="op">=</span>[<span class="st">"nom"</span>, <span class="st">"densite"</span>], name<span class="op">=</span><span class="st">"Densité"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Sans <code>column</code>, la couche est affichée avec un style uni plutôt qu’une choroplèthe :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wm.add_layer(routes_gdf, name<span class="op">=</span><span class="st">"Routes"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wm.add_layer(routes_gdf, name<span class="op">=</span><span class="st">"Routes"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -701,42 +735,81 @@ Note
 </div>
 </div>
 </section>
-<section id="marqueurs" class="level2">
-<h2 class="anchored" data-anchor-id="marqueurs">Marqueurs</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>wm.add_marker((<span class="fl">5.35</span>, <span class="op">-</span><span class="fl">4.0</span>), popup<span class="op">=</span><span class="st">"Abidjan"</span>, tooltip<span class="op">=</span><span class="st">"Cliquez pour plus d'infos"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="marqueurs-clusters-et-chaleur-folium" class="level2">
+<h2 class="anchored" data-anchor-id="marqueurs-clusters-et-chaleur-folium">Marqueurs, clusters et chaleur (folium)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wm.add_marker((<span class="fl">5.35</span>, <span class="op">-</span><span class="fl">4.0</span>), popup<span class="op">=</span><span class="st">"Abidjan"</span>, tooltip<span class="op">=</span><span class="st">"Cliquez pour plus d'infos"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>wm.add_cluster(ecoles_gdf, popup_columns<span class="op">=</span>[<span class="st">"nom"</span>])       <span class="co"># marqueurs groupés</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>wm.add_heatmap(incidents_gdf, weight_column<span class="op">=</span><span class="st">"gravite"</span>)  <span class="co"># carte de chaleur</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="contrôles-et-cadrage" class="level2">
-<h2 class="anchored" data-anchor-id="contrôles-et-cadrage">Contrôles et cadrage</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wm.add_layer_control()      <span class="co"># bouton d'activation/désactivation des couches</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>wm.fit_bounds(regions_gdf)  <span class="co"># zoome automatiquement sur l'emprise d'une couche</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="fonds-de-carte-wms-et-raster-add_cog" class="level2">
+<h2 class="anchored" data-anchor-id="fonds-de-carte-wms-et-raster-add_cog">Fonds de carte, WMS et raster (add_cog)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>wm.add_basemap(<span class="st">"CartoDB positron"</span>, name<span class="op">=</span><span class="st">"Carto"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>wm.add_xyz(<span class="st">"https://</span><span class="sc">{s}</span><span class="st">.tile.opentopomap.org/</span><span class="sc">{z}</span><span class="st">/</span><span class="sc">{x}</span><span class="st">/</span><span class="sc">{y}</span><span class="st">.png"</span>, attr<span class="op">=</span><span class="st">"OpenTopoMap"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>wm.add_wms(<span class="st">"https://ahocevar.com/geoserver/wms"</span>, layers<span class="op">=</span><span class="st">"topp:states"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Raster local ou COG distant, lu via rio-tiler (jamais de téléchargement complet)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>wm.add_cog(<span class="st">"https://.../landcover.tif"</span>, cmap<span class="op">=</span><span class="st">"terrain"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>wm.add_raster(<span class="st">"data/elevation.tif"</span>, cmap<span class="op">=</span><span class="st">"viridis"</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1500</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Astuce
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>add_cog</code>/<code>add_raster</code> lisent un aperçu décimé (<code>max_size</code>, défaut <code>1024</code> px) directement depuis le fichier via <code>rio-tiler</code> : même sur une scène Sentinel de plusieurs centaines de Mo hébergée à distance, seul cet aperçu est transféré. <code>cmap</code> accepte les noms de <code>rio_tiler.colormap.cmap.list()</code> (palettes matplotlib + ColorBrewer).</p>
+</div>
+</div>
+</section>
+<section id="légende-colorbar-et-contrôles-folium" class="level2">
+<h2 class="anchored" data-anchor-id="légende-colorbar-et-contrôles-folium">Légende, colorbar et contrôles (folium)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wm.add_legend({<span class="st">"Faible"</span>: <span class="st">"green"</span>, <span class="st">"Élevé"</span>: <span class="st">"red"</span>}, title<span class="op">=</span><span class="st">"Densité"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>wm.add_colorbar(<span class="dv">0</span>, <span class="dv">100</span>, cmap<span class="op">=</span><span class="st">"YlOrRd"</span>, caption<span class="op">=</span><span class="st">"Densité (hab/km²)"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>wm.add_layer_control()       <span class="co"># bouton d'activation/désactivation des couches</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>wm.add_measure_control()     <span class="co"># outil de mesure distance/surface</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>wm.add_draw_control()        <span class="co"># dessin/édition</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>wm.add_fullscreen()          <span class="co"># bouton plein écran</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>wm.fit_bounds(regions_gdf)   <span class="co"># zoome automatiquement sur l'emprise d'une couche</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="comparaison-côte-à-côte-et-animation-temporelle-folium" class="level2">
+<h2 class="anchored" data-anchor-id="comparaison-côte-à-côte-et-animation-temporelle-folium">Comparaison côte à côte et animation temporelle (folium)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>wm.split(left<span class="op">=</span>occupation_2015, right<span class="op">=</span>occupation_2025,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>         left_name<span class="op">=</span><span class="st">"2015"</span>, right_name<span class="op">=</span><span class="st">"2025"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wm.time_slider(detections_gdf, time_column<span class="op">=</span><span class="st">"date"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>time_slider</code> attend une ligne par (entité, date) : voir <a href="../reference/mapper.html">Reference mapper</a> pour le détail des paramètres.</p>
 </section>
 <section id="toutes-les-méthodes-se-chaînent" class="level2">
 <h2 class="anchored" data-anchor-id="toutes-les-méthodes-se-chaînent">Toutes les méthodes se chaînent</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wm <span class="op">=</span> (</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    WebMap(location<span class="op">=</span>(<span class="fl">5.35</span>, <span class="op">-</span><span class="fl">4.0</span>), zoom_start<span class="op">=</span><span class="dv">7</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .add_layer(regions_gdf, column<span class="op">=</span><span class="st">"densite"</span>, name<span class="op">=</span><span class="st">"Densité"</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .add_marker((<span class="fl">5.35</span>, <span class="op">-</span><span class="fl">4.0</span>), popup<span class="op">=</span><span class="st">"Abidjan"</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    .add_layer_control()</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>wm <span class="op">=</span> (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    WebMap(location<span class="op">=</span>(<span class="fl">5.35</span>, <span class="op">-</span><span class="fl">4.0</span>), zoom_start<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .add_layer(regions_gdf, column<span class="op">=</span><span class="st">"densite"</span>, name<span class="op">=</span><span class="st">"Densité"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .add_marker((<span class="fl">5.35</span>, <span class="op">-</span><span class="fl">4.0</span>), popup<span class="op">=</span><span class="st">"Abidjan"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .add_layer_control()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="afficher-et-exporter" class="level2">
 <h2 class="anchored" data-anchor-id="afficher-et-exporter">Afficher et exporter</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>wm.show()              <span class="co"># affichage automatique dans un notebook Jupyter/Marimo</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>wm.save(<span class="st">"carte.html"</span>)  <span class="co"># export HTML autonome</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wm.show()              <span class="co"># affichage automatique dans un notebook Jupyter/Marimo</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>wm.save(<span class="st">"carte.html"</span>)  <span class="co"># export HTML autonome</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="limites-face-à-map" class="level2">
 <h2 class="anchored" data-anchor-id="limites-face-à-map">Limites face à <code>Map</code></h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
 </colgroup>
 <thead>
 <tr class="header">
 <th></th>
 <th><code>Map</code></th>
-<th><code>WebMap</code></th>
+<th><code>WebMap</code> (folium)</th>
+<th><code>WebMap</code> (lonboard/kepler.gl)</th>
 </tr>
 </thead>
 <tbody>
@@ -744,21 +817,25 @@ Note
 <td>Rendu</td>
 <td>statique (PNG, PDF, export papier)</td>
 <td>interactif (HTML, zoom/pan navigateur)</td>
+<td>interactif, rendu GPU</td>
 </tr>
 <tr class="even">
 <td>Légende, échelle, flèche du Nord</td>
 <td>oui, gérées en détail</td>
-<td>non : habillage Leaflet standard uniquement</td>
+<td>légende/colorbar statiques ; pas d’échelle/flèche du Nord</td>
+<td>non (kepler.gl a sa propre UI)</td>
 </tr>
 <tr class="odd">
 <td>Volumes de données</td>
 <td>adapté aux gros jeux de données</td>
 <td>à limiter : de gros GeoJSON ralentissent le navigateur</td>
+<td>adapté aux gros volumes (millions d’entités)</td>
 </tr>
 <tr class="even">
 <td>Distribution</td>
 <td>image/PDF à insérer dans un document</td>
 <td>fichier HTML autonome, partageable tel quel</td>
+<td>fichier HTML autonome (plus volumineux)</td>
 </tr>
 </tbody>
 </table>
@@ -772,7 +849,7 @@ Astuce
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Pour de gros volumes (plusieurs dizaines de milliers d’entités), simplifiez la géométrie avant <code>add_layer</code> (<code>VectorTools(gdf).simplify_geometry(tolerance=...)</code>) : un GeoJSON trop détaillé ralentit sensiblement l’affichage Leaflet.</p>
+<p>Pour de gros volumes sur <code>engine="folium"</code> (plusieurs dizaines de milliers d’entités), simplifiez la géométrie avant <code>add_layer</code> (<code>VectorTools(gdf).simplify_geometry(tolerance=...)</code>), ou passez à <code>engine="lonboard"</code>/<code>"kepler.gl"</code> plutôt que de forcer Leaflet.</p>
 </div>
 </div>
 </section>

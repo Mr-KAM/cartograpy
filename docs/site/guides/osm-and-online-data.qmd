@@ -126,6 +126,38 @@ les dépendances de `pyproject.toml` : installez-le manuellement
 [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd).
 :::
 
+## Catalogues STAC (`STAC`)
+
+```python
+from cartograpy.data import STAC
+
+stac = STAC("planetary-computer")   # signe automatiquement les hrefs des assets
+
+images = stac.search(
+    collection="sentinel-2-l2a",
+    bbox=(-4.05, 5.28, -3.95, 5.38),
+    start="2025-01-01", end="2025-12-31",
+    cloud_cover=10,
+)
+
+best = images.best()                # élément avec la couverture nuageuse la plus faible
+best.assets()                       # bandes disponibles (DataFrame)
+
+rt = best.load(["red", "nir"])      # -> RasterTools, bandes empilées
+ndvi = rt.ndvi()                    # réutilise RasterTools.ndvi() directement
+```
+
+`load()` lit les bandes directement depuis leur href via `rasterio` : jamais
+de téléchargement complet de la scène, même pour une image Sentinel-2 de
+plusieurs centaines de Mo. `bands` accepte des clés d'asset exactes
+(`"B04"`) ou des noms communs de l'extension STAC `eo` (`"red"`, `"nir"`).
+
+::: {.callout-warning}
+`STAC` nécessite le paquet optionnel `pystac-client` (et `planetary-computer`
+pour ce catalogue précis) : `ImportError` explicite dès l'instanciation s'ils
+sont absents.
+:::
+
 ## Géocodage (`Geocoder`)
 
 ```python

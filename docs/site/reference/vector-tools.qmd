@@ -44,6 +44,29 @@ erreur explicite si elle manque : `networkx` (réseau/accessibilité),
 `scikit-learn` (`spatial_clustering`), `libpysal`/`esda` (statistiques
 spatiales), `pykrige` (`kriging`).
 
+::: {.callout-tip}
+## CRS géographique vs projeté : le piège classique
+
+Sur une couche en `EPSG:4326` (degrés), `vt.buffer(1000)` produit un tampon de
+1000 **degrés**, pas 1000 mètres. `buffer()`, `area()` et
+`distance_to_nearest()` détectent ce cas automatiquement : si le CRS est
+géographique, elles reprojettent temporairement vers l'UTM estimé
+(`estimate_utm()`) avant de calculer, puis reviennent au CRS d'origine.
+
+```python
+vt = VectorTools(gdf)          # gdf en EPSG:4326
+vt.crs_info()                  # {"epsg": 4326, "is_geographic": True, ...}
+
+vt.buffer(1000, unit="m")      # vrai tampon de 1000 m (auto_project=True par défaut)
+vt.area(unit="ha").gdf["area"] # surface en hectares, pas en degrés²
+vt.distance_to_nearest(routes, unit="km")
+```
+
+`auto_project=False` retrouve le comportement historique (calcul direct dans
+les unités du CRS courant), utile si la couche est déjà dans un CRS projeté
+adapté.
+:::
+
 ::: {.callout-note collapse="true"}
 ## Qualité et validation géométrique
 
@@ -70,6 +93,9 @@ spatiales), `pykrige` (`kriging`).
 | `get_crs()` | Retourne le CRS courant. |
 | `set_crs(crs, allow_override=False)` | Attribue un CRS sans reprojeter. |
 | `reproject_layer(target_crs)` | Reprojette la couche (`to_crs`). |
+| `crs_info()` | `dict` (`epsg`, `name`, `is_geographic`, `unit`) : le CRS courant est-il en degrés ou dans une unité métrique. |
+| `estimate_utm()` | CRS UTM estimé à partir du centroïde de l'étendue de la couche (délègue à `GeoDataFrame.estimate_utm_crs()`). |
+| `to_local_crs()` | Reprojette vers le CRS UTM estimé (`estimate_utm()` + `reproject_layer()`). |
 | `rename_fields(mapping)` | Renomme des colonnes (`{ancien: nouveau}`). |
 | `select_fields(columns)` | Ne garde que les colonnes listées (+ géométrie). |
 | `drop_fields(columns)` | Supprime les colonnes listées. |
@@ -103,7 +129,7 @@ spatiales), `pykrige` (`kriging`).
 | `convert_geometry_type(target_type)` | Convertit vers `"point"`, `"line"` ou `"polygon"`. |
 | `line_to_polygon()` | Convertit des lignes fermées en polygones (`polygonize`). |
 | `polygon_to_line()` | Convertit des polygones en lignes de contour (`boundary`). |
-| `buffer(distance)` | Zone tampon autour de chaque géométrie. |
+| `buffer(distance, unit="m", auto_project=True)` | Zone tampon autour de chaque géométrie. Si le CRS est géographique (degrés) et `auto_project=True` (défaut), reprojette temporairement vers l'UTM estimé pour interpréter `distance` en `unit` (`"m"` ou `"km"`) plutôt qu'en degrés, puis revient au CRS d'origine. `auto_project=False` retrouve l'ancien comportement (tampon dans les unités brutes du CRS). |
 | `centroid()` | Remplace les géométries par leur centroïde. |
 | `convex_hull()` | Remplace les géométries par leur enveloppe convexe. |
 | `minimum_bounding_box()` | Remplace les géométries par leur rectangle englobant (`envelope`). |
@@ -117,7 +143,7 @@ spatiales), `pykrige` (`kriging`).
 
 | Méthode | Description |
 |---|---|
-| `area(column_name="area")` | Ajoute une colonne de surface. |
+| `area(column_name="area", unit="m2", auto_project=True)` | Ajoute une colonne de surface. Si le CRS est géographique et `auto_project=True` (défaut), la surface est calculée après reprojection temporaire vers l'UTM estimé, en `unit` (`"m2"`, `"ha"` ou `"km2"`) plutôt qu'en degrés². `auto_project=False` retrouve l'ancien comportement. |
 | `perimeter(column_name="perimeter")` | Ajoute une colonne de périmètre. |
 | `length(column_name="length")` | Ajoute une colonne de longueur (alias surface pour les lignes). |
 | `compactness(column_name="compactness")` | Indice de compacité `4πA / P²`. |
@@ -161,7 +187,7 @@ Certaines méthodes nécessitent `networkx` ou `scikit-learn` (import différé,
 
 | Méthode | Description |
 |---|---|
-| `distance_to_nearest(other, column_name="dist_nearest")` | Distance de chaque entité au plus proche élément d'une autre couche. |
+| `distance_to_nearest(other, column_name="dist_nearest", unit="m", auto_project=True)` | Distance de chaque entité au plus proche élément d'une autre couche. Si le CRS est géographique et `auto_project=True` (défaut), calculée après reprojection temporaire vers l'UTM estimé, en `unit` (`"m"` ou `"km"`) plutôt qu'en degrés. |
 | `nearest_neighbor_analysis()` | Indice R de Clark-Evans (dict : distances observée/attendue, indice R). |
 | `within_distance(other, distance)` | Conserve les entités à moins de `distance` d'une autre couche. |
 | `distance_matrix(other=None, label_field=None, method="centroid")` | Matrice de distance (`"centroid"` ou `"boundary"`). |

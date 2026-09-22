@@ -87,6 +87,28 @@ class TestRasterInit:
         rt = _make_raster()
         assert len(rt) == 1
 
+    def test_lazy_defers_full_read(self):
+        rt = _make_raster()
+        path = rt._write_tmp()
+        try:
+            rt2 = RasterTools(path, lazy=True)
+            assert rt2._data is None
+            assert "not loaded" in repr(rt2)
+            assert len(rt2) == rt.data.shape[0]
+            assert rt2.data.shape == rt.data.shape
+            assert rt2._data is not None
+        finally:
+            os.remove(path)
+
+    def test_non_lazy_loads_immediately(self):
+        rt = _make_raster()
+        path = rt._write_tmp()
+        try:
+            rt2 = RasterTools(path)
+            assert rt2._data is not None
+        finally:
+            os.remove(path)
+
 
 class TestRasterValidation:
     def test_get_raster_info(self):
@@ -193,6 +215,28 @@ class TestRasterClipping:
         gdf = gpd.GeoDataFrame(geometry=[box(*bounds)], crs="EPSG:4326")
         masked = rt.mask_raster(gdf)
         assert masked.data.shape == rt.data.shape
+
+    def test_clip_raster_lazy_never_loads_full_array(self):
+        rt = _make_raster()
+        path = rt._write_tmp()
+        try:
+            lazy_rt = RasterTools(path, lazy=True)
+            bounds = rasterio.transform.array_bounds(
+                lazy_rt.profile["height"],
+                lazy_rt.profile["width"],
+                lazy_rt.profile["transform"],
+            )
+            # A small AOI covering only the top-left quadrant.
+            xmin, ymin, xmax, ymax = bounds
+            aoi = box(xmin, (ymin + ymax) / 2, (xmin + xmax) / 2, ymax)
+            gdf = gpd.GeoDataFrame(geometry=[aoi], crs="EPSG:4326")
+            clipped = lazy_rt.clip_raster(gdf)
+            assert lazy_rt._data is None  # clip never touched the full array
+            assert clipped.data.size > 0
+            assert clipped.data.shape[1] <= rt.data.shape[1]
+            assert clipped.data.shape[2] <= rt.data.shape[2]
+        finally:
+            os.remove(path)
 
 
 class TestRasterCleaning:

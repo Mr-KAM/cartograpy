@@ -5,7 +5,7 @@ description: "Composer une carte 2D avec Map, couches, légende et mise en page.
 
 `Map` (dans `cartograpy.mapper`) centralise la production de cartes statiques avec
 Matplotlib et Cartopy : couches vectorielles/raster, choroplèthes, légende, échelle,
-flèche du Nord, grille, export. C'est la classe la plus riche du package (65
+flèche du Nord, grille, export. C'est la classe la plus riche du package (70
 méthodes publiques).
 
 ```{mermaid}
@@ -154,8 +154,35 @@ m.show()
 m.save("carte_finale.png", dpi=300)
 ```
 
-Référence complète des 69 méthodes de `Map`, groupées par thème :
+Référence complète des 70 méthodes de `Map`, groupées par thème :
 [Reference mapper](/reference/mapper.qmd).
+
+## Planches multi-panneaux (Layout)
+
+Pour assembler plusieurs `Map` en une seule planche publication (titre,
+légende partagée, source, crédits, lettres de panneaux `(a)`, `(b)`...),
+utilisez `Layout` plutôt que de composer les images à la main :
+
+```python
+from cartograpy import Layout
+
+layout = Layout("A4", orientation="landscape", template="scientific")
+layout.add_map(carte_localisation, caption="Zone d'étude")
+layout.add_map(carte_ndvi, caption="NDVI")
+layout.add_map(carte_occupation, caption="Occupation du sol")
+layout.add_map(carte_changement, caption="Changement 2020-2024")
+layout.add_title("Suivi de l'occupation du sol")
+layout.add_legend()
+layout.add_source("Sentinel-2, ESA")
+layout.add_credits("Carte : A. Kambou, 2026")
+layout.export("planche.pdf")
+```
+
+7 gabarits visuels prêts à l'emploi (`template=`) : `"scientific"`,
+`"journal"`, `"thesis"`, `"atlas"`, `"report"`, `"poster"`, `"minimal"`. Pour
+une planche à un seul panneau, le raccourci `m.layout("scientific")` évite
+d'instancier `Layout` explicitement. Détail complet : [Méthodes de
+Layout](/reference/mapper.qmd#méthodes-de-layout).
 
 ## Exemple complet
 

@@ -537,6 +537,12 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -658,6 +664,10 @@ ul.task-list li input[type="checkbox"] {
 <h4 class="anchored" data-anchor-id="google-earth-engine">Google Earth Engine</h4>
 <p>Imagerie satellite et analyses à grande échelle. Utilisé par <code>Gee</code> : nécessite en plus un compte Google Earth Engine et une authentification (<code>ee.Authenticate()</code>), au-delà de l’installation des paquets Python.</p>
 </section>
+<section id="catalogues-stac" class="level4">
+<h4 class="anchored" data-anchor-id="catalogues-stac">Catalogues STAC</h4>
+<p>Recherche et chargement d’imagerie satellite via le standard STAC (SpatioTemporal Asset Catalog) : Microsoft Planetary Computer, AWS Earth Search, Digital Earth Africa, Copernicus Data Space. Utilisé par <code>STAC</code>. Les bandes sont lues directement via <code>rasterio</code> (jamais de téléchargement complet du fichier).</p>
+</section>
 </section>
 <section id="ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin" class="level2">
 <h2 class="anchored" data-anchor-id="ce-qui-a-besoin-du-réseau-et-ce-qui-nen-a-pas-besoin">Ce qui a besoin du réseau : et ce qui n’en a pas besoin</h2>
@@ -722,16 +732,24 @@ ul.task-list li input[type="checkbox"] {
 <td>Oui, + authentification Google Earth Engine préalable</td>
 </tr>
 <tr class="odd">
+<td><code>STAC</code></td>
+<td>Oui (catalogue STAC + hrefs des assets), sauf <code>sources()</code></td>
+</tr>
+<tr class="even">
 <td><code>google_font()</code> (styling)</td>
 <td>Oui (Google Fonts) : <code>path_font()</code>/<code>local_font()</code> sont locaux</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>Map.add_basemap()</code></td>
 <td>Oui (tuiles web via <code>contextily</code>)</td>
 </tr>
+<tr class="even">
+<td><code>WebMap</code> (<code>engine="folium"</code>)</td>
+<td>Non pour la génération de la carte (tuiles chargées côté navigateur), sauf <code>add_wms</code>/<code>add_cog</code>/<code>add_raster</code> sur une URL distante (lues au moment de l’appel Python via <code>rio-tiler</code>)</td>
+</tr>
 <tr class="odd">
-<td><code>WebMap</code></td>
-<td>Non pour la génération de la carte (tuiles chargées côté navigateur au moment de l’affichage, pas au moment de l’appel Python)</td>
+<td><code>WebMap</code> (<code>engine="lonboard"</code>/<code>"kepler.gl"</code>)</td>
+<td>Non : rendu local, sauf source de données distante</td>
 </tr>
 </tbody>
 </table>
@@ -752,7 +770,7 @@ Astuce
 <section id="dépendances-cœur" class="level2">
 <h2 class="anchored" data-anchor-id="dépendances-cœur">Dépendances cœur</h2>
 <p>Toutes déclarées dans <code>pyproject.toml</code>, installées automatiquement avec <code>pip install cartograpy</code> :</p>
-<p><code>cartopy</code>, <code>click</code>, <code>drawarrow</code>, <code>geopandas</code>, <code>geojson</code>, <code>geopy</code>, <code>gpxpy</code>, <code>highlight-text</code>, <code>matplotlib</code>, <code>numpy</code>, <code>osmnx</code>, <code>pandas</code>, <code>pillow</code>, <code>pykml</code>, <code>pypalettes</code>, <code>pyproj</code>, <code>rasterio</code>, <code>reportlab</code>, <code>requests</code>, <code>requests-cache</code>, <code>seaborn</code>, <code>shapely</code>, <code>svglib</code>, <code>tabulate</code>, <code>tqdm</code>, <code>wbdata</code>, <code>fiona</code>, <code>matplotlib-map-utils</code>, <code>jupyter</code>, <code>geemap</code>, <code>pyfonts</code>, <code>marimo</code>, <code>scienceplots</code>, <code>mplcyberpunk</code>, <code>geohexgrid</code>.</p>
+<p><code>cartopy</code>, <code>click</code>, <code>drawarrow</code>, <code>geopandas</code>, <code>geojson</code>, <code>geopy</code>, <code>gpxpy</code>, <code>highlight-text</code>, <code>matplotlib</code>, <code>numpy</code>, <code>osmnx</code>, <code>pandas</code>, <code>pillow</code>, <code>pykml</code>, <code>pypalettes</code>, <code>pyproj</code>, <code>rasterio</code>, <code>reportlab</code>, <code>requests</code>, <code>requests-cache</code>, <code>seaborn</code>, <code>shapely</code>, <code>svglib</code>, <code>tabulate</code>, <code>tqdm</code>, <code>wbdata</code>, <code>fiona</code>, <code>matplotlib-map-utils</code>, <code>jupyter</code>, <code>geemap</code>, <code>pyfonts</code>, <code>marimo</code>, <code>scienceplots</code>, <code>mplcyberpunk</code>, <code>geohexgrid</code>, <code>pystac-client</code>, <code>planetary-computer</code>.</p>
 <p><code>scienceplots</code> et <code>mplcyberpunk</code> alimentent <code>styling.set_style()</code> / <code>list_all_styles()</code> ; <code>geohexgrid</code> alimente les grilles hexagonales de <code>cartograpy.mapper</code> (<code>make_hex_grid</code>, <code>aggregate_to_hex</code>, <code>plot_hexgrid_choropleth</code>).</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -800,6 +818,26 @@ Avertissement
 <td><code>Gee</code> (toutes les méthodes)</td>
 <td><strong>Non</strong> : écart à corriger, voir ci-dessous</td>
 </tr>
+<tr class="even">
+<td><code>folium</code></td>
+<td><code>WebMap</code> avec <code>engine="folium"</code> (moteur par défaut)</td>
+<td>Oui, extra <code>webmap</code></td>
+</tr>
+<tr class="odd">
+<td><code>lonboard</code></td>
+<td><code>WebMap</code> avec <code>engine="lonboard"</code> (rendu GPU deck.gl)</td>
+<td>Oui, extra <code>webmap</code></td>
+</tr>
+<tr class="even">
+<td><code>keplergl</code></td>
+<td><code>WebMap</code> avec <code>engine="kepler.gl"</code></td>
+<td>Oui, extra <code>webmap</code></td>
+</tr>
+<tr class="odd">
+<td><code>rio-tiler</code></td>
+<td><code>WebMap.add_raster()</code>/<code>.add_cog()</code></td>
+<td>Oui, extra <code>webmap</code></td>
+</tr>
 </tbody>
 </table>
 <div class="callout callout-style-default callout-warning callout-titled">
@@ -813,6 +851,19 @@ Avertissement
 </div>
 <div class="callout-body-container callout-body">
 <p>Écart connu : <code>Gee</code> importe le paquet <code>ee</code> (<code>earthengine-api</code>) via <code>_require_ee()</code>, mais ce paquet n’apparaît nulle part dans les dépendances de <code>pyproject.toml</code> : seul <code>geemap</code> y est déclaré (en dépendance cœur, alors qu’il n’est en réalité utilisé qu’à travers ce même mécanisme optionnel). Installer cartograpy seul ne suffit donc pas à faire fonctionner <code>Gee</code> : il faut ajouter manuellement <code>pip install earthengine-api</code>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Astuce
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>folium</code>, <code>lonboard</code>, <code>keplergl</code> et <code>rio-tiler</code> sont regroupés dans l’extra <code>webmap</code> de <code>pyproject.toml</code> (contrairement à <code>contextily</code>/<code>matplotlib-scalebar</code>, totalement absents des métadonnées) : <code>pip install cartograpy[webmap]</code> les installe tous les quatre d’un coup, plutôt que de les ajouter un par un.</p>
 </div>
 </div>
 

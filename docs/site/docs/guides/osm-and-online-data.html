@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -628,6 +634,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#indicateurs-world-bank-worldbank" id="toc-indicateurs-world-bank-worldbank" class="nav-link" data-scroll-target="#indicateurs-world-bank-worldbank">Indicateurs World Bank (<code>WorldBank</code>)</a></li>
   <li><a href="#météo-climat-nasa-power-climate" id="toc-météo-climat-nasa-power-climate" class="nav-link" data-scroll-target="#météo-climat-nasa-power-climate">Météo &amp; climat NASA POWER (<code>Climate</code>)</a></li>
   <li><a href="#google-earth-engine-gee" id="toc-google-earth-engine-gee" class="nav-link" data-scroll-target="#google-earth-engine-gee">Google Earth Engine (<code>Gee</code>)</a></li>
+  <li><a href="#catalogues-stac-stac" id="toc-catalogues-stac-stac" class="nav-link" data-scroll-target="#catalogues-stac-stac">Catalogues STAC (<code>STAC</code>)</a></li>
   <li><a href="#géocodage-geocoder" id="toc-géocodage-geocoder" class="nav-link" data-scroll-target="#géocodage-geocoder">Géocodage (<code>Geocoder</code>)</a></li>
   <li><a href="#aller-plus-loin" id="toc-aller-plus-loin" class="nav-link" data-scroll-target="#aller-plus-loin">Aller plus loin</a></li>
   </ul>
@@ -771,20 +778,53 @@ Avertissement
 </div>
 </div>
 </section>
+<section id="catalogues-stac-stac" class="level2">
+<h2 class="anchored" data-anchor-id="catalogues-stac-stac">Catalogues STAC (<code>STAC</code>)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> STAC</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>stac <span class="op">=</span> STAC(<span class="st">"planetary-computer"</span>)   <span class="co"># signe automatiquement les hrefs des assets</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>images <span class="op">=</span> stac.search(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    collection<span class="op">=</span><span class="st">"sentinel-2-l2a"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    bbox<span class="op">=</span>(<span class="op">-</span><span class="fl">4.05</span>, <span class="fl">5.28</span>, <span class="op">-</span><span class="fl">3.95</span>, <span class="fl">5.38</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    start<span class="op">=</span><span class="st">"2025-01-01"</span>, end<span class="op">=</span><span class="st">"2025-12-31"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    cloud_cover<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>best <span class="op">=</span> images.best()                <span class="co"># élément avec la couverture nuageuse la plus faible</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>best.assets()                       <span class="co"># bandes disponibles (DataFrame)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>rt <span class="op">=</span> best.load([<span class="st">"red"</span>, <span class="st">"nir"</span>])      <span class="co"># -&gt; RasterTools, bandes empilées</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>ndvi <span class="op">=</span> rt.ndvi()                    <span class="co"># réutilise RasterTools.ndvi() directement</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>load()</code> lit les bandes directement depuis leur href via <code>rasterio</code> : jamais de téléchargement complet de la scène, même pour une image Sentinel-2 de plusieurs centaines de Mo. <code>bands</code> accepte des clés d’asset exactes (<code>"B04"</code>) ou des noms communs de l’extension STAC <code>eo</code> (<code>"red"</code>, <code>"nir"</code>).</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Avertissement
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>STAC</code> nécessite le paquet optionnel <code>pystac-client</code> (et <code>planetary-computer</code> pour ce catalogue précis) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents.</p>
+</div>
+</div>
+</section>
 <section id="géocodage-geocoder" class="level2">
 <h2 class="anchored" data-anchor-id="géocodage-geocoder">Géocodage (<code>Geocoder</code>)</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Geocoder</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>geocoder <span class="op">=</span> Geocoder()</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>gdf, non_trouves <span class="op">=</span> geocoder.geocode(<span class="st">"Tour Eiffel, Paris"</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>gdf, non_trouves <span class="op">=</span> geocoder.geocode([<span class="st">"Abidjan"</span>, <span class="st">"Dakar"</span>, <span class="st">"Bamako"</span>])</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>adresses, _ <span class="op">=</span> geocoder.reverse_geocode((<span class="fl">48.8566</span>, <span class="fl">2.3522</span>))</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>candidats <span class="op">=</span> geocoder.search(<span class="st">"Boulangerie"</span>, limit<span class="op">=</span><span class="dv">5</span>, country_codes<span class="op">=</span><span class="st">"fr"</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>bbox <span class="op">=</span> geocoder.bbox(<span class="st">"Abidjan, Côte d'Ivoire"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.data <span class="im">import</span> Geocoder</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>geocoder <span class="op">=</span> Geocoder()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>gdf, non_trouves <span class="op">=</span> geocoder.geocode(<span class="st">"Tour Eiffel, Paris"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>gdf, non_trouves <span class="op">=</span> geocoder.geocode([<span class="st">"Abidjan"</span>, <span class="st">"Dakar"</span>, <span class="st">"Bamako"</span>])</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>adresses, _ <span class="op">=</span> geocoder.reverse_geocode((<span class="fl">48.8566</span>, <span class="fl">2.3522</span>))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>candidats <span class="op">=</span> geocoder.search(<span class="st">"Boulangerie"</span>, limit<span class="op">=</span><span class="dv">5</span>, country_codes<span class="op">=</span><span class="st">"fr"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>bbox <span class="op">=</span> geocoder.bbox(<span class="st">"Abidjan, Côte d'Ivoire"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Renvoie un <code>GeoDataFrame</code> (colonnes <code>query</code>, <code>address</code>, <code>latitude</code>, <code>longitude</code>, <code>geometry</code>…) et la liste de ce qui n’a pas été trouvé, plutôt que de lever une erreur : pratique pour géocoder un lot d’adresses en continuant malgré les échecs individuels.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">

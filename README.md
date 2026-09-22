@@ -19,18 +19,25 @@ boundaries to the final static map, ready to export, anywhere in the world.
 
 - **Data**: download administrative boundaries (`GeoBoundaries`),
   OpenStreetMap data, hydrography, geocoding, elevation (SRTM), World Bank
-  indicators, weather/climate series (NASA POWER), or Google Earth Engine
-  imagery in one line; results returned as `GeoDataFrame`/`DataFrame`.
+  indicators, weather/climate series (NASA POWER), Google Earth Engine
+  imagery, or STAC catalogs (Planetary Computer, AWS Earth Search…) in one
+  line; results returned as `GeoDataFrame`/`DataFrame`/`RasterTools`.
 - **Processing**: import/export all common formats (Shapefile, GeoJSON, KML,
   GPX, GPKG, CSV, Parquet…), reproject, clip, merge, compute centroids,
-  joins, and dynamic attributes (`VectorTools`, `RasterTools`).
+  joins, and dynamic attributes (`VectorTools`, `RasterTools`); automatic
+  UTM projection for accurate metric distances/areas, lazy/windowed raster
+  loading for large files.
 - **Mapping**: choropleth, point, polygon, raster, bivariate, or hexbin maps
-  with the `Map` class: north arrow, scale bar, situation inset map,
-  legends, graticule, PNG/SVG export.
+  with the `Map` class (north arrow, scale bar, situation inset map,
+  legends, graticule, PNG/SVG export); publication-ready multi-panel plates
+  (`Layout`); interactive web maps (`WebMap`, Folium/lonboard/kepler.gl
+  engines).
 - **Styling**: Google Fonts, 16 built-in palettes + seaborn/matplotlib,
   graphic styles (`scienceplots`, `mplcyberpunk`).
 - **Project**: `Project` structures folders and outputs, tracks the CRS,
   and validates dataset integrity.
+- **CLI**: a `cartograpy` command (`init`, `fetch`, `inspect`, `convert`,
+  `map`, `doctor`) for common tasks without writing a Python script.
 
 ## Installation
 
@@ -44,15 +51,22 @@ pip install cartograpy
 > fails, install `geopandas rasterio cartopy fiona` via `conda-forge` before
 > `pip install cartograpy`.
 
+Interactive web maps (`WebMap`) need the optional `webmap` extra
+(`folium`, `lonboard`, `keplergl`, `rio-tiler`):
+
+```bash
+pip install cartograpy[webmap]
+```
+
 ## How it works
 
-![Flow: sources → data → processing → mapper → final map](https://mermaid.ink/svg/Zmxvd2NoYXJ0IExSCiAgICBTWyJTb3VyY2VzPGJyLz5sb2NhbCBmaWxlcyDCtyBHZW9Cb3VuZGFyaWVzIMK3IE9TTTxici8-SHlkcm8gwrcgU1JUTSDCtyBXb3JsZCBCYW5rIMK3IEdFRSJdIC0tPiBEWyJjYXJ0b2dyYXB5LmRhdGEiXQogICAgRCAtLT58Ikdlb0RhdGFGcmFtZSAvIERhdGFGcmFtZSJ8IFBbImNhcnRvZ3JhcHkucHJvY2Vzc2luZyJdCiAgICBQIC0tPiBNWyJjYXJ0b2dyYXB5Lm1hcHBlciJdCiAgICBTVFsiY2FydG9ncmFweS5zdHlsaW5nIl0gLS4tPiBNCiAgICBNIC0tPiBPWyJGaW5hbCBtYXA8YnIvPlBORyDCtyBTVkcgwrcgSFRNTCJd)
+![Flow: sources → data → processing → mapper → final map](https://mermaid.ink/svg/Zmxvd2NoYXJ0IExSCiAgICBTWyJTb3VyY2VzPGJyLz5sb2NhbCBmaWxlcyDCtyBHZW9Cb3VuZGFyaWVzIMK3IE9TTTxici8-SHlkcm8gwrcgU1JUTSDCtyBXb3JsZCBCYW5rIMK3IEdFRSDCtyBTVEFDIl0gLS0-IERbImNhcnRvZ3JhcHkuZGF0YSJdCiAgICBEIC0tPnwiR2VvRGF0YUZyYW1lIC8gRGF0YUZyYW1lInwgUFsiY2FydG9ncmFweS5wcm9jZXNzaW5nIl0KICAgIFAgLS0-IE1bImNhcnRvZ3JhcHkubWFwcGVyIl0KICAgIFNUWyJjYXJ0b2dyYXB5LnN0eWxpbmciXSAtLi0-IE0KICAgIE0gLS0-IE9bIkZpbmFsIG1hcDxici8-UE5HIMK3IFNWRyDCtyBIVE1MIl0)
 
 <details><summary>Mermaid diagram source</summary>
 
 ```mermaid
 flowchart LR
-    S["Sources<br/>local files · GeoBoundaries · OSM<br/>Hydro · SRTM · World Bank · GEE"] --> D["cartograpy.data"]
+    S["Sources<br/>local files · GeoBoundaries · OSM<br/>Hydro · SRTM · World Bank · GEE · STAC"] --> D["cartograpy.data"]
     D -->|"GeoDataFrame / DataFrame"| P["cartograpy.processing"]
     P --> M["cartograpy.mapper"]
     ST["cartograpy.styling"] -.-> M
@@ -77,6 +91,18 @@ m.add_scale_bar()
 m.show()
 
 m.save("cote-divoire.png", dpi=300)          # print-ready export
+```
+
+## Command line
+
+Common tasks without writing Python, via the `cartograpy` command installed
+with the package:
+
+```bash
+cartograpy init mon_projet
+cartograpy fetch boundary CIV --adm 2
+cartograpy map regions.gpkg --column population -o map.png
+cartograpy doctor        # check Python, GDAL/PROJ/GEOS, core and optional deps
 ```
 
 ## The modules

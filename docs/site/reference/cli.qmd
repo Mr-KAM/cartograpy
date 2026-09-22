@@ -1,0 +1,200 @@
+---
+title: "CLI"
+description: "Référence de la commande cartograpy en ligne de commande."
+---
+
+`pip install cartograpy` installe aussi une commande `cartograpy`, construite avec
+`click` (déjà une dépendance du paquet). Elle expose un sous-ensemble des tâches les
+plus courantes sans écrire de script Python : initialiser un projet, télécharger des
+données (frontières, DEM, OSM, hydrographie, World Bank, météo/climat, Google Earth
+Engine, catalogues STAC), inspecter un fichier, convertir un format, produire une
+carte rapide, diagnostiquer l'environnement GIS.
+
+```bash
+cartograpy --help
+cartograpy --version
+```
+
+## `cartograpy init`
+
+Initialise un projet (`Project.init()`) : crée les dossiers `data/` et `output/`.
+
+```bash
+cartograpy init mon_projet
+```
+
+## `cartograpy fetch`
+
+Sous-commandes de téléchargement, en s'appuyant sur les classes de
+[Reference data](/reference/data.qmd).
+
+### `fetch boundary`
+
+```bash
+cartograpy fetch boundary CIV --adm 2
+cartograpy fetch boundary "Côte d'Ivoire" --adm 0 --no-simplified -o civ.gpkg
+```
+
+- `--adm` : niveau administratif (`0`-`5`, ou `-1` pour le plus fin disponible). Défaut `0`.
+- `--simplified/--no-simplified` : géométrie simplifiée (par défaut) ou complète.
+- `-o, --output` : fichier de sortie ; format déduit de l'extension
+  (`.gpkg`, `.geojson`, `.shp`...). Défaut `<territoire>_adm<niveau>.gpkg`.
+
+### `fetch dem`
+
+```bash
+cartograpy fetch dem CIV
+cartograpy fetch dem LUX -o lux.tif
+```
+
+Résout l'emprise du territoire (`Bound.get_bbox()`) puis télécharge la mosaïque SRTM
+correspondante (`DEM.download()`). Défaut `<territoire>_dem.tif`.
+
+### `fetch osm`
+
+```bash
+cartograpy fetch osm "Abidjan, Côte d'Ivoire" --common schools
+cartograpy fetch osm "Dakar, Sénégal" --tag amenity=hospital --tag building=true --data-type points -o hopitaux.gpkg
+```
+
+- `--tag KEY=VALUE` (répétable) : filtre OSM brut ; `VALUE` = `true`/`*` devient `True`
+  (n'importe quelle valeur de la clé), comme attendu par `osmnx`.
+- `--common NAME` : raccourci vers une entrée de `OSM.get_common_tag()` (`schools`,
+  `hospitals`, `restaurants`...). Fournir `--tag` ou `--common`, pas les deux à vide.
+- `--data-type` : `points`, `polygons`, `lines` ou `all` (défaut).
+- Défaut de sortie : `osm_<lieu-normalisé>.gpkg`.
+
+### `fetch hydro`
+
+```bash
+cartograpy fetch hydro af -o rivieres_afrique.gpkg
+```
+
+Télécharge les données HydroRIVERS pour une région continentale (`af`, `as`, `au`,
+`eu`, `na`, `sa`). Défaut `hydro_<region>.gpkg`.
+
+### `fetch worldbank`
+
+```bash
+cartograpy fetch worldbank -i SP.POP.TOTL -c CIV -c SEN -o population.csv
+```
+
+- `-i, --indicator` (répétable, requis) : code d'indicateur World Bank.
+- `-c, --country` (répétable) : code ISO3. Défaut `all` (tous les pays).
+- Sortie tabulaire (défaut `worldbank.csv`) : l'index (pays, date) est réintégré comme
+  colonnes avant export.
+
+### `fetch climate`
+
+```bash
+cartograpy fetch climate --point -3.99,5.35 --start 2023-01-01 --end 2023-12-31
+cartograpy fetch climate --bbox -6,4,-2,8 --start 2020 --end 2022 --temporal monthly -o climat.gpkg
+```
+
+Mode point (`--point lon,lat`) ou régional (`--bbox xmin,ymin,xmax,ymax`) — un seul des
+deux, exclusif. `--parameter` (répétable, défaut `Climate.DEFAULT_PARAMETERS`),
+`--community` (`ag`/`sb`/`re`), `--temporal` (`daily`/`hourly`/`monthly`/`climatology`).
+
+### `fetch gee`
+
+```bash
+cartograpy fetch gee sentinel2 --bbox -8.6,4.3,-2.5,10.7 --start 2024-01-01 --end 2024-03-01 --cloud 0.2
+```
+
+Mosaïque médiane sans nuages (`get_sentinel2`/`get_landsat9`) puis export local via
+`Gee.download()`. `--scale` par défaut 10 m (sentinel2) ou 30 m (landsat9). Nécessite
+`earthengine-api` installé et authentifié (voir `cartograpy doctor`).
+
+### `fetch stac`
+
+```bash
+cartograpy fetch stac sentinel-2-l2a --bbox -4.05,5.28,-3.95,5.38 --start 2025-01-01 --end 2025-06-01 --cloud-cover 20 --band red --band nir -o s2.tif
+```
+
+Recherche (`STAC.search()`), garde l'élément le moins nuageux (`.best()`), charge les
+bandes demandées (`.load()`, lecture fenêtrée directe depuis les hrefs — jamais de
+téléchargement complet de la scène) et exporte en GeoTIFF (`RasterTools.export_geotiff()`).
+`--catalog` accepte une clé de `STAC.CATALOGS` (`planetary-computer`, `earth-search`,
+`digital-earth-africa`, `copernicus-dataspace`) ou une URL STAC directe.
+
+::: {.callout-tip}
+Le téléchargement effectif se fait au moment de `.load()`, via des lectures fenêtrées
+sur le COG distant : pour une grande emprise ou des bandes à pleine résolution, la
+commande peut prendre plusieurs dizaines de secondes selon la bande passante.
+:::
+
+## `cartograpy inspect`
+
+```bash
+cartograpy inspect landcover.tif
+cartograpy inspect frontieres.gpkg
+```
+
+Affiche les métadonnées d'un fichier géospatial (type, format, couches, CRS,
+emprise...) via `describe()`. Voir [Reference data](/reference/data.qmd#describe).
+
+## `cartograpy convert`
+
+```bash
+cartograpy convert data.shp data.gpkg
+cartograpy convert points.geojson points.csv
+```
+
+Charge `SRC` (`load()`) et réenregistre en `DST` (`save()`), le format de sortie
+étant déduit de l'extension de `DST`.
+
+## `cartograpy map`
+
+```bash
+cartograpy map regions.gpkg --column population -o population.png
+cartograpy map landcover.tif -o landcover.png --title "Occupation du sol"
+```
+
+Rendu rapide en une commande : `Map()` + `add_layer()` (+ `column` pour une
+choroplèthe) + `save()`. Pour un contrôle fin (projection, légende, mise en page),
+utilisez directement `Map` en Python — voir [Reference mapper](/reference/mapper.qmd).
+
+- `--column` : colonne pour une carte choroplèthe (vecteur uniquement).
+- `--title` : titre de la carte.
+- `-o, --output` : fichier image de sortie. Défaut `map.png`.
+
+## `cartograpy doctor`
+
+```bash
+cartograpy doctor
+```
+
+Diagnostique l'environnement GIS : version de Python, des bibliothèques C sous-jacentes
+(GDAL, PROJ, GEOS via `rasterio`/`pyproj`/`shapely`), des dépendances cœur
+(`rasterio`, `geopandas`, `cartopy`, `fiona`), des dépendances optionnelles de
+l'extra `webmap` (`folium`, `lonboard`, `keplergl`, `rio-tiler`), et de
+`earthengine-api` (installation + authentification `ee.Authenticate()`).
+
+```
+Cartograpy 2.1.0
+
+[OK] Python 3.12.13
+[OK] GDAL 3.12.4
+[OK] PROJ 9.5.1
+[OK] GEOS 3.13.1
+[OK] rasterio 1.5.1
+[OK] geopandas 1.1.4
+[OK] cartopy 0.25.0
+[OK] fiona 1.10.1
+[!] folium not installed (pip install cartograpy[webmap])
+[!] earthengine-api authentication missing (ee.Authenticate())
+```
+
+::: {.callout-tip}
+Particulièrement utile pour diagnostiquer une installation Windows/conda où
+GDAL/GEOS/PROJ sont la source la plus fréquente de plantage à l'import — voir
+[Installation](/getting-started/installation.qmd#dépendances-par-plateforme).
+:::
+
+## Ce que la CLI ne couvre pas
+
+La CLI expose un sous-ensemble volontairement restreint des sources de données et
+des rendus : les workflows plus riches (styles, projections personnalisées,
+`Layout`, `WebMap`, `Geocoder`, `VectorTools`/`RasterTools`, requêtes STAC/GEE
+multi-collections, zonal stats...) nécessitent d'utiliser cartograpy comme
+bibliothèque Python. Voir [Référence API](/reference/api-overview.qmd).

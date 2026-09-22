@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cartograpy"
-version = "2.0.3"
+version = "2.1.0"
 description = "Python package to create maps easily"
 authors = [
     { name = "Anicet Cyrille KAMBOU", email = "kanicetcyrille@gmail.com" },
@@ -58,14 +58,25 @@ dependencies = [
     "scienceplots>=2.1",
     "mplcyberpunk>=0.7",
     "geohexgrid>=3.0",
+    "pystac-client>=0.8",
+    "planetary-computer>=1.0",
 ]
 
 [project.license]
 file = "LICENSE"
 
+[project.scripts]
+cartograpy = "cartograpy.cli:cli"
+
 [project.optional-dependencies]
 notebook = [
     "jupyter>=1.1.1",
+]
+webmap = [
+    "folium>=0.15",
+    "lonboard>=0.9",
+    "keplergl>=0.3.2",
+    "rio-tiler>=6.0",
 ]
 dev = [
     "pytest>=7.0.0",

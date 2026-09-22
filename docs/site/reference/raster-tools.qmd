@@ -25,6 +25,28 @@ rt2.export_geotiff("resultat.tif")
 82 méthodes publiques, groupées ci-dessous par famille. Chaque entrée montre la signature et un résumé d'une ligne : voir le docstring de la méthode dans `cartograpy/processing/raster.py` pour le détail des paramètres.
 :::
 
+::: {.callout-tip}
+## `lazy=True` : éviter de charger un gros raster en mémoire
+
+Par défaut, `RasterTools(path)` lit immédiatement tout le raster (`src.read()`).
+Avec `lazy=True`, seules les métadonnées (`profile`) sont lues à la
+construction ; les pixels ne sont chargés qu'au premier accès à `.data`.
+
+`clip_raster()` (et donc `mask_raster()`/`crop_raster()`) lit directement
+depuis le fichier source via une fenêtre rasterio plutôt que de matérialiser
+`.data` d'abord : découper un grand raster sur une petite zone d'intérêt ne
+charge donc **jamais** le raster complet en mémoire.
+
+```python
+rt = RasterTools("sentinel.tif", lazy=True)
+zone_etude = rt.clip_raster(aoi_gdf)   # rt.data n'est jamais chargé
+ndvi = zone_etude.ndvi()               # opère sur le petit clip
+```
+
+`repr(rt)` indique si les pixels sont chargés (`data=loaded` /
+`data=not loaded (lazy)`) sans forcer la lecture.
+:::
+
 ::: {.callout-note collapse="true"}
 ## Initialisation et introspection
 

@@ -115,9 +115,13 @@ pip install cartograpy
 - `geopandas` pour les données vectorielles
 - `rasterio` pour les rasters
 - `cartopy` et `matplotlib` pour les cartes statiques
-- `folium` (via `WebMap`) et `geemap` pour les usages web et Google Earth Engine
+- `geemap`/`pystac-client`/`planetary-computer` pour Google Earth Engine et les catalogues STAC
 - `geohexgrid` pour les grilles hexagonales / hexbin
 - `scienceplots` et `mplcyberpunk` pour les styles graphiques de `styling`
+
+`WebMap` (cartes interactives) n'est **pas** couvert par l'installation de base :
+`pip install cartograpy[webmap]` installe `folium`, `lonboard`, `keplergl` et
+`rio-tiler`.
 
 Voir [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd)
 pour la liste complète et les dépendances optionnelles (`contextily`,
@@ -156,3 +160,12 @@ Si cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème 
 des dépendances système (voir la section par plateforme ci-dessus), pas de
 cartograpy lui-même.
 :::
+
+Ou, sans écrire de Python, via la CLI installée avec le paquet :
+
+```bash
+cartograpy doctor
+```
+
+Vérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et optionnelles (`webmap`,
+`earthengine-api`) en un coup d'œil. Voir [Reference CLI](/reference/cli.qmd).

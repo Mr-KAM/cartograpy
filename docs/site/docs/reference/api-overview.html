@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -623,6 +629,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#modules-publics" id="toc-modules-publics" class="nav-link" data-scroll-target="#modules-publics">Modules publics</a></li>
   <li><a href="#objets-majeurs" id="toc-objets-majeurs" class="nav-link" data-scroll-target="#objets-majeurs">Objets majeurs</a></li>
   <li><a href="#fonctions-cartographiques" id="toc-fonctions-cartographiques" class="nav-link" data-scroll-target="#fonctions-cartographiques">Fonctions cartographiques</a></li>
+  <li><a href="#ligne-de-commande" id="toc-ligne-de-commande" class="nav-link" data-scroll-target="#ligne-de-commande">Ligne de commande</a></li>
   <li><a href="#recommandation" id="toc-recommandation" class="nav-link" data-scroll-target="#recommandation">Recommandation</a></li>
   </ul>
 </nav>
@@ -676,8 +683,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="objets-majeurs" class="level2">
 <h2 class="anchored" data-anchor-id="objets-majeurs">Objets majeurs</h2>
 <ul>
-<li><code>Map</code>, <code>Map2D</code>, <code>WebMap</code>, <code>SituationMap</code></li>
-<li><code>GeoBoundaries</code>, <code>Bound</code>, <code>Geocoder</code>, <code>OSM</code>, <code>Hydro</code>, <code>DEM</code>, <code>DEMDownloadError</code>, <code>WorldBank</code>, <code>Climate</code>, <code>Gee</code></li>
+<li><code>Map</code>, <code>Map2D</code>, <code>WebMap</code>, <code>SituationMap</code>, <code>Layout</code></li>
+<li><code>GeoBoundaries</code>, <code>Bound</code>, <code>Geocoder</code>, <code>OSM</code>, <code>Hydro</code>, <code>DEM</code>, <code>DEMDownloadError</code>, <code>WorldBank</code>, <code>Climate</code>, <code>Gee</code>, <code>STAC</code>, <code>STACResults</code></li>
 <li><code>VectorTools</code>, <code>RasterTools</code></li>
 <li><code>Project</code></li>
 </ul>
@@ -689,7 +696,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Choroplèthe bivariée : <code>plot_bivariate_choropleth</code>, <code>plot_bivariate_legend</code>, <code>assign_bivariate_classes</code>, <code>classify_variable</code>, <code>get_bivariate_palette</code>, <code>generate_bivariate_palette</code>, <code>list_bivariate_palettes</code>, <code>preview_bivariate_palette</code>, <code>BIVARIATE_PALETTES</code></li>
 <li>Grille hexagonale : <code>make_hex_grid</code>, <code>aggregate_to_hex</code>, <code>plot_hexgrid_choropleth</code></li>
 </ul>
-<p>Toute la surface publique de <code>cartograpy.data</code> (dont <code>Geocoder</code>, <code>DEMDownloadError</code>, <code>Gee</code>, <code>describe</code>) est réexportée à la racine du package : <code>from cartograpy import Gee</code> fonctionne au même titre que <code>from cartograpy.data import Gee</code>.</p>
+<p>Toute la surface publique de <code>cartograpy.data</code> (dont <code>Geocoder</code>, <code>DEMDownloadError</code>, <code>Gee</code>, <code>STAC</code>, <code>describe</code>) est réexportée à la racine du package : <code>from cartograpy import Gee</code> fonctionne au même titre que <code>from cartograpy.data import Gee</code>.</p>
+</section>
+<section id="ligne-de-commande" class="level2">
+<h2 class="anchored" data-anchor-id="ligne-de-commande">Ligne de commande</h2>
+<p><code>pip install cartograpy</code> installe aussi une commande <code>cartograpy</code> (<code>init</code>, <code>fetch boundary</code>/<code>fetch dem</code>, <code>inspect</code>, <code>convert</code>, <code>map</code>, <code>doctor</code>) pour les tâches courantes sans écrire de script Python. Voir <a href="../reference/cli.html">Reference CLI</a>.</p>
 </section>
 <section id="recommandation" class="level2">
 <h2 class="anchored" data-anchor-id="recommandation">Recommandation</h2>

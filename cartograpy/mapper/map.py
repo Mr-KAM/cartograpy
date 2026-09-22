@@ -5938,3 +5938,24 @@ class Map:
         self.fig.savefig(buf, format=format, dpi=dpi, bbox_inches=self._resolve_bbox_inches(bbox_inches))
         buf.seek(0)
         return buf
+
+    def layout(self, template: str = "scientific", **kwargs):
+        """
+        Wraps this map as the single panel of a `Layout`, using a named
+        template. Shortcut for `Layout(template=template, **kwargs).add_map(self)`.
+
+        Parameters:
+        -----------
+        template : str
+            One of `Layout.TEMPLATES` ("scientific", "journal", "thesis",
+            "atlas", "report", "poster", "minimal").
+        **kwargs : dict
+            Forwarded to `Layout(...)` (e.g. `paper_format`, `orientation`).
+
+        Returns:
+        --------
+        Layout: ready to receive `.add_title()`, `.add_legend()`,
+        `.add_source()`, `.add_credits()`, `.add_logo()`, then `.export()`.
+        """
+        from .layout import Layout
+        return Layout(template=template, **kwargs).add_map(self)

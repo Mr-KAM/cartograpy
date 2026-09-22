@@ -3,7 +3,7 @@ title: "Reference data"
 description: "Référence des fonctions et classes du module data."
 ---
 
-`cartograpy.data` regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale et Google Earth Engine. La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément : chaque section ci-dessous précise les erreurs et pièges réels du code source.
+`cartograpy.data` regroupe le chargement/sauvegarde de fichiers géospatiaux et les connecteurs vers des sources externes : frontières administratives (GeoBoundaries/Natural Earth), géocodage (Nominatim/OSM), OpenStreetMap, réseau hydrographique (HydroRIVERS), modèles numériques de terrain (SRTM), indicateurs Banque mondiale, Google Earth Engine et catalogues STAC (Planetary Computer, AWS Earth Search, Digital Earth Africa, Copernicus Data Space). La plupart des connecteurs font des appels réseau et certains nécessitent des dépendances optionnelles installées séparément : chaque section ci-dessous précise les erreurs et pièges réels du code source.
 
 ## `io` : chargement, sauvegarde et inspection de fichiers
 
@@ -582,6 +582,86 @@ gee.download(s2, bbox=bbox_abidjan, filename="abidjan_s2.tif", scale=10)
 | `sources()` | `DataFrame` (`name`, `url`, `description`) des collections GEE utilisées (Sentinel-2, Landsat 9, MODIS NDVI, Sentinel-1), avec lien vers leur fiche dans le catalogue GEE. |
 :::
 
+## `STAC` et `STACResults`
+
+Interroge des catalogues STAC (SpatioTemporal Asset Catalog) et charge
+l'imagerie trouvée. S'appuie sur `pystac-client` (mécanique de
+recherche/pagination du standard STAC) et lit les bandes directement via
+`rasterio` (jamais de téléchargement complet du fichier).
+
+```python
+from cartograpy.data import STAC
+
+stac = STAC("planetary-computer")
+```
+
+- **`catalog`** (`str`, défaut `"planetary-computer"`) : nom d'un catalogue
+  prédéfini (voir `STAC.CATALOGS`) ou une URL racine STAC directe.
+  `"planetary-computer"` signe automatiquement les hrefs des assets (requis
+  pour lire les données Planetary Computer) via le paquet `planetary-computer`.
+
+| Catalogue prédéfini | URL |
+|---|---|
+| `"planetary-computer"` | Microsoft Planetary Computer (signature automatique) |
+| `"earth-search"` / `"aws-earth-search"` / `"element84"` | AWS Earth Search (Element 84) |
+| `"digital-earth-africa"` | Digital Earth Africa |
+| `"copernicus-dataspace"` | Copernicus Data Space Ecosystem |
+
+::: {.callout-warning}
+`STAC()` nécessite le paquet optionnel `pystac-client` (et `planetary-computer`
+pour le catalogue du même nom) : `ImportError` explicite dès l'instanciation
+s'ils sont absents.
+:::
+
+### `search(collection, bbox, start, end, cloud_cover=None, limit=100, **kwargs)`
+
+```python
+search(collection: str | list[str], bbox, start: str, end: str,
+       cloud_cover: float | None = None, limit: int = 100, **kwargs) -> STACResults
+```
+
+- **`collection`** (`str` ou liste, requis) : identifiant(s) de collection (ex. `"sentinel-2-l2a"`).
+- **`bbox`** (`[xmin, ymin, xmax, ymax]`, requis) : emprise en EPSG:4326.
+- **`start`**, **`end`** (`str`, requis) : bornes `"YYYY-MM-DD"` de la recherche.
+- **`cloud_cover`** (`float`, optionnel) : couverture nuageuse maximale (`eo:cloud_cover`), si la collection publie cette propriété.
+- **`limit`** (`int`, défaut `100`) : nombre maximal d'éléments récupérés.
+- **`**kwargs`** : transmis à `pystac_client.Client.search` (ex. `query` pour des filtres additionnels, `sortby`).
+- **Retour** (`STACResults`) : résultats de la recherche.
+
+```python
+images = stac.search(
+    collection="sentinel-2-l2a",
+    bbox=[-4.05, 5.28, -3.95, 5.38],
+    start="2025-01-01", end="2025-12-31",
+    cloud_cover=10,
+)
+```
+
+### Méthodes de `STACResults`
+
+| Méthode | Description |
+|---|---|
+| `best(sort_by="eo:cloud_cover")` | Nouveau `STACResults` ne contenant que l'élément avec la plus petite valeur de `sort_by` (les éléments sans cette propriété sont classés derniers). |
+| `assets()` | `DataFrame` (`key`, `common_name`, `media_type`, `href`) des assets disponibles sur le premier élément. |
+| `to_dataframe()` | Résumé des éléments trouvés (`id`, `datetime`, `cloud_cover`, `collection`). |
+| `load(bands, bbox=None)` | Charge les bandes demandées en `RasterTools`, empilées dans l'ordre. `bands` accepte des clés d'asset exactes (`"B04"`) ou des noms communs de l'extension STAC `eo` (`"red"`, `"nir"`). Nécessite un seul élément (`.best()` d'abord). `bbox` restreint optionnellement la lecture à une fenêtre (au lieu de la scène entière). |
+
+```python
+best = images.best()
+best.assets()                       # bandes disponibles
+rt = best.load(["red", "nir"])      # -> RasterTools
+ndvi = rt.ndvi()                    # méthode RasterTools existante, réutilisée
+```
+
+::: {.callout-note}
+`load()` ne mélange pas de résolutions natives différentes : les bandes
+doivent partager la même grille (même transform/dimensions). Pour combiner des
+bandes de résolutions différentes (ex. 10 m et 20 m), reprojetez/rééchantillonnez
+au préalable.
+:::
+
+`stac.sources()` retourne un `DataFrame` (`name`, `url`, `description`) listant les 4 catalogues prédéfinis.
+
 ## Organisation
 
 `cartograpy.data` est un sous-package, un fichier par responsabilité :
@@ -597,5 +677,6 @@ gee.download(s2, bbox=bbox_abidjan, filename="abidjan_s2.tif", scale=10)
 | `worldbank.py` | `WorldBank` |
 | `climate.py` | `Climate` |
 | `gee.py` | `Gee` |
+| `stac.py` | `STAC`, `STACResults` |
 
 Tout reste importable depuis `cartograpy.data` directement (`from cartograpy.data import GeoBoundaries`) : l'organisation en fichiers est un détail d'implémentation, pas une API à connaître.

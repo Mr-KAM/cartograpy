@@ -19,6 +19,7 @@ description: "Référence des cartes statiques et interactives."
 - `Map2D`
 - `WebMap`
 - `SituationMap`
+- `Layout`
 
 ## Organisation
 
@@ -29,10 +30,11 @@ description: "Référence des cartes statiques et interactives."
 | `helpers.py` | `read_image`, `plot_choropleth` |
 | `map.py` | `Map` : la classe principale, cartes statiques matplotlib/cartopy |
 | `map2d.py` | `Map2D` (hérite de `Map`) : cartes sans projection cartographique |
-| `webmap.py` | `WebMap` : cartes interactives Folium/Leaflet |
+| `webmap.py` | `WebMap` : cartes interactives (Folium/Leaflet, lonboard, kepler.gl) |
 | `situation.py` | `SituationMap` : carte + mini-carte de localisation |
 | `bivariate.py` | choroplèthes bivariées (croisement de deux variables) |
 | `hexgrid.py` | grilles hexagonales et cartes hexbin (via `geohexgrid`) |
+| `layout.py` | `Layout` : composition de plusieurs cartes en une planche multi-panneaux |
 
 Tout reste importable depuis `cartograpy.mapper` directement (`from cartograpy.mapper import Map`).
 
@@ -65,7 +67,7 @@ m.show()
 
 ## Méthodes de Map
 
-69 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
+70 méthodes publiques, groupées par thème. Signature complète (avec valeurs par
 défaut) et description en une ligne : pour les paramètres en détail, se référer
 au docstring de la méthode dans `cartograpy/mapper/map.py`.
 
@@ -447,6 +449,13 @@ Exporte la carte en objet `PIL.Image` (en mémoire, sans fichier).
 to_bytes(format='png', dpi=300, bbox_inches='tight', legend=True, auto_extent=True, tight_layout=True, smart_centering=True, title=None, **kwargs)
 ```
 Exporte la carte en `BytesIO` (en mémoire, sans fichier).
+
+```python
+layout(template='scientific', **kwargs)
+```
+Enveloppe cette carte comme panneau unique d'un `Layout` (raccourci pour
+`Layout(template=template, **kwargs).add_map(self)`). Voir [Méthodes de
+Layout](#méthodes-de-layout) ci-dessous.
 :::
 
 ## Méthodes de Map2D
@@ -470,37 +479,145 @@ Masque les axes matplotlib.
 
 ## Méthodes de WebMap
 
-6 méthodes publiques : carte interactive Folium/Leaflet, indépendante de `Map`.
+21 méthodes publiques : carte interactive, indépendante de `Map`. Trois moteurs
+au choix (`engine="folium"` par défaut, `"lonboard"`, `"kepler.gl"`) ; une
+méthode sans équivalent sur le moteur actif lève un `NotImplementedError`
+explicite plutôt que d'échouer silencieusement.
+
+```python
+WebMap(engine='folium', location=(0, 0), zoom_start=6, tiles='OpenStreetMap', width='100%', height='600px')
+```
+- **`engine`** : `"folium"` (Leaflet, jeu de fonctionnalités complet), `"lonboard"` (deck.gl/GeoArrow, rendu GPU pour de gros volumes de points/polygones), `"kepler.gl"` (deck.gl, interface intégrée type "studio").
+
+::: {.callout-warning}
+`folium`, `lonboard` et `keplergl` ne sont pas des dépendances cœur : `pip
+install cartograpy[webmap]` les installe toutes les trois (extra optionnel).
+`add_cog`/`add_raster` nécessitent en plus `rio-tiler` (inclus dans le même
+extra).
+:::
+
+::: {.callout-note collapse="true"}
+## Couches vectorielles
 
 ```python
 add_layer(gdf, column=None, cmap='YlOrRd', style_function=None, tooltip_columns=None, popup_columns=None, name=None, **kwargs)
 ```
-Ajoute un GeoDataFrame comme couche GeoJson ou Choropleth.
+Ajoute un GeoDataFrame comme couche. Les 3 moteurs le supportent : folium
+(GeoJson/Choropleth), lonboard (`lonboard.viz()`, type de couche déduit de la
+géométrie), kepler.gl (`add_data`).
+
+```python
+add_geojson(data, name=None, style=None, tooltip_columns=None, popup_columns=None, **kwargs)
+```
+Ajoute du GeoJSON brut (`dict`, chemin de fichier, ou `GeoDataFrame`).
 
 ```python
 add_marker(location, popup=None, tooltip=None, icon=None)
 ```
-Ajoute un marqueur.
+Ajoute un marqueur (folium uniquement).
+
+```python
+add_cluster(gdf, popup_columns=None, tooltip_columns=None, name=None)
+```
+Ajoute des points sous forme de marqueurs groupés (`folium.plugins.MarkerCluster`, folium uniquement : un moteur GPU affiche directement tous les points, le clustering n'est pas nécessaire).
+
+```python
+add_heatmap(data, weight_column=None, radius=15, blur=15, name=None, **kwargs)
+```
+Ajoute une couche de chaleur (`folium.plugins.HeatMap`, folium uniquement). `data` : `GeoDataFrame` de points, ou liste `[lat, lon]`/`[lat, lon, poids]`.
+:::
+
+::: {.callout-note collapse="true"}
+## Fonds de carte et raster
+
+```python
+add_basemap(tiles, name=None, attr=None, **kwargs)
+```
+Ajoute un fond de carte additionnel. folium : tout nom/URL accepté par `folium.TileLayer` (ex. `"CartoDB positron"`). lonboard : un nom `lonboard.basemap.CartoStyle` (ex. `"positron"`, `"dark matter"`, `"voyager"`).
+
+```python
+add_xyz(url_template, name=None, attr='')
+```
+Ajoute une couche de tuiles XYZ brute (`'.../{z}/{x}/{y}.png'`, folium uniquement).
+
+```python
+add_wms(url, layers, name=None, fmt='image/png', transparent=True, version='1.1.1', attr='', **kwargs)
+```
+Ajoute une couche WMS (folium uniquement).
+
+```python
+add_raster(source, bands=None, cmap=None, vmin=None, vmax=None, opacity=1.0, name=None, max_size=1024)
+```
+Ajoute un raster local (chemin ou `RasterTools`) en overlay image (folium uniquement), lu via `rio-tiler`. `cmap` : colormap nommée appliquée à une bande unique (ex. `"terrain"`, `"viridis"` : voir `rio_tiler.colormap.cmap.list()`). `max_size` : décimation avant affichage.
+
+```python
+add_cog(url, bands=None, cmap=None, vmin=None, vmax=None, opacity=1.0, name=None, max_size=1024)
+```
+Ajoute un Cloud-Optimized GeoTIFF local ou distant, lu directement via
+`rio-tiler` (aperçu décimé, jamais de téléchargement complet — voir
+`Reader.preview()` de rio-tiler). Alias de `add_raster` avec les mêmes
+paramètres.
+
+```python
+wm.add_cog("https://.../landcover.tif", cmap="terrain")
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Légende, contrôles et vues
+
+```python
+add_legend(items, title=None, position='bottomright')
+```
+Ajoute une légende statique à pastilles de couleur (folium uniquement). `items` : `dict {label: couleur}` ou liste de `(label, couleur)`.
+
+```python
+add_colorbar(vmin, vmax, cmap='YlOrRd', caption=None)
+```
+Ajoute une barre de couleur continue (folium uniquement).
 
 ```python
 add_layer_control()
 ```
-Ajoute un contrôle de couches (`folium.LayerControl`).
+Ajoute un contrôle de couches (`folium.LayerControl`, folium uniquement).
+
+```python
+add_measure_control(**kwargs)
+add_draw_control(**kwargs)
+add_fullscreen(**kwargs)
+```
+Ajoutent respectivement un outil de mesure, des outils de dessin/édition, et un bouton plein écran (folium uniquement).
 
 ```python
 fit_bounds(gdf)
 ```
-Adapte le zoom aux limites d'un GeoDataFrame.
+Adapte le zoom aux limites d'un GeoDataFrame (folium uniquement).
+
+```python
+split(left, right, left_name=None, right_name=None, column=None, cmap='YlOrRd', layout='horizontal')
+```
+Remplace la carte par une comparaison côte à côte de deux couches (`folium.plugins.DualMap`, folium uniquement).
+
+```python
+wm.split(left=occupation_2015, right=occupation_2025)
+```
+
+```python
+time_slider(gdf, time_column='date', style_columns=None, period='P1D', duration=None, transition_time=200, auto_play=True, loop=True)
+```
+Ajoute une couche animée dans le temps (`folium.plugins.TimestampedGeoJson`,
+folium uniquement) : une ligne de `gdf` par (entité, date).
+:::
 
 ```python
 show()
 ```
-Renvoie la carte Folium (affichage automatique dans un notebook).
+Renvoie l'objet carte/widget sous-jacent (affichage automatique dans un notebook).
 
 ```python
 save(filename='map.html')
 ```
-Sauvegarde la carte en HTML.
+Sauvegarde la carte en HTML autonome (folium, lonboard) ou via `save_to_html` (kepler.gl).
 
 ## Méthodes de SituationMap
 
@@ -538,6 +655,81 @@ save(filename, dpi=300, bbox_inches='tight')
 to_bytes(format='png', dpi=300)
 ```
 Affiche / sauvegarde dans un fichier / exporte en mémoire.
+
+## Méthodes de Layout {#méthodes-de-layout}
+
+8 méthodes publiques : compose plusieurs `Map` en une planche multi-panneaux
+(titre, légende partagée, source, crédits, lettres de panneaux automatiques).
+Chaque panneau est rastérisé via `Map.to_image()` puis collé sur un nouveau
+canvas matplotlib ; titre/légende/texte restent vectoriels. La construction
+(`add_map`/`add_title`/...) est déclarative : le rendu matplotlib n'a lieu
+qu'à `export()`/`show()`.
+
+```python
+Layout(paper_format='A4', orientation='landscape', template=None, nrows=None, ncols=None, dpi=300, background=None)
+```
+- **`template`** (`str`, optionnel) : un des 7 préréglages visuels (défaut `"scientific"`) : `"scientific"`, `"journal"`, `"thesis"`, `"atlas"`, `"report"`, `"poster"`, `"minimal"`. Chacun définit marges, police, style des lettres de panneaux, bandeau de titre et couleur d'accent.
+- **`nrows`**/**`ncols`** (`int`, optionnels) : force la forme de la grille ; sinon déduite des positions explicites des panneaux, ou d'une grille automatique (`⌈√n⌉` colonnes) si aucune position n'est donnée.
+
+```python
+add_map(map_obj, position=None, rowspan=1, colspan=1, rect=None, caption=None, label=None, show_label=None, dpi=None, **to_image_kwargs)
+```
+Ajoute un panneau de carte. `position=(ligne, colonne)` place dans la grille (sinon placement automatique dans l'ordre d'ajout) ; `rect=(left, bottom, width, height)` (fraction de figure) positionne librement, hors grille. `caption` : texte affiché à côté de la lettre (`"(a) Zone d'étude"`). Une lettre est ajoutée automatiquement dès que la planche compte plus d'un panneau (ou si `label`/`show_label=True` est fourni explicitement).
+
+```python
+add_title(text, subtitle=None, **kwargs)
+```
+Définit le titre de la planche (et un sous-titre optionnel), dans le bandeau supérieur.
+
+```python
+add_legend(handles=None, labels=None, title=None, ncol=None, **kwargs)
+```
+Ajoute une légende unique, construite à partir des éléments de légende de
+chaque panneau (`Map.legend_elements`, dédupliqués par label), sauf si
+`handles` est fourni explicitement.
+
+```python
+add_source(text, **kwargs)
+add_credits(text, **kwargs)
+```
+Ajoutent respectivement une ligne de source (bas-gauche) et de crédits (bas-droite) dans le bandeau inférieur.
+
+```python
+add_logo(path, position='top-right', size=0.08, **kwargs)
+```
+Place une image logo dans un coin de la page (`"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`). `size` : largeur en fraction de la largeur de page.
+
+```python
+show()
+export(path, dpi=None, **kwargs)
+```
+Construit et affiche la planche (`plt.show()`) / construit et l'enregistre (`path` : format déduit de l'extension : `png`, `pdf`, `svg`...).
+
+```python
+from cartograpy import Layout
+
+layout = Layout("A4", orientation="landscape", template="scientific")
+layout.add_map(carte_localisation, caption="Zone d'étude")
+layout.add_map(carte_ndvi, caption="NDVI")
+layout.add_map(carte_occupation, caption="Occupation du sol")
+layout.add_map(carte_changement, caption="Changement 2020-2024")
+layout.add_title("Suivi de l'occupation du sol")
+layout.add_legend()
+layout.add_source("Sentinel-2, ESA")
+layout.add_credits("Carte : A. Kambou, 2026")
+layout.export("planche.pdf")
+```
+
+Raccourci pour une planche à un seul panneau : `m.layout("scientific")`
+(voir `Map.layout()` ci-dessus), qui renvoie un `Layout` prêt à recevoir
+`add_title()`/`add_legend()`/... puis `export()`.
+
+::: {.callout-note}
+Chaque panneau conserve un léger cadre issu de son propre axe `Map` (visible
+sur l'image rastérisée), indépendant du réglage `panel_border` du template :
+c'est une conséquence du collage d'images plutôt qu'une fusion vectorielle
+des figures.
+:::
 
 ## Méthodes de `Map` : bivarié et hexbin
 

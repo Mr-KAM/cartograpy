@@ -536,6 +536,12 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -632,6 +638,8 @@ ul.task-list li input[type="checkbox"] {
 <li><code>data.py</code>, <code>mapper.py</code> et <code>processing.py</code> étaient des fichiers plats de plusieurs milliers de lignes mélangeant plusieurs responsabilités. Découpés en sous-packages organisés par domaine (voir <a href="../explanations/package-architecture.html">Architecture du package</a>).</li>
 <li><code>VectorTools.eliminate_small_polygons()</code> existait dans le code sans être documenté dans <a href="../reference/vector-tools.html">Reference VectorTools</a>. Ajouté.</li>
 <li><code>Project.infos()</code> était utilisé dans l’exemple complet de <a href="../reference/project.html">Reference project</a> sans section dédiée expliquant sa valeur de retour. Ajoutée.</li>
+<li>Cinq ajouts récents n’étaient documentés nulle part : le CRS intelligent de <code>VectorTools</code> (<code>crs_info()</code>, <code>estimate_utm()</code>, <code>to_local_crs()</code>, et les paramètres <code>unit</code>/<code>auto_project</code> de <code>buffer()</code>/<code>area()</code>/<code>distance_to_nearest()</code>), le mode <code>lazy=True</code> de <code>RasterTools</code>, la classe <code>STAC</code>/<code>STACResults</code> (<code>cartograpy.data</code>), la classe <code>Layout</code> (planches multi-panneaux, <code>cartograpy.mapper</code>), et l’extension de <code>WebMap</code> (moteurs <code>engine="folium"|"lonboard"|"kepler.gl"</code>, 13 méthodes supplémentaires dont <code>add_cog()</code> via <code>rio-tiler</code>). Documentés dans <a href="../reference/vector-tools.html">Reference VectorTools</a>, <a href="../reference/raster-tools.html">Reference RasterTools</a>, <a href="../reference/data.html">Reference data</a>, <a href="../reference/mapper.html">Reference mapper</a> et les guides correspondants.</li>
+<li><code>click</code> était déclaré dans les dépendances de <code>pyproject.toml</code> sans qu’aucune commande CLI n’existe dans le dépôt. Ajout de <code>cartograpy/cli.py</code> (<code>init</code>, <code>fetch boundary</code>/<code>dem</code>/<code>osm</code>/<code>hydro</code>/<code>worldbank</code>/<code>climate</code>/<code>gee</code>/<code>stac</code>, <code>inspect</code>, <code>convert</code>, <code>map</code>, <code>doctor</code>) et de l’entry point <code>[project.scripts] cartograpy</code>. Documenté dans <a href="../reference/cli.html">Reference CLI</a>.</li>
 </ul>
 </section>
 <section id="usage-de-cette-page" class="level2">

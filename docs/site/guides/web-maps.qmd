@@ -3,8 +3,10 @@ title: "Cartes web"
 description: "Créer une carte interactive avec WebMap."
 ---
 
-`WebMap` (dans `cartograpy.mapper`) couvre les usages interactifs légers à partir
-d'un `GeoDataFrame`, par-dessus Folium/Leaflet.
+`WebMap` (dans `cartograpy.mapper`) couvre les usages interactifs à partir d'un
+`GeoDataFrame`. Trois moteurs au choix : Folium/Leaflet par défaut (jeu de
+fonctionnalités complet), ou deux moteurs GPU (deck.gl) pour les gros volumes :
+lonboard et kepler.gl.
 
 ## Créer une carte
 
@@ -17,8 +19,42 @@ wm = WebMap(location=(5.35, -4.0), zoom_start=7, tiles="OpenStreetMap")
 - **`tiles`** (`str`, défaut `OpenStreetMap`) : Fond de carte : `"OpenStreetMap"`, `"CartoDB positron"`, `"Stamen Terrain"`, etc. (tout fond supporté par Folium).
 
 ::: {.callout-warning}
-`WebMap` nécessite `folium`, qui n'est pas dans les dépendances cœur de
-cartograpy : `pip install folium` si l'import échoue.
+`WebMap` nécessite `folium`, `lonboard` et `keplergl`, qui ne sont pas dans les
+dépendances cœur de cartograpy : `pip install cartograpy[webmap]` installe les
+trois d'un coup (avec `rio-tiler`, requis par `add_cog`/`add_raster`). Un
+moteur non installé lève une `ImportError` explicite à la construction de
+`WebMap(engine=...)`.
+:::
+
+## Millions d'entités : lonboard et kepler.gl
+
+Folium/Leaflet ralentit nettement au-delà de quelques dizaines de milliers
+d'entités (rendu DOM/SVG côté navigateur). Pour de gros volumes vectoriels,
+`engine="lonboard"` délègue le rendu au GPU via deck.gl/GeoArrow :
+
+```python
+wm = WebMap(engine="lonboard")
+wm.add_layer(gros_gdf)          # des millions de points/polygones, rendu GPU
+wm.add_basemap("positron")      # style lonboard.basemap.CartoStyle
+wm.save("carte_gpu.html")
+```
+
+`engine="kepler.gl"` (aussi deck.gl) apporte en plus une interface intégrée
+type « studio » (filtres, styles, détection automatique des colonnes
+temporelles) :
+
+```python
+wm = WebMap(engine="kepler.gl")
+wm.add_layer(gros_gdf, name="Points")
+wm.save("carte_kepler.html")
+```
+
+::: {.callout-note}
+Les deux moteurs GPU ne couvrent que `add_layer`/`add_geojson`/`fit_bounds`
+(`add_basemap` en plus pour lonboard) : les contrôles Leaflet (mesure, dessin,
+légende statique, plein écran...), `add_heatmap`, `add_cluster`, `split()` et
+`time_slider()` restent spécifiques à `engine="folium"` et lèvent un
+`NotImplementedError` explicite sur les deux autres moteurs.
 :::
 
 ## Ajouter une couche vectorielle
@@ -39,18 +75,59 @@ wm.add_layer(routes_gdf, name="Routes")
 autre CRS : Folium/Leaflet n'acceptent que WGS 84.
 :::
 
-## Marqueurs
+## Marqueurs, clusters et chaleur (folium)
 
 ```python
 wm.add_marker((5.35, -4.0), popup="Abidjan", tooltip="Cliquez pour plus d'infos")
+wm.add_cluster(ecoles_gdf, popup_columns=["nom"])       # marqueurs groupés
+wm.add_heatmap(incidents_gdf, weight_column="gravite")  # carte de chaleur
 ```
 
-## Contrôles et cadrage
+## Fonds de carte, WMS et raster (add_cog)
 
 ```python
-wm.add_layer_control()      # bouton d'activation/désactivation des couches
-wm.fit_bounds(regions_gdf)  # zoome automatiquement sur l'emprise d'une couche
+wm.add_basemap("CartoDB positron", name="Carto")
+wm.add_xyz("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", attr="OpenTopoMap")
+wm.add_wms("https://ahocevar.com/geoserver/wms", layers="topp:states")
+
+# Raster local ou COG distant, lu via rio-tiler (jamais de téléchargement complet)
+wm.add_cog("https://.../landcover.tif", cmap="terrain")
+wm.add_raster("data/elevation.tif", cmap="viridis", vmin=0, vmax=1500)
 ```
+
+::: {.callout-tip}
+`add_cog`/`add_raster` lisent un aperçu décimé (`max_size`, défaut `1024` px)
+directement depuis le fichier via `rio-tiler` : même sur une scène Sentinel de
+plusieurs centaines de Mo hébergée à distance, seul cet aperçu est transféré.
+`cmap` accepte les noms de `rio_tiler.colormap.cmap.list()` (palettes
+matplotlib + ColorBrewer).
+:::
+
+## Légende, colorbar et contrôles (folium)
+
+```python
+wm.add_legend({"Faible": "green", "Élevé": "red"}, title="Densité")
+wm.add_colorbar(0, 100, cmap="YlOrRd", caption="Densité (hab/km²)")
+wm.add_layer_control()       # bouton d'activation/désactivation des couches
+wm.add_measure_control()     # outil de mesure distance/surface
+wm.add_draw_control()        # dessin/édition
+wm.add_fullscreen()          # bouton plein écran
+wm.fit_bounds(regions_gdf)   # zoome automatiquement sur l'emprise d'une couche
+```
+
+## Comparaison côte à côte et animation temporelle (folium)
+
+```python
+wm.split(left=occupation_2015, right=occupation_2025,
+         left_name="2015", right_name="2025")
+```
+
+```python
+wm.time_slider(detections_gdf, time_column="date")
+```
+
+`time_slider` attend une ligne par (entité, date) : voir [Reference
+mapper](/reference/mapper.qmd) pour le détail des paramètres.
 
 ## Toutes les méthodes se chaînent
 
@@ -72,17 +149,18 @@ wm.save("carte.html")  # export HTML autonome
 
 ## Limites face à `Map`
 
-| | `Map` | `WebMap` |
-|---|---|---|
-| Rendu | statique (PNG, PDF, export papier) | interactif (HTML, zoom/pan navigateur) |
-| Légende, échelle, flèche du Nord | oui, gérées en détail | non : habillage Leaflet standard uniquement |
-| Volumes de données | adapté aux gros jeux de données | à limiter : de gros GeoJSON ralentissent le navigateur |
-| Distribution | image/PDF à insérer dans un document | fichier HTML autonome, partageable tel quel |
+| | `Map` | `WebMap` (folium) | `WebMap` (lonboard/kepler.gl) |
+|---|---|---|---|
+| Rendu | statique (PNG, PDF, export papier) | interactif (HTML, zoom/pan navigateur) | interactif, rendu GPU |
+| Légende, échelle, flèche du Nord | oui, gérées en détail | légende/colorbar statiques ; pas d'échelle/flèche du Nord | non (kepler.gl a sa propre UI) |
+| Volumes de données | adapté aux gros jeux de données | à limiter : de gros GeoJSON ralentissent le navigateur | adapté aux gros volumes (millions d'entités) |
+| Distribution | image/PDF à insérer dans un document | fichier HTML autonome, partageable tel quel | fichier HTML autonome (plus volumineux) |
 
 ::: {.callout-tip}
-Pour de gros volumes (plusieurs dizaines de milliers d'entités), simplifiez la
-géométrie avant `add_layer` (`VectorTools(gdf).simplify_geometry(tolerance=...)`)
-: un GeoJSON trop détaillé ralentit sensiblement l'affichage Leaflet.
+Pour de gros volumes sur `engine="folium"` (plusieurs dizaines de milliers
+d'entités), simplifiez la géométrie avant `add_layer`
+(`VectorTools(gdf).simplify_geometry(tolerance=...)`), ou passez à
+`engine="lonboard"`/`"kepler.gl"` plutôt que de forcer Leaflet.
 :::
 
 ## Aller plus loin

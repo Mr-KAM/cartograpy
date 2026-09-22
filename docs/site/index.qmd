@@ -16,7 +16,8 @@ d'étude, partout dans le monde.
 
 Fichiers locaux (shp, geojson, gpkg, kml, gpx, csv, parquet, tif) et sources en
 ligne : frontières administratives, OpenStreetMap, hydrographie, altitude
-(SRTM), World Bank, Google Earth Engine.
+(SRTM), World Bank, Google Earth Engine, catalogues STAC (Planetary Computer,
+AWS Earth Search...).
 
 #### [Transformer vos couches](/reference/vector-tools.qmd)
 
@@ -26,7 +27,8 @@ les statistiques, le raster processing et bien plus.
 #### [Produire des cartes](/reference/mapper.qmd)
 
 Cartes statiques (`Map`, `Map2D`), mini-cartes de situation
-(`SituationMap`) et cartes interactives (`WebMap`). Choroplèthes bivariées
+(`SituationMap`) et cartes interactives (`WebMap`, moteurs Folium/lonboard/kepler.gl).
+Planches multi-panneaux publication-ready (`Layout`). Choroplèthes bivariées
 (`plot_bivariate_choropleth`) et grilles hexagonales / hexbin
 (`make_hex_grid`, `aggregate_to_hex`, `plot_hexgrid_choropleth`).
 

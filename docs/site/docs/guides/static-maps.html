@@ -575,6 +575,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -637,6 +643,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#cadrage" id="toc-cadrage" class="nav-link" data-scroll-target="#cadrage">Cadrage</a></li>
   <li><a href="#rendu-et-export" id="toc-rendu-et-export" class="nav-link" data-scroll-target="#rendu-et-export">Rendu et export</a></li>
+  <li><a href="#planches-multi-panneaux-layout" id="toc-planches-multi-panneaux-layout" class="nav-link" data-scroll-target="#planches-multi-panneaux-layout">Planches multi-panneaux (Layout)</a></li>
   <li><a href="#exemple-complet" id="toc-exemple-complet" class="nav-link" data-scroll-target="#exemple-complet">Exemple complet</a>
   <ul class="collapse">
   <li><a href="#données" id="toc-données" class="nav-link" data-scroll-target="#données">1. Données</a></li>
@@ -680,7 +687,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>Map</code> (dans <code>cartograpy.mapper</code>) centralise la production de cartes statiques avec Matplotlib et Cartopy : couches vectorielles/raster, choroplèthes, légende, échelle, flèche du Nord, grille, export. C’est la classe la plus riche du package (65 méthodes publiques).</p>
+<p><code>Map</code> (dans <code>cartograpy.mapper</code>) centralise la production de cartes statiques avec Matplotlib et Cartopy : couches vectorielles/raster, choroplèthes, légende, échelle, flèche du Nord, grille, export. C’est la classe la plus riche du package (70 méthodes publiques).</p>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
@@ -810,7 +817,24 @@ Note
 <h2 class="anchored" data-anchor-id="rendu-et-export">Rendu et export</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>m.show()</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"carte_finale.png"</span>, dpi<span class="op">=</span><span class="dv">300</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Référence complète des 69 méthodes de <code>Map</code>, groupées par thème : <a href="../reference/mapper.html">Reference mapper</a>.</p>
+<p>Référence complète des 70 méthodes de <code>Map</code>, groupées par thème : <a href="../reference/mapper.html">Reference mapper</a>.</p>
+</section>
+<section id="planches-multi-panneaux-layout" class="level2">
+<h2 class="anchored" data-anchor-id="planches-multi-panneaux-layout">Planches multi-panneaux (Layout)</h2>
+<p>Pour assembler plusieurs <code>Map</code> en une seule planche publication (titre, légende partagée, source, crédits, lettres de panneaux <code>(a)</code>, <code>(b)</code>…), utilisez <code>Layout</code> plutôt que de composer les images à la main :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy <span class="im">import</span> Layout</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>layout <span class="op">=</span> Layout(<span class="st">"A4"</span>, orientation<span class="op">=</span><span class="st">"landscape"</span>, template<span class="op">=</span><span class="st">"scientific"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>layout.add_map(carte_localisation, caption<span class="op">=</span><span class="st">"Zone d'étude"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>layout.add_map(carte_ndvi, caption<span class="op">=</span><span class="st">"NDVI"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>layout.add_map(carte_occupation, caption<span class="op">=</span><span class="st">"Occupation du sol"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>layout.add_map(carte_changement, caption<span class="op">=</span><span class="st">"Changement 2020-2024"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>layout.add_title(<span class="st">"Suivi de l'occupation du sol"</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>layout.add_legend()</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>layout.add_source(<span class="st">"Sentinel-2, ESA"</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>layout.add_credits(<span class="st">"Carte : A. Kambou, 2026"</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>layout.export(<span class="st">"planche.pdf"</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>7 gabarits visuels prêts à l’emploi (<code>template=</code>) : <code>"scientific"</code>, <code>"journal"</code>, <code>"thesis"</code>, <code>"atlas"</code>, <code>"report"</code>, <code>"poster"</code>, <code>"minimal"</code>. Pour une planche à un seul panneau, le raccourci <code>m.layout("scientific")</code> évite d’instancier <code>Layout</code> explicitement. Détail complet : <a href="../reference/mapper.html#méthodes-de-layout">Méthodes de Layout</a>.</p>
 </section>
 <section id="exemple-complet" class="level2">
 <h2 class="anchored" data-anchor-id="exemple-complet">Exemple complet</h2>
@@ -840,154 +864,162 @@ Note
 <section id="données" class="level3">
 <h3 class="anchored" data-anchor-id="données">1. Données</h3>
 <p>Rien de spécifique à <code>cartograpy</code> ici : <code>cp.load()</code> détecte l’extension et route vers <code>gpd.read_file</code>/<code>pd.read_csv</code> en interne, donc il fonctionne aussi bien sur un chemin local que sur une URL directe. Le reste (fusion, <code>.query()</code>, calcul des centroïdes en CRS projeté) reste du pandas/geopandas standard.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartograpy <span class="im">as</span> cp</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>world <span class="op">=</span> cp.load(</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/holtzy/the-python-graph-gallery/"</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"master/static/data/europe.geojson"</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> cp.load(</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/holtzy/the-python-graph-gallery/"</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"master/static/data/co2PerCapita.csv"</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Year"</span>] <span class="op">=</span> pd.to_numeric(df[<span class="st">"Year"</span>], errors<span class="op">=</span><span class="st">"coerce"</span>)</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Total"</span>] <span class="op">=</span> pd.to_numeric(df[<span class="st">"Total"</span>], errors<span class="op">=</span><span class="st">"coerce"</span>)</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> world.merge(df, how<span class="op">=</span><span class="st">"left"</span>, left_on<span class="op">=</span><span class="st">"name"</span>, right_on<span class="op">=</span><span class="st">"Country"</span>)</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.query(</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'continent == "Europe" and name not in ["Russia", "Iceland"] and Year == 2021'</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data[[<span class="st">"name"</span>, <span class="st">"Total"</span>, <span class="st">"geometry"</span>]].dropna(subset<span class="op">=</span>[<span class="st">"Total"</span>, <span class="st">"geometry"</span>]).copy()</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Centroïdes calculés en CRS métrique (EPSG:3035) puis reprojetés en 4326 :</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="co"># cp.centroids() ne reprojette pas, donc calcul manuel ici pour des</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="co"># positions d'étiquette correctes malgré la distorsion de PlateCarree.</span></span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>proj <span class="op">=</span> data.to_crs(epsg<span class="op">=</span><span class="dv">3035</span>)</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>data[<span class="st">"centroid"</span>] <span class="op">=</span> proj.geometry.centroid.to_crs(data.crs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartograpy <span class="im">as</span> cp</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>world <span class="op">=</span> cp.load(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/holtzy/the-python-graph-gallery/"</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"master/static/data/europe.geojson"</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> cp.load(</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/holtzy/the-python-graph-gallery/"</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"master/static/data/co2PerCapita.csv"</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Year"</span>] <span class="op">=</span> pd.to_numeric(df[<span class="st">"Year"</span>], errors<span class="op">=</span><span class="st">"coerce"</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Total"</span>] <span class="op">=</span> pd.to_numeric(df[<span class="st">"Total"</span>], errors<span class="op">=</span><span class="st">"coerce"</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> world.merge(df, how<span class="op">=</span><span class="st">"left"</span>, left_on<span class="op">=</span><span class="st">"name"</span>, right_on<span class="op">=</span><span class="st">"Country"</span>)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.query(</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'continent == "Europe" and name not in ["Russia", "Iceland"] and Year == 2021'</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data[[<span class="st">"name"</span>, <span class="st">"Total"</span>, <span class="st">"geometry"</span>]].dropna(subset<span class="op">=</span>[<span class="st">"Total"</span>, <span class="st">"geometry"</span>]).copy()</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Centroïdes calculés en CRS métrique (EPSG:3035) puis reprojetés en 4326 :</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="co"># cp.centroids() ne reprojette pas, donc calcul manuel ici pour des</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="co"># positions d'étiquette correctes malgré la distorsion de PlateCarree.</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>proj <span class="op">=</span> data.to_crs(epsg<span class="op">=</span><span class="dv">3035</span>)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>data[<span class="st">"centroid"</span>] <span class="op">=</span> proj.geometry.centroid.to_crs(data.crs)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="polices-et-carte-de-base" class="level3">
 <h3 class="anchored" data-anchor-id="polices-et-carte-de-base">2. Polices et carte de base</h3>
 <p><code>google_font()</code> télécharge/charge une police Google Fonts et renvoie un <code>FontProperties</code> réutilisable partout où <code>Map</code> accepte un paramètre <code>font</code>. <code>basemap=False</code> désactive les côtes/frontières automatiques puisque le GeoDataFrame <code>data</code> fournit déjà tous les contours nécessaires.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>my_cmap <span class="op">=</span> <span class="st">"PonyoDark"</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>font_title <span class="op">=</span> cp.google_font(<span class="st">"Bebas Neue"</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>font_text <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"light"</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>font_bold <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"medium"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>text_color <span class="op">=</span> <span class="st">"black"</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>background_color <span class="op">=</span> <span class="st">"white"</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> cp.Map(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>), dpi<span class="op">=</span><span class="dv">400</span>, basemap<span class="op">=</span><span class="va">False</span>, title<span class="op">=</span><span class="st">""</span>)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>m.set_background_color(background_color)</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>m.add_polygons_choropleth(</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    data,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    column_to_plot<span class="op">=</span><span class="st">"Total"</span>,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span>my_cmap,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"black"</span>,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    show_labels<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    show_colorbar<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>m.set_extent([<span class="op">-</span><span class="dv">11</span>, <span class="dv">32</span>, <span class="dv">41</span>, <span class="dv">73</span>])</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>m.hide_gridline()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>my_cmap <span class="op">=</span> <span class="st">"Acanthostracion_polygonius"</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>font_title <span class="op">=</span> cp.google_font(<span class="st">"Bebas Neue"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>font_text <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"light"</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>font_bold <span class="op">=</span> cp.google_font(<span class="st">"Fira Sans"</span>, weight<span class="op">=</span><span class="st">"medium"</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>text_color <span class="op">=</span> <span class="st">"black"</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>background_color <span class="op">=</span> <span class="st">"white"</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> cp.Map(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>), dpi<span class="op">=</span><span class="dv">400</span>, basemap<span class="op">=</span><span class="va">False</span>, title<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>m.set_background_color(background_color)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>m.add_polygons_choropleth(</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    data,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    column_to_plot<span class="op">=</span><span class="st">"Total"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span>my_cmap,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    show_labels<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    show_colorbar<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>m.set_extent([<span class="op">-</span><span class="dv">11</span>, <span class="dv">40</span>, <span class="dv">30</span>, <span class="dv">75</span>])</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>m.hide_gridline()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="annotations-par-pays" class="level3">
 <h3 class="anchored" data-anchor-id="annotations-par-pays">3. Annotations par pays</h3>
 <p><code>add_custom_text(..., to="ax")</code> positionne du texte en coordonnées géographiques, avec segments <code>&lt;mis en évidence&gt;</code> (ici : le nom du pays en gras via <code>highlight_textprops</code>). <code>adjustments</code> décale chaque étiquette pour éviter les chevauchements sur les petits pays ; la couleur du texte bascule en blanc au-delà de 7 t pour rester lisible sur les teintes foncées de la palette.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>adjustments <span class="op">=</span> {</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"France"</span>: (<span class="dv">10</span>, <span class="dv">3</span>), <span class="st">"Italy"</span>: (<span class="op">-</span><span class="fl">2.4</span>, <span class="fl">2.5</span>), <span class="st">"Finland"</span>: (<span class="dv">0</span>, <span class="op">-</span><span class="dv">2</span>),</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belarus"</span>: (<span class="dv">0</span>, <span class="op">-</span><span class="fl">0.4</span>), <span class="st">"Ireland"</span>: (<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>), <span class="st">"Germany"</span>: (<span class="op">-</span><span class="fl">0.2</span>, <span class="dv">0</span>),</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Poland"</span>: (<span class="dv">0</span>, <span class="fl">0.2</span>), <span class="st">"Sweden"</span>: (<span class="op">-</span><span class="fl">1.2</span>, <span class="op">-</span><span class="fl">2.8</span>),</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"United Kingdom"</span>: (<span class="dv">1</span>, <span class="op">-</span><span class="fl">1.5</span>), <span class="st">"Norway"</span>: (<span class="op">-</span><span class="dv">4</span>, <span class="op">-</span><span class="fl">5.5</span>),</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>countries_to_annotate <span class="op">=</span> [</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"France"</span>, <span class="st">"Italy"</span>, <span class="st">"Romania"</span>, <span class="st">"Poland"</span>, <span class="st">"Finland"</span>, <span class="st">"Ukraine"</span>,</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Spain"</span>, <span class="st">"Germany"</span>, <span class="st">"Sweden"</span>, <span class="st">"United Kingdom"</span>, <span class="st">"Belarus"</span>, <span class="st">"Norway"</span>,</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>data_by_country <span class="op">=</span> data.set_index(<span class="st">"name"</span>)</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> country <span class="kw">in</span> countries_to_annotate:</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> country <span class="kw">not</span> <span class="kw">in</span> data_by_country.index:</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> data_by_country.loc[country]</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    dx, dy <span class="op">=</span> adjustments.get(country, (<span class="dv">0</span>, <span class="dv">0</span>))</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> row[<span class="st">"centroid"</span>].x <span class="op">+</span> dx, row[<span class="st">"centroid"</span>].y <span class="op">+</span> dy</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    rate <span class="op">=</span> row[<span class="st">"Total"</span>]</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    label <span class="op">=</span> <span class="st">"UK"</span> <span class="cf">if</span> country <span class="op">==</span> <span class="st">"United Kingdom"</span> <span class="cf">else</span> country</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    m.add_custom_text(</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"&lt;</span><span class="sc">{</span>label<span class="sc">.</span>upper()<span class="sc">}</span><span class="ss">&gt;: </span><span class="sc">{</span>rate<span class="sc">:.2f}</span><span class="ss">"</span>, (x, y), to<span class="op">=</span><span class="st">"ax"</span>,</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"white"</span> <span class="cf">if</span> rate <span class="op">&lt;</span> <span class="dv">6</span> <span class="cf">else</span> text_color,</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>        highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>adjustments <span class="op">=</span> {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"France"</span>: (<span class="dv">10</span>, <span class="dv">3</span>), <span class="st">"Italy"</span>: (<span class="op">-</span><span class="fl">2.4</span>, <span class="fl">2.5</span>), <span class="st">"Finland"</span>: (<span class="dv">0</span>, <span class="op">-</span><span class="dv">2</span>),</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belarus"</span>: (<span class="dv">0</span>, <span class="op">-</span><span class="fl">0.4</span>), <span class="st">"Ireland"</span>: (<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>), <span class="st">"Germany"</span>: (<span class="op">-</span><span class="fl">0.2</span>, <span class="dv">0</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Poland"</span>: (<span class="dv">0</span>, <span class="fl">0.2</span>), <span class="st">"Sweden"</span>: (<span class="op">-</span><span class="fl">1.2</span>, <span class="op">-</span><span class="fl">2.8</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"United Kingdom"</span>: (<span class="dv">1</span>, <span class="op">-</span><span class="fl">1.5</span>), <span class="st">"Norway"</span>: (<span class="op">-</span><span class="dv">4</span>, <span class="op">-</span><span class="fl">5.5</span>),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>countries_to_annotate <span class="op">=</span> [</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"France"</span>, <span class="st">"Italy"</span>, <span class="st">"Romania"</span>, <span class="st">"Poland"</span>, <span class="st">"Finland"</span>, <span class="st">"Ukraine"</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Spain"</span>, <span class="st">"Germany"</span>, <span class="st">"Sweden"</span>, <span class="st">"United Kingdom"</span>, <span class="st">"Belarus"</span>, <span class="st">"Norway"</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>data_by_country <span class="op">=</span> data.set_index(<span class="st">"name"</span>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> country <span class="kw">in</span> countries_to_annotate:</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> country <span class="kw">not</span> <span class="kw">in</span> data_by_country.index:</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> data_by_country.loc[country]</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    dx, dy <span class="op">=</span> adjustments.get(country, (<span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> row[<span class="st">"centroid"</span>].x <span class="op">+</span> dx, row[<span class="st">"centroid"</span>].y <span class="op">+</span> dy</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    rate <span class="op">=</span> row[<span class="st">"Total"</span>]</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    label <span class="op">=</span> <span class="st">"UK"</span> <span class="cf">if</span> country <span class="op">==</span> <span class="st">"United Kingdom"</span> <span class="cf">else</span> country</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    m.add_custom_text(</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"&lt;</span><span class="sc">{</span>label<span class="sc">.</span>upper()<span class="sc">}</span><span class="ss">&gt;: </span><span class="sc">{</span>rate<span class="sc">:.2f}</span><span class="ss">"</span>, (x, y), to<span class="op">=</span><span class="st">"ax"</span>,</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>        fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span><span class="st">"white"</span> <span class="cf">if</span> rate <span class="op">&lt;</span> <span class="dv">6</span> <span class="cf">else</span> text_color,</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>        highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="cas-particulier-le-luxembourg" class="level3">
 <h3 class="anchored" data-anchor-id="cas-particulier-le-luxembourg">4. Cas particulier : le Luxembourg</h3>
 <p>Trop petit pour recevoir une étiquette directement sur son polygone : la combinaison <code>add_fig_arrow()</code> (flèche en coordonnées figure 0-1, indépendante du zoom de la carte) + <code>add_custom_text(..., to="fig")</code> place le label à côté de la carte, avec une flèche qui pointe vers le pays.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>lux <span class="op">=</span> data[data[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Luxembourg"</span>]</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> lux.empty:</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    lux_value <span class="op">=</span> lux.iloc[<span class="dv">0</span>][<span class="st">"Total"</span>]</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    m.add_fig_arrow(</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        tail_position<span class="op">=</span>(<span class="fl">0.32</span>, <span class="fl">0.70</span>),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        head_position<span class="op">=</span>(<span class="fl">0.39</span>, <span class="fl">0.48</span>),</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        radius<span class="op">=</span><span class="fl">0.3</span>,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        width<span class="op">=</span><span class="fl">0.5</span>, head_width<span class="op">=</span><span class="dv">4</span>, head_length<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"black"</span>,</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    m.add_custom_text(</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"&lt;LUXEMBOURG&gt;: </span><span class="sc">{</span>lux_value<span class="sc">:.2f}</span><span class="ss">"</span>, (<span class="fl">0.32</span>, <span class="fl">0.71</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">9</span>, font<span class="op">=</span>font_text,</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>lux <span class="op">=</span> data[data[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Luxembourg"</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> lux.empty:</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    lux_value <span class="op">=</span> lux.iloc[<span class="dv">0</span>][<span class="st">"Total"</span>]</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># position figure de la flèche calculée depuis le centroïde du pays</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (transData -&gt; transFigure), plutôt qu'une valeur fixe : reste correcte</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># si l'étendue ou la taille de la figure change</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    m.fig.canvas.draw()</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    lux_point <span class="op">=</span> lux.iloc[<span class="dv">0</span>][<span class="st">"centroid"</span>]</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    head_x, head_y <span class="op">=</span> m.ax.transData.transform((lux_point.x, lux_point.y))</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    head_position <span class="op">=</span> <span class="bu">tuple</span>(m.fig.transFigure.inverted().transform((head_x, head_y)))</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    m.add_fig_arrow(</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        tail_position<span class="op">=</span>(<span class="fl">0.32</span>, <span class="fl">0.70</span>),</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        head_position<span class="op">=</span>(head_position[<span class="dv">0</span>] <span class="op">-</span> <span class="fl">0.01</span>, head_position[<span class="dv">1</span>] <span class="op">+</span> <span class="fl">0.01</span>),</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        radius<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        width<span class="op">=</span><span class="fl">0.5</span>, head_width<span class="op">=</span><span class="dv">4</span>, head_length<span class="op">=</span><span class="dv">8</span>, color<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    m.add_custom_text(</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"&lt;LUXEMBOURG&gt;: </span><span class="sc">{</span>lux_value<span class="sc">:.2f}</span><span class="ss">"</span>, (<span class="fl">0.32</span>, <span class="fl">0.71</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>        highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">9</span>, font<span class="op">=</span>font_text,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="légende-par-classes" class="level3">
 <h3 class="anchored" data-anchor-id="légende-par-classes">5. Légende par classes</h3>
 <p>Une légende à bins manuels (plutôt qu’une barre de couleur continue) : <code>add_swatch_legend()</code> dessine un rectangle de couleur par classe à une position géographique donnée, avec le label exact voulu (<code>"0-2 t"</code>, etc.) : plus de contrôle qu’un <code>scheme</code> mapclassify auto-généré, sans dépendance supplémentaire.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>value_ranges <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>]</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"0-2 t"</span>, <span class="st">"2-4 t"</span>, <span class="st">"4-6 t"</span>, <span class="st">"6-8 t"</span>, <span class="st">"8-10 t"</span>, <span class="st">"10-12 t"</span>, <span class="st">"12+ t"</span>]</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>cmap_obj <span class="op">=</span> cp.load_cmap(my_cmap)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    (lab, cmap_obj((value_ranges[i] <span class="op">+</span> value_ranges[i <span class="op">+</span> <span class="dv">1</span>]) <span class="op">/</span> <span class="dv">2</span> <span class="op">/</span> value_ranges[<span class="op">-</span><span class="dv">1</span>]))</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, lab <span class="kw">in</span> <span class="bu">enumerate</span>(labels)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>m.add_swatch_legend(</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    items, xy<span class="op">=</span>(<span class="dv">35</span>, <span class="dv">70</span>),</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    rect_width<span class="op">=</span><span class="dv">2</span>, rect_height<span class="op">=</span><span class="fl">1.5</span>, y_step<span class="op">=</span><span class="fl">1.5</span>,</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span>text_color,</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"black"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>,</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    font<span class="op">=</span>font_text,</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>value_ranges <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"0-2 t"</span>, <span class="st">"2-4 t"</span>, <span class="st">"4-6 t"</span>, <span class="st">"6-8 t"</span>, <span class="st">"8-10 t"</span>, <span class="st">"10-12 t"</span>, <span class="st">"12+ t"</span>]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>cmap_obj <span class="op">=</span> cp.load_cmap(my_cmap)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    (lab, cmap_obj((value_ranges[i] <span class="op">+</span> value_ranges[i <span class="op">+</span> <span class="dv">1</span>]) <span class="op">/</span> <span class="dv">2</span> <span class="op">/</span> value_ranges[<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, lab <span class="kw">in</span> <span class="bu">enumerate</span>(labels)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>m.add_swatch_legend(</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    items, xy<span class="op">=</span>(<span class="dv">35</span>, <span class="dv">70</span>),</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    rect_width<span class="op">=</span><span class="dv">2</span>, rect_height<span class="op">=</span><span class="fl">1.5</span>, y_step<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    fontsize<span class="op">=</span><span class="dv">9</span>, color<span class="op">=</span>text_color,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    edge_color<span class="op">=</span><span class="st">"black"</span>, linewidth<span class="op">=</span><span class="fl">0.6</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    font<span class="op">=</span>font_text,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="titre-sous-titre-et-logo" class="level3">
 <h3 class="anchored" data-anchor-id="titre-sous-titre-et-logo">6. Titre, sous-titre et logo</h3>
 <p>Trois blocs de texte figure-relatifs pour le titre, la source et la signature, plus le logo du package en filigrane via <code>add_image()</code> (<code>to="fig"</code> par défaut) : chaque élément hors-carte est positionné indépendamment du zoom/étendue de la carte elle-même.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Émissions de CO₂ par habitant en Europe (2021)"</span>, (<span class="fl">0.5</span>, <span class="fl">0.87</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">25</span>, font<span class="op">=</span>font_title,</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>,</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;Unité&gt; : tonnes | &lt;Source&gt;: zenodo.org"</span>, (<span class="fl">0.5</span>, <span class="fl">0.2</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">12</span>, font<span class="op">=</span>font_text,</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>,</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}, {<span class="st">"font"</span>: font_bold}],</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;By&gt; : Anicet Cyrille KAMBOU"</span>, (<span class="fl">0.48</span>, <span class="fl">0.15</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">9</span>, font<span class="op">=</span>font_text,</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>m.add_image(<span class="st">"logo.png"</span>, (<span class="fl">0.44</span>, <span class="fl">0.1</span>), zoom<span class="op">=</span><span class="fl">0.035</span>)</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 8. EXPORT</span></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"web-map-with-custom-legend.png"</span>, dpi<span class="op">=</span><span class="dv">600</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Émissions de CO₂ par habitant en Europe (2021)"</span>, (<span class="fl">0.5</span>, <span class="fl">0.87</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">25</span>, font<span class="op">=</span>font_title,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;Unité&gt; : tonnes | &lt;Source&gt;: zenodo.org"</span>, (<span class="fl">0.5</span>, <span class="fl">0.2</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">12</span>, font<span class="op">=</span>font_text,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"top"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}, {<span class="st">"font"</span>: font_bold}],</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>m.add_custom_text(</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;By&gt; : Anicet Cyrille KAMBOU"</span>, (<span class="fl">0.48</span>, <span class="fl">0.15</span>), to<span class="op">=</span><span class="st">"fig"</span>,</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>text_color, fontsize<span class="op">=</span><span class="dv">9</span>, font<span class="op">=</span>font_text,</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    highlight_textprops<span class="op">=</span>[{<span class="st">"font"</span>: font_bold}],</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>m.add_image(<span class="st">"logo.png"</span>, (<span class="fl">0.44</span>, <span class="fl">0.14</span>), zoom<span class="op">=</span><span class="fl">0.035</span>)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 8. EXPORT</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>m.save(<span class="st">"web-map-with-custom-legend.png"</span>, dpi<span class="op">=</span><span class="dv">600</span>)</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="résultat" class="level3">
 <h3 class="anchored" data-anchor-id="résultat">Résultat</h3>
@@ -1007,12 +1039,12 @@ Note
 <section id="plot_choropleth" class="level4">
 <h4 class="anchored" data-anchor-id="plot_choropleth"><a href="../reference/mapper.html">plot_choropleth()</a></h4>
 <p>Fonction autonome pour une choroplèthe rapide, sans passer par une instance <code>Map</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> SituationMap</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>sm <span class="op">=</span> SituationMap(title<span class="op">=</span><span class="st">"Côte d'Ivoire"</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>sm.add_main_layer(regions_gdf, facecolor<span class="op">=</span><span class="st">"khaki"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>sm.set_inset_box_from_gdf(regions_gdf)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>sm.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cartograpy.mapper <span class="im">import</span> SituationMap</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>sm <span class="op">=</span> SituationMap(title<span class="op">=</span><span class="st">"Côte d'Ivoire"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>sm.add_main_layer(regions_gdf, facecolor<span class="op">=</span><span class="st">"khaki"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>sm.set_inset_box_from_gdf(regions_gdf)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>sm.show()</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 <section id="aller-plus-loin" class="level2">

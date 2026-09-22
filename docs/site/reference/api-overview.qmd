@@ -26,8 +26,8 @@ cp.__version__   # ex. "2.0.0"
 
 ## Objets majeurs
 
-- `Map`, `Map2D`, `WebMap`, `SituationMap`
-- `GeoBoundaries`, `Bound`, `Geocoder`, `OSM`, `Hydro`, `DEM`, `DEMDownloadError`, `WorldBank`, `Climate`, `Gee`
+- `Map`, `Map2D`, `WebMap`, `SituationMap`, `Layout`
+- `GeoBoundaries`, `Bound`, `Geocoder`, `OSM`, `Hydro`, `DEM`, `DEMDownloadError`, `WorldBank`, `Climate`, `Gee`, `STAC`, `STACResults`
 - `VectorTools`, `RasterTools`
 - `Project`
 
@@ -41,8 +41,14 @@ cp.__version__   # ex. "2.0.0"
 - Grille hexagonale : `make_hex_grid`, `aggregate_to_hex`, `plot_hexgrid_choropleth`
 
 Toute la surface publique de `cartograpy.data` (dont `Geocoder`, `DEMDownloadError`,
-`Gee`, `describe`) est réexportée à la racine du package : `from cartograpy import
+`Gee`, `STAC`, `describe`) est réexportée à la racine du package : `from cartograpy import
 Gee` fonctionne au même titre que `from cartograpy.data import Gee`.
+
+## Ligne de commande
+
+`pip install cartograpy` installe aussi une commande `cartograpy` (`init`, `fetch
+boundary`/`fetch dem`, `inspect`, `convert`, `map`, `doctor`) pour les tâches
+courantes sans écrire de script Python. Voir [Reference CLI](/reference/cli.qmd).
 
 ## Recommandation
 

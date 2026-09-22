@@ -33,3 +33,11 @@ def _require_ee():
 
 def _require_geemap():
     return _import_optional_dependency("geemap")
+
+
+def _require_pystac_client():
+    return _import_optional_dependency("pystac_client", "pystac-client")
+
+
+def _require_planetary_computer():
+    return _import_optional_dependency("planetary_computer", "planetary-computer")

@@ -12,6 +12,7 @@ from .dem import DEMDownloadError, DEM
 from .worldbank import WorldBank
 from .climate import Climate
 from .gee import Gee
+from .stac import STAC, STACResults
 
 __all__ = [
     "load", "save", "describe", "list_geofiles",
@@ -23,4 +24,5 @@ __all__ = [
     "WorldBank",
     "Climate",
     "Gee",
+    "STAC", "STACResults",
 ]

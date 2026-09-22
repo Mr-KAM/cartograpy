@@ -572,6 +572,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Reference project</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -754,10 +760,11 @@ Astuce
 <li><code>geopandas</code> pour les données vectorielles</li>
 <li><code>rasterio</code> pour les rasters</li>
 <li><code>cartopy</code> et <code>matplotlib</code> pour les cartes statiques</li>
-<li><code>folium</code> (via <code>WebMap</code>) et <code>geemap</code> pour les usages web et Google Earth Engine</li>
+<li><code>geemap</code>/<code>pystac-client</code>/<code>planetary-computer</code> pour Google Earth Engine et les catalogues STAC</li>
 <li><code>geohexgrid</code> pour les grilles hexagonales / hexbin</li>
 <li><code>scienceplots</code> et <code>mplcyberpunk</code> pour les styles graphiques de <code>styling</code></li>
 </ul>
+<p><code>WebMap</code> (cartes interactives) n’est <strong>pas</strong> couvert par l’installation de base : <code>pip install cartograpy[webmap]</code> installe <code>folium</code>, <code>lonboard</code>, <code>keplergl</code> et <code>rio-tiler</code>.</p>
 <p>Voir <a href="../explanations/data-sources-and-dependencies.html">Sources de données et dépendances</a> pour la liste complète et les dépendances optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>, <code>earthengine-api</code>).</p>
 </section>
 <section id="jupyter-et-marimo" class="level2">
@@ -794,6 +801,9 @@ Note
 <p>Si cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème vient des dépendances système (voir la section par plateforme ci-dessus), pas de cartograpy lui-même.</p>
 </div>
 </div>
+<p>Ou, sans écrire de Python, via la CLI installée avec le paquet :</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cartograpy</span> doctor</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Vérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et optionnelles (<code>webmap</code>, <code>earthengine-api</code>) en un coup d’œil. Voir <a href="../reference/cli.html">Reference CLI</a>.</p>
 
 
 </section>

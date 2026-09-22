@@ -8,6 +8,7 @@ from .map import Map
 from .map2d import Map2D
 from .webmap import WebMap
 from .situation import SituationMap
+from .layout import Layout
 from .bivariate import (
     plot_bivariate_choropleth,
     plot_bivariate_legend,
@@ -26,7 +27,7 @@ from .hexgrid import (
 )
 
 __all__ = [
-    "Map", "Map2D", "WebMap", "SituationMap",
+    "Map", "Map2D", "WebMap", "SituationMap", "Layout",
     "plot_choropleth", "read_image",
     "plot_bivariate_choropleth", "plot_bivariate_legend",
     "assign_bivariate_classes", "classify_variable",
