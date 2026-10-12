@@ -59,7 +59,7 @@ Online data sources and web maps are optional extras:
 | `worldbank` | `WorldBank` | `wbdata` |
 | `gee` | `Gee` (Google Earth Engine) | `earthengine-api`, `geemap` |
 | `stac` | `STAC` catalogs (Planetary Computer…) | `pystac-client`, `planetary-computer` |
-| `webmap` | `WebMap` | `folium`, `lonboard`, `keplergl`, `rio-tiler` |
+| `webmap` | `WebMap` | `folium`, `lonboard`, `keplergl` (Python < 3.13), `rio-tiler` |
 | `all` | everything above | |
 
 ```bash

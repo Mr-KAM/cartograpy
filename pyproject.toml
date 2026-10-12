@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cartograpy"
-version = "3.0.1"
+version = "3.0.2"
 description = "Python package to create maps easily"
 authors = [
     { name = "Anicet Cyrille KAMBOU", email = "kanicetcyrille@gmail.com" },
@@ -83,7 +83,9 @@ notebook = [
 webmap = [
     "folium>=0.15",
     "lonboard>=0.9",
-    "keplergl>=0.3.2",
+    # keplergl 0.3.7 is sdist-only and its build needs pyarrow==16 (no wheel for
+    # Python 3.13+). Drop the marker once keplergl publishes wheels.
+    "keplergl>=0.3.2; python_version < '3.13'",
     "rio-tiler>=6.0",
 ]
 dev = [

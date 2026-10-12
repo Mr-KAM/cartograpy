@@ -391,7 +391,7 @@ wheels = [
 
 [[package]]
 name = "cartograpy"
-version = "3.0.1"
+version = "3.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "cartopy" },
@@ -430,7 +430,7 @@ all = [
     { name = "earthengine-api" },
     { name = "folium" },
     { name = "geemap" },
-    { name = "keplergl" },
+    { name = "keplergl", marker = "python_full_version < '3.13'" },
     { name = "lonboard" },
     { name = "osmnx" },
     { name = "planetary-computer" },
@@ -460,7 +460,7 @@ stac = [
 ]
 webmap = [
     { name = "folium" },
-    { name = "keplergl" },
+    { name = "keplergl", marker = "python_full_version < '3.13'" },
     { name = "lonboard" },
     { name = "rio-tiler" },
 ]
@@ -484,7 +484,7 @@ requires-dist = [
     { name = "highlight-text", specifier = ">=0.2" },
     { name = "jupyter", marker = "extra == 'notebook'", specifier = ">=1.1.1" },
     { name = "jupyterlab", marker = "extra == 'dev'", specifier = ">=4.0.0" },
-    { name = "keplergl", marker = "extra == 'webmap'", specifier = ">=0.3.2" },
+    { name = "keplergl", marker = "python_full_version < '3.13' and extra == 'webmap'", specifier = ">=0.3.2" },
     { name = "lonboard", marker = "extra == 'webmap'", specifier = ">=0.9" },
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "matplotlib-map-utils", specifier = "==3.1.2" },
@@ -1043,7 +1043,7 @@ name = "deprecation"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "packaging" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5a/d3/8ae2869247df154b64c1884d7346d412fed0c49df84db635aab2d1c40e62/deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff", size = 173788, upload-time = "2020-04-20T14:23:38.738Z" }
 wheels = [
@@ -1293,9 +1293,9 @@ name = "geoarrow-pandas"
 version = "0.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "geoarrow-pyarrow" },
-    { name = "pandas" },
-    { name = "pyarrow" },
+    { name = "geoarrow-pyarrow", marker = "python_full_version < '3.13'" },
+    { name = "pandas", marker = "python_full_version < '3.13'" },
+    { name = "pyarrow", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/89/f4/e20f1f96dc572b2dac17ff99395e95bebaae972f5e0cef9087be58e60789/geoarrow-pandas-0.1.1.tar.gz", hash = "sha256:feb909eb5f5b98addc9bbb7e34d73208a43ec74df68d02f94aa2b54bab52aa50", size = 9963, upload-time = "2023-10-05T15:12:08.48Z" }
 wheels = [
@@ -1307,9 +1307,9 @@ name = "geoarrow-pyarrow"
 version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "geoarrow-c" },
-    { name = "geoarrow-types" },
-    { name = "pyarrow" },
+    { name = "geoarrow-c", marker = "python_full_version < '3.13'" },
+    { name = "geoarrow-types", marker = "python_full_version < '3.13'" },
+    { name = "pyarrow", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d1/e0/ff8430e5e1049e310c35f335cf7e14682bfeafeb773f48c5a7425359a4ba/geoarrow_pyarrow-0.2.0.tar.gz", hash = "sha256:5c981f5cae26fa6cdfb6f9b83fb490d36bf0fe6f6fa360c4c8983e0a8a457926", size = 33488, upload-time = "2025-05-27T03:51:45.071Z" }
 wheels = [
@@ -2036,11 +2036,11 @@ name = "jupyter-packaging"
 version = "0.12.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "deprecation" },
-    { name = "packaging" },
-    { name = "setuptools" },
-    { name = "tomlkit" },
-    { name = "wheel" },
+    { name = "deprecation", marker = "python_full_version < '3.13'" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
+    { name = "setuptools", marker = "python_full_version < '3.13'" },
+    { name = "tomlkit", marker = "python_full_version < '3.13'" },
+    { name = "wheel", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/25/c5/b0e154e6403c6790bb1e66acddf9787296a8196f5b14f4bb9e4c92b6734e/jupyter_packaging-0.12.3.tar.gz", hash = "sha256:9d9b2b63b97ffd67a8bc5391c32a421bc415b264a32c99e4d8d8dd31daae9cf4", size = 25350, upload-time = "2022-08-25T15:31:43.44Z" }
 wheels = [
@@ -2155,18 +2155,18 @@ name = "keplergl"
 version = "0.3.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "geoarrow-pandas" },
-    { name = "geoarrow-pyarrow" },
-    { name = "geopandas" },
-    { name = "ipywidgets" },
-    { name = "jupyter" },
-    { name = "jupyter-packaging" },
-    { name = "jupyterlab" },
-    { name = "notebook" },
-    { name = "pyarrow" },
-    { name = "shapely" },
-    { name = "traitlets" },
-    { name = "traittypes" },
+    { name = "geoarrow-pandas", marker = "python_full_version < '3.13'" },
+    { name = "geoarrow-pyarrow", marker = "python_full_version < '3.13'" },
+    { name = "geopandas", marker = "python_full_version < '3.13'" },
+    { name = "ipywidgets", marker = "python_full_version < '3.13'" },
+    { name = "jupyter", marker = "python_full_version < '3.13'" },
+    { name = "jupyter-packaging", marker = "python_full_version < '3.13'" },
+    { name = "jupyterlab", marker = "python_full_version < '3.13'" },
+    { name = "notebook", marker = "python_full_version < '3.13'" },
+    { name = "pyarrow", marker = "python_full_version < '3.13'" },
+    { name = "shapely", marker = "python_full_version < '3.13'" },
+    { name = "traitlets", marker = "python_full_version < '3.13'" },
+    { name = "traittypes", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a0/1e/adc9406362eba310840634c1482c016a49c60ab576daeeb4fee1c595ddae/keplergl-0.3.7.tar.gz", hash = "sha256:52357af658ff21cf478b18e8670f9ee39c295dfdfe72a8f00cfcc523a7979962", size = 18440135, upload-time = "2025-02-01T22:29:51.641Z" }
 
@@ -5243,7 +5243,7 @@ name = "wheel"
 version = "0.48.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "packaging" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d0/20/50ed6bdf27dec98b568a8ae25dc599f35baa3d9709f9e83fd1edb56b9a90/wheel-0.48.0.tar.gz", hash = "sha256:94800765601e9171bf5d58d066e640662842bcedcbab982b2c90787a2c987322", size = 66471, upload-time = "2026-08-11T22:02:27.327Z" }
 wheels = [

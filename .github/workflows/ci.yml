@@ -40,6 +40,6 @@ jobs:
         with:
           enable-cache: true
       - name: Install dependencies (versions verrouillées via uv.lock)
-        run: uv sync --frozen --extra dev --extra stac --python ${{ matrix.python-version }}
+        run: uv sync --frozen --extra dev --extra stac --extra webmap --python ${{ matrix.python-version }}
       - name: Run tests
         run: uv run --no-sync pytest test/ -v

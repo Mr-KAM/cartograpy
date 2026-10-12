@@ -171,7 +171,7 @@ Diagnostique l'environnement GIS : version de Python, des bibliothèques C sous-
 manquent, et de `earthengine-api` (installation + authentification `ee.Authenticate()`).
 
 ```
-Cartograpy 3.0.1
+Cartograpy 3.0.2
 
 [OK] Python 3.12.13
 [OK] GDAL 3.12.4

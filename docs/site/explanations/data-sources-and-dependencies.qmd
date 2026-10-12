@@ -137,7 +137,7 @@ n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
 | `pystac-client`, `planetary-computer` | `STAC` | Oui, extra `stac` |
 | `folium` | `WebMap` avec `engine="folium"` (moteur par défaut) | Oui, extra `webmap` |
 | `lonboard` | `WebMap` avec `engine="lonboard"` (rendu GPU deck.gl) | Oui, extra `webmap` |
-| `keplergl` | `WebMap` avec `engine="kepler.gl"` | Oui, extra `webmap` |
+| `keplergl` | `WebMap` avec `engine="kepler.gl"` | Oui, extra `webmap` (Python < 3.13 uniquement : pas de wheel publié) |
 | `rio-tiler` | `WebMap.add_raster()`/`.add_cog()` | Oui, extra `webmap` |
 
 Un module concerné s'importe sans le paquet ; l'erreur, levée à

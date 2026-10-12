@@ -127,7 +127,7 @@ optionnels, à ajouter selon vos besoins :
 | `worldbank` | `WorldBank` | `wbdata` |
 | `gee` | `Gee` (Google Earth Engine) | `earthengine-api`, `geemap` |
 | `stac` | `STAC` (Planetary Computer…) | `pystac-client`, `planetary-computer` |
-| `webmap` | `WebMap` | `folium`, `lonboard`, `keplergl`, `rio-tiler` |
+| `webmap` | `WebMap` | `folium`, `lonboard`, `keplergl` (Python < 3.13), `rio-tiler` |
 | `all` | tout ce qui précède | |
 
 ```bash
@@ -164,7 +164,7 @@ marimo edit mon_notebook.py
 ```python
 import cartograpy as cp
 
-print(cp.__version__)                  # ex. "3.0.1"
+print(cp.__version__)                  # ex. "3.0.2"
 print(cp.COUNTRY_ISO3["france"])       # "fra"
 ```
 
