@@ -316,7 +316,7 @@
     "href": "reference/api-overview.html#version",
     "title": "Vue d’ensemble de l’API",
     "section": "Version",
-    "text": "Version\ncartograpy.__version__ expose la version installée (lue depuis les métadonnées du paquet, comme numpy.__version__ / pandas.__version__) :\nimport cartograpy as cp\ncp.__version__   # ex. \"3.0.0\"",
+    "text": "Version\ncartograpy.__version__ expose la version installée (lue depuis les métadonnées du paquet, comme numpy.__version__ / pandas.__version__) :\nimport cartograpy as cp\ncp.__version__   # ex. \"3.0.1\"",
     "crumbs": [
       "Accueil",
       "Référence API",
@@ -1000,7 +1000,7 @@
     "href": "getting-started/installation.html#vérifier-linstallation",
     "title": "Installation",
     "section": "Vérifier l’installation",
-    "text": "Vérifier l’installation\nimport cartograpy as cp\n\nprint(cp.__version__)                  # ex. \"3.0.0\"\nprint(cp.COUNTRY_ISO3[\"france\"])       # \"fra\"\n\n\n\n\n\n\nNote\n\n\n\nSi cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème vient des dépendances système (voir la section par plateforme ci-dessus), pas de cartograpy lui-même.\n\n\nOu, sans écrire de Python, via la CLI installée avec le paquet :\ncartograpy doctor\nVérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et celles des extras optionnels (webmap, osm, worldbank, gee, stac) en un coup d’œil. Voir Reference CLI.",
+    "text": "Vérifier l’installation\nimport cartograpy as cp\n\nprint(cp.__version__)                  # ex. \"3.0.1\"\nprint(cp.COUNTRY_ISO3[\"france\"])       # \"fra\"\n\n\n\n\n\n\nNote\n\n\n\nSi cet import échoue avec une erreur liée à GDAL, GEOS ou PROJ, le problème vient des dépendances système (voir la section par plateforme ci-dessus), pas de cartograpy lui-même.\n\n\nOu, sans écrire de Python, via la CLI installée avec le paquet :\ncartograpy doctor\nVérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et celles des extras optionnels (webmap, osm, worldbank, gee, stac) en un coup d’œil. Voir Reference CLI.",
     "crumbs": [
       "Accueil",
       "Prise en main",
@@ -2058,7 +2058,7 @@
     "href": "reference/cli.html#cartograpy-doctor",
     "title": "CLI",
     "section": "cartograpy doctor",
-    "text": "cartograpy doctor\ncartograpy doctor\nDiagnostique l’environnement GIS : version de Python, des bibliothèques C sous-jacentes (GDAL, PROJ, GEOS via rasterio/pyproj/shapely), des dépendances cœur (rasterio, geopandas, cartopy), des paquets des extras optionnels (webmap, osm, worldbank, gee, stac) avec l’extra à installer s’ils manquent, et de earthengine-api (installation + authentification ee.Authenticate()).\nCartograpy 3.0.0\n\n[OK] Python 3.12.13\n[OK] GDAL 3.12.4\n[OK] PROJ 9.5.1\n[OK] GEOS 3.13.1\n[OK] rasterio 1.5.1\n[OK] geopandas 1.1.4\n[OK] cartopy 0.25.0\n[!] folium not installed (pip install cartograpy[webmap])\n[!] lonboard not installed (pip install cartograpy[webmap])\n[!] keplergl not installed (pip install cartograpy[webmap])\n[!] rio-tiler not installed (pip install cartograpy[webmap])\n[OK] osmnx 2.1.1\n[!] wbdata not installed (pip install cartograpy[worldbank])\n[!] geemap not installed (pip install cartograpy[gee])\n[OK] pystac-client 0.9.0\n[OK] planetary-computer 1.0.0\n[!] earthengine-api not installed (pip install cartograpy[gee])\n\n\n\n\n\n\nAstuce\n\n\n\nParticulièrement utile pour diagnostiquer une installation Windows/conda où GDAL/GEOS/PROJ sont la source la plus fréquente de plantage à l’import — voir Installation.",
+    "text": "cartograpy doctor\ncartograpy doctor\nDiagnostique l’environnement GIS : version de Python, des bibliothèques C sous-jacentes (GDAL, PROJ, GEOS via rasterio/pyproj/shapely), des dépendances cœur (rasterio, geopandas, cartopy), des paquets des extras optionnels (webmap, osm, worldbank, gee, stac) avec l’extra à installer s’ils manquent, et de earthengine-api (installation + authentification ee.Authenticate()).\nCartograpy 3.0.1\n\n[OK] Python 3.12.13\n[OK] GDAL 3.12.4\n[OK] PROJ 9.5.1\n[OK] GEOS 3.13.1\n[OK] rasterio 1.5.1\n[OK] geopandas 1.1.4\n[OK] cartopy 0.25.0\n[!] folium not installed (pip install cartograpy[webmap])\n[!] lonboard not installed (pip install cartograpy[webmap])\n[!] keplergl not installed (pip install cartograpy[webmap])\n[!] rio-tiler not installed (pip install cartograpy[webmap])\n[OK] osmnx 2.1.1\n[!] wbdata not installed (pip install cartograpy[worldbank])\n[!] geemap not installed (pip install cartograpy[gee])\n[OK] pystac-client 0.9.0\n[OK] planetary-computer 1.0.0\n[!] earthengine-api not installed (pip install cartograpy[gee])\n\n\n\n\n\n\nAstuce\n\n\n\nParticulièrement utile pour diagnostiquer une installation Windows/conda où GDAL/GEOS/PROJ sont la source la plus fréquente de plantage à l’import — voir Installation.",
     "crumbs": [
       "Accueil",
       "Référence API",

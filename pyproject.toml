@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cartograpy"
-version = "3.0.0"
+version = "3.0.1"
 description = "Python package to create maps easily"
 authors = [
     { name = "Anicet Cyrille KAMBOU", email = "kanicetcyrille@gmail.com" },

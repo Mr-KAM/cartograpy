@@ -5,7 +5,7 @@ from matplotlib.patches import Patch
 import numpy as np
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 import matplotlib.ticker as mticker
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
@@ -2648,8 +2648,8 @@ class Map:
 
             # Coordinate formatting
             if not dms:
-                gl.xformatter = LONGITUDE_FORMATTER
-                gl.yformatter = LATITUDE_FORMATTER
+                gl.xformatter = LongitudeFormatter()
+                gl.yformatter = LatitudeFormatter()
 
         # Configure the grid line positions
         if xlocs is not None:
