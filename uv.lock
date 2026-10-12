@@ -434,6 +434,7 @@ all = [
     { name = "lonboard" },
     { name = "osmnx" },
     { name = "planetary-computer" },
+    { name = "pyarrow" },
     { name = "pystac-client" },
     { name = "rio-tiler" },
     { name = "wbdata" },
@@ -462,6 +463,7 @@ webmap = [
     { name = "folium" },
     { name = "keplergl", marker = "python_full_version < '3.13'" },
     { name = "lonboard" },
+    { name = "pyarrow" },
     { name = "rio-tiler" },
 ]
 worldbank = [
@@ -495,6 +497,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.1" },
     { name = "pillow", specifier = ">=10.0" },
     { name = "planetary-computer", marker = "extra == 'stac'", specifier = ">=1.0" },
+    { name = "pyarrow", marker = "extra == 'webmap'", specifier = ">=16" },
     { name = "pyfonts", specifier = ">=1.3.0" },
     { name = "pypalettes", specifier = ">=0.1" },
     { name = "pyproj", specifier = ">=3.6" },

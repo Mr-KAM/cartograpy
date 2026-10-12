@@ -83,6 +83,7 @@ notebook = [
 webmap = [
     "folium>=0.15",
     "lonboard>=0.9",
+    "pyarrow>=16",  # lonboard converts GeoDataFrames through geopandas.to_arrow()
     # keplergl 0.3.7 is sdist-only and its build needs pyarrow==16 (no wheel for
     # Python 3.13+). Drop the marker once keplergl publishes wheels.
     "keplergl>=0.3.2; python_version < '3.13'",

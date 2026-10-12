@@ -130,13 +130,10 @@ def fetch_osm(place, tags, common, data_type, output):
     """Downloads OSM features matching tags for PLACE (a place name)."""
     from cartograpy.data import OSM
 
-    osm = OSM()
-    if common:
-        tag_dict = osm.get_common_tag()[common]
-    elif tags:
-        tag_dict = _parse_tags(tags)
-    else:
+    if not (common or tags):
         raise click.UsageError("Provide --tag KEY=VALUE or --common NAME.")
+    osm = OSM()
+    tag_dict = osm.get_common_tag()[common] if common else _parse_tags(tags)
 
     gdf = osm.get_data(place, tag_dict, data_type=data_type)
     output = output or f"osm_{_slugify(place)}.gpkg"
