@@ -1090,7 +1090,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>folium</code>, <code>lonboard</code> et <code>keplergl</code> ne sont pas des dépendances cœur : <code>pip install cartograpy[webmap]</code> les installe toutes les trois (extra optionnel). <code>add_cog</code>/<code>add_raster</code> nécessitent en plus <code>rio-tiler</code> (inclus dans le même extra).</p>
+<p><code>folium</code>, <code>lonboard</code> et <code>keplergl</code> ne sont pas des dépendances cœur : <code>pip install cartograpy[webmap]</code> les installe toutes les trois (extra optionnel), sauf <code>keplergl</code> sous Python 3.13+ (aucun wheel publié). <code>add_cog</code>/<code>add_raster</code> nécessitent en plus <code>rio-tiler</code>, et <code>lonboard</code> nécessite <code>pyarrow</code> (tous deux inclus dans le même extra).</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">

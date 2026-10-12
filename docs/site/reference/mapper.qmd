@@ -491,9 +491,10 @@ WebMap(engine='folium', location=(0, 0), zoom_start=6, tiles='OpenStreetMap', wi
 
 ::: {.callout-warning}
 `folium`, `lonboard` et `keplergl` ne sont pas des dépendances cœur : `pip
-install cartograpy[webmap]` les installe toutes les trois (extra optionnel).
-`add_cog`/`add_raster` nécessitent en plus `rio-tiler` (inclus dans le même
-extra).
+install cartograpy[webmap]` les installe toutes les trois (extra optionnel),
+sauf `keplergl` sous Python 3.13+ (aucun wheel publié). `add_cog`/`add_raster`
+nécessitent en plus `rio-tiler`, et `lonboard` nécessite `pyarrow` (tous deux
+inclus dans le même extra).
 :::
 
 ::: {.callout-note collapse="true"}

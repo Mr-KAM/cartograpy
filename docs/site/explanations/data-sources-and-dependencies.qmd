@@ -136,7 +136,7 @@ n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
 | `earthengine-api` (`ee`), `geemap` | `Gee` (toutes les méthodes) | Oui, extra `gee` |
 | `pystac-client`, `planetary-computer` | `STAC` | Oui, extra `stac` |
 | `folium` | `WebMap` avec `engine="folium"` (moteur par défaut) | Oui, extra `webmap` |
-| `lonboard` | `WebMap` avec `engine="lonboard"` (rendu GPU deck.gl) | Oui, extra `webmap` |
+| `lonboard`, `pyarrow` | `WebMap` avec `engine="lonboard"` (rendu GPU deck.gl) | Oui, extra `webmap` |
 | `keplergl` | `WebMap` avec `engine="kepler.gl"` | Oui, extra `webmap` (Python < 3.13 uniquement : pas de wheel publié) |
 | `rio-tiler` | `WebMap.add_raster()`/`.add_cog()` | Oui, extra `webmap` |
 
@@ -145,8 +145,10 @@ l'utilisation, indique l'extra à installer (`pip install cartograpy[gee]`, etc.
 `pip install cartograpy[all]` installe tous les extras.
 
 ::: {.callout-tip}
-`folium`, `lonboard`, `keplergl` et `rio-tiler` sont regroupés dans l'extra
-`webmap` de `pyproject.toml` (contrairement à `contextily`/`matplotlib-scalebar`,
-totalement absents des métadonnées) : `pip install cartograpy[webmap]` les
-installe tous les quatre d'un coup, plutôt que de les ajouter un par un.
+`folium`, `lonboard` (avec `pyarrow`), `keplergl` et `rio-tiler` sont regroupés
+dans l'extra `webmap` de `pyproject.toml` (contrairement à
+`contextily`/`matplotlib-scalebar`, totalement absents des métadonnées) :
+`pip install cartograpy[webmap]` les installe d'un coup, plutôt que de les
+ajouter un par un. `keplergl` n'est installé que sous Python < 3.13 (aucun
+wheel publié, compilation impossible au-delà).
 :::

@@ -686,7 +686,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>WebMap</code> nécessite <code>folium</code>, <code>lonboard</code> et <code>keplergl</code>, qui ne sont pas dans les dépendances cœur de cartograpy : <code>pip install cartograpy[webmap]</code> installe les trois d’un coup (avec <code>rio-tiler</code>, requis par <code>add_cog</code>/<code>add_raster</code>). Un moteur non installé lève une <code>ImportError</code> explicite à la construction de <code>WebMap(engine=...)</code>.</p>
+<p><code>WebMap</code> nécessite <code>folium</code>, <code>lonboard</code> et <code>keplergl</code>, qui ne sont pas dans les dépendances cœur de cartograpy : <code>pip install cartograpy[webmap]</code> installe les trois d’un coup (avec <code>rio-tiler</code>, requis par <code>add_cog</code>/<code>add_raster</code>, et <code>pyarrow</code>, requis par <code>lonboard</code>). Sous Python 3.13+, <code>keplergl</code> n’est pas installé (aucun wheel publié) : le moteur <code>kepler.gl</code> y est indisponible. Un moteur non installé lève une <code>ImportError</code> explicite à la construction de <code>WebMap(engine=...)</code>.</p>
 </div>
 </div>
 </section>

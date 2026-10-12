@@ -127,7 +127,7 @@ optionnels, à ajouter selon vos besoins :
 | `worldbank` | `WorldBank` | `wbdata` |
 | `gee` | `Gee` (Google Earth Engine) | `earthengine-api`, `geemap` |
 | `stac` | `STAC` (Planetary Computer…) | `pystac-client`, `planetary-computer` |
-| `webmap` | `WebMap` | `folium`, `lonboard`, `keplergl` (Python < 3.13), `rio-tiler` |
+| `webmap` | `WebMap` | `folium`, `lonboard`, `pyarrow`, `keplergl` (Python < 3.13), `rio-tiler` |
 | `all` | tout ce qui précède | |
 
 ```bash

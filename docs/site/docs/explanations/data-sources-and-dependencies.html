@@ -839,7 +839,7 @@ Avertissement
 <td>Oui, extra <code>webmap</code></td>
 </tr>
 <tr class="even">
-<td><code>lonboard</code></td>
+<td><code>lonboard</code>, <code>pyarrow</code></td>
 <td><code>WebMap</code> avec <code>engine="lonboard"</code> (rendu GPU deck.gl)</td>
 <td>Oui, extra <code>webmap</code></td>
 </tr>
@@ -866,7 +866,7 @@ Astuce
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>folium</code>, <code>lonboard</code>, <code>keplergl</code> et <code>rio-tiler</code> sont regroupés dans l’extra <code>webmap</code> de <code>pyproject.toml</code> (contrairement à <code>contextily</code>/<code>matplotlib-scalebar</code>, totalement absents des métadonnées) : <code>pip install cartograpy[webmap]</code> les installe tous les quatre d’un coup, plutôt que de les ajouter un par un.</p>
+<p><code>folium</code>, <code>lonboard</code> (avec <code>pyarrow</code>), <code>keplergl</code> et <code>rio-tiler</code> sont regroupés dans l’extra <code>webmap</code> de <code>pyproject.toml</code> (contrairement à <code>contextily</code>/<code>matplotlib-scalebar</code>, totalement absents des métadonnées) : <code>pip install cartograpy[webmap]</code> les installe d’un coup, plutôt que de les ajouter un par un. <code>keplergl</code> n’est installé que sous Python &lt; 3.13 (aucun wheel publié, compilation impossible au-delà).</p>
 </div>
 </div>
 

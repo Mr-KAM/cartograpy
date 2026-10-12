@@ -21,7 +21,9 @@ wm = WebMap(location=(5.35, -4.0), zoom_start=7, tiles="OpenStreetMap")
 ::: {.callout-warning}
 `WebMap` nécessite `folium`, `lonboard` et `keplergl`, qui ne sont pas dans les
 dépendances cœur de cartograpy : `pip install cartograpy[webmap]` installe les
-trois d'un coup (avec `rio-tiler`, requis par `add_cog`/`add_raster`). Un
+trois d'un coup (avec `rio-tiler`, requis par `add_cog`/`add_raster`, et
+`pyarrow`, requis par `lonboard`). Sous Python 3.13+, `keplergl` n'est pas
+installé (aucun wheel publié) : le moteur `kepler.gl` y est indisponible. Un
 moteur non installé lève une `ImportError` explicite à la construction de
 `WebMap(engine=...)`.
 :::

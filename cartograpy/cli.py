@@ -335,7 +335,8 @@ def doctor():
             fail(f"{pkg} not installed")
 
     optional = {
-        "folium": "webmap", "lonboard": "webmap", "keplergl": "webmap", "rio-tiler": "webmap",
+        "folium": "webmap", "lonboard": "webmap", "pyarrow": "webmap", "keplergl": "webmap",
+        "rio-tiler": "webmap",
         "osmnx": "osm", "wbdata": "worldbank", "geemap": "gee",
         "pystac-client": "stac", "planetary-computer": "stac",
     }
