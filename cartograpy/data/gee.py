@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union, List, Optional, Tuple
+from typing import TYPE_CHECKING, Union, Optional
 import pandas as pd
 import os
 from pathlib import Path
@@ -342,7 +342,6 @@ class Gee:
         if col is None:
             raise ValueError("Aucune collection disponible.")
         dates = col.aggregate_array("system:time_start").getInfo()
-        import datetime
         return [
             datetime.datetime.utcfromtimestamp(d / 1000).strftime("%Y-%m-%d")
             for d in dates

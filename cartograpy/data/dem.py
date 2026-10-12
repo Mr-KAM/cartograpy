@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import geopandas as gpd
-from typing import TYPE_CHECKING, Union, List, Optional, Tuple
+from typing import Union, List, Optional, Tuple
 import math
 import numpy as np
 from requests_cache import CachedSession

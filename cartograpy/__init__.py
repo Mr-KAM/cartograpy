@@ -103,7 +103,7 @@ __all__ = [
     "BIVARIATE_PALETTES",
     "make_hex_grid", "aggregate_to_hex", "plot_hexgrid_choropleth",
     # styling
-    "get_fonts", "get_available_palettes",
+    "get_fonts", "google_font", "path_font", "local_font", "get_available_palettes",
     "color_palettes", "custom_palettes", "load_cmap", "to_cmap",
     "show_palette", "show_palette_details", "palettes_by_popularity",
     "palettes_with_color", "preview_multiple_palettes",

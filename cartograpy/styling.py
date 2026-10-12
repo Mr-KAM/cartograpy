@@ -1,10 +1,10 @@
 import pypalettes
-from pypalettes import create_cmap, show_cmap, load_palette, load_cmap
+from pypalettes import create_cmap, show_cmap
 from pyfonts import load_google_font, load_font
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
-from typing import Optional, Union, List, Tuple, Dict, Any
+from typing import Optional, Union, List, Dict
 import matplotlib.font_manager as fm
 import logging
 
@@ -497,7 +497,6 @@ def show_palette(palette, n_colors: int = 8, custom_palettes: dict = None, ax=No
     ---------
     matplotlib.axes.Axes: the axes object with the palette preview
     """
-    import matplotlib.colors as mcolors
 
     # Create the axes if not provided
     if ax is None:
@@ -608,7 +607,7 @@ def set_style(style_name, source="matplotlib"):
 
     elif source.lower() == "mplcyberpunk":
         try:
-            import mplcyberpunk  # just to ensure it is installed
+            import mplcyberpunk  # noqa: F401 -- registers the 'cyberpunk' style
             if style_name == "cyberpunk":
                 plt.style.use("cyberpunk")
             else:
@@ -617,7 +616,7 @@ def set_style(style_name, source="matplotlib"):
             logger.warning("mplcyberpunk n'est pas installé ou incompatible avec cette version de matplotlib.")
 
     elif source.lower() == "scienceplots":
-        import scienceplots
+        import scienceplots  # noqa: F401 -- registers the SciencePlots styles
         # SciencePlots styles show up in plt.style.available
         if style_name in plt.style.available:
             # plt.style.use(style_name)
@@ -644,7 +643,7 @@ def list_all_styles():
 
     # 2. Seaborn styles
     try:
-        import seaborn as sns
+        import seaborn  # noqa: F401 -- availability check
         # Seaborn styles are well defined here:
         seaborn_styles = ["darkgrid", "whitegrid", "dark", "white", "ticks"]
         styles['seaborn'] = seaborn_styles
@@ -663,7 +662,7 @@ def list_all_styles():
 
     # 4. SciencePlots styles
     try:
-        import scienceplots
+        import scienceplots  # noqa: F401 -- registers the SciencePlots styles
 
         # SciencePlots styles are added to Matplotlib upon installation
         # Classic list, filtered through plt.style.available

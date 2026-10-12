@@ -10,7 +10,7 @@ en local.
 
 - Python 3.11 ou supérieur
 - Un environnement virtuel dédié (`venv`, `conda` ou `uv`)
-- Les bibliothèques système requises par `geopandas`, `rasterio`, `fiona` et
+- Les bibliothèques système requises par `geopandas`, `rasterio` et
   `cartopy` (GDAL, GEOS, PROJ) : voir la section par plateforme ci-dessous
 
 ## Installation rapide
@@ -62,7 +62,7 @@ cd cartograpy
 pip install -e .[dev]
 ```
 
-`[dev]` ajoute `pytest`, `black`, `flake8`, `mypy` et `jupyterlab` : nécessaires pour
+`[dev]` ajoute `pytest`, `ruff`, `mypy` et `jupyterlab` : nécessaires pour
 contribuer, inutiles pour un simple usage du package.
 
 ## Dépendances par plateforme
@@ -70,7 +70,7 @@ contribuer, inutiles pour un simple usage du package.
 ::: {.panel-tabset}
 ## Windows
 
-Les roues précompilées (`.whl`) de `geopandas`, `rasterio`, `fiona`, `cartopy` et
+Les roues précompilées (`.whl`) de `geopandas`, `rasterio`, `cartopy` et
 `pyproj` couvrent la majorité des cas via `pip install cartograpy` directement :
 aucune compilation locale requise dans la plupart des configurations récentes
 de Python 3.11+/pip.
@@ -81,7 +81,7 @@ passez par `conda`/`mamba` (canal `conda-forge`) qui gère ces dépendances
 binaires plus fiablement que pip sur Windows :
 
 ```bash
-conda install -c conda-forge geopandas rasterio cartopy fiona
+conda install -c conda-forge geopandas rasterio cartopy
 pip install cartograpy --no-deps
 pip install cartograpy  # puis les dépendances Python restantes
 ```
@@ -115,33 +115,46 @@ pip install cartograpy
 - `geopandas` pour les données vectorielles
 - `rasterio` pour les rasters
 - `cartopy` et `matplotlib` pour les cartes statiques
-- `geemap`/`pystac-client`/`planetary-computer` pour Google Earth Engine et les catalogues STAC
 - `geohexgrid` pour les grilles hexagonales / hexbin
 - `scienceplots` et `mplcyberpunk` pour les styles graphiques de `styling`
 
-`WebMap` (cartes interactives) n'est **pas** couvert par l'installation de base :
-`pip install cartograpy[webmap]` installe `folium`, `lonboard`, `keplergl` et
-`rio-tiler`.
+Les sources de données en ligne et les cartes interactives sont des extras
+optionnels, à ajouter selon vos besoins :
+
+| Extra | Fonctionnalité | Paquets installés |
+|---|---|---|
+| `osm` | `OSM`, géocodage via OSM | `osmnx` |
+| `worldbank` | `WorldBank` | `wbdata` |
+| `gee` | `Gee` (Google Earth Engine) | `earthengine-api`, `geemap` |
+| `stac` | `STAC` (Planetary Computer…) | `pystac-client`, `planetary-computer` |
+| `webmap` | `WebMap` | `folium`, `lonboard`, `keplergl`, `rio-tiler` |
+| `all` | tout ce qui précède | |
+
+```bash
+pip install cartograpy[osm,stac]   # ou cartograpy[all]
+```
 
 Voir [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd)
 pour la liste complète et les dépendances optionnelles (`contextily`,
-`matplotlib-scalebar`, `earthengine-api`).
+`matplotlib-scalebar`).
 
 ## Jupyter et Marimo
 
-`jupyter` et `marimo` font partie des dépendances cœur : aucune installation
-supplémentaire n'est nécessaire pour utiliser cartograpy dans un notebook.
+Aucun environnement de notebook n'est installé avec cartograpy : ajoutez celui
+que vous utilisez.
 
 ::: {.panel-tabset}
 ## Jupyter
 
 ```bash
+pip install cartograpy[notebook]   # installe jupyter
 jupyter lab
 ```
 
 ## Marimo
 
 ```bash
+pip install marimo
 marimo edit mon_notebook.py
 ```
 :::
@@ -151,7 +164,7 @@ marimo edit mon_notebook.py
 ```python
 import cartograpy as cp
 
-print(cp.__version__)                  # ex. "2.1.0"
+print(cp.__version__)                  # ex. "3.0.0"
 print(cp.COUNTRY_ISO3["france"])       # "fra"
 ```
 
@@ -167,5 +180,5 @@ Ou, sans écrire de Python, via la CLI installée avec le paquet :
 cartograpy doctor
 ```
 
-Vérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et optionnelles (`webmap`,
-`earthengine-api`) en un coup d'œil. Voir [Reference CLI](/reference/cli.qmd).
+Vérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et celles des extras optionnels
+(`webmap`, `osm`, `worldbank`, `gee`, `stac`) en un coup d'œil. Voir [Reference CLI](/reference/cli.qmd).

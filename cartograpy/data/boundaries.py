@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from cartograpy.iso_code import *
+from cartograpy.iso_code import countries_iso3, iso_codes
 import pandas as pd
 import geopandas as gpd
 import geojson
-from typing import TYPE_CHECKING, Union, List, Optional, Tuple
-from requests_cache import CachedSession
-from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, box, shape, mapping
+from typing import Union, List, Optional
+from requests_cache import CachedSession, DO_NOT_CACHE
+from shapely.geometry import Point
 import logging
 
 logger = logging.getLogger(__name__)
@@ -41,10 +41,17 @@ class GeoBoundaries:
         Args:
             cache_expire_seconds: Cache expiration duration in seconds (default: 1 week)
         """
-        self._session = CachedSession(expire_after=cache_expire_seconds)
+        self._session = self._new_session(cache_expire_seconds)
         self._base_url = "https://www.geoboundaries.org/api/current/gbOpen"
         self._continents_gdf = None
         self._countries_gdf = None
+
+    @staticmethod
+    def _new_session(expire_after) -> CachedSession:
+        # User cache dir (~/.cache/cartograpy, %LOCALAPPDATA%\cartograpy), not the CWD
+        return CachedSession(
+            "cartograpy/geoboundaries", use_cache_dir=True, expire_after=expire_after,
+        )
 
     def clear_cache(self):
         """Clears the request cache."""
@@ -57,11 +64,11 @@ class GeoBoundaries:
         Args:
             seconds: New expiration duration in seconds
         """
-        self._session = CachedSession(expire_after=seconds)
+        self._session = self._new_session(seconds)
 
     def disable_cache(self):
         """Disables the request cache."""
-        self._session = CachedSession(expire_after=-1)
+        self._session = self._new_session(DO_NOT_CACHE)
 
     def is_valid_adm(self, iso3: str, adm: str) -> bool:
         """

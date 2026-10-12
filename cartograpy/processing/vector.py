@@ -6,7 +6,7 @@ from shapely.geometry import MultiPolygon, Polygon, LineString, Point, box
 from shapely.validation import make_valid
 from shapely.ops import unary_union, snap, polygonize
 from shapely import wkt
-from typing import List, Union, Optional
+from typing import List, Union
 import warnings
 import logging
 
@@ -2140,7 +2140,6 @@ class VectorTools:
             GeoDataFrame: level, geometry (LineString)
         """
         import matplotlib.pyplot as plt
-        from matplotlib.contour import QuadContourSet
 
         interp = self.idw_interpolation(value_col, resolution=resolution)
         fig, ax = plt.subplots()

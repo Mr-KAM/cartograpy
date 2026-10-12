@@ -669,7 +669,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Python 3.11 ou supérieur</li>
 <li>Un environnement virtuel dédié (<code>venv</code>, <code>conda</code> ou <code>uv</code>)</li>
-<li>Les bibliothèques système requises par <code>geopandas</code>, <code>rasterio</code>, <code>fiona</code> et <code>cartopy</code> (GDAL, GEOS, PROJ) : voir la section par plateforme ci-dessous</li>
+<li>Les bibliothèques système requises par <code>geopandas</code>, <code>rasterio</code> et <code>cartopy</code> (GDAL, GEOS, PROJ) : voir la section par plateforme ci-dessous</li>
 </ul>
 </section>
 <section id="installation-rapide" class="level2">
@@ -713,7 +713,7 @@ Astuce
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/mr-kam/cartograpy.git</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> cartograpy</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-e</span> .<span class="pp">[</span><span class="ss">dev</span><span class="pp">]</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>[dev]</code> ajoute <code>pytest</code>, <code>black</code>, <code>flake8</code>, <code>mypy</code> et <code>jupyterlab</code> : nécessaires pour contribuer, inutiles pour un simple usage du package.</p>
+<p><code>[dev]</code> ajoute <code>pytest</code>, <code>ruff</code>, <code>mypy</code> et <code>jupyterlab</code> : nécessaires pour contribuer, inutiles pour un simple usage du package.</p>
 </section>
 <section id="dépendances-par-plateforme" class="level2">
 <h2 class="anchored" data-anchor-id="dépendances-par-plateforme">Dépendances par plateforme</h2>
@@ -721,7 +721,7 @@ Astuce
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Windows</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">macOS</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Linux</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<p>Les roues précompilées (<code>.whl</code>) de <code>geopandas</code>, <code>rasterio</code>, <code>fiona</code>, <code>cartopy</code> et <code>pyproj</code> couvrent la majorité des cas via <code>pip install cartograpy</code> directement : aucune compilation locale requise dans la plupart des configurations récentes de Python 3.11+/pip.</p>
+<p>Les roues précompilées (<code>.whl</code>) de <code>geopandas</code>, <code>rasterio</code>, <code>cartopy</code> et <code>pyproj</code> couvrent la majorité des cas via <code>pip install cartograpy</code> directement : aucune compilation locale requise dans la plupart des configurations récentes de Python 3.11+/pip.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -733,7 +733,7 @@ Astuce
 </div>
 <div class="callout-body-container callout-body">
 <p>En cas d’échec d’installation (erreurs de compilation liées à GDAL/GEOS/PROJ), passez par <code>conda</code>/<code>mamba</code> (canal <code>conda-forge</code>) qui gère ces dépendances binaires plus fiablement que pip sur Windows :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> conda-forge geopandas rasterio cartopy fiona</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> conda-forge geopandas rasterio cartopy</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install cartograpy <span class="at">--no-deps</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install cartograpy  <span class="co"># puis les dépendances Python restantes</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -760,34 +760,82 @@ Astuce
 <li><code>geopandas</code> pour les données vectorielles</li>
 <li><code>rasterio</code> pour les rasters</li>
 <li><code>cartopy</code> et <code>matplotlib</code> pour les cartes statiques</li>
-<li><code>geemap</code>/<code>pystac-client</code>/<code>planetary-computer</code> pour Google Earth Engine et les catalogues STAC</li>
 <li><code>geohexgrid</code> pour les grilles hexagonales / hexbin</li>
 <li><code>scienceplots</code> et <code>mplcyberpunk</code> pour les styles graphiques de <code>styling</code></li>
 </ul>
-<p><code>WebMap</code> (cartes interactives) n’est <strong>pas</strong> couvert par l’installation de base : <code>pip install cartograpy[webmap]</code> installe <code>folium</code>, <code>lonboard</code>, <code>keplergl</code> et <code>rio-tiler</code>.</p>
-<p>Voir <a href="../explanations/data-sources-and-dependencies.html">Sources de données et dépendances</a> pour la liste complète et les dépendances optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>, <code>earthengine-api</code>).</p>
+<p>Les sources de données en ligne et les cartes interactives sont des extras optionnels, à ajouter selon vos besoins :</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Extra</th>
+<th>Fonctionnalité</th>
+<th>Paquets installés</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>osm</code></td>
+<td><code>OSM</code>, géocodage via OSM</td>
+<td><code>osmnx</code></td>
+</tr>
+<tr class="even">
+<td><code>worldbank</code></td>
+<td><code>WorldBank</code></td>
+<td><code>wbdata</code></td>
+</tr>
+<tr class="odd">
+<td><code>gee</code></td>
+<td><code>Gee</code> (Google Earth Engine)</td>
+<td><code>earthengine-api</code>, <code>geemap</code></td>
+</tr>
+<tr class="even">
+<td><code>stac</code></td>
+<td><code>STAC</code> (Planetary Computer…)</td>
+<td><code>pystac-client</code>, <code>planetary-computer</code></td>
+</tr>
+<tr class="odd">
+<td><code>webmap</code></td>
+<td><code>WebMap</code></td>
+<td><code>folium</code>, <code>lonboard</code>, <code>keplergl</code>, <code>rio-tiler</code></td>
+</tr>
+<tr class="even">
+<td><code>all</code></td>
+<td>tout ce qui précède</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install cartograpy<span class="pp">[</span><span class="ss">osm,stac</span><span class="pp">]</span>   <span class="co"># ou cartograpy[all]</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Voir <a href="../explanations/data-sources-and-dependencies.html">Sources de données et dépendances</a> pour la liste complète et les dépendances optionnelles (<code>contextily</code>, <code>matplotlib-scalebar</code>).</p>
 </section>
 <section id="jupyter-et-marimo" class="level2">
 <h2 class="anchored" data-anchor-id="jupyter-et-marimo">Jupyter et Marimo</h2>
-<p><code>jupyter</code> et <code>marimo</code> font partie des dépendances cœur : aucune installation supplémentaire n’est nécessaire pour utiliser cartograpy dans un notebook.</p>
+<p>Aucun environnement de notebook n’est installé avec cartograpy : ajoutez celui que vous utilisez.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Jupyter</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">Marimo</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install cartograpy<span class="pp">[</span><span class="ss">notebook</span><span class="pp">]</span>   <span class="co"># installe jupyter</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">marimo</span> edit mon_notebook.py</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install marimo</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">marimo</span> edit mon_notebook.py</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
 </section>
 <section id="vérifier-linstallation" class="level2">
 <h2 class="anchored" data-anchor-id="vérifier-linstallation">Vérifier l’installation</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartograpy <span class="im">as</span> cp</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cp.__version__)                  <span class="co"># ex. "2.1.0"</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cp.COUNTRY_ISO3[<span class="st">"france"</span>])       <span class="co"># "fra"</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartograpy <span class="im">as</span> cp</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cp.__version__)                  <span class="co"># ex. "3.0.0"</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cp.COUNTRY_ISO3[<span class="st">"france"</span>])       <span class="co"># "fra"</span></span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -802,8 +850,8 @@ Note
 </div>
 </div>
 <p>Ou, sans écrire de Python, via la CLI installée avec le paquet :</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cartograpy</span> doctor</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Vérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et optionnelles (<code>webmap</code>, <code>earthengine-api</code>) en un coup d’œil. Voir <a href="../reference/cli.html">Reference CLI</a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cartograpy</span> doctor</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Vérifie Python, GDAL/PROJ/GEOS, les dépendances cœur et celles des extras optionnels (<code>webmap</code>, <code>osm</code>, <code>worldbank</code>, <code>gee</code>, <code>stac</code>) en un coup d’œil. Voir <a href="../reference/cli.html">Reference CLI</a>.</p>
 
 
 </section>

@@ -5,7 +5,7 @@ cartograpy/__pycache__/
 *.pyo
 *.pyd
 *.so
-
+.kilo/
 # === Build / packaging ===
 build/
 dist/

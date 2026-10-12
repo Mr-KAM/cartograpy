@@ -101,7 +101,7 @@ b = Bound(cache_expire_seconds=604800)
 - **`cache_expire_seconds`** (`int`, défaut `604800` = 1 semaine) : durée de mise en cache des requêtes HTTP (`requests_cache.CachedSession`).
 
 ::: {.callout-note}
-Les réponses de l'API sont mises en cache automatiquement. Utilisez `b.clear_cache()`, `b.set_cache_expire_time(seconds)` ou `b.disable_cache()` pour contrôler ce comportement pendant le développement.
+Les réponses de l'API sont mises en cache automatiquement, dans le dossier de cache utilisateur (`~/.cache/cartograpy/`, `%LOCALAPPDATA%\cartograpy\` sous Windows). Utilisez `b.clear_cache()`, `b.set_cache_expire_time(seconds)` ou `b.disable_cache()` pour contrôler ce comportement pendant le développement.
 :::
 
 ### `get_country(name)`
@@ -238,7 +238,7 @@ osm = OSM()
 ```
 
 ::: {.callout-warning}
-`OSM()` nécessite le paquet optionnel `osmnx` : son absence lève `ImportError` dès l'instanciation (`pip install osmnx`).
+`OSM()` nécessite le paquet optionnel `osmnx` : son absence lève `ImportError` dès l'instanciation (`pip install cartograpy[osm]`).
 :::
 
 ### `get_data(place, tags, data_type="all")`
@@ -417,7 +417,7 @@ wb = WorldBank()
 ```
 
 ::: {.callout-warning}
-`WorldBank()` nécessite le paquet optionnel `wbdata` : son absence lève `ImportError` dès l'instanciation (`pip install wbdata`).
+`WorldBank()` nécessite le paquet optionnel `wbdata` : son absence lève `ImportError` dès l'instanciation (`pip install cartograpy[worldbank]`).
 :::
 
 ### `get_data(indicators, country='all', **kwargs)`
@@ -516,7 +516,7 @@ gee = Gee(project="mon-projet-gcp")
 - **`service_account`** / **`key_file`** (`str`, optionnels) : authentification non interactive par compte de service (les deux doivent être fournis ensemble).
 
 ::: {.callout-warning}
-`Gee()` nécessite les paquets optionnels `earthengine-api` (module `ee`) et `geemap` : `ImportError` explicite dès l'instanciation s'ils sont absents. Sans authentification déjà en cache localement, l'initialisation peut déclencher `ee.Authenticate()`, un flux **interactif** (ouverture de navigateur) : à éviter dans un script non interactif ou un pipeline CI.
+`Gee()` nécessite les paquets optionnels `earthengine-api` (module `ee`) et `geemap`, installés par l'extra `gee` (`pip install cartograpy[gee]`) : `ImportError` explicite dès l'instanciation s'ils sont absents. Sans authentification déjà en cache localement, l'initialisation peut déclencher `ee.Authenticate()`, un flux **interactif** (ouverture de navigateur) : à éviter dans un script non interactif ou un pipeline CI.
 :::
 
 ### `get_sentinel2(bbox, start, end, mosaic=True, clip=True, cloud=0.2, bands=None)`
@@ -609,7 +609,8 @@ stac = STAC("planetary-computer")
 
 ::: {.callout-warning}
 `STAC()` nécessite le paquet optionnel `pystac-client` (et `planetary-computer`
-pour le catalogue du même nom) : `ImportError` explicite dès l'instanciation
+pour le catalogue du même nom), installés par l'extra `stac`
+(`pip install cartograpy[stac]`) : `ImportError` explicite dès l'instanciation
 s'ils sont absents.
 :::
 

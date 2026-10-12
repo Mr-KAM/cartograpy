@@ -7,7 +7,7 @@ from reportlab.graphics import renderPM
 from reportlab.lib import colors as _rl_colors
 from io import BytesIO
 from PIL import Image
-from cartograpy.styling import load_cmap, get_available_palettes
+from cartograpy.styling import load_cmap
 import logging
 
 logger = logging.getLogger(__name__)

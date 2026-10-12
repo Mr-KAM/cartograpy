@@ -807,7 +807,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Les réponses de l’API sont mises en cache automatiquement. Utilisez <code>b.clear_cache()</code>, <code>b.set_cache_expire_time(seconds)</code> ou <code>b.disable_cache()</code> pour contrôler ce comportement pendant le développement.</p>
+<p>Les réponses de l’API sont mises en cache automatiquement, dans le dossier de cache utilisateur (<code>~/.cache/cartograpy/</code>, <code>%LOCALAPPDATA%\cartograpy\</code> sous Windows). Utilisez <code>b.clear_cache()</code>, <code>b.set_cache_expire_time(seconds)</code> ou <code>b.disable_cache()</code> pour contrôler ce comportement pendant le développement.</p>
 </div>
 </div>
 <section id="get_countryname" class="level3">
@@ -1106,7 +1106,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>OSM()</code> nécessite le paquet optionnel <code>osmnx</code> : son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install osmnx</code>).</p>
+<p><code>OSM()</code> nécessite le paquet optionnel <code>osmnx</code> : son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install cartograpy[osm]</code>).</p>
 </div>
 </div>
 <section id="get_dataplace-tags-data_typeall" class="level3">
@@ -1378,7 +1378,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>WorldBank()</code> nécessite le paquet optionnel <code>wbdata</code> : son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install wbdata</code>).</p>
+<p><code>WorldBank()</code> nécessite le paquet optionnel <code>wbdata</code> : son absence lève <code>ImportError</code> dès l’instanciation (<code>pip install cartograpy[worldbank]</code>).</p>
 </div>
 </div>
 <section id="get_dataindicators-countryall-kwargs" class="level3">
@@ -1558,7 +1558,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>Gee()</code> nécessite les paquets optionnels <code>earthengine-api</code> (module <code>ee</code>) et <code>geemap</code> : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents. Sans authentification déjà en cache localement, l’initialisation peut déclencher <code>ee.Authenticate()</code>, un flux <strong>interactif</strong> (ouverture de navigateur) : à éviter dans un script non interactif ou un pipeline CI.</p>
+<p><code>Gee()</code> nécessite les paquets optionnels <code>earthengine-api</code> (module <code>ee</code>) et <code>geemap</code>, installés par l’extra <code>gee</code> (<code>pip install cartograpy[gee]</code>) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents. Sans authentification déjà en cache localement, l’initialisation peut déclencher <code>ee.Authenticate()</code>, un flux <strong>interactif</strong> (ouverture de navigateur) : à éviter dans un script non interactif ou un pipeline CI.</p>
 </div>
 </div>
 <section id="get_sentinel2bbox-start-end-mosaictrue-cliptrue-cloud0.2-bandsnone" class="level3">
@@ -1742,7 +1742,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>STAC()</code> nécessite le paquet optionnel <code>pystac-client</code> (et <code>planetary-computer</code> pour le catalogue du même nom) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents.</p>
+<p><code>STAC()</code> nécessite le paquet optionnel <code>pystac-client</code> (et <code>planetary-computer</code> pour le catalogue du même nom), installés par l’extra <code>stac</code> (<code>pip install cartograpy[stac]</code>) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents.</p>
 </div>
 </div>
 <section id="searchcollection-bbox-start-end-cloud_covernone-limit100-kwargs" class="level3">

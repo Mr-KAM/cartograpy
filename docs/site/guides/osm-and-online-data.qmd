@@ -119,9 +119,8 @@ gee.zonal_stats(ndvi, regions_gdf)
 ```
 
 ::: {.callout-warning}
-`Gee` nécessite en plus `earthengine-api` (`ee`), qui n'est **pas** déclaré dans
-les dépendances de `pyproject.toml` : installez-le manuellement
-(`pip install earthengine-api`) et authentifiez-vous
+`Gee` nécessite l'extra `gee` (`pip install cartograpy[gee]`, qui installe
+`earthengine-api` et `geemap`) et une authentification
 (`ee.Authenticate()` puis `ee.Initialize()`) avant d'utiliser cette classe. Voir
 [Sources de données et dépendances](/explanations/data-sources-and-dependencies.qmd).
 :::
@@ -153,9 +152,9 @@ plusieurs centaines de Mo. `bands` accepte des clés d'asset exactes
 (`"B04"`) ou des noms communs de l'extension STAC `eo` (`"red"`, `"nir"`).
 
 ::: {.callout-warning}
-`STAC` nécessite le paquet optionnel `pystac-client` (et `planetary-computer`
-pour ce catalogue précis) : `ImportError` explicite dès l'instanciation s'ils
-sont absents.
+`STAC` nécessite l'extra `stac` (`pip install cartograpy[stac]`, qui installe
+`pystac-client` et `planetary-computer`) : `ImportError` explicite dès
+l'instanciation s'ils sont absents.
 :::
 
 ## Géocodage (`Geocoder`)

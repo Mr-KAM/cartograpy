@@ -61,7 +61,7 @@ class Climate:
     def __init__(self, cache_expire_seconds: int = 604800, timeout: int = 60):
         self.timeout = timeout
         self._session = CachedSession(
-            cache_name=".nasapower_cache", expire_after=cache_expire_seconds,
+            "cartograpy/nasapower", use_cache_dir=True, expire_after=cache_expire_seconds,
         )
 
     # ------------------------------------------------------------------ #

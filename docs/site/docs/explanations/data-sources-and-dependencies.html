@@ -763,14 +763,14 @@ Astuce
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>GeoBoundaries</code> utilise <code>requests_cache</code> : une fois une requête effectuée, les appels identiques suivants (même territoire, même niveau ADM) sont servis depuis le cache local sans repasser par le réseau, y compris hors connexion. <code>clear_cache()</code> et <code>set_cache_expire_time()</code> permettent d’ajuster ce comportement.</p>
+<p><code>GeoBoundaries</code> utilise <code>requests_cache</code> : une fois une requête effectuée, les appels identiques suivants (même territoire, même niveau ADM) sont servis depuis le cache local sans repasser par le réseau, y compris hors connexion. Ce cache (comme celui de <code>Climate</code>) est stocké dans le dossier de cache utilisateur (<code>~/.cache/cartograpy/</code> sous Linux, <code>%LOCALAPPDATA%\cartograpy\</code> sous Windows), pas dans le dossier courant. <code>clear_cache()</code> et <code>set_cache_expire_time()</code> permettent d’ajuster ce comportement.</p>
 </div>
 </div>
 </section>
 <section id="dépendances-cœur" class="level2">
 <h2 class="anchored" data-anchor-id="dépendances-cœur">Dépendances cœur</h2>
 <p>Toutes déclarées dans <code>pyproject.toml</code>, installées automatiquement avec <code>pip install cartograpy</code> :</p>
-<p><code>cartopy</code>, <code>click</code>, <code>drawarrow</code>, <code>geopandas</code>, <code>geojson</code>, <code>geopy</code>, <code>gpxpy</code>, <code>highlight-text</code>, <code>matplotlib</code>, <code>numpy</code>, <code>osmnx</code>, <code>pandas</code>, <code>pillow</code>, <code>pykml</code>, <code>pypalettes</code>, <code>pyproj</code>, <code>rasterio</code>, <code>reportlab</code>, <code>requests</code>, <code>requests-cache</code>, <code>seaborn</code>, <code>shapely</code>, <code>svglib</code>, <code>tabulate</code>, <code>tqdm</code>, <code>wbdata</code>, <code>fiona</code>, <code>matplotlib-map-utils</code>, <code>jupyter</code>, <code>geemap</code>, <code>pyfonts</code>, <code>marimo</code>, <code>scienceplots</code>, <code>mplcyberpunk</code>, <code>geohexgrid</code>, <code>pystac-client</code>, <code>planetary-computer</code>.</p>
+<p><code>cartopy</code>, <code>click</code>, <code>drawarrow</code>, <code>geopandas</code>, <code>geojson</code>, <code>geopy</code>, <code>highlight-text</code>, <code>matplotlib</code>, <code>numpy</code>, <code>pandas</code>, <code>pillow</code>, <code>pypalettes</code>, <code>pyproj</code>, <code>rasterio</code>, <code>reportlab</code>, <code>rlPyCairo</code>, <code>requests</code>, <code>requests-cache</code>, <code>scipy</code>, <code>seaborn</code>, <code>shapely</code>, <code>svglib</code>, <code>tqdm</code>, <code>matplotlib-map-utils</code>, <code>pyfonts</code>, <code>scienceplots</code>, <code>mplcyberpunk</code>, <code>geohexgrid</code>.</p>
 <p><code>scienceplots</code> et <code>mplcyberpunk</code> alimentent <code>styling.set_style()</code> / <code>list_all_styles()</code> ; <code>geohexgrid</code> alimente les grilles hexagonales de <code>cartograpy.mapper</code> (<code>make_hex_grid</code>, <code>aggregate_to_hex</code>, <code>plot_hexgrid_choropleth</code>).</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -782,7 +782,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Plusieurs de ces paquets (<code>cartopy</code>, <code>rasterio</code>, <code>fiona</code>, <code>geopandas</code>, <code>shapely</code>, <code>pyproj</code>) s’appuient sur des bibliothèques système natives (GDAL, GEOS, PROJ). Sur Windows en particulier, privilégiez des roues précompilées (wheels) ou un gestionnaire comme <code>conda</code>/<code>uv</code> plutôt qu’une compilation depuis les sources.</p>
+<p>Plusieurs de ces paquets (<code>cartopy</code>, <code>rasterio</code>, <code>geopandas</code>, <code>shapely</code>, <code>pyproj</code>) s’appuient sur des bibliothèques système natives (GDAL, GEOS, PROJ). Sur Windows en particulier, privilégiez des roues précompilées (wheels) ou un gestionnaire comme <code>conda</code>/<code>uv</code> plutôt qu’une compilation depuis les sources.</p>
 </div>
 </div>
 </section>
@@ -814,45 +814,48 @@ Avertissement
 <td>Non</td>
 </tr>
 <tr class="odd">
-<td><code>earthengine-api</code> (<code>ee</code>)</td>
-<td><code>Gee</code> (toutes les méthodes)</td>
-<td><strong>Non</strong> : écart à corriger, voir ci-dessous</td>
+<td><code>osmnx</code></td>
+<td><code>OSM</code>, géocodage via OSM (<code>Geocoder</code>)</td>
+<td>Oui, extra <code>osm</code></td>
 </tr>
 <tr class="even">
+<td><code>wbdata</code></td>
+<td><code>WorldBank</code></td>
+<td>Oui, extra <code>worldbank</code></td>
+</tr>
+<tr class="odd">
+<td><code>earthengine-api</code> (<code>ee</code>), <code>geemap</code></td>
+<td><code>Gee</code> (toutes les méthodes)</td>
+<td>Oui, extra <code>gee</code></td>
+</tr>
+<tr class="even">
+<td><code>pystac-client</code>, <code>planetary-computer</code></td>
+<td><code>STAC</code></td>
+<td>Oui, extra <code>stac</code></td>
+</tr>
+<tr class="odd">
 <td><code>folium</code></td>
 <td><code>WebMap</code> avec <code>engine="folium"</code> (moteur par défaut)</td>
 <td>Oui, extra <code>webmap</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>lonboard</code></td>
 <td><code>WebMap</code> avec <code>engine="lonboard"</code> (rendu GPU deck.gl)</td>
 <td>Oui, extra <code>webmap</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>keplergl</code></td>
 <td><code>WebMap</code> avec <code>engine="kepler.gl"</code></td>
 <td>Oui, extra <code>webmap</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>rio-tiler</code></td>
 <td><code>WebMap.add_raster()</code>/<code>.add_cog()</code></td>
 <td>Oui, extra <code>webmap</code></td>
 </tr>
 </tbody>
 </table>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Avertissement
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Écart connu : <code>Gee</code> importe le paquet <code>ee</code> (<code>earthengine-api</code>) via <code>_require_ee()</code>, mais ce paquet n’apparaît nulle part dans les dépendances de <code>pyproject.toml</code> : seul <code>geemap</code> y est déclaré (en dépendance cœur, alors qu’il n’est en réalité utilisé qu’à travers ce même mécanisme optionnel). Installer cartograpy seul ne suffit donc pas à faire fonctionner <code>Gee</code> : il faut ajouter manuellement <code>pip install earthengine-api</code>.</p>
-</div>
-</div>
+<p>Un module concerné s’importe sans le paquet ; l’erreur, levée à l’utilisation, indique l’extra à installer (<code>pip install cartograpy[gee]</code>, etc.). <code>pip install cartograpy[all]</code> installe tous les extras.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

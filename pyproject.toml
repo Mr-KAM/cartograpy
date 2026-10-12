@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cartograpy"
-version = "2.1.0"
+version = "3.0.0"
 description = "Python package to create maps easily"
 authors = [
     { name = "Anicet Cyrille KAMBOU", email = "kanicetcyrille@gmail.com" },
@@ -29,14 +29,11 @@ dependencies = [
     "geopandas>=0.14",
     "geojson>=3.0",
     "geopy>=2.4",
-    "gpxpy>=1.6",
     "highlight-text>=0.2",
     "matplotlib>=3.8",
     "numpy>=1.26",
-    "osmnx>=1.9",
     "pandas>=2.1",
     "pillow>=10.0",
-    "pykml>=0.2",
     "pypalettes>=0.1",
     "pyproj>=3.6",
     "rasterio>=1.3",
@@ -48,18 +45,12 @@ dependencies = [
     "seaborn>=0.13",
     "shapely>=2.0",
     "svglib>=1.5",
-    "tabulate>=0.9",
     "tqdm>=4.66",
-    "wbdata>=1.0",
-    "fiona>=1.10.1",
     "matplotlib-map-utils==3.1.2",
-    "geemap>=0.37.2",
     "pyfonts>=1.3.0",
     "scienceplots>=2.1",
     "mplcyberpunk>=0.7",
     "geohexgrid>=3.0",
-    "pystac-client>=0.8",
-    "planetary-computer>=1.0",
 ]
 
 [project.license]
@@ -69,6 +60,23 @@ file = "LICENSE"
 cartograpy = "cartograpy.cli:cli"
 
 [project.optional-dependencies]
+osm = [
+    "osmnx>=1.9",
+]
+worldbank = [
+    "wbdata>=1.0",
+]
+gee = [
+    "earthengine-api>=1.0",
+    "geemap>=0.37.2",
+]
+stac = [
+    "pystac-client>=0.8",
+    "planetary-computer>=1.0",
+]
+all = [
+    "cartograpy[osm,worldbank,gee,stac,webmap]",
+]
 notebook = [
     "jupyter>=1.1.1",
 ]
@@ -80,8 +88,7 @@ webmap = [
 ]
 dev = [
     "pytest>=7.0.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
+    "ruff>=0.6",
     "mypy>=1.0.0",
     "jupyterlab>=4.0.0",
 ]
@@ -108,15 +115,17 @@ exclude = [
     "*",
 ]
 
-[tool.black]
-line-length = 88
-target-version = [
-    "py311",
-]
-extend-ignore = [
-    "E203",
-    "W503",
-]
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# availability probes, re-exported to map.py / situation.py via `import *`
+"cartograpy/mapper/_optional_deps.py" = ["F401"]
+"cartograpy/mapper/{map,situation}.py" = ["F405"]
 
 [tool.pytest.ini_options]
 testpaths = [

@@ -331,17 +331,22 @@ def doctor():
     except Exception:
         fail("GEOS")
 
-    for pkg in ("rasterio", "geopandas", "cartopy", "fiona"):
+    for pkg in ("rasterio", "geopandas", "cartopy"):
         try:
             ok(f"{pkg} {_im.version(pkg)}")
         except _im.PackageNotFoundError:
             fail(f"{pkg} not installed")
 
-    for pkg in ("folium", "lonboard", "keplergl", "rio-tiler"):
+    optional = {
+        "folium": "webmap", "lonboard": "webmap", "keplergl": "webmap", "rio-tiler": "webmap",
+        "osmnx": "osm", "wbdata": "worldbank", "geemap": "gee",
+        "pystac-client": "stac", "planetary-computer": "stac",
+    }
+    for pkg, extra in optional.items():
         try:
             ok(f"{pkg} {_im.version(pkg)}")
         except _im.PackageNotFoundError:
-            warn(f"{pkg} not installed (pip install cartograpy[webmap])")
+            warn(f"{pkg} not installed (pip install cartograpy[{extra}])")
 
     try:
         from ee.oauth import get_credentials_path
@@ -351,7 +356,7 @@ def doctor():
         else:
             warn("earthengine-api authentication missing (ee.Authenticate())")
     except ImportError:
-        warn("earthengine-api not installed (pip install earthengine-api)")
+        warn("earthengine-api not installed (pip install cartograpy[gee])")
 
 
 if __name__ == "__main__":

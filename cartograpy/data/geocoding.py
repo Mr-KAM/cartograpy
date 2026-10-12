@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pandas as pd
 import geopandas as gpd
-from typing import TYPE_CHECKING, Union, List, Optional, Tuple
+from typing import Union, List, Optional
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from geopy.location import Location
-from shapely.geometry import Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, box, shape, mapping
+from shapely.geometry import Point
 import time
 from ._optional import _require_osmnx
 import logging

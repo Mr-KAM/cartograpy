@@ -166,12 +166,12 @@ cartograpy doctor
 
 Diagnostique l'environnement GIS : version de Python, des bibliothèques C sous-jacentes
 (GDAL, PROJ, GEOS via `rasterio`/`pyproj`/`shapely`), des dépendances cœur
-(`rasterio`, `geopandas`, `cartopy`, `fiona`), des dépendances optionnelles de
-l'extra `webmap` (`folium`, `lonboard`, `keplergl`, `rio-tiler`), et de
-`earthengine-api` (installation + authentification `ee.Authenticate()`).
+(`rasterio`, `geopandas`, `cartopy`), des paquets des extras optionnels
+(`webmap`, `osm`, `worldbank`, `gee`, `stac`) avec l'extra à installer s'ils
+manquent, et de `earthengine-api` (installation + authentification `ee.Authenticate()`).
 
 ```
-Cartograpy 2.1.0
+Cartograpy 3.0.0
 
 [OK] Python 3.12.13
 [OK] GDAL 3.12.4
@@ -180,9 +180,16 @@ Cartograpy 2.1.0
 [OK] rasterio 1.5.1
 [OK] geopandas 1.1.4
 [OK] cartopy 0.25.0
-[OK] fiona 1.10.1
 [!] folium not installed (pip install cartograpy[webmap])
-[!] earthengine-api authentication missing (ee.Authenticate())
+[!] lonboard not installed (pip install cartograpy[webmap])
+[!] keplergl not installed (pip install cartograpy[webmap])
+[!] rio-tiler not installed (pip install cartograpy[webmap])
+[OK] osmnx 2.1.1
+[!] wbdata not installed (pip install cartograpy[worldbank])
+[!] geemap not installed (pip install cartograpy[gee])
+[OK] pystac-client 0.9.0
+[OK] planetary-computer 1.0.0
+[!] earthengine-api not installed (pip install cartograpy[gee])
 ```
 
 ::: {.callout-tip}

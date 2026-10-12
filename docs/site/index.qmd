@@ -84,8 +84,8 @@ graph TD
 
 ::: {.callout-note}
 Un huitième connecteur, `Gee` (Google Earth Engine), est disponible via
-`cartograpy.data.Gee` ou `cartograpy.Gee` : il nécessite en plus le paquet
-`earthengine-api` et une authentification interactive (`ee.Authenticate()`).
+`cartograpy.data.Gee` ou `cartograpy.Gee` : il nécessite l'extra `gee`
+(`pip install cartograpy[gee]`) et une authentification interactive (`ee.Authenticate()`).
 :::
 
 Toutes les données sont formatées pour être retournées sous forme de `GeoDataFrame` ou de `DataFrame`, afin d'en faciliter la manipulation.

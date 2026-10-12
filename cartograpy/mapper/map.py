@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import geopandas as gpd
-from shapely.geometry import Point, LineString, Polygon, MultiPolygon, MultiPoint
+from shapely.geometry import Point, LineString, Polygon
 from matplotlib.patches import Patch
 import numpy as np
 import cartopy.crs as ccrs
@@ -12,7 +12,6 @@ import matplotlib.patches as mpatches
 import matplotlib.path as mpath
 import matplotlib.colors as mcolors
 import matplotlib.patheffects as patheffects
-import importlib.resources
 import os
 import warnings
 from typing import Optional, Union, List, Tuple, Dict, Any
@@ -2381,7 +2380,7 @@ class Map:
                 )
                 labels.append(f"{size_value:,.0f}")
 
-            legend = self.ax.legend(
+            self.ax.legend(
                 handles,
                 labels,
                 title=point_size_column,
@@ -2699,7 +2698,6 @@ class Map:
         """
         # Save the current parameters
         title = self.title
-        figsize = self.figsize
 
         # Recreate the axes with the new projection
         self.fig.clear()
@@ -4175,9 +4173,6 @@ class Map:
                     return self
 
         # Create color preview
-        y_pos = [0] * len(colors)
-        x_pos = range(len(colors))
-
         for i, color in enumerate(colors):
             self.ax.barh(0, 1, left=i, color=color, edgecolor="white", linewidth=0.5)
 
@@ -4370,7 +4365,7 @@ class Map:
             self._log(
                 f"Warning: Font '{family}' not found. Available fonts can be checked with get_available_fonts()"
             )
-            self._log(f"Using default font instead.")
+            self._log("Using default font instead.")
             family = "sans-serif"
 
         plt.rcParams.update(
@@ -4478,7 +4473,7 @@ class Map:
         self.ax.set_extent(extent, crs=ccrs.PlateCarree())
 
         # Display debug information
-        self._log(f"📊 Centrage intelligent appliqué:")
+        self._log("📊 Centrage intelligent appliqué:")
         self._log(
             f"   Format: {self.paper_info['format'] if self.paper_info else 'Personnalisé'} "
             f"({self.paper_info['orientation'] if self.paper_info else 'N/A'})"

@@ -781,8 +781,8 @@ Astuce
 <section id="cartograpy-doctor" class="level2">
 <h2 class="anchored" data-anchor-id="cartograpy-doctor"><code>cartograpy doctor</code></h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cartograpy</span> doctor</span></code></pre></div><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Diagnostique l’environnement GIS : version de Python, des bibliothèques C sous-jacentes (GDAL, PROJ, GEOS via <code>rasterio</code>/<code>pyproj</code>/<code>shapely</code>), des dépendances cœur (<code>rasterio</code>, <code>geopandas</code>, <code>cartopy</code>, <code>fiona</code>), des dépendances optionnelles de l’extra <code>webmap</code> (<code>folium</code>, <code>lonboard</code>, <code>keplergl</code>, <code>rio-tiler</code>), et de <code>earthengine-api</code> (installation + authentification <code>ee.Authenticate()</code>).</p>
-<pre><code>Cartograpy 2.1.0
+<p>Diagnostique l’environnement GIS : version de Python, des bibliothèques C sous-jacentes (GDAL, PROJ, GEOS via <code>rasterio</code>/<code>pyproj</code>/<code>shapely</code>), des dépendances cœur (<code>rasterio</code>, <code>geopandas</code>, <code>cartopy</code>), des paquets des extras optionnels (<code>webmap</code>, <code>osm</code>, <code>worldbank</code>, <code>gee</code>, <code>stac</code>) avec l’extra à installer s’ils manquent, et de <code>earthengine-api</code> (installation + authentification <code>ee.Authenticate()</code>).</p>
+<pre><code>Cartograpy 3.0.0
 
 [OK] Python 3.12.13
 [OK] GDAL 3.12.4
@@ -791,9 +791,16 @@ Astuce
 [OK] rasterio 1.5.1
 [OK] geopandas 1.1.4
 [OK] cartopy 0.25.0
-[OK] fiona 1.10.1
 [!] folium not installed (pip install cartograpy[webmap])
-[!] earthengine-api authentication missing (ee.Authenticate())</code></pre>
+[!] lonboard not installed (pip install cartograpy[webmap])
+[!] keplergl not installed (pip install cartograpy[webmap])
+[!] rio-tiler not installed (pip install cartograpy[webmap])
+[OK] osmnx 2.1.1
+[!] wbdata not installed (pip install cartograpy[worldbank])
+[!] geemap not installed (pip install cartograpy[gee])
+[OK] pystac-client 0.9.0
+[OK] planetary-computer 1.0.0
+[!] earthengine-api not installed (pip install cartograpy[gee])</code></pre>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">

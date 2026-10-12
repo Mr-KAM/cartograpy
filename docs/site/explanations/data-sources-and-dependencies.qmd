@@ -92,6 +92,9 @@ du fichier).
 `GeoBoundaries` utilise `requests_cache` : une fois une requête effectuée, les
 appels identiques suivants (même territoire, même niveau ADM) sont servis depuis
 le cache local sans repasser par le réseau, y compris hors connexion.
+Ce cache (comme celui de `Climate`) est stocké dans le dossier de cache
+utilisateur (`~/.cache/cartograpy/` sous Linux, `%LOCALAPPDATA%\cartograpy\`
+sous Windows), pas dans le dossier courant.
 `clear_cache()` et `set_cache_expire_time()` permettent d'ajuster ce comportement.
 :::
 
@@ -100,13 +103,11 @@ le cache local sans repasser par le réseau, y compris hors connexion.
 Toutes déclarées dans `pyproject.toml`, installées automatiquement avec
 `pip install cartograpy` :
 
-`cartopy`, `click`, `drawarrow`, `geopandas`, `geojson`, `geopy`, `gpxpy`,
-`highlight-text`, `matplotlib`, `numpy`, `osmnx`, `pandas`, `pillow`, `pykml`,
-`pypalettes`, `pyproj`, `rasterio`, `reportlab`, `requests`, `requests-cache`,
-`seaborn`, `shapely`, `svglib`, `tabulate`, `tqdm`, `wbdata`, `fiona`,
-`matplotlib-map-utils`, `jupyter`, `geemap`, `pyfonts`, `marimo`,
-`scienceplots`, `mplcyberpunk`, `geohexgrid`, `pystac-client`,
-`planetary-computer`.
+`cartopy`, `click`, `drawarrow`, `geopandas`, `geojson`, `geopy`,
+`highlight-text`, `matplotlib`, `numpy`, `pandas`, `pillow`, `pypalettes`,
+`pyproj`, `rasterio`, `reportlab`, `rlPyCairo`, `requests`, `requests-cache`,
+`scipy`, `seaborn`, `shapely`, `svglib`, `tqdm`, `matplotlib-map-utils`,
+`pyfonts`, `scienceplots`, `mplcyberpunk`, `geohexgrid`.
 
 `scienceplots` et `mplcyberpunk` alimentent `styling.set_style()` /
 `list_all_styles()` ; `geohexgrid` alimente les grilles hexagonales de
@@ -114,7 +115,7 @@ Toutes déclarées dans `pyproject.toml`, installées automatiquement avec
 `plot_hexgrid_choropleth`).
 
 ::: {.callout-warning}
-Plusieurs de ces paquets (`cartopy`, `rasterio`, `fiona`, `geopandas`, `shapely`,
+Plusieurs de ces paquets (`cartopy`, `rasterio`, `geopandas`, `shapely`,
 `pyproj`) s'appuient sur des bibliothèques système natives (GDAL, GEOS, PROJ). Sur
 Windows en particulier, privilégiez des roues précompilées (wheels) ou un
 gestionnaire comme `conda`/`uv` plutôt qu'une compilation depuis les sources.
@@ -130,20 +131,18 @@ n'apparaît qu'au moment où la fonctionnalité est réellement utilisée.
 |---|---|---|
 | `contextily` | `Map.add_basemap()` (fonds de carte tuilés) | Non |
 | `matplotlib-scalebar` | Barre d'échelle alternative sur `Map`/`SituationMap` | Non |
-| `earthengine-api` (`ee`) | `Gee` (toutes les méthodes) | **Non** : écart à corriger, voir ci-dessous |
+| `osmnx` | `OSM`, géocodage via OSM (`Geocoder`) | Oui, extra `osm` |
+| `wbdata` | `WorldBank` | Oui, extra `worldbank` |
+| `earthengine-api` (`ee`), `geemap` | `Gee` (toutes les méthodes) | Oui, extra `gee` |
+| `pystac-client`, `planetary-computer` | `STAC` | Oui, extra `stac` |
 | `folium` | `WebMap` avec `engine="folium"` (moteur par défaut) | Oui, extra `webmap` |
 | `lonboard` | `WebMap` avec `engine="lonboard"` (rendu GPU deck.gl) | Oui, extra `webmap` |
 | `keplergl` | `WebMap` avec `engine="kepler.gl"` | Oui, extra `webmap` |
 | `rio-tiler` | `WebMap.add_raster()`/`.add_cog()` | Oui, extra `webmap` |
 
-::: {.callout-warning}
-Écart connu : `Gee` importe le paquet `ee` (`earthengine-api`) via
-`_require_ee()`, mais ce paquet n'apparaît nulle part dans les dépendances de
-`pyproject.toml` : seul `geemap` y est déclaré (en dépendance cœur, alors qu'il
-n'est en réalité utilisé qu'à travers ce même mécanisme optionnel). Installer
-cartograpy seul ne suffit donc pas à faire fonctionner `Gee` : il faut ajouter
-manuellement `pip install earthengine-api`.
-:::
+Un module concerné s'importe sans le paquet ; l'erreur, levée à
+l'utilisation, indique l'extra à installer (`pip install cartograpy[gee]`, etc.).
+`pip install cartograpy[all]` installe tous les extras.
 
 ::: {.callout-tip}
 `folium`, `lonboard`, `keplergl` et `rio-tiler` sont regroupés dans l'extra

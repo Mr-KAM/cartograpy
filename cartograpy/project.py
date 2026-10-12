@@ -1,9 +1,7 @@
 import os
 import shutil
-import glob
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 
 from pyproj import CRS
 from pyproj.database import query_crs_info

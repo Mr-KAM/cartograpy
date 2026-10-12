@@ -774,7 +774,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>Gee</code> nécessite en plus <code>earthengine-api</code> (<code>ee</code>), qui n’est <strong>pas</strong> déclaré dans les dépendances de <code>pyproject.toml</code> : installez-le manuellement (<code>pip install earthengine-api</code>) et authentifiez-vous (<code>ee.Authenticate()</code> puis <code>ee.Initialize()</code>) avant d’utiliser cette classe. Voir <a href="../explanations/data-sources-and-dependencies.html">Sources de données et dépendances</a>.</p>
+<p><code>Gee</code> nécessite l’extra <code>gee</code> (<code>pip install cartograpy[gee]</code>, qui installe <code>earthengine-api</code> et <code>geemap</code>) et une authentification (<code>ee.Authenticate()</code> puis <code>ee.Initialize()</code>) avant d’utiliser cette classe. Voir <a href="../explanations/data-sources-and-dependencies.html">Sources de données et dépendances</a>.</p>
 </div>
 </div>
 </section>
@@ -807,7 +807,7 @@ Avertissement
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>STAC</code> nécessite le paquet optionnel <code>pystac-client</code> (et <code>planetary-computer</code> pour ce catalogue précis) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents.</p>
+<p><code>STAC</code> nécessite l’extra <code>stac</code> (<code>pip install cartograpy[stac]</code>, qui installe <code>pystac-client</code> et <code>planetary-computer</code>) : <code>ImportError</code> explicite dès l’instanciation s’ils sont absents.</p>
 </div>
 </div>
 </section>

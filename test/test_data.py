@@ -221,6 +221,16 @@ class TestGeoBoundaries:
         assert isinstance(result, dict)
         assert "africa" in result
 
+    def test_cache_lives_outside_cwd(self):
+        gb = GeoBoundaries()
+        assert not str(gb._session.cache.db_path).startswith(os.getcwd())
+
+    def test_disable_cache_does_not_cache(self):
+        from requests_cache import DO_NOT_CACHE
+        gb = GeoBoundaries()
+        gb.disable_cache()
+        assert gb._session.settings.expire_after == DO_NOT_CACHE
+
 
 class TestBound:
     """Tests de la classe Bound."""
